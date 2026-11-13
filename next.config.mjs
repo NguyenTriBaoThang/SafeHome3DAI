@@ -1,0 +1,12 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false, // Prevents double mount issues with Three.js WebGL contexts in dev
+  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei"],
+  webpack: (config) => {
+    config.externals = [...(config.externals || []), { canvas: "canvas" }];
+    return config;
+  },
+};
+
+export default nextConfig;
+

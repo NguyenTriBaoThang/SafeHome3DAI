@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  homes       Home[]
+}
+
+model Home {
+  id                    String   @id @default(uuid())
+  projectId             String
+  project               Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name                  String
+  address               String?
+  targetResidentProfile String?  // e.g. "Người cao tuổi 75 tuổi, giảm thị lực, đi lại cần hỗ trợ"
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  rooms                 Room[]
+}
+
+model Room {
+  id               String               @id @default(uuid())
+  homeId           String
+  home             Home                 @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  name             String
+  roomType         String               // "BEDROOM" | "BATHROOM" | "LIVING_ROOM"
+  width            Float                @default(4.0)
+  length           Float                @default(5.0)
+  height           Float                @default(2.8)
+  floorMaterial    String               @default("WOOD") // "WOOD" | "CERAMIC_TILE" | "NON_SLIP_VINYL"
+  lightingLevel    Float                @default(150.0)  // Lux: e.g. 50 (dim/night), 150 (normal), 300 (bright)
+  isWet            Boolean              @default(false)
+  isSlipResistant  Boolean              @default(false)
+  grabBarsCount    Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  sceneObjects     SceneObject[]
+  assessments      Assessment[]
+  scenarios        SimulationScenario[]
+}
+
+model SceneObject {
+  id                  String   @id @default(uuid())
+  roomId              String
+  room                Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  name                String
+  category            String   // "FURNITURE" | "RUG" | "CABLE" | "LIGHTING" | "SAFETY_DEVICE" | "OBSTACLE"
+  modelType           String   // "bed", "nightstand", "wardrobe", "rug", "cable", "toilet", "shower", "grab_bar", "sofa", "coffee_table", "lamp"
+  positionX           Float    @default(0.0)
+  positionY           Float    @default(0.0)
+  positionZ           Float    @default(0.0)
+  rotationX           Float    @default(0.0)
+  rotationY           Float    @default(0.0)
+  rotationZ           Float    @default(0.0)
+  scaleX              Float    @default(1.0)
+  scaleY              Float    @default(1.0)
+  scaleZ              Float    @default(1.0)
+  width               Float    @default(1.0)
+  length              Float    @default(1.0)
+  height              Float    @default(1.0)
+  isWalkwayObstacle   Boolean  @default(false)
+  isFixed             Boolean  @default(false)
+  isLoose             Boolean  @default(false)
+  isSlippery          Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  customProperties    String?  // JSON string for specific properties
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SimulationScenario {
+  id               String          @id @default(uuid())
+  roomId           String
+  room             Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  name             String
+  description      String?
+  isBaseline       Boolean         @default(false)
+  parentScenarioId String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  assessments      Assessment[]
+  snapshots        SceneSnapshot[]
+}
+
+model SceneSnapshot {
+  id           String             @id @default(uuid())
+  scenarioId   String
+  scenario     SimulationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  snapshotData String             // JSON of room state and scene objects
+  createdAt    DateTime           @default(now())
+}
+
+model Assessment {
+  id               String             @id @default(uuid())
+  roomId           String
+  room             Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  scenarioId       String?
+  scenario         SimulationScenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+  assessmentDate   DateTime           @default(now())
+  totalHazards     Int                @default(0)
+  resolvedHazards  Int                @default(0)
+  remainingHazards Int                @default(0)
+  newHazards       Int                @default(0)
+  safetyScore      Float              @default(70.0) // 0-100 heuristic index
+  status           String             @default("COMPLETED")
+  notes            String?
+  findings         HazardFinding[]
+}
+
+model HazardFinding {
+  id                String          @id @default(uuid())
+  assessmentId      String
+  assessment        Assessment      @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  hazardType        String          // e.g. "LOOSE_RUG", "CABLE_CROSSING", "OBSTACLE_ROUTE", "POOR_LIGHTING", "WET_FLOOR", "MISSING_GRAB_BAR", "CLUTTERED_PATH", "UNSTABLE_FURNITURE"
+  title             String
+  description       String
+  severityCategory  String          // "LOW" | "MEDIUM" | "HIGH"
+  detectionRuleId   String          // e.g. "RULE_RUG_01", "RULE_CABLE_02", "RULE_LIGHT_03", "RULE_BATH_WET_04", "RULE_BATH_GRAB_05", "RULE_PATH_OBST_06"
+  evidence          String          // JSON or detailed text description of spatial measurement
+  recommendationText String
+  targetObjectId    String?         // Reference to SceneObject.id if applicable
+  targetArea        String?         // JSON of bounding zone coordinates
+  status            String          @default("ACTIVE") // "ACTIVE" | "RESOLVED" | "IGNORED"
+  recommendations   Recommendation[]
+}
+
+model Recommendation {
+  id             String        @id @default(uuid())
+  findingId      String
+  finding        HazardFinding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  priority       String        // "LOW" | "MEDIUM" | "HIGH"
+  practicalSteps String        // Markdown or bullet points
+  estimatedCost  String?       // e.g. "Dưới 100.000 VNĐ", "100.000 - 500.000 VNĐ"
+  referenceIds   String?       // JSON array of KnowledgeSource IDs
+}
+
+model KnowledgeSource {
+  id              String             @id @default(uuid())
+  title           String
+  organization    String             // "WHO" | "CDC" | "BỘ Y TẾ VIỆT NAM" | "NCOA"
+  url             String
+  publicationDate String
+  retrievedAt     DateTime           @default(now())
+  sourceStatus    String             @default("VERIFIED") // "VERIFIED" | "CURATED"
+  passages        KnowledgePassage[]
+}
+
+model KnowledgePassage {
+  id           String          @id @default(uuid())
+  sourceId     String
+  source       KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  section      String
+  passageText  String
+  keywords     String          // JSON array or comma separated
+  relatedRules String?         // JSON array of Rule IDs
+}
+
+model Conversation {
+  id        String                @id @default(uuid())
+  title     String                @default("Tư vấn an toàn phòng ngừa té ngã")
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  messages  ConversationMessage[]
+}
+
+model ConversationMessage {
+  id                  String       @id @default(uuid())
+  conversationId      String
+  conversation        Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role                String       // "user" | "assistant" | "system"
+  content             String
+  retrievedPassageIds String?      // JSON array
+  citations           String?      // JSON array
+  isFallback          Boolean      @default(false)
+  createdAt           DateTime     @default(now())
+}
+
