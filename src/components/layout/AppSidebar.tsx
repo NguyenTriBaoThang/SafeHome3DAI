@@ -1,27 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Compass,
-  ClipboardCheck,
-  Camera,
-  Box,
-  Sliders,
-  AlertTriangle,
-  Network,
   Bot,
+  Network,
   BarChart3,
-  FileText,
   UserCheck,
   Info,
   ArrowRight,
+  ChevronDown,
+  Layers,
+  Box,
+  ClipboardCheck,
+  Camera,
+  Sliders,
+  AlertTriangle,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+// Các phân hệ độc lập bên ngoài (không nằm trong luồng tuyến tính 7 bước)
+const EXTERNAL_MODULES = [
   {
     href: "/dashboard",
     label: "Tổng quan & Chỉ số",
@@ -29,34 +32,25 @@ const NAV_ITEMS = [
     badge: null,
   },
   {
-    href: "/ai-guided-survey",
-    label: "Khảo sát AI thông minh",
-    icon: ClipboardCheck,
-    badge: "AI Survey",
-  },
-  {
-    href: "/ai-vision",
-    label: "Thị giác AI (Vision)",
-    icon: Camera,
-    badge: "Vision",
-  },
-  {
-    href: "/digital-twin",
-    label: "Bản sao số 3D",
+    href: "/simulations",
+    label: "Kho mô phỏng 3D",
     icon: Box,
-    badge: "Core",
+    badge: "3D Hub",
+    highlight: true,
   },
   {
-    href: "/scenario-simulator",
-    label: "Mô phỏng kịch bản",
-    icon: Sliders,
-    badge: "Interactive",
+    href: "/ai-assistant",
+    label: "Trợ lý AI & RAG",
+    icon: Bot,
+    badge: "RAG",
+    highlight: true,
   },
   {
-    href: "/risk-assessment",
-    label: "Đánh giá nguy cơ",
-    icon: AlertTriangle,
-    badge: "Risk AI",
+    href: "/explainability",
+    label: "Sơ đồ giải trình XAI",
+    icon: Network,
+    badge: "Trace",
+    highlight: true,
   },
   {
     href: "/risk-assessment/traceability",
@@ -65,70 +59,65 @@ const NAV_ITEMS = [
     badge: "Audit",
   },
   {
-    href: "/ai-assistant",
-    label: "Trợ lý AI & RAG",
-    icon: Bot,
-    badge: "RAG",
-  },
-  {
     href: "/analytics",
     label: "Phân tích Trước/Sau",
     icon: BarChart3,
     badge: null,
   },
-  {
-    href: "/explainability",
-    label: "Sơ đồ giải trình XAI",
-    icon: Network,
-    badge: "Trace",
-  },
-  {
-    href: "/reports",
-    label: "Báo cáo an toàn",
-    icon: FileText,
-    badge: "Xuất PDF",
-  },
+];
+
+// Các công cụ thành phần đã nằm trọn vẹn trong 7 bước (có thể mở riêng lẻ khi cần)
+const COMPONENT_TOOLS = [
+  { href: "/ai-guided-survey", label: "Khảo sát AI (Bước 1-2)", icon: ClipboardCheck },
+  { href: "/ai-vision", label: "Thị giác AI (Bước 3)", icon: Camera },
+  { href: "/digital-twin", label: "Bản sao số 3D (Bước 4)", icon: Box },
+  { href: "/risk-assessment", label: "Đánh giá nguy cơ (Bước 5)", icon: AlertTriangle },
+  { href: "/scenario-simulator", label: "Mô phỏng can thiệp (Bước 6)", icon: Sliders },
+  { href: "/reports", label: "Báo cáo an toàn (Bước 7)", icon: FileText },
 ];
 
 export const AppSidebar: React.FC = () => {
   const pathname = usePathname();
   const isWorkflowActive = pathname === "/workflow";
+  const [showComponents, setShowComponents] = useState(false);
 
   return (
     <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
       {/* Navigation Links */}
-      <div className="p-3.5 space-y-3.5 overflow-y-auto max-h-[calc(100vh-9rem)]">
-        {/* 1 Nút riêng biệt cho Hành trình 7 Bước AI */}
+      <div className="p-3.5 space-y-4 overflow-y-auto max-h-[calc(100vh-9rem)]">
+        {/* 1 Nút Gom Toàn Bộ Quy Trình: Hành trình 7 Bước AI */}
         <div>
           <Link
             href="/workflow"
             className={cn(
-              "w-full flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-all shadow-md group border",
+              "w-full flex items-center justify-between p-3.5 rounded-2xl text-xs font-bold transition-all shadow-md group border",
               isWorkflowActive
                 ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white border-teal-500 shadow-teal-500/20 ring-2 ring-teal-400/30"
                 : "bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white border-transparent hover:shadow-teal-500/25"
             )}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs">
-                <Compass className="h-4.5 w-4.5" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs shrink-0">
+                <Compass className="h-5 w-5" />
               </div>
               <div className="text-left">
                 <div className="text-xs font-black tracking-tight">Hành trình 7 Bước AI</div>
-                <div className="text-[10px] text-teal-100 font-normal">Quy trình khép kín A-Z</div>
+                <div className="text-[10px] text-teal-100 font-normal">
+                  Gộp trọn gói Khảo sát ➔ 3D ➔ Đánh giá ➔ Mô phỏng ➔ Báo cáo
+                </div>
               </div>
             </div>
-            <ArrowRight className="h-4 w-4 text-teal-100 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="h-4 w-4 text-teal-100 group-hover:translate-x-0.5 transition-transform shrink-0" />
           </Link>
         </div>
 
-        {/* Danh sách 11 Phân hệ ứng dụng */}
+        {/* Danh sách các phân hệ độc lập ngoài luồng 7 bước */}
         <div>
           <div className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
             Phân hệ ứng dụng
           </div>
-          <nav className="space-y-0.5">
-            {NAV_ITEMS.map((item) => {
+          <nav className="space-y-1">
+            {EXTERNAL_MODULES.map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/dashboard" && pathname?.startsWith(item.href));
@@ -139,10 +128,11 @@ export const AppSidebar: React.FC = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group",
+                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group",
                     isActive
                       ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
+                    item.highlight && !isActive && "text-teal-700 font-bold"
                   )}
                 >
                   <div className="flex items-center gap-2.5">
@@ -150,6 +140,8 @@ export const AppSidebar: React.FC = () => {
                       className={cn(
                         "h-4 w-4 transition-colors",
                         isActive
+                          ? "text-teal-600"
+                          : item.highlight
                           ? "text-teal-600"
                           : "text-slate-400 group-hover:text-slate-700"
                       )}
@@ -162,6 +154,8 @@ export const AppSidebar: React.FC = () => {
                         "px-1.5 py-0.5 rounded text-[10px] font-bold",
                         isActive
                           ? "bg-teal-200/80 text-teal-900"
+                          : item.highlight
+                          ? "bg-teal-100 text-teal-800"
                           : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                       )}
                     >
@@ -172,6 +166,41 @@ export const AppSidebar: React.FC = () => {
               );
             })}
           </nav>
+        </div>
+
+        {/* Xem các công cụ thành phần lẻ (đã nằm trong 7 bước) */}
+        <div className="pt-2 border-t border-slate-100">
+          <button
+            onClick={() => setShowComponents(!showComponents)}
+            className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-600 transition"
+          >
+            <span>Mở lẻ từng bước (Tùy chọn)</span>
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 transition-transform", showComponents && "rotate-180")}
+            />
+          </button>
+
+          {showComponents && (
+            <div className="mt-1 space-y-0.5 animate-fade-in pl-1">
+              {COMPONENT_TOOLS.map((tool) => {
+                const isActive = pathname === tool.href;
+                const Icon = tool.icon;
+                return (
+                  <Link
+                    key={tool.href}
+                    href={tool.href}
+                    className={cn(
+                      "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+                      isActive && "font-bold text-teal-700 bg-teal-50"
+                    )}
+                  >
+                    <Icon className="h-3 w-3 text-slate-400" />
+                    <span>{tool.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Resident Persona Widget */}
