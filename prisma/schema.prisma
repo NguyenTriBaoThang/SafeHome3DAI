@@ -321,3 +321,105 @@ model SurveyAuditEvent {
   changedFields String?    // JSON metadata
   timestamp     DateTime   @default(now())
 }
+
+
+// =====================================================================
+// MODULE: SAFEHOME MULTIMODAL AI VISION & SMART HOME IMAGE ASSESSMENT
+// =====================================================================
+
+model RoomImage {
+  id            String           @id @default(uuid())
+  roomId        String
+  storageKey    String           // e.g. "/uploads/vision/room-1_img1.jpg" or data URI
+  imageWidth    Int              @default(1920)
+  imageHeight   Int              @default(1080)
+  viewpoint     String           @default("ENTRANCE") // "ENTRANCE" | "OPPOSITE_CORNER" | "WALKWAY" | "CLOSE_UP" | "OTHER"
+  caption       String?
+  uploadedBy    String?          @default("Gia đình")
+  consentStatus Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  analyses      VisionAnalysis[]
+}
+
+model VisionAnalysis {
+  id             String              @id @default(uuid())
+  roomId         String
+  imageId        String
+  image          RoomImage           @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  modelId        String              @default("safehome-vision-v1")
+  modelVersion   String              @default("1.0.0")
+  analysisStatus String              @default("COMPLETED") // "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED"
+  errorCode      String?
+  startedAt      DateTime            @default(now())
+  completedAt    DateTime?
+  detections     ObjectDetection[]
+  observations   VisionObservation[]
+}
+
+model ObjectDetection {
+  id                 String         @id @default(uuid())
+  analysisId         String
+  analysis           VisionAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  category           String         // "bed", "chair", "table", "cabinet", "door", "toilet", "sink", "bathtub", "sofa", "rug", "electrical_cable", "grab_bar", "obstacle_route", "threshold_step"
+  originalLabel      String
+  userLabel          String?
+  confidence         Float          @default(0.85)
+  bboxJson           String         // JSON [xMin, yMin, xMax, yMax] normalized 0..1
+  source             String         @default("OBJECT_DETECTOR") // "OBJECT_DETECTOR" | "VISION_LANGUAGE_MODEL" | "MANUAL_ANNOTATION"
+  verificationStatus String         @default("PENDING_REVIEW") // "PENDING_REVIEW" | "CONFIRMED" | "CORRECTED" | "REJECTED"
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model VisionObservation {
+  id                   String               @id @default(uuid())
+  analysisId           String
+  analysis             VisionAnalysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  observationType      String               // "OBSTACLE_CANDIDATE" | "RUG_OBSERVED" | "CABLE_OBSERVED" | "GRAB_BAR_UNCERTAIN" | "WET_SURFACE_UNCERTAIN" | "LEVEL_TRANSITION"
+  description          String
+  evidenceJson         String?              // JSON metadata
+  uncertaintyType      String               @default("SPATIAL_UNCERTAINTY") // "SPATIAL_UNCERTAINTY" | "CONDITION_UNCERTAINTY" | "OCCLUSION"
+  requiresConfirmation Boolean              @default(true)
+  verificationStatus   String               @default("PENDING_REVIEW") // "PENDING_REVIEW" | "CONFIRMED" | "REJECTED"
+  surveyQuestionId     String?              // e.g. "BED_006", "BED_008", "BATH_005"
+  clarifications       VisionClarification[]
+  createdAt            DateTime             @default(now())
+}
+
+model VisionClarification {
+  id               String             @id @default(uuid())
+  roomId           String
+  observationId    String?
+  observation      VisionObservation? @relation(fields: [observationId], references: [id], onDelete: SetNull)
+  surveyQuestionId String             // e.g. "BED_006", "BED_007", "BED_008", "BATH_003", "BATH_005"
+  questionText     String
+  optionsJson      String             // JSON array of options
+  status           String             @default("PENDING") // "PENDING" | "ANSWERED" | "DISMISSED"
+  userResponse     String?            // JSON value of response
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model VisionRoomFact {
+  id                 String   @id @default(uuid())
+  roomId             String
+  fieldPath          String   // e.g. "rugs.present", "rugs.secured", "cables.crossingWalkway"
+  proposedValue      String   // JSON string
+  confirmedValue     String?  // JSON string
+  evidenceReference  String?  // imageId or detectionId
+  verificationStatus String   @default("CONFIRMED") // "AI_PROPOSED" | "CONFIRMED" | "CORRECTED" | "REJECTED"
+  updatedAt          DateTime @updatedAt
+
+  @@unique([roomId, fieldPath])
+}
+
+model VisionAuditEvent {
+  id         String   @id @default(uuid())
+  roomId     String
+  actionType String   // "IMAGE_UPLOADED" | "DETECTION_CONFIRMED" | "DETECTION_CORRECTED" | "FACT_SYNCED" | "SURVEY_SYNCED"
+  objectId   String?
+  oldValue   String?
+  newValue   String?
+  actorId    String?  @default("USER")
+  timestamp  DateTime @default(now())
+}

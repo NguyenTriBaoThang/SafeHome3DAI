@@ -16,6 +16,7 @@ import {
   Info,
   ShieldCheck,
   ClipboardCheck,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,12 @@ const NAV_ITEMS = [
     label: "Khảo sát AI thông minh",
     icon: ClipboardCheck,
     badge: "AI Survey",
+  },
+  {
+    href: "/ai-vision",
+    label: "Thị giác AI (Vision)",
+    icon: Camera,
+    badge: "Vision",
   },
   {
     href: "/digital-twin",
