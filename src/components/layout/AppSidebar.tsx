@@ -5,18 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Compass,
+  ClipboardCheck,
+  Camera,
   Box,
   Sliders,
   AlertTriangle,
+  Network,
   Bot,
   BarChart3,
-  Network,
   FileText,
   UserCheck,
   Info,
-  ShieldCheck,
-  ClipboardCheck,
-  Camera,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -91,16 +92,42 @@ const NAV_ITEMS = [
 
 export const AppSidebar: React.FC = () => {
   const pathname = usePathname();
+  const isWorkflowActive = pathname === "/workflow";
 
   return (
     <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
       {/* Navigation Links */}
-      <div className="p-4 space-y-6">
+      <div className="p-3.5 space-y-3.5 overflow-y-auto max-h-[calc(100vh-9rem)]">
+        {/* 1 Nút riêng biệt cho Hành trình 7 Bước AI */}
+        <div>
+          <Link
+            href="/workflow"
+            className={cn(
+              "w-full flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-all shadow-md group border",
+              isWorkflowActive
+                ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white border-teal-500 shadow-teal-500/20 ring-2 ring-teal-400/30"
+                : "bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white border-transparent hover:shadow-teal-500/25"
+            )}
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs">
+                <Compass className="h-4.5 w-4.5" />
+              </div>
+              <div className="text-left">
+                <div className="text-xs font-black tracking-tight">Hành trình 7 Bước AI</div>
+                <div className="text-[10px] text-teal-100 font-normal">Quy trình khép kín A-Z</div>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-teal-100 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        {/* Danh sách 11 Phân hệ ứng dụng */}
         <div>
           <div className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
             Phân hệ ứng dụng
           </div>
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -112,13 +139,13 @@ export const AppSidebar: React.FC = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group",
+                    "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group",
                     isActive
-                      ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-sm"
+                      ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <Icon
                       className={cn(
                         "h-4 w-4 transition-colors",
@@ -148,10 +175,10 @@ export const AppSidebar: React.FC = () => {
         </div>
 
         {/* Resident Persona Widget */}
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50/70 to-white p-3.5 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-7 w-7 rounded-full bg-teal-100 flex items-center justify-center text-teal-700">
-              <UserCheck className="h-4 w-4" />
+        <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50/70 to-white p-3 shadow-xs">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="h-6 w-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-700">
+              <UserCheck className="h-3.5 w-3.5" />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-800">
@@ -160,21 +187,21 @@ export const AppSidebar: React.FC = () => {
               <div className="text-[10px] text-slate-500">Đối tượng đánh giá</div>
             </div>
           </div>
-          <p className="text-[11px] text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
-            Giảm thị lực ban đêm, thoái hóa khớp gối độ 2, đi lại cần khoảng tựa vững, có thói quen dậy vệ sinh 2 lần/đêm.
+          <p className="text-[10px] text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
+            Giảm thị lực ban đêm, thoái hóa khớp gối độ 2, đi lại cần khoảng tựa vững, dậy vệ sinh 2 lần/đêm.
           </p>
         </div>
       </div>
 
       {/* Educational & Medical Safety Disclaimer */}
-      <div className="p-4 border-t border-slate-100">
-        <div className="rounded-xl bg-slate-50 p-3 border border-slate-200/80">
-          <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 text-teal-600 shrink-0 mt-0.5" />
+      <div className="p-3 border-t border-slate-100">
+        <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80">
+          <div className="flex items-start gap-1.5">
+            <Info className="h-3.5 w-3.5 text-teal-600 shrink-0 mt-0.5" />
             <p className="text-[10px] text-slate-500 leading-normal">
               <strong>Tuyên bố y tế:</strong> Hệ thống phục vụ mục đích giáo dục
               và hoạch định cải tạo không gian sống an toàn, không thay thế cho
-              chẩn đoán y khoa hay khảo sát xây dựng thực tế.
+              chẩn đoán y khoa.
             </p>
           </div>
         </div>
@@ -182,4 +209,3 @@ export const AppSidebar: React.FC = () => {
     </aside>
   );
 };
-

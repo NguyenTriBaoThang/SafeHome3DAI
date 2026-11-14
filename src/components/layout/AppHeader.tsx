@@ -12,6 +12,7 @@ import {
   Home,
   CheckCircle2,
   AlertTriangle,
+  Compass,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,15 @@ export const AppHeader: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Guided Journey Fast Action */}
+        <Link
+          href="/workflow"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white text-xs font-bold transition shadow-sm"
+        >
+          <Compass className="h-3.5 w-3.5" />
+          <span>Hành trình 7 Bước</span>
+        </Link>
 
         {/* Real-time Status Badges & Quick Action Controls */}
         <div className="flex items-center space-x-3">
