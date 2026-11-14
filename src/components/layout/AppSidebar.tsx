@@ -15,6 +15,7 @@ import {
   UserCheck,
   Info,
   ShieldCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,12 @@ const NAV_ITEMS = [
     label: "Tổng quan & Chỉ số",
     icon: LayoutDashboard,
     badge: null,
+  },
+  {
+    href: "/ai-guided-survey",
+    label: "Khảo sát AI thông minh",
+    icon: ClipboardCheck,
+    badge: "AI Survey",
   },
   {
     href: "/digital-twin",
@@ -41,7 +48,13 @@ const NAV_ITEMS = [
     href: "/risk-assessment",
     label: "Đánh giá nguy cơ",
     icon: AlertTriangle,
-    badge: null,
+    badge: "Risk AI",
+  },
+  {
+    href: "/risk-assessment/traceability",
+    label: "Truy xuất nguồn gốc XAI",
+    icon: Network,
+    badge: "Audit",
   },
   {
     href: "/ai-assistant",

@@ -5,6 +5,9 @@ async function main() {
   console.log("🌱 Bắt đầu nạp dữ liệu mẫu SafeHome 3D AI...");
 
   // Clean up previous records if needed
+  try {
+    await prisma.answerCitation.deleteMany();
+  } catch (e) {}
   await prisma.conversationMessage.deleteMany();
   await prisma.conversation.deleteMany();
   await prisma.recommendation.deleteMany();

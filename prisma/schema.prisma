@@ -150,9 +150,18 @@ model KnowledgeSource {
   id              String             @id @default(uuid())
   title           String
   organization    String             // "WHO" | "CDC" | "BỘ Y TẾ VIỆT NAM" | "NCOA"
+  publisher       String?            // Official publisher alias
   url             String
+  officialUrl     String?            // Canonical URL alias
   publicationDate String
+  language        String             @default("vi") // "vi" | "en"
+  documentType    String             @default("GUIDELINE") // "GUIDELINE" | "STANDARD" | "RESEARCH"
+  version         String?            @default("1.0")
+  approvalStatus  String             @default("APPROVED") // "APPROVED" | "PENDING" | "REJECTED"
+  ingestionStatus String             @default("INDEXED")  // "INDEXED" | "FAILED" | "PENDING"
+  contentHash     String?
   retrievedAt     DateTime           @default(now())
+  lastVerifiedAt  DateTime           @default(now())
   sourceStatus    String             @default("VERIFIED") // "VERIFIED" | "CURATED"
   passages        KnowledgePassage[]
 }
@@ -163,6 +172,11 @@ model KnowledgePassage {
   source       KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   section      String
   passageText  String
+  pageNumber   Int?
+  startOffset  Int?
+  endOffset    Int?
+  contentHash  String?
+  embeddingRef String?
   keywords     String          // JSON array or comma separated
   relatedRules String?         // JSON array of Rule IDs
 }
@@ -176,14 +190,134 @@ model Conversation {
 }
 
 model ConversationMessage {
-  id                  String       @id @default(uuid())
+  id                  String           @id @default(uuid())
   conversationId      String
-  conversation        Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  role                String       // "user" | "assistant" | "system"
+  conversation        Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role                String           // "user" | "assistant" | "system"
   content             String
-  retrievedPassageIds String?      // JSON array
-  citations           String?      // JSON array
-  isFallback          Boolean      @default(false)
-  createdAt           DateTime     @default(now())
+  evidenceStatus      String?          @default("SUPPORTED") // "SUPPORTED" | "PARTIALLY_SUPPORTED" | "INSUFFICIENT_EVIDENCE" | "CONFLICTING_EVIDENCE" | "OUT_OF_SCOPE" | "EMERGENCY"
+  responseMode        String?          @default("LOCAL_GROUNDED") // "LOCAL_GROUNDED" | "LLM_GENERATED" | "REFUSAL_INSUFFICIENT" | "EMERGENCY_ESCALATION"
+  modelProvider       String?          @default("local-deterministic")
+  modelName           String?          @default("curated-rag-engine-v1")
+  warnings            String?          // JSON array
+  retrievedPassageIds String?          // JSON array
+  citations           String?          // JSON array (legacy/serialized cache)
+  isFallback          Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  citationsList       AnswerCitation[]
 }
 
+model AnswerCitation {
+  id                String              @id @default(uuid())
+  messageId         String
+  message           ConversationMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  sourceId          String
+  passageId         String?
+  citationNumber    Int                 @default(1)
+  documentTitle     String
+  publisher         String
+  sectionTitle      String
+  pageNumber        Int?
+  supportingExcerpt String
+  officialUrl       String?
+  createdAt         DateTime            @default(now())
+}
+
+// =====================================================================
+// MODULE: SAFEHOME AI GUIDED HOME SAFETY SURVEY
+// =====================================================================
+
+model HomeSurvey {
+  id              String             @id @default(uuid())
+  name            String             @default("Khảo sát không gian sống mới")
+  ownerId         String?
+  targetResident  String?            // e.g. "Người cao tuổi 75 tuổi, đi lại chậm"
+  status          String             @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "DRAFT"
+  consentGiven    Boolean            @default(true)
+  generalNotes    String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  rooms           SurveyRoom[]
+  auditEvents     SurveyAuditEvent[]
+}
+
+model SurveyRoom {
+  id                  String             @id @default(uuid())
+  surveyId            String
+  survey              HomeSurvey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  roomType            String             // "BEDROOM" | "BATHROOM" | "LIVING_ROOM" | "KITCHEN"
+  name                String             // e.g. "Phòng ngủ chính", "Nhà vệ sinh tầng 1"
+  status              String             @default("NOT_STARTED") // "NOT_STARTED" | "IN_PROGRESS" | "NEEDS_CONFIRMATION" | "COMPLETED"
+  questionBankVersion String             @default("1.0.0")
+  currentQuestionId   String?
+  completedAt         DateTime?
+  linked3dRoomId      String?            // Reference to existing Room.id for 3D digital twin integration
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  answers             SurveyAnswer[]
+  profile             SurveyRoomProfile?
+  findings            SurveyFinding[]
+  photos              SurveyRoomPhoto[]
+}
+
+model SurveyAnswer {
+  id                 String     @id @default(uuid())
+  roomId             String
+  room               SurveyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  questionId         String     // e.g. "BED_001", "BED_006", "BATH_005"
+  category           String     // "BASIC" | "LIGHTING" | "FLOOR" | "CABLE" | "OBSTACLE" | "GRAB_BAR" | "ACCESSIBILITY"
+  value              String     // JSON-serialized answer value
+  answerSource       String     @default("USER_SELECTED") // "USER_SELECTED" | "USER_FREE_TEXT" | "USER_ESTIMATED" | "NLP_EXTRACTED" | "VISION_SUGGESTED"
+  confirmationStatus String     @default("CONFIRMED") // "CONFIRMED" | "PENDING_CONFIRMATION" | "UNKNOWN"
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@unique([roomId, questionId])
+}
+
+model SurveyRoomProfile {
+  id                String     @id @default(uuid())
+  roomId            String     @unique
+  room              SurveyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  profileJson       String     // Strongly typed RoomProfile JSON payload
+  version           String     @default("1.0.0")
+  completenessScore Float      @default(0.0) // 0 - 100%
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model SurveyFinding {
+  id                  String     @id @default(uuid())
+  roomId              String
+  room                SurveyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  ruleId              String     // e.g. "RULE_BED_001", "RULE_BATH_001"
+  title               String
+  category            String     // "RUG" | "CABLE" | "LIGHTING" | "OBSTACLE" | "BATH_SLIP" | "GRAB_BAR" | "ACCESSIBILITY"
+  priority            String     // "CAN_UU_TIEN_KIEM_TRA" | "NEN_XEM_XET_CAI_THIEN" | "CAN_THEM_THONG_TIN"
+  observedEvidence    String
+  recommendation      String
+  supportingSourceIds String?    // JSON array of KnowledgeSource IDs
+  status              String     @default("ACTIVE") // "ACTIVE" | "ACKNOWLEDGED" | "RESOLVED"
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model SurveyRoomPhoto {
+  id              String     @id @default(uuid())
+  roomId          String
+  room            SurveyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  fileUrl         String
+  caption         String?
+  detectedObjects String?    // JSON array of AI Vision annotations
+  createdAt       DateTime   @default(now())
+}
+
+model SurveyAuditEvent {
+  id            String     @id @default(uuid())
+  surveyId      String
+  survey        HomeSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  roomId        String?
+  eventType     String     // "SURVEY_CREATED" | "ANSWER_SAVED" | "ANSWER_EDITED" | "DEPENDENT_INVALIDATED" | "PROFILE_UPDATED" | "SURVEY_COMPLETED"
+  changedFields String?    // JSON metadata
+  timestamp     DateTime   @default(now())
+}
