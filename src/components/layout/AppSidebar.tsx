@@ -47,16 +47,10 @@ const EXTERNAL_MODULES = [
   },
   {
     href: "/explainability",
-    label: "Sơ đồ giải trình XAI",
+    label: "Giải trình AI (XAI & Audit)",
     icon: Network,
-    badge: "Trace",
+    badge: "XAI",
     highlight: true,
-  },
-  {
-    href: "/risk-assessment/traceability",
-    label: "Truy xuất nguồn gốc XAI",
-    icon: Network,
-    badge: "Audit",
   },
   {
     href: "/analytics",

@@ -66,39 +66,37 @@ export const AppHeader: React.FC = () => {
           </Link>
         </div>
 
-        {/* Room Switcher */}
-        <div className="flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 hidden md:flex">
-          {rooms.map((r) => {
-            const isActive = r.id === currentRoomId;
-            return (
-              <button
-                key={r.id}
-                onClick={() => switchRoom(r.id)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
-                  isActive
-                    ? "bg-white text-teal-700 shadow-sm font-bold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                )}
-              >
-                <Home className="h-3.5 w-3.5" />
-                {r.name.split("(")[0].trim()}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Guided Journey Fast Action */}
-        <Link
-          href="/workflow"
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white text-xs font-bold transition shadow-sm"
-        >
-          <Compass className="h-3.5 w-3.5" />
-          <span>Hành trình 7 Bước</span>
-        </Link>
+        {/* Center: Context-aware Navigation */}
+        {pathname === "/workflow" ? (
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
+            <Compass className="h-4 w-4 text-teal-600 animate-spin-slow" />
+            <span>Quy Trình Khảo Sát &amp; Đánh Giá An Toàn (7 Bước Khép Kín)</span>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 hidden md:flex">
+            {rooms.map((r) => {
+              const isActive = r.id === currentRoomId;
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => switchRoom(r.id)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
+                    isActive
+                      ? "bg-white text-teal-700 shadow-sm font-bold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                  )}
+                >
+                  <Home className="h-3.5 w-3.5" />
+                  {r.name.split("(")[0].trim()}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Real-time Status Badges & Quick Action Controls */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
           {/* Safety Score Indicator */}
           <div
             className={cn(
@@ -153,24 +151,27 @@ export const AppHeader: React.FC = () => {
             )}
           </button>
 
-          {/* Run Simulation Action */}
-          <button
-            onClick={() => runSimulation()}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-md shadow-teal-600/20 active:scale-95 transition-all"
-            title="Đánh giá lại toàn bộ nguy cơ không gian"
-          >
-            <Play className="h-3.5 w-3.5 fill-white" />
-            <span>Chạy mô phỏng</span>
-          </button>
+          {/* Run Simulation & Restore Baseline (Shown on 3D & interactive pages, hidden on workflow to keep header clean) */}
+          {pathname !== "/workflow" && (
+            <>
+              <button
+                onClick={() => runSimulation()}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-md shadow-teal-600/20 active:scale-95 transition-all"
+                title="Đánh giá lại toàn bộ nguy cơ không gian"
+              >
+                <Play className="h-3.5 w-3.5 fill-white" />
+                <span>Chạy mô phỏng</span>
+              </button>
 
-          {/* Restore Baseline */}
-          <button
-            onClick={() => restoreBaseline()}
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs transition-all"
-            title="Khôi phục trạng thái ban đầu (Baseline)"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </button>
+              <button
+                onClick={() => restoreBaseline()}
+                className="p-1.5 sm:p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs transition-all"
+                title="Khôi phục trạng thái ban đầu (Baseline)"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

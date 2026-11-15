@@ -77,8 +77,30 @@ export default function WorkflowPage() {
   const [residentProfile, setResidentProfile] = useState(
     "Bác Nam (75 tuổi), thoái hóa khớp gối độ 2, giảm thị lực ban đêm, đi lại cần điểm tựa vững."
   );
-  const [roomType, setRoomType] = useState<"BEDROOM" | "BATHROOM">("BEDROOM");
+  const [roomType, setRoomType] = useState<"BEDROOM" | "BATHROOM" | "LIVINGROOM">("BEDROOM");
   const [mode, setMode] = useState<"DEMO" | "REAL">("REAL");
+
+  const RESIDENT_QUICK_TAGS = [
+    "Thoái hóa khớp gối độ 2",
+    "Giảm thị lực ban đêm",
+    "Dậy vệ sinh 2 lần/đêm",
+    "Đi lại cần điểm tựa vững",
+    "Tiền sử từng trượt chân ngã",
+  ];
+
+  const handleToggleTag = (tag: string) => {
+    if (residentProfile.includes(tag)) {
+      setResidentProfile((prev) =>
+        prev
+          .replace(new RegExp(`,?\\s*${tag}\\.?`, "gi"), "")
+          .trim()
+      );
+    } else {
+      setResidentProfile((prev) =>
+        prev ? `${prev.replace(/[\.\s]+$/, "")}, ${tag}.` : `${tag}.`
+      );
+    }
+  };
 
   // Step 2: Collection State
   const [dimensions, setDimensions] = useState({ length: 4.5, width: 3.5, height: 2.8 });
@@ -111,12 +133,17 @@ export default function WorkflowPage() {
   const [selectedFinding, setSelectedFinding] = useState<any | null>(null);
   const [showRAGModal, setShowRAGModal] = useState(false);
 
-  // Sync Room selection with Room Type
+  // Sync Room selection with Room Type & default dimensions
   useEffect(() => {
     if (roomType === "BATHROOM" && currentRoomId !== "room-bathroom-01") {
       switchRoom("room-bathroom-01");
+      setDimensions({ length: 2.4, width: 1.8, height: 2.6 });
     } else if (roomType === "BEDROOM" && currentRoomId !== "room-bedroom-01") {
       switchRoom("room-bedroom-01");
+      setDimensions({ length: 4.5, width: 3.5, height: 2.8 });
+    } else if (roomType === "LIVINGROOM" && currentRoomId !== "room-living-01") {
+      switchRoom("room-living-01");
+      setDimensions({ length: 6.0, width: 5.4, height: 2.8 });
     }
   }, [roomType]);
 
@@ -252,38 +279,70 @@ export default function WorkflowPage() {
           </div>
 
           {/* 7-Step Interactive Progress Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1 border-t border-slate-100">
-            {WORKFLOW_STEPS.map((s) => {
-              const isPast = currentStep > s.step;
-              const isCurrent = currentStep === s.step;
+          <div className="pt-2 border-t border-slate-100">
+            {/* Progress line */}
+            <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold mb-2">
+              <span className="flex items-center gap-1.5 text-teal-700 font-bold">
+                <Sparkles className="h-3.5 w-3.5 text-teal-600" />
+                Tiến độ: Bước {currentStep}/7 — {WORKFLOW_STEPS[currentStep - 1].title.split(".")[1].trim()}
+              </span>
+              <span>{Math.round((currentStep / 7) * 100)}% Hoàn tất</span>
+            </div>
 
-              return (
-                <button
-                  key={s.step}
-                  onClick={() => setCurrentStep(s.step)}
-                  className={`text-left p-2 rounded-xl transition-all border flex flex-col justify-between ${
-                    isCurrent
-                      ? "bg-teal-50 border-teal-300 ring-2 ring-teal-500/20 shadow-xs"
-                      : isPast
-                      ? "bg-emerald-50/60 border-emerald-200 text-slate-700 hover:bg-emerald-50"
-                      : "bg-slate-50 border-slate-200/80 text-slate-400 hover:bg-slate-100"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wide">
-                      {isPast ? <CheckCircle2 className="h-3 w-3 text-emerald-600 inline mr-1" /> : null}
-                      Bước {s.step}
-                    </span>
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        isCurrent ? "bg-teal-600 animate-ping" : isPast ? "bg-emerald-500" : "bg-slate-300"
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+              {WORKFLOW_STEPS.map((s) => {
+                const isPast = currentStep > s.step;
+                const isCurrent = currentStep === s.step;
+
+                return (
+                  <button
+                    key={s.step}
+                    onClick={() => setCurrentStep(s.step)}
+                    className={`text-left p-2.5 rounded-xl transition-all border flex items-center gap-2.5 relative group ${
+                      isCurrent
+                        ? "bg-teal-50/90 border-teal-500 shadow-sm ring-2 ring-teal-500/20"
+                        : isPast
+                        ? "bg-emerald-50/50 border-emerald-200/90 hover:bg-emerald-50 text-slate-700"
+                        : "bg-white border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    }`}
+                  >
+                    {/* Circle badge */}
+                    <div
+                      className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 transition-all ${
+                        isCurrent
+                          ? "bg-teal-600 text-white shadow-xs"
+                          : isPast
+                          ? "bg-emerald-500 text-white"
+                          : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                       }`}
-                    />
-                  </div>
-                  <div className="text-xs font-bold text-slate-800 truncate mt-0.5">{s.title.split(".")[1]}</div>
-                </button>
-              );
-            })}
+                    >
+                      {isPast ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : s.step}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={`text-[10px] uppercase font-bold tracking-wider ${
+                          isCurrent
+                            ? "text-teal-700 font-black"
+                            : isPast
+                            ? "text-emerald-700"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        Bước {s.step}
+                      </div>
+                      <div
+                        className={`text-xs font-bold truncate ${
+                          isCurrent ? "text-slate-900" : isPast ? "text-slate-700" : "text-slate-500"
+                        }`}
+                      >
+                        {s.title.split(".")[1].trim()}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -301,12 +360,13 @@ export default function WorkflowPage() {
                 <span>Bước 1: Khởi Tạo Hồ Sơ Khảo Sát Không Gian Sống</span>
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Thiết lập thông tin dự án, đối tượng người cao tuổi và lựa chọn phòng cần thẩm định an toàn.
+                Thiết lập thông tin dự án, đối tượng người cao tuổi và lựa chọn không gian phòng cần thẩm định an toàn.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Project & Resident Info (7 cols) */}
+              <div className="lg:col-span-6 space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Tên dự án / Căn hộ khảo sát:
@@ -315,121 +375,233 @@ export default function WorkflowPage() {
                     type="text"
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none bg-slate-50/50"
                     placeholder="Ví dụ: Khảo sát căn hộ gia đình Bác Nam"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Hồ sơ thể trạng người cao tuổi (Target Resident):
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Hồ sơ thể trạng người cao tuổi (Target Resident):
+                    </label>
+                    <span className="text-[10px] text-slate-400">Nhấp thẻ bên dưới để chèn nhanh</span>
+                  </div>
                   <textarea
                     rows={3}
                     value={residentProfile}
                     onChange={(e) => setResidentProfile(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none bg-slate-50/50 leading-relaxed"
                     placeholder="Mô tả tuổi tác, thị lực, khả năng giữ thăng bằng..."
                   />
+
+                  {/* Quick Clickable Health Condition Tags */}
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {RESIDENT_QUICK_TAGS.map((tag) => {
+                      const isIncluded = residentProfile.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => handleToggleTag(tag)}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 ${
+                            isIncluded
+                              ? "bg-teal-100 text-teal-800 border border-teal-300 font-bold"
+                              : "bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200"
+                          }`}
+                        >
+                          <span>{isIncluded ? "✓" : "+"}</span>
+                          <span>{tag}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     Chế độ dữ liệu khảo sát:
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setMode("REAL")}
-                      className={`p-3 rounded-xl border text-left transition ${
+                      className={`p-3.5 rounded-xl border text-left transition ${
                         mode === "REAL"
-                          ? "bg-teal-50 border-teal-300 text-teal-900 font-bold"
-                          : "bg-slate-50 border-slate-200 text-slate-600"
+                          ? "bg-teal-50 border-teal-400 text-teal-950 font-bold ring-2 ring-teal-500/15"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                       }`}
                     >
-                      <div className="text-xs font-bold">Khảo sát Thực Tế</div>
-                      <div className="text-[10px] text-slate-500 mt-0.5">Nhập số đo & ảnh thật</div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">Khảo sát Thực Tế</span>
+                        {mode === "REAL" && <span className="h-2 w-2 rounded-full bg-teal-600" />}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">Nhập số đo phòng &amp; tải ảnh chụp thật</div>
                     </button>
                     <button
                       type="button"
                       onClick={() => setMode("DEMO")}
-                      className={`p-3 rounded-xl border text-left transition ${
+                      className={`p-3.5 rounded-xl border text-left transition ${
                         mode === "DEMO"
-                          ? "bg-teal-50 border-teal-300 text-teal-900 font-bold"
-                          : "bg-slate-50 border-slate-200 text-slate-600"
+                          ? "bg-teal-50 border-teal-400 text-teal-950 font-bold ring-2 ring-teal-500/15"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                       }`}
                     >
-                      <div className="text-xs font-bold">Dữ liệu Mẫu (Demo)</div>
-                      <div className="text-[10px] text-slate-500 mt-0.5">Dùng kịch bản chuẩn</div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">Dữ liệu Mẫu (Demo)</span>
+                        {mode === "DEMO" && <span className="h-2 w-2 rounded-full bg-teal-600" />}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">Tự động nạp kịch bản phòng tiêu chuẩn</div>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              {/* Right Column: Room Selection (3 Rooms) & Clinical Guidelines (6 cols) */}
+              <div className="lg:col-span-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Chọn loại phòng khảo sát trọng tâm:
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Chọn không gian phòng khảo sát trọng tâm (3 phòng có sẵn):
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2.5">
+                    {/* Room 1: Bedroom */}
                     <button
                       type="button"
                       onClick={() => setRoomType("BEDROOM")}
-                      className={`p-4 rounded-xl border text-left transition ${
+                      className={`w-full p-3.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
                         roomType === "BEDROOM"
-                          ? "bg-teal-50 border-teal-300 ring-2 ring-teal-500/20"
-                          : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                          ? "bg-teal-50/80 border-teal-400 ring-2 ring-teal-500/20 shadow-xs"
+                          : "bg-slate-50/70 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      <div className="h-8 w-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold mb-2">
-                        🛏️
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg shrink-0">
+                          🛏️
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900">Phòng Ngủ Người Cao Tuổi</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700">
+                              4.5m × 3.5m (15.8m²)
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Trọng tâm: Mép giường cao, thảm chân lỏng lẻo &amp; dây điện sạc sàn.
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs font-bold text-slate-800">Phòng Ngủ</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Khu vực dậy đêm, mép giường, thảm trượt và dây sạc.
-                      </div>
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${roomType === "BEDROOM" ? "bg-teal-600 ring-4 ring-teal-100" : "bg-slate-300"}`} />
                     </button>
 
+                    {/* Room 2: Bathroom */}
                     <button
                       type="button"
                       onClick={() => setRoomType("BATHROOM")}
-                      className={`p-4 rounded-xl border text-left transition ${
+                      className={`w-full p-3.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
                         roomType === "BATHROOM"
-                          ? "bg-teal-50 border-teal-300 ring-2 ring-teal-500/20"
-                          : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                          ? "bg-teal-50/80 border-teal-400 ring-2 ring-teal-500/20 shadow-xs"
+                          : "bg-slate-50/70 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      <div className="h-8 w-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold mb-2">
-                        🚿
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg shrink-0">
+                          🚿
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900">Phòng Tắm &amp; Nhà Vệ Sinh</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700">
+                              2.4m × 1.8m (4.3m²)
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Trọng tâm: Sàn ướt trơn trượt, thiếu thanh vịn bồn cầu, gờ cửa cao.
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs font-bold text-slate-800">Nhà Vệ Sinh / Tắm</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Khu vực sàn ướt, thanh tay vịn và thảm chống trượt.
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${roomType === "BATHROOM" ? "bg-teal-600 ring-4 ring-teal-100" : "bg-slate-300"}`} />
+                    </button>
+
+                    {/* Room 3: Living Room */}
+                    <button
+                      type="button"
+                      onClick={() => setRoomType("LIVINGROOM")}
+                      className={`w-full p-3.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
+                        roomType === "LIVINGROOM"
+                          ? "bg-teal-50/80 border-teal-400 ring-2 ring-teal-500/20 shadow-xs"
+                          : "bg-slate-50/70 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
+                          🛋️
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900">Phòng Khách Sinh Hoạt Chung</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700">
+                              6.0m × 5.4m (32.4m²)
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Trọng tâm: Lối đi chung, bàn trà góc nhọn, thảm sofa &amp; chướng ngại vật.
+                          </div>
+                        </div>
                       </div>
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${roomType === "LIVINGROOM" ? "bg-teal-600 ring-4 ring-teal-100" : "bg-slate-300"}`} />
                     </button>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
+                {/* Medical & Engineering Standard Card */}
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-teal-50/60 to-sky-50/60 border border-teal-100 space-y-1.5 text-xs text-slate-600">
                   <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                    <Info className="h-4 w-4 text-teal-600" />
-                    <span>Lưu ý phương pháp an toàn y khoa:</span>
+                    <ShieldCheck className="h-4 w-4 text-teal-600 shrink-0" />
+                    <span>Cơ sở y tế đối chiếu: CDC STEADI (2019) &amp; WHO (2021)</span>
                   </div>
-                  <p>
-                    Theo <strong>CDC STEADI (2019)</strong> và <strong>WHO (2021)</strong>, hơn 60% các vụ té ngã ở người cao tuổi diễn ra trong phòng ngủ và nhà vệ sinh vào ban đêm.
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Theo thống kê dịch tễ học, hơn <strong>60% các vụ té ngã</strong> ở người cao tuổi diễn ra trong lộ trình từ phòng ngủ sang nhà vệ sinh vào ban đêm khi độ rọi dưới 50 Lux và thiếu điểm bám tay.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={handleNextStep}
-                className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
-              >
-                <span>Bắt đầu khảo sát (Sang bước 2)</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
+            {/* Bottom Configuration Summary & Action Bar */}
+            <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                <span className="font-bold text-slate-800">Đã chọn:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 font-bold text-xs">
+                  {roomType === "BEDROOM"
+                    ? "Phòng Ngủ (4.5m × 3.5m)"
+                    : roomType === "BATHROOM"
+                    ? "Nhà Vệ Sinh / Tắm (2.4m × 1.8m)"
+                    : "Phòng Khách (6.0m × 5.4m)"}
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium text-xs">
+                  Chế độ: {mode === "REAL" ? "Khảo sát thực tế" : "Dữ liệu mẫu chuẩn"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSaveState}
+                  disabled={isSaving}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition shadow-xs flex items-center gap-1.5"
+                >
+                  <Save className="h-3.5 w-3.5 text-teal-600" />
+                  <span>{isSaving ? "Đang lưu..." : "Lưu nháp"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-teal-600/25 flex items-center gap-2 transition active:scale-95"
+                >
+                  <span>Bắt đầu khảo sát (Sang bước 2)</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}
