@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   title: "SafeHome 3D AI — Nhà an toàn, tuổi già an tâm",
   description:
     "Nền tảng Digital Twin 3D hỗ trợ nhận diện, giải trình và giảm thiểu nguy cơ té ngã trong không gian sống của người cao tuổi.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({

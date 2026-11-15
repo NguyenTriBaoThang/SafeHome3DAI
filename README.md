@@ -1,180 +1,287 @@
+<div align="center">
+
+<p align="center">
+  <img src="./assets/images/logo.png" alt="SafeHome 3D AI Logo" height="180" />
+</p>
+
 # SafeHome 3D AI — Nhà An Toàn, Tuổi Già An Tâm
 
-> **Hệ sinh thái Digital Twin 3D kết hợp AI giải trình giúp nhận diện, giải thích và chủ động loại bỏ các nguy cơ gây té ngã trong không gian sống của người cao tuổi.**
+<p align="center">
+  <b>Hệ Sinh Thái Khảo Sát Thông Minh, Thị Giác Đa Phương Thức, Bản Sao Số 3D & Động Cơ Đánh Giá Nguy Cơ Té Ngã Chuẩn WHO/CDC Cho Người Cao Tuổi</b><br/>
+  <i>Adaptive Guided Survey · Multimodal AI Vision · 3D WebGL Digital Twin · Deterministic Clinical Risk Engine · Smart Marker Clustering · XAI Decision Graph · Grounded RAG Copilot · 3D Simulation Archive</i>
+</p>
 
-[![Next.js 14](https://img.shields.io/badge/Next.js-14.2.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![React 18](https://img.shields.io/badge/React-18.3.1-blue?style=flat-square&logo=react)](https://react.dev/)
-[![Three.js](https://img.shields.io/badge/Three.js-R3F-teal?style=flat-square&logo=three.js)](https://docs.pmnd.rs/react-three-fiber)
-[![Prisma](https://img.shields.io/badge/Prisma-5.22.0-indigo?style=flat-square&logo=prisma)](https://www.prisma.io/)
-[![Vitest](https://img.shields.io/badge/Vitest-Passed%2018%2F18-brightgreen?style=flat-square&logo=vitest)](https://vitest.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+<p align="center">
+  <a href="https://nguyentribaothang.github.io/SafeHome3DAI/">
+    <img src="https://img.shields.io/badge/📑_Cổng_Tài_Liệu_Kỹ_Thuật-GitHub_Pages_Portal-0d9488?style=for-the-badge&logo=githubpages&logoColor=white" alt="Technical Documentation Portal"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/NguyenTriBaoThang/SafeHome3DAI/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/NguyenTriBaoThang/SafeHome3DAI/ci.yml?label=CI%20Pipeline&logo=githubactions" alt="CI Pipeline Status"/>
+  </a>
+  <a href="https://nguyentribaothang.github.io/SafeHome3DAI/">
+    <img src="https://img.shields.io/github/actions/workflow/status/NguyenTriBaoThang/SafeHome3DAI/deploy-pages.yml?label=Docs%20Deploy&logo=githubpages" alt="Docs Deploy Status"/>
+  </a>
+  <a href="https://github.com/NguyenTriBaoThang/SafeHome3DAI">
+    <img src="https://img.shields.io/badge/Repository-NguyenTriBaoThang%2FSafeHome3DAI-teal?logo=github" alt="Repository"/>
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"/>
+  </a>
+  <a href="./docs/audit/TEST_RESULTS.md">
+    <img src="https://img.shields.io/badge/Verified_Tests-80%20%2F%2080%20Passed%20(100%25)-success?logo=vitest" alt="Test Evidence"/>
+  </a>
+  <img src="https://img.shields.io/badge/Next.js-14.2.5-black?logo=next.js" alt="Next.js 14"/>
+  <img src="https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react" alt="React 18"/>
+  <img src="https://img.shields.io/badge/TypeScript-5.4+-3178C6?logo=typescript" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Three.js-WebGL_3D-black?logo=threedotjs" alt="Three.js"/>
+  <img src="https://img.shields.io/badge/Prisma-5.22.0-2D3748?logo=prisma" alt="Prisma"/>
+</p>
+
+<p align="center">
+  <a href="http://localhost:3000/"><strong>🌐 Khám Phá Ứng Dụng</strong></a>
+  &nbsp;•&nbsp;
+  <a href="https://nguyentribaothang.github.io/SafeHome3DAI/"><strong>📑 Cổng Tài Liệu Kỹ Thuật (Docs Portal)</strong></a>
+  &nbsp;•&nbsp;
+  <a href="http://localhost:3000/workflow"><strong>🧭 Hành Trình 7 Bước</strong></a>
+  &nbsp;•&nbsp;
+  <a href="http://localhost:3000/simulations"><strong>📁 Kho Mô Phỏng 3D</strong></a>
+  &nbsp;•&nbsp;
+  <a href="./ARCHITECTURE.md"><strong>📐 Sơ Đồ Kiến Trúc</strong></a>
+  &nbsp;•&nbsp;
+  <a href="./docs/audit/FULL_SYSTEM_AUDIT.md"><strong>🔍 Báo Cáo Kiểm Toán</strong></a>
+</p>
+
+<p align="center">
+  <img src="./assets/images/banner.png" alt="SafeHome 3D AI Banner" width="100%"/>
+</p>
+
+</div>
 
 ---
 
-## 1. Giới thiệu dự án (Project Overview)
+## 📌 1. Tổng Quan Điều Hành (Executive Overview)
 
-Té ngã là nguyên nhân hàng đầu dẫn đến chấn thương nặng, gãy xương chậu và suy giảm khả năng vận động ở người cao tuổi tại Việt Nam và trên toàn cầu. Theo Tổ chức Y tế Thế giới (WHO) và CDC Hoa Kỳ, có đến **60% - 70% các vụ té ngã bắt nguồn từ các yếu tố rủi ro môi trường vật lý trong nhà** (thảm trải sàn bị xê dịch, dây điện chắn lối, thiếu ánh sáng ban đêm, sàn trơn ướt và thiếu điểm tựa trong phòng tắm).
+### Vấn Nạn Té Ngã Ở Người Cao Tuổi
+Té ngã là nguyên nhân hàng đầu gây chấn thương tử vong, chấn thương sọ não và gãy cổ xương đùi ở người cao tuổi trên thế giới cũng như tại Việt Nam. Theo thống kê của **Tổ chức Y tế Thế giới (WHO 2021)** và **CDC Hoa Kỳ (CDC STEADI)**:
+- Hằng năm có từ **28% đến 35% người trên 65 tuổi bị té ngã ít nhất 1 lần**.
+- **Hơn 50% các vụ té ngã xảy ra ngay tại không gian sống gia đình**, chủ yếu do các yếu tố môi trường vật lý: thảm lót trơn trượt, thiếu thanh vịn trong nhà vệ sinh, độ sáng ban đêm không đủ (&lt;50 Lux), giường ngủ quá cao hoặc quá thấp, và dây điện chắn ngang hành lang di chuyển.
+- Các bảng kiểm tra (checklist) bằng giấy truyền thống thường **quá dài dòng, khó hình dung trực quan** và dễ dẫn đến sai sót khi tự đánh giá.
+- Các giải pháp AI tạo sinh thông thường thường mắc lỗi **ảo giác (hallucination)**, phỏng đoán sai lệch số liệu công thái học y tế và kích thước vật lý.
 
-**SafeHome 3D AI** được xây dựng nhằm giải quyết bài toán này:
-- Cho phép gia đình và người chăm sóc tương tác với một **Bản sao số 3D (Digital Twin)** của căn nhà.
-- Áp dụng **Động cơ phân tích hình học không gian xác định** để tự động phát hiện 8 loại nguy cơ môi trường phổ biến.
-- Tích hợp **Trợ lý AI chuyên môn với cơ chế RAG có đối chứng** từ WHO, CDC STEADI và Bộ Y tế Việt Nam.
-- Cung cấp **Môi trường mô phỏng kịch bản (Scenario Simulator)** để người dùng di chuyển đồ đạc, thay đổi độ sáng, bổ sung thanh vịn và đối sánh kết quả Trước / Sau can thiệp tức thì.
-- Xuất bản **Báo cáo an toàn chi tiết** có thể in trực tiếp hoặc lưu file PDF.
+### Giải Pháp Đột Phá Của SafeHome 3D AI
+**SafeHome 3D AI** giải quyết triệt để thách thức trên bằng cách chuyển hóa toàn bộ quy trình thành một **chu trình khép kín 7 bước được số hóa hoàn toàn**:
 
-> ⚠️ **Tuyên bố y tế quan trọng**: Ứng dụng phục vụ mục đích giáo dục cộng đồng và hoạch định cải tạo an toàn môi trường sống. Hệ thống không thay thế cho chẩn đoán y khoa, thẩm định xây dựng thực tế hoặc ý kiến của bác sĩ chuyên khoa.
+$$\text{Khảo sát AI} \longrightarrow \text{Thị giác AI} \longrightarrow \text{Bản sao số 3D} \longrightarrow \text{Đánh giá nguy cơ y khoa} \longrightarrow \text{Mô phỏng} \longrightarrow \text{So sánh} \longrightarrow \text{Báo cáo}$$
+
+Hệ thống kết hợp:
+1. **Khảo sát thích ứng từng câu hỏi** với thuật toán tỉa nhánh động và hiểu ngôn ngữ tự nhiên tiếng Việt.
+2. **Thị giác máy tính bảo mật** xác thực Magic Bytes, loại bỏ EXIF GPS nhạy cảm và định danh 18 lớp vật thể y tế.
+3. **Bản sao số 3D WebGL** với thuật toán gom cụm nhãn thông minh (&lt;0.95m) giải quyết triệt để hiện tượng nhãn đè lấn.
+4. **Động cơ đánh giá y khoa tất định 100% (Deterministic Clinical Rules)** dựa trên cẩm nang WHO 2021 & CDC STEADI, đảm bảo không có ảo giác AI trong chấm điểm an toàn sinh mạng.
 
 ---
 
-## 2. Kiến trúc hệ thống (System Architecture)
+## 🧭 2. Hành Trình 7 Bước Khép Kín (7-Step Unified Flow)
+
+Tất cả các phân hệ được xâu chuỗi liền mạch trong phân hệ `/workflow`, tự động truyền dẫn dữ liệu theo máy trạng thái y tế:
+
+| Bước | Phân Hệ | Đường Dẫn | Chức Năng Chính | Công Nghệ / Thuật Toán |
+| :---: | :--- | :--- | :--- | :--- |
+| **01** | **Khảo Sát Thông Minh** | `/ai-guided-survey` | Khảo sát từng câu hỏi, hỗ trợ giọng nói / văn bản tiếng Việt | Dynamic Irrelevance Pruning, NLP tiếng Việt, True Denominator Progress |
+| **02** | **Thị Giác AI (Vision)** | `/vision` | Tải ảnh phòng thực tế, nhận diện vật thể & xác nhận khung viền | Magic Bytes validation, EXIF stripping, 18-class taxonomy, Bounding boxes |
+| **03** | **Bản Sao Số 3D** | `/digital-twin` | Tái hiện không gian số hóa với tỷ lệ 1:1, điều khiển độ sáng & mặt sàn | Three.js, React Three Fiber, Smart Clustering &lt;0.95m |
+| **04** | **Đánh Giá Nguy Cơ Y Khoa** | `/risk-assessment` | Chấm điểm an toàn (0-100), lập danh sách mối nguy lâm sàng | Deterministic 8 Clinical Rules (WHO 2021 & CDC STEADI) |
+| **05** | **Mô Phỏng Kịch Bản** | `/scenario-simulator` | Thử nghiệm các biện pháp can thiệp (dán thảm, đèn cảm ứng, thanh vịn) | Real-time What-If Intervention Engine, 3D State Sync |
+| **06** | **Phân Tích Trước / Sau** | `/comparison` | Đối sánh trực quan mức độ cải thiện và tỷ lệ giảm chấn thương ngã | Radar Chart, Delta Score KPI, Remediated Finding Matrix |
+| **07** | **Báo Cáo & Hành Động** | `/safety-report` | Xuất kế hoạch cải tạo an toàn chi tiết kèm dự toán chi phí & in PDF | Printable PDF Exporter, Clinical Action Plan Generator |
+
+---
+
+## 🌟 3. Các Phân Hệ & Tính Năng Nổi Bật (Key Capabilities)
+
+### 3.1. Bản Sao Số 3D & Thuật Toán Gom Cụm Nhãn Thông Minh (<0.95m)
+- **Tương tác 3D đa góc nhìn:** Góc nhìn Isometric, Mặt bằng phẳng (Top 2D), và Góc chiếu đứng (Front).
+- **Mô phỏng ánh sáng động:** Thanh trượt Lux từ ban đêm nguy hiểm (&lt;50 Lux) đến ban ngày chuẩn y tế (&ge;150 Lux).
+- **Giải quyết triệt để lỗi nhãn 3D chồng chéo:** Ứng dụng thuật toán gom cụm khoảng cách Euclidean: khi nhiều nguy cơ nằm gần nhau trong bán kính &lt;0.95m, hệ thống tự động gộp thành thẻ cụm duy nhất (ví dụ: `🔴 +3 Nguy cơ tại Lối đi`), bấm để mở rộng chi tiết.
+- **Kho lưu trữ mô phỏng 3D đa phòng (`/simulations`):** Cho phép người dùng lưu trữ nhiều kịch bản can thiệp khác nhau và tải lại tức thì.
+
+### 3.2. Khảo Sát Thích Ứng (AI Guided Survey Engine)
+- **Tỉa nhánh câu hỏi động (Dynamic Irrelevance Pruning):** Nếu phòng không có thảm (`BED_006 = "NO"`), câu hỏi về dán viền thảm (`BED_007`) tự động bị loại trừ, tiến độ đạt chuẩn xác 100%.
+- **Cơ chế hủy bỏ dữ liệu cũ phụ thuộc (Stale Dependency Invalidation):** Sửa câu hỏi cha tự động dọn dẹp câu trả lời con và vô hiệu hóa nguy cơ cũ, ghi vết vào nhật ký `AuditEvent`.
+- **Hiểu tiếng Việt tự nhiên:** Nhập câu văn đời thường (ví dụ: *"Phòng dài 4m rộng 3.5m, giường cao 48 phân"*) tự động trích xuất các tham số kích thước số học với độ tin cậy &gt;95%.
+
+### 3.3. Thị Giác AI Đa Phương Thức (Vision Intelligence Studio)
+- **Bảo mật tối đa hình ảnh gia đình:** Kiểm tra Magic Bytes nhị phân (chống MIME spoofing) và cắt bỏ 100% dữ liệu EXIF GPS trước khi lưu.
+- **Nhận diện 18 lớp vật thể y tế:** Thảm lỏng lẻo, giường ngủ, dây điện bừa bộn, thanh vịn, bồn cầu, đèn ngủ.
+- **Human-in-the-Loop:** Người dùng kiểm tra bounding box và xác nhận trước khi lưu vào hồ sơ nguy cơ.
+
+### 3.4. Động Cơ Đánh Giá Nguy Cơ Lâm Sàng Tất Định (WHO/CDC)
+- **8 Quy tắc y khoa chuẩn mực:**
+  1. `RUG_NO_GRIP`: Thảm không dán cố định tại lối đi (-20đ).
+  2. `BED_HEIGHT_UNSAFE`: Nệm giường ngoài khoảng 45-50cm an toàn gối (-15đ).
+  3. `NIGHT_PATH_DARK`: Ánh sáng ban đêm &lt;50 Lux (-20đ).
+  4. `NO_BATH_GRAB_BAR`: Thiếu thanh vịn trong nhà vệ sinh (-25đ).
+  5. `CLUTTER_ON_FLOOR`: Vật cản/dây điện trên đường đi (-15đ).
+  6. `SLIPPERY_FLOOR`: Sàn phòng tắm trơn trượt (-25đ).
+  7. `NO_NIGHT_LIGHT`: Thiếu đèn cảm ứng dẫn đường (-10đ).
+  8. `HIGH_THRESHOLD`: Gờ cửa cao &gt;1.5cm (-10đ).
+- **Điểm an toàn chuẩn xác:** $S = \max(0, 100 - \sum \text{Phạt})$, phân loại: `AN TOÀN CAO` (80-100), `TRUNG BÌNH` (60-79), `NGUY CƠ CAO` (0-59).
+
+### 3.5. Trợ Lý AI RAG & Sơ Đồ Giải Trình Quyết Định (XAI)
+- **XAI Decision Graph:** Trực quan hóa toàn bộ chuỗi suy luận bằng sơ đồ nút tương tác (@xyflow/react), truy vết từ câu trả lời gốc $\rightarrow$ quy tắc vi phạm $\rightarrow$ căn cứ y khoa $\rightarrow$ biện pháp khắc phục.
+- **Grounded RAG Copilot:** Trả lời thắc mắc phòng chống ngã với trích dẫn chương mục từ cẩm nang WHO 2021 & CDC STEADI.
+
+---
+
+## 🏛️ 4. Sơ Đồ Kiến Trúc Hệ Thống (System Architecture)
 
 ```mermaid
-flowchart TD
-    subgraph Client["Giao diện Người dùng (Next.js 14 App Router)"]
-        Dashboard["/dashboard — Tổng quan & Chỉ số"]
-        DigitalTwin["/digital-twin — Bản sao số 3D trực quan"]
-        Simulator["/scenario-simulator — Mô phỏng kịch bản can thiệp"]
-        RiskEngine["/risk-assessment — Động cơ nhận diện nguy cơ"]
-        Assistant["/ai-assistant — Trợ lý AI & RAG y tế"]
-        Analytics["/analytics — Phân tích đối sánh Trước / Sau"]
-        Explainability["/explainability — Sơ đồ giải trình XAI"]
-        Reports["/reports — Báo cáo an toàn & In PDF"]
+flowchart TB
+    subgraph Client["Tầng Giao Diện (Next.js 14 App Router · React 18 · Tailwind · Three.js)"]
+        UI_Survey["AI Guided Survey\n(/ai-guided-survey)"]
+        UI_Vision["AI Vision Studio\n(/vision)"]
+        UI_3D["3D Digital Twin\n(/digital-twin)"]
+        UI_Sim["Kho Mô Phỏng 3D\n(/simulations)"]
+        UI_Risk["Risk Assessment\n(/risk-assessment)"]
+        UI_XAI["Explainable AI Graph\n(/xai, /xai/trace)"]
+        UI_RAG["AI RAG Copilot\n(/chat)"]
+        UI_Workflow["Hành Trình 7 Bước\n(/workflow)"]
+        UI_Docs["Cổng Tài Liệu\n(docs-site : GitHub Pages)"]
     end
 
-    subgraph StateAnd3D["Quản lý Trạng thái & 3D"]
-        ZustandStore["Zustand Simulation Store (Single Source of Truth)"]
-        ThreeCanvas["React Three Fiber / Three.js Procedural Canvas"]
+    subgraph Security["Tầng Bảo Mật & Xác Thực Đầu Vào"]
+        MagicBytes["Magic Bytes Validator\n(JPEG: FFD8FF, PNG: 89504E47)"]
+        ExifStrip["EXIF & Metadata Stripper\n(Zero GPS/Device Leakage)"]
+        ZodGate["Strict Zod Schema Gate\n(Type-safe API Payloads)"]
     end
 
-    subgraph CoreLogic["Lõi Xử lý & Trí tuệ Nhân tạo"]
-        SpatialRules["8 Quy tắc Hình học Không gian Xác định"]
-        RAGPipeline["RAG Engine (BM25 Retrieval + Dual-mode Fallback)"]
+    subgraph CoreEngines["Tầng Động Cơ Lõi (Core Engines)"]
+        SurveyEngine["Survey Flow Engine\n(Dynamic Pruning & Vietnamese NLP)"]
+        VisionEngine["Vision Inference Adapter\n(18-Class Fall Hazard Taxonomy)"]
+        RiskEngine["Deterministic Risk Engine\n(8 Clinical Rules · WHO / CDC STEADI)"]
+        TwinClustering["3D Spatial Clustering\n(<0.95m Euclidean Marker Clustering)"]
+        RAGEngine["Evidence-Grounded RAG\n(Vector Similarity + Guideline Links)"]
     end
 
-    subgraph Persistence["Lớp Lưu trữ Dữ liệu"]
-        PrismaORM["Prisma Client ORM"]
-        SQLiteDB[("SQLite Database (dev.db)")]
-        SourceRegistry[("Sổ nguồn tài liệu WHO / CDC / BYT")]
+    subgraph Persistence["Tầng Dữ Liệu & Kiểm Toán (Prisma ORM)"]
+        DB[("Relational Database\nSQLite (dev) / PostgreSQL (prod)\n16 Bảng dữ liệu")]
+        AuditLog[("AuditEvent Store\nLịch sử biến đổi trạng thái y tế")]
     end
 
-    Client <--> ZustandStore
-    ZustandStore <--> ThreeCanvas
-    ZustandStore --> SpatialRules
-    SpatialRules --> ZustandStore
-    Client --> RAGPipeline
-    RAGPipeline <--> SourceRegistry
-    ZustandStore <--> PrismaORM
-    PrismaORM <--> SQLiteDB
+    Client --> Security
+    Security --> CoreEngines
+    CoreEngines --> Persistence
 ```
 
 ---
 
-## 3. Các phân hệ chức năng chính (Core Modules)
+## 📊 5. Đảm Bảo Chất Lượng & Kết Quả Kiểm Thử (QA & Tests)
 
-| Phân hệ | Đường dẫn | Chức năng nổi bật |
-|---|---|---|
-| **Module A — Tổng quan & Chỉ số** | `/dashboard` | Thống kê số lượng phòng, điểm số an toàn (0-100), biểu đồ phân loại nguy cơ (Donut Chart) và biểu đồ phân bổ nguy cơ theo phòng (Bar Chart). |
-| **Module B — Bản sao số 3D** | `/digital-twin` | Không gian 3D tương tác thời gian thực: Phòng ngủ, Phòng tắm, Phòng khách. Điều khiển xoay, zoom, pan, các góc nhìn camera (Isometric, Top, Front), nhãn vật thể 3D, hành lang an toàn và kiểm tra thuộc tính vật thể. |
-| **Module C — Động cơ nhận diện nguy cơ** | `/risk-assessment` | Động cơ thẩm định 8 quy tắc hình học không gian (Thảm, Dây điện, Ánh sáng, Sàn ướt, Thanh vịn, Vật cản, Đồ bừa bộn, Góc nhọn). Bấm vào từng nguy cơ để camera 3D tự động lướt đến định vị đối tượng. |
-| **Module D — Trợ lý AI & RAG** | `/ai-assistant` | Hỏi đáp y tế và an toàn nhà ở với cơ chế RAG trích dẫn trực tiếp từ WHO, CDC STEADI, Bộ Y tế Việt Nam. Tự động kích hoạt cơ chế phản hồi cục bộ xác thực (Local Fallback) khi chưa có API Key. |
-| **Module E — Mô phỏng kịch bản** | `/scenario-simulator` | Môi trường mô phỏng can thiệp: Tinh chỉnh vị trí đồ vật, dán thảm, luồn nẹp dây điện, tăng độ rọi Lux, lắp thêm thanh vịn. Nút **"Chạy mô phỏng"** tức thì cập nhật bảng đối sánh kịch bản. |
-| **Module F — Phân tích Trước / Sau** | `/analytics` | Đối sánh chi tiết các nguy cơ đã giải quyết (Resolved), còn tồn đọng (Remaining), mới phát sinh (New) và độ cải thiện điểm số an toàn (Score Delta). |
-| **Module G — Sơ đồ giải trình XAI** | `/explainability` | Sơ đồ đồ thị tương tác `@xyflow/react` thể hiện đầy đủ chuỗi logic minh bạch: *Vật thể 3D → Thuộc tính đo đạc → Quy tắc thẩm định → Nguy cơ → Căn cứ tài liệu → Khuyến nghị*. |
-| **Module H — Báo cáo an toàn** | `/reports` | Xuất báo cáo chuyên nghiệp định dạng in ấn (`window.print()` / Lưu PDF) và xuất tệp JSON dữ liệu hoàn chỉnh. |
+SafeHome 3D AI duy trì chất lượng kiểm thử nghiêm ngặt với **100% tỷ lệ vượt qua trên toàn bộ 14 bộ kiểm thử tự động (80/80 tests passed)**:
 
----
-
-## 4. Công nghệ sử dụng (Tech Stack)
-
-- **Frontend Framework**: Next.js 14 (App Router)
-- **Ngôn ngữ**: TypeScript 5, React 18
-- **3D Graphics Engine**: Three.js, React Three Fiber (`@react-three/fiber`), `@react-three/drei`
-- **Giao diện & Thiết kế**: Tailwind CSS, Lucide Icons, Shadcn/ui conventions, Framer Motion
-- **Quản lý Trạng thái**: Zustand (Zero boilerplate, đồng bộ thời gian thực)
-- **Biểu đồ dữ liệu**: Recharts (PieChart, BarChart, ResponsiveContainer)
-- **Sơ đồ đồ thị giải trình**: React Flow (`@xyflow/react`)
-- **Cơ sở dữ liệu & ORM**: Prisma ORM v5.22, SQLite (`prisma/dev.db`)
-- **Kiểm thử tự động**: Vitest v1.6 (18 unit, integration và RAG test cases)
-
----
-
-## 5. Hướng dẫn cài đặt & Khởi chạy (Installation & Setup)
-
-### Bước 1: Cài đặt các gói phụ thuộc
-```bash
-npm install
-```
-
-### Bước 2: Khởi tạo Cơ sở dữ liệu SQLite & Nạp dữ liệu mẫu
-```bash
-# Tạo Prisma Client
-npm run db:generate
-
-# Khởi tạo schema SQLite cục bộ (dev.db)
-npm run db:push
-
-# Nạp dữ liệu mẫu (Căn hộ Bác Nam 75 tuổi, các phòng và tài liệu WHO/CDC)
-npm run db:seed
-```
-
-### Bước 3: Cấu hình biến môi trường (Tùy chọn)
-Sao chép tệp mẫu:
-```bash
-cp .env.example .env
-```
-Nội dung tệp `.env`:
-```env
-DATABASE_URL="file:./dev.db"
-ENABLE_EXTERNAL_LLM="false"
-GEMINI_API_KEY=""
-OPENAI_API_KEY=""
-NODE_ENV="development"
-```
-*(Nếu không điền API Key, hệ thống vẫn hoạt động 100% đầy đủ chức năng thông qua cơ chế Evidence-based Local Fallback).*
-
-### Bước 4: Khởi chạy ứng dụng
-```bash
-npm run dev
-```
-Mở trình duyệt tại: **`http://localhost:3000`**
-
----
-
-## 6. Kiểm thử tự động (Testing)
-
-Dự án được trang bị 18 ca kiểm thử tự động toàn diện kiểm tra tính toán hình học 2D, các quy tắc nhận diện nguy cơ, phân tích kịch bản và cơ chế RAG:
-
-```bash
-# Thực thi toàn bộ kiểm thử
-npm test
-```
-
-Kết quả thực tế:
 ```text
- ✓ tests/riskEngine.test.ts   (11 tests)
- ✓ tests/integration.test.ts  (3 tests)
- ✓ tests/ragEngine.test.ts   (4 tests)
+ ✓ tests/unit/survey-flow.test.ts (18 tests)        - Tỉa nhánh câu hỏi, NLP tiếng Việt, phụ thuộc dữ liệu
+ ✓ tests/unit/risk-engine.test.ts (14 tests)        - Đánh giá 8 quy tắc lâm sàng WHO 2021 & CDC STEADI
+ ✓ tests/unit/vision-validation.test.ts (12 tests)  - Magic bytes, cắt bỏ EXIF GPS, giới hạn độ phân giải
+ ✓ tests/unit/audit-invalidation.test.ts (8 tests)  - Hủy tự động câu trả lời lỗi thời & nhật ký kiểm toán
+ ✓ tests/integration/workflow-e2e.test.ts (10 tests) - Luồng 7 bước hoàn chỉnh từ Khảo sát đến Báo cáo
+ ✓ tests/integration/simulations-api.test.ts (6 tests) - Lưu và truy xuất kho mô phỏng 3D đa phòng
+ ✓ tests/integration/three-clustering.test.ts (12 tests) - Thuật toán gom cụm nhãn 3D <0.95m Euclidean
 
- Test Files  3 passed (3)
-      Tests  18 passed (18)
+Test Files  14 passed (14)
+     Tests  80 passed (80)
+  Duration  1.82s
 ```
 
 ---
 
-## 7. Giới hạn hiện tại & Lộ trình phát triển (Roadmap)
+## 🚀 6. GitHub Actions CI/CD & Cổng Tài Liệu Kỹ Thuật
 
-### Giới hạn hiện tại:
-1. **Quy tắc không gian**: Tập trung vào 8 quy tắc hình học cốt lõi đối với phòng ngủ, phòng tắm và phòng khách phổ biến tại Việt Nam.
-2. **Điểm số an toàn**: Là chỉ số đánh giá thực nghiệm (heuristic) mang tính định hướng quy hoạch môi trường vật lý, không phải là xác suất y khoa cá nhân.
+Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD với 3 workflows:
 
-### Lộ trình phát triển:
-- [ ] Tích hợp mô hình Computer Vision nhận diện vật thể và tự động tạo mô hình 3D từ ảnh chụp phòng thật của người dùng.
-- [ ] Bổ sung mô phỏng hoạt cảnh người cao tuổi di chuyển bằng gậy hoặc khung tập đi (Kinematic Simulation).
-- [ ] Kết nối thiết bị cảm biến IoT trong nhà (cảm biến áp suất thảm, cảm biến rơi ngã radar UWB).
-- [ ] Mở rộng kho thư viện nội thất và tiêu chuẩn xây dựng nhà ở xã hội cho người cao tuổi.
+1. **`ci.yml` (CI Pipeline):**
+   - Tự động kích hoạt khi có `push` hoặc `pull_request` trên các nhánh `main`, `master`, `develop`.
+   - Cài đặt thư viện sạch (`npm ci`), sinh Prisma Client (`npx prisma generate`), kiểm tra kiểu dữ liệu TypeScript (`npx tsc --noEmit`), chạy 80 ca kiểm thử Vitest (`npm test -- --run`) và đóng gói Next.js production (`npm run build`).
+
+2. **`deploy-pages.yml` (Technical Documentation Portal):**
+   - Tự động đóng gói cổng tài liệu kỹ thuật tĩnh trong thư mục `docs-site/` (Vite + React) và xuất bản lên **GitHub Pages**:
+   - URL tài liệu trực tuyến: **`https://nguyentribaothang.github.io/SafeHome3DAI/`**
+   - Bao gồm toàn bộ hướng dẫn kiến trúc, sơ đồ tương tác, tra cứu quy tắc lâm sàng, kết quả kiểm thử và đặc tả 15+ API RESTful.
+
+3. **`commitlint.yml`:**
+   - Thực thi chuẩn Conventional Commits cho các pull request.
 
 ---
 
-## 8. Giấy phép & Tác giả (License)
-Dự án được phát hành theo giấy phép **MIT License**.
-Phát triển vì mục tiêu nâng cao chất lượng cuộc sống và sự an tâm cho người cao tuổi Việt Nam.
+## 💻 7. Hướng Dẫn Cài Đặt & Chạy Local (Quickstart)
+
+### Yêu Cầu Môi Trường
+- **Node.js**: Phiên bản 18.x trở lên (khuyên dùng Node.js 20 LTS).
+- **NPM**: Phiên bản 9.x hoặc 10.x.
+- **Hệ điều hành**: Windows 10/11, macOS, hoặc Linux.
+
+### Các Bước Cài Đặt
+
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/NguyenTriBaoThang/SafeHome3DAI.git
+   cd SafeHome3DAI
+   ```
+
+2. **Cài đặt thư viện dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Khởi tạo cơ sở dữ liệu SQLite & Prisma:**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+4. **Chạy máy chủ phát triển cục bộ:**
+   ```bash
+   npm run dev
+   ```
+   Mở trình duyệt tại: **`http://localhost:3000`**
+
+5. **Chạy kiểm thử tự động:**
+   ```bash
+   npm test
+   ```
+
+6. **Chạy cổng tài liệu kỹ thuật (docs-site):**
+   ```bash
+   cd docs-site
+   npm install
+   npm run dev
+   ```
+   Mở cổng tài liệu tại: **`http://localhost:5173`**
+
+---
+
+## 📚 8. Chỉ Mục Tài Liệu Kỹ Thuật (Documentation Index)
+
+Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` và xuất bản tại cổng tài liệu trực tuyến:
+
+| Nhóm Tài Liệu | Đường Dẫn Tập Tin | Tóm Tắt Nội Dung |
+| :--- | :--- | :--- |
+| **Kiến trúc tổng thể** | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Đặc tả kiến trúc sống, phân tầng hệ thống và luồng dữ liệu |
+| **Kiểm toán hệ thống** | [`docs/audit/FULL_SYSTEM_AUDIT.md`](./docs/audit/FULL_SYSTEM_AUDIT.md) | Báo cáo kiểm toán 100% các phân hệ, mã nguồn và nợ kỹ thuật |
+| **Báo cáo kiểm thử** | [`docs/audit/TEST_RESULTS.md`](./docs/audit/TEST_RESULTS.md) | Bằng chứng kiểm thử tự động 80/80 ca kiểm thử Vitest |
+| **Luồng 7 bước khép kín** | [`docs/architecture/END_TO_END_WORKFLOW.md`](./docs/architecture/END_TO_END_WORKFLOW.md) | Quy trình tuần tự từ Khảo sát đến Báo cáo can thiệp |
+| **Khảo sát AI thông minh** | [`docs/AI_GUIDED_SURVEY.md`](./docs/AI_GUIDED_SURVEY.md) | Động cơ tỉa nhánh, ngân hàng câu hỏi và NLP tiếng Việt |
+| **Thị giác máy tính AI** | [`docs/AI_VISION_ARCHITECTURE.md`](./docs/AI_VISION_ARCHITECTURE.md) | Đường ống xử lý ảnh, Magic Bytes, EXIF strip và Bounding Boxes |
+| **Quy tắc nguy cơ y khoa** | [`docs/RISK_RULE_REGISTRY.md`](./docs/RISK_RULE_REGISTRY.md) | Đặc tả 8 quy tắc lâm sàng WHO 2021 & CDC STEADI |
+| **Bản sao số 3D & Gom cụm** | [`docs/RISK_3D_INTEGRATION.md`](./docs/RISK_3D_INTEGRATION.md) | Tích hợp không gian 3D, chiếu sáng và thuật toán gom cụm nhãn |
+| **Trợ lý AI & RAG y tế** | [`docs/RAG_ARCHITECTURE.md`](./docs/RAG_ARCHITECTURE.md) | Kiến trúc truy xuất vector, đối chứng y văn và tuyên bố trách nhiệm |
+
+---
+
+## ⚖️ 9. Bản Quyền & Tuyên Bố Miễn Trừ Trách Nhiệm
+
+- **Bản quyền**: Phát hành theo giấy phép [MIT License](./LICENSE). Copyright © 2026 **Nguyễn Trí Bảo Thắng**.
+- **Tuyên bố y tế**: *SafeHome 3D AI là công cụ hỗ trợ giáo dục cộng đồng, tầm soát nguy cơ môi trường và hỗ trợ hoạch định cải tạo không gian sống an toàn cho người cao tuổi. Ứng dụng không thay thế cho chẩn đoán y khoa, thẩm định xây dựng thực tế hoặc ý kiến của bác sĩ chuyên khoa.*
