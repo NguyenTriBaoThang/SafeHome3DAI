@@ -333,40 +333,57 @@ export const ProceduralFurniture: React.FC<ObjectModelProps> = ({
 
       {/* Selected Bounding Indicator */}
       {isSelected && (
-        <mesh position={[0, dimensions.height * 0.5, 0]}>
-          <boxGeometry
-            args={[
-              dimensions.width + 0.1,
-              dimensions.height + 0.1,
-              dimensions.length + 0.1,
-            ]}
-          />
-          <meshBasicMaterial
-            color="#0ea5e9"
-            wireframe
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
+        <group position={[0, dimensions.height * 0.5, 0]}>
+          <mesh>
+            <boxGeometry
+              args={[
+                dimensions.width + 0.06,
+                dimensions.height + 0.06,
+                dimensions.length + 0.06,
+              ]}
+            />
+            <meshBasicMaterial
+              color="#0284c7"
+              wireframe
+              transparent
+              opacity={0.65}
+            />
+          </mesh>
+        </group>
       )}
 
-      {/* Hazard Warning Outline Ring */}
+      {/* Subtle Hazard Danger Floor Perimeter (Fitted to object footprint) */}
       {hasHazard && (
-        <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry
-            args={[
-              Math.max(dimensions.width, dimensions.length) * 0.55,
-              Math.max(dimensions.width, dimensions.length) * 0.65,
-              32,
-            ]}
-          />
-          <meshBasicMaterial
-            color={hazardColor}
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.85}
-          />
-        </mesh>
+        <group position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          {/* Soft Danger Area Fill */}
+          <mesh receiveShadow>
+            <planeGeometry
+              args={[dimensions.width + 0.16, dimensions.length + 0.16]}
+            />
+            <meshBasicMaterial
+              color={hazardColor}
+              transparent
+              opacity={0.25}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          {/* Danger Perimeter Border Ring */}
+          <mesh>
+            <ringGeometry
+              args={[
+                Math.max(dimensions.width, dimensions.length) * 0.5 + 0.06,
+                Math.max(dimensions.width, dimensions.length) * 0.5 + 0.1,
+                32,
+              ]}
+            />
+            <meshBasicMaterial
+              color={hazardColor}
+              side={THREE.DoubleSide}
+              transparent
+              opacity={0.7}
+            />
+          </mesh>
+        </group>
       )}
     </group>
   );

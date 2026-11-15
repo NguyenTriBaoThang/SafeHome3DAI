@@ -16,6 +16,7 @@ import { HazardFindingResult } from "@/types";
 export const HazardFindingList: React.FC = () => {
   const {
     currentAssessment,
+    selectedObjectId,
     selectObject,
     focusOnLocation,
     fixObject,
@@ -91,9 +92,11 @@ export const HazardFindingList: React.FC = () => {
       </div>
 
       <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
-        {findings.map((item) => {
+        {findings.map((item, idx) => {
           const isHigh = item.severityCategory === "HIGH";
           const isMedium = item.severityCategory === "MEDIUM";
+          const hazardNumber = `H${idx + 1}`;
+          const isSelected = selectedObjectId && item.targetObjectId === selectedObjectId;
 
           const badgeBg = isHigh
             ? "bg-rose-100 text-rose-800 border-rose-300"
@@ -105,7 +108,9 @@ export const HazardFindingList: React.FC = () => {
             <div
               key={item.id}
               className={`p-3.5 rounded-2xl border transition-all hover:shadow-md cursor-pointer bg-white ${
-                isHigh
+                isSelected
+                  ? "border-teal-500 ring-2 ring-teal-500/40 shadow-lg"
+                  : isHigh
                   ? "border-rose-200 hover:border-rose-400"
                   : isMedium
                   ? "border-amber-200 hover:border-amber-400"
@@ -116,13 +121,15 @@ export const HazardFindingList: React.FC = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2">
                   <div
-                    className={`mt-0.5 p-1 rounded-lg ${
+                    className={`mt-0.5 px-2 py-0.5 rounded-lg text-white font-black text-xs shadow-sm flex items-center justify-center shrink-0 ${
                       isHigh
-                        ? "bg-rose-100 text-rose-600"
-                        : "bg-amber-100 text-amber-600"
+                        ? "bg-rose-600"
+                        : isMedium
+                        ? "bg-amber-600"
+                        : "bg-sky-600"
                     }`}
                   >
-                    <AlertTriangle className="h-4 w-4" />
+                    {hazardNumber}
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 leading-tight">
