@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: './',
   plugins: [react()],
+  css: {
+    postcss: {
+      plugins: [],
+    },
+  },
   build: { chunkSizeWarningLimit: 500 },
 })
-
