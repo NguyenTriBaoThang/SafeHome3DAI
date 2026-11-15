@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    testTimeout: 20000,
+    hookTimeout: 20000,
+    globalSetup: ["./tests/globalSetup.ts"],
   },
   resolve: {
     alias: {
@@ -12,4 +15,3 @@ export default defineConfig({
     },
   },
 });
-
