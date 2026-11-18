@@ -66,6 +66,9 @@ export interface VisionDetection {
   imageId: string;
   category: DetectionCategory;
   originalLabel: string;
+  /** More specific 3D asset for visually distinct items in the same risk category. */
+  sceneModelType?: string;
+  placementWall?: "left" | "back" | "right" | "free";
   userLabel?: string;
   confidence: number; // 0..1
   bbox: NormalizedBoundingBox;

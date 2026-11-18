@@ -29,9 +29,10 @@ interface SimulationStore {
 
   // Selection & 3D Controls
   selectedObjectId: string | null;
-  cameraPreset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE";
+  cameraPreset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY";
   cameraFocusPoint: [number, number, number] | null;
   transformMode: "translate" | "rotate" | null;
+  lightingPreset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
 
   // View Options
   showLabels: boolean;
@@ -50,7 +51,8 @@ interface SimulationStore {
   // Actions
   switchRoom: (roomId: string) => void;
   selectObject: (id: string | null) => void;
-  setCameraPreset: (preset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE") => void;
+  setCameraPreset: (preset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY") => void;
+  setLightingPreset: (preset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO") => void;
   focusOnLocation: (point: [number, number, number] | null) => void;
   setTransformMode: (mode: "translate" | "rotate" | null) => void;
 
@@ -76,6 +78,7 @@ interface SimulationStore {
   runSimulation: () => AssessmentResult;
   restoreBaseline: () => void;
   saveCurrentScenario: (name: string, description?: string) => void;
+  loadReconstructedRoom: (room: RoomState) => void;
 }
 
 export const useSimulationStore = create<SimulationStore>((set, get) => {
@@ -98,8 +101,10 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     };
   }
 
-  const defaultRoomId = INITIAL_ROOMS[0].id;
-  const initialCurrentAssessment = initialBaselines[defaultRoomId];
+  // Find dollhouse room or fallback to first
+  const dollhouseRoom = INITIAL_ROOMS.find((r) => r.id === "room-photoreal-dollhouse-01");
+  const defaultRoomId = dollhouseRoom ? dollhouseRoom.id : INITIAL_ROOMS[0].id;
+  const initialCurrentAssessment = initialBaselines[defaultRoomId] || initialBaselines[INITIAL_ROOMS[0].id];
 
   return {
     rooms: JSON.parse(JSON.stringify(INITIAL_ROOMS)),
@@ -115,6 +120,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     cameraPreset: "ISOMETRIC",
     cameraFocusPoint: null,
     transformMode: "translate",
+    lightingPreset: "MORNING",
 
     showLabels: true,
     showHazardOverlay: true,
@@ -166,6 +172,21 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
 
     selectObject: (id) => set({ selectedObjectId: id }),
     setCameraPreset: (preset) => set({ cameraPreset: preset }),
+    setLightingPreset: (preset) => {
+      const isNight = preset === "NIGHT";
+      const room = get().getCurrentRoom();
+      const updatedRooms = get().rooms.map((r) => {
+        if (r.id === room.id) {
+          return {
+            ...r,
+            lightingLevel: isNight ? 40 : preset === "MORNING" ? 320 : 250,
+          };
+        }
+        return r;
+      });
+      set({ lightingPreset: preset, isNightMode: isNight, rooms: updatedRooms });
+      get().runSimulation();
+    },
     focusOnLocation: (point) => set({ cameraFocusPoint: point }),
     setTransformMode: (mode) => set({ transformMode: mode }),
 
@@ -510,6 +531,46 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         isBaseline: false,
       };
       set((s) => ({ scenarioHistory: [entry, ...s.scenarioHistory] }));
+    },
+
+    loadReconstructedRoom: (room: RoomState) => {
+      const findings = runEnvironmentalAssessment(room);
+      const score = calculateSafetyScore(findings);
+      const assessment: AssessmentResult = {
+        id: `assessment-live-${room.id}`,
+        roomId: room.id,
+        timestamp: new Date().toISOString(),
+        totalHazards: findings.length,
+        resolvedHazards: 0,
+        remainingHazards: findings.length,
+        newHazards: 0,
+        safetyScore: score,
+        findings,
+        notes: "Không gian 3D được tái dựng từ AI Scanner",
+      };
+
+      set((state) => {
+        const existingIdx = state.rooms.findIndex((r) => r.id === room.id);
+        let updatedRooms: RoomState[];
+        if (existingIdx >= 0) {
+          updatedRooms = [...state.rooms];
+          updatedRooms[existingIdx] = room;
+        } else {
+          updatedRooms = [room, ...state.rooms];
+        }
+
+        return {
+          rooms: updatedRooms,
+          currentRoomId: room.id,
+          currentAssessment: assessment,
+          selectedObjectId: null,
+          cameraFocusPoint: null,
+          baselineAssessments: {
+            ...state.baselineAssessments,
+            [room.id]: assessment,
+          },
+        };
+      });
     },
   };
 });

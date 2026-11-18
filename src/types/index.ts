@@ -1,4 +1,4 @@
-export type RoomType = "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
+export type RoomType = "BEDROOM" | "BATHROOM" | "LIVING_ROOM" | "DOLLHOUSE";
 
 export type ObjectCategory =
   | "FURNITURE"
@@ -6,7 +6,9 @@ export type ObjectCategory =
   | "CABLE"
   | "LIGHTING"
   | "SAFETY_DEVICE"
-  | "OBSTACLE";
+  | "OBSTACLE"
+  | "DECORATION"
+  | "ARCHITECTURE";
 
 export type HazardSeverity = "LOW" | "MEDIUM" | "HIGH";
 
@@ -34,12 +36,31 @@ export interface SceneObjectState {
     length: number;
     height: number;
   };
+  assetId?: string;
+  glbPath?: string;
+  verified?: boolean;
+  materialVariant?: string;
+  confidence?: number;
+  safetyRecommendation?: string;
   isWalkwayObstacle?: boolean;
   isFixed?: boolean;
   isLoose?: boolean;
   isSlippery?: boolean;
   isActive?: boolean;
   customProperties?: Record<string, any>;
+}
+
+export interface RoomZoneDefinition {
+  id: string;
+  name: string;
+  type: "bedroom" | "walk_in_closet" | "bathroom" | "walkway";
+  bounds: {
+    minX: number;
+    maxX: number;
+    minZ: number;
+    maxZ: number;
+  };
+  floorType: "wood" | "tiles";
 }
 
 export interface WalkingZone {
@@ -55,6 +76,8 @@ export interface RoomState {
   id: string;
   name: string;
   roomType: RoomType;
+  layoutType?: "SINGLE_ROOM" | "DOLLHOUSE_MULTI_ZONE";
+  zones?: RoomZoneDefinition[];
   dimensions: {
     width: number;
     length: number;

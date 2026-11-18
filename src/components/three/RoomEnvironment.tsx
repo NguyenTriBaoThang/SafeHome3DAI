@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import * as THREE from "three";
+import { ContactShadows, useTexture } from "@react-three/drei";
 import { RoomState } from "@/types";
 
 interface RoomEnvironmentProps {
@@ -10,6 +11,170 @@ interface RoomEnvironmentProps {
   showGrid: boolean;
   transparentWalls: boolean;
   isNightMode: boolean;
+  lightingPreset?: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
+}
+
+/**
+ * Texturized PBR Floor for the Bedroom & Walk-in Closet (Light Oak Planks)
+ */
+function WoodFloorSegment({
+  width,
+  length,
+  position,
+}: {
+  width: number;
+  length: number;
+  position: [number, number, number];
+}) {
+  const [diffMap, roughMap, norMap] = useTexture([
+    "/textures/wood/laminate_floor_02_diffuse_1k.jpg",
+    "/textures/wood/laminate_floor_02_rough_1k.jpg",
+    "/textures/wood/laminate_floor_02_nor_gl_1k.jpg",
+  ]);
+
+  useMemo(() => {
+    [diffMap, roughMap, norMap].forEach((tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(width * 0.8, length * 0.8);
+    });
+  }, [diffMap, roughMap, norMap, width, length]);
+
+  return (
+    <mesh
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={position}
+      receiveShadow
+    >
+      <planeGeometry args={[width, length]} />
+      <meshStandardMaterial
+        map={diffMap}
+        roughnessMap={roughMap}
+        normalMap={norMap}
+        roughness={0.5}
+        metalness={0.05}
+      />
+    </mesh>
+  );
+}
+
+/**
+ * Texturized PBR Floor for the Bathroom (Modern Stone / Ceramic Tiles)
+ */
+function TileFloorSegment({
+  width,
+  length,
+  position,
+  isWet,
+}: {
+  width: number;
+  length: number;
+  position: [number, number, number];
+  isWet?: boolean;
+}) {
+  const [diffMap, roughMap, norMap] = useTexture([
+    "/textures/tiles/floor_tiles_06_diffuse_1k.jpg",
+    "/textures/tiles/floor_tiles_06_rough_1k.jpg",
+    "/textures/tiles/floor_tiles_06_nor_gl_1k.jpg",
+  ]);
+
+  useMemo(() => {
+    [diffMap, roughMap, norMap].forEach((tex) => {
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(width * 1.2, length * 1.2);
+    });
+  }, [diffMap, roughMap, norMap, width, length]);
+
+  return (
+    <group>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={position}
+        receiveShadow
+      >
+        <planeGeometry args={[width, length]} />
+        <meshStandardMaterial
+          map={diffMap}
+          roughnessMap={roughMap}
+          normalMap={norMap}
+          roughness={isWet ? 0.08 : 0.25}
+          metalness={isWet ? 0.35 : 0.05}
+        />
+      </mesh>
+
+      {/* Subtle wet gloss puddle reflection if bathroom floor is wet */}
+      {isWet && (
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[position[0], position[1] + 0.003, position[2]]}
+          receiveShadow
+        >
+          <planeGeometry args={[width * 0.85, length * 0.85]} />
+          <meshStandardMaterial
+            color="#38bdf8"
+            transparent
+            opacity={0.35}
+            roughness={0.02}
+            metalness={0.9}
+          />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+/**
+ * Clean architectural wall segment with smooth top cap and skirting board
+ */
+function CutawayWall({
+  extents,
+  position,
+  opacity = 1.0,
+  isTiled = false,
+  showCap = true,
+}: {
+  extents: [number, number, number]; // [width, height, depth]
+  position: [number, number, number];
+  opacity?: number;
+  isTiled?: boolean;
+  showCap?: boolean;
+}) {
+  const [w, h, d] = extents;
+  const wallColor = isTiled ? "#f1f5f9" : "#fafaf9"; // Warm matte plaster
+  const capColor = "#ffffff";
+
+  return (
+    <group position={position}>
+      {/* Wall Body */}
+      <mesh receiveShadow castShadow position={[0, 0, 0]}>
+        <boxGeometry args={[w, h, d]} />
+        <meshStandardMaterial
+          color={wallColor}
+          roughness={0.85}
+          metalness={0.02}
+          transparent={opacity < 1}
+          opacity={opacity}
+        />
+      </mesh>
+
+      {/* Finished Smooth Wall Cap (Top Surface) */}
+      {showCap && (
+        <mesh position={[0, h * 0.5 + 0.006, 0]} receiveShadow>
+          <boxGeometry args={[w + 0.01, 0.012, d + 0.01]} />
+          <meshStandardMaterial color={capColor} roughness={0.4} />
+        </mesh>
+      )}
+
+      {/* Skirting Board (Phào chân tường) */}
+      {h > 1.0 && (
+        <mesh position={[0, -h * 0.5 + 0.04, 0]}>
+          <boxGeometry args={[w, 0.08, d + 0.015]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+        </mesh>
+      )}
+    </group>
+  );
 }
 
 export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
@@ -18,100 +183,362 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
   showGrid,
   transparentWalls,
   isNightMode,
+  lightingPreset = "MORNING",
 }) => {
+  const isDollhouse =
+    room.layoutType === "DOLLHOUSE_MULTI_ZONE" ||
+    room.id === "room-photoreal-dollhouse-01";
   const { dimensions, floorMaterial, isWet } = room;
   const { width, length, height } = dimensions;
-  const halfW = width / 2;
-  const halfL = length / 2;
 
-  // Floor color & roughness based on material
-  const floorColor =
-    floorMaterial === "CERAMIC_TILE"
-      ? "#e2e8f0"
-      : floorMaterial === "NON_SLIP_VINYL"
-      ? "#cbd5e1"
-      : "#b48a60"; // Warm wood
-
-  const floorRoughness = isWet ? 0.05 : floorMaterial === "CERAMIC_TILE" ? 0.3 : 0.6;
-  const wallOpacity = transparentWalls ? 0.25 : 0.85;
+  const wallOpacity = transparentWalls ? 0.35 : 1.0;
+  const activeLight = isNightMode ? "NIGHT" : lightingPreset;
 
   return (
     <group>
-      {/* Lighting setup */}
-      {isNightMode ? (
+      {/* --- ARCHITECTURAL LIGHTING SYSTEM --- */}
+      {activeLight === "NIGHT" ? (
         <>
-          <ambientLight intensity={0.15} color="#312e81" />
+          <ambientLight intensity={0.12} color="#1e1b4b" />
           <directionalLight
             position={[5, 8, 4]}
-            intensity={0.2}
+            intensity={0.25}
             color="#6366f1"
           />
-          {/* Bedside warm night lamp */}
+          {/* Bedside Warm Night Lamps */}
           <pointLight
-            position={[-0.6, 1.0, -1.5]}
-            intensity={1.2}
+            position={[-2.95, 0.8, -1.65]}
+            intensity={1.8}
             distance={4.5}
             color="#fef08a"
+            castShadow
+          />
+          <pointLight
+            position={[-2.95, 0.8, 0.85]}
+            intensity={1.8}
+            distance={4.5}
+            color="#fef08a"
+            castShadow
+          />
+          {/* Bathroom Soft Vanity Light */}
+          <pointLight
+            position={[3.35, 1.8, -0.35]}
+            intensity={1.4}
+            distance={5.0}
+            color="#fde047"
+          />
+        </>
+      ) : activeLight === "MORNING" ? (
+        <>
+          {/* Warm Golden Morning Sunlight streaming from the rear window */}
+          <ambientLight intensity={0.65} color="#fdfbf7" />
+          <directionalLight
+            position={[-6, 13, -8]}
+            intensity={1.85}
+            color="#fff8e7"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-8}
+            shadow-camera-right={8}
+            shadow-camera-top={8}
+            shadow-camera-bottom={-8}
+            shadow-bias={-0.0001}
+          />
+          {/* Soft Sky Blue Bounce Light from Front-Right */}
+          <directionalLight
+            position={[8, 10, 6]}
+            intensity={0.45}
+            color="#e0f2fe"
+          />
+          {/* Secondary Fill */}
+          <hemisphereLight
+            args={["#fff8f0", "#94a3b8", 0.5]}
+            position={[0, 10, 0]}
+          />
+        </>
+      ) : activeLight === "AFTERNOON" ? (
+        <>
+          <ambientLight intensity={0.75} color="#ffffff" />
+          <directionalLight
+            position={[3, 15, 2]}
+            intensity={1.6}
+            color="#ffffff"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-7}
+            shadow-camera-right={7}
+            shadow-camera-top={7}
+            shadow-camera-bottom={-7}
+          />
+          <directionalLight
+            position={[-6, 8, -5]}
+            intensity={0.4}
+            color="#bfdbfe"
           />
         </>
       ) : (
+        /* Neutral Studio Architectural Viz Lighting */
         <>
-          <ambientLight intensity={0.7} color="#ffffff" />
+          <ambientLight intensity={0.8} color="#ffffff" />
           <directionalLight
-            position={[8, 12, 6]}
+            position={[8, 14, 8]}
             intensity={1.2}
+            color="#ffffff"
             castShadow
-            shadow-mapSize={[1024, 1024]}
-            shadow-camera-left={-6}
-            shadow-camera-right={6}
-            shadow-camera-top={6}
-            shadow-camera-bottom={-6}
+            shadow-mapSize={[2048, 2048]}
           />
           <directionalLight
-            position={[-6, 8, -4]}
-            intensity={0.4}
-            color="#93c5fd"
+            position={[-8, 10, -6]}
+            intensity={0.6}
+            color="#e2e8f0"
           />
         </>
       )}
 
-      {/* Main Floor Mesh */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[width, length]} />
-        <meshStandardMaterial
-          color={floorColor}
-          roughness={floorRoughness}
-          metalness={isWet ? 0.3 : 0.05}
-        />
+      {/* --- CONTACT SHADOWS ON FLOOR FOR GROUNDING --- */}
+      <ContactShadows
+        position={[0, 0.001, 0]}
+        opacity={0.45}
+        scale={14}
+        blur={1.8}
+        far={3.5}
+        resolution={1024}
+        color="#0f172a"
+      />
+
+      {/* --- ARCHITECTURAL PODIUM / BASE SLAB --- */}
+      <mesh position={[0, -0.06, 0]} receiveShadow>
+        <boxGeometry args={[width + 0.3, 0.12, length + 0.3]} />
+        <meshStandardMaterial color="#f1f5f9" roughness={0.4} />
       </mesh>
 
-      {/* Puddle / Wet reflection plane if floor is wet */}
-      {isWet && (
-        <mesh
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, 0.005, 0]}
-          receiveShadow
-        >
-          <planeGeometry args={[width * 0.8, length * 0.8]} />
-          <meshStandardMaterial
-            color="#38bdf8"
-            transparent
-            opacity={0.35}
-            roughness={0.02}
-            metalness={0.8}
+      {/* --- MULTI-ZONE DOLLHOUSE ARCHITECTURE --- */}
+      {isDollhouse ? (
+        <group>
+          {/* Floor Zone A: Bedroom (X: -3.8 to -0.6, width = 3.2m, length = 5.2m, centered at X: -2.2, Z: -0.2) */}
+          <WoodFloorSegment
+            width={3.2}
+            length={5.2}
+            position={[-2.2, 0.002, -0.2]}
           />
-        </mesh>
+
+          {/* Floor Zone B: Walk-in Closet & Corridor (X: -0.6 to 1.3, width = 1.9m, length = 5.2m, centered at X: 0.35, Z: -0.2) */}
+          <WoodFloorSegment
+            width={1.9}
+            length={5.2}
+            position={[0.35, 0.002, -0.2]}
+          />
+
+          {/* Floor Zone C: Bathroom (X: 1.3 to 3.7, width = 2.4m, length = 5.2m, centered at X: 2.5, Z: -0.2) */}
+          <TileFloorSegment
+            width={2.4}
+            length={5.2}
+            position={[2.5, 0.002, -0.2]}
+            isWet={isWet}
+          />
+
+          {/* Floor Threshold Strip between Corridor and Bathroom (at X = 1.3) */}
+          <mesh position={[1.3, 0.004, -0.2]} receiveShadow>
+            <boxGeometry args={[0.04, 0.008, 5.2]} />
+            <meshStandardMaterial
+              color="#cbd5e1"
+              metalness={0.8}
+              roughness={0.2}
+            />
+          </mesh>
+
+          {/* --- WALLS WITH ARCHITECTURAL CUTAWAY --- */}
+          {/* 1. Tall Rear Wall (North, Z = -2.8, full height 2.7m) */}
+          {/* Bedroom window wall segment (with window cutout) */}
+          <CutawayWall
+            extents={[1.4, 2.7, 0.16]}
+            position={[-3.1, 1.35, -2.8]}
+            opacity={wallOpacity}
+          />
+          <CutawayWall
+            extents={[0.9, 2.7, 0.16]}
+            position={[-1.0, 1.35, -2.8]}
+            opacity={wallOpacity}
+          />
+          {/* Wall header above window */}
+          <CutawayWall
+            extents={[1.8, 0.45, 0.16]}
+            position={[-2.05, 2.475, -2.8]}
+            opacity={wallOpacity}
+          />
+          {/* Wall sill below window */}
+          <CutawayWall
+            extents={[1.8, 0.45, 0.16]}
+            position={[-2.05, 0.225, -2.8]}
+            opacity={wallOpacity}
+          />
+
+          {/* Walk-in Closet rear wall segment */}
+          <CutawayWall
+            extents={[1.9, 2.7, 0.16]}
+            position={[0.35, 1.35, -2.8]}
+            opacity={wallOpacity}
+          />
+
+          {/* Bathroom rear wall segment (Tiled) */}
+          <CutawayWall
+            extents={[2.4, 2.7, 0.16]}
+            position={[2.5, 1.35, -2.8]}
+            opacity={wallOpacity}
+            isTiled
+          />
+
+          {/* 2. Tall Left Exterior Wall (West, X = -3.8, full height 2.7m) */}
+          <CutawayWall
+            extents={[0.16, 2.7, 5.2]}
+            position={[-3.8, 1.35, -0.2]}
+            opacity={wallOpacity}
+          />
+
+          {/* 3. Interior Partition Wall between Bedroom and Walk-in Closet (at X = -0.6) */}
+          {/* Rear section (behind closet) */}
+          <CutawayWall
+            extents={[0.14, 2.7, 2.4]}
+            position={[-0.6, 1.35, -1.6]}
+            opacity={wallOpacity}
+          />
+          {/* Doorway Header above passage */}
+          <CutawayWall
+            extents={[0.14, 0.5, 1.0]}
+            position={[-0.6, 2.45, 0.1]}
+            opacity={wallOpacity}
+          />
+          {/* Front cutaway section (lowered to 0.65m for dollhouse visibility) */}
+          <CutawayWall
+            extents={[0.14, 0.65, 1.8]}
+            position={[-0.6, 0.325, 1.5]}
+            opacity={wallOpacity}
+          />
+
+          {/* 4. Half-Height Partition Wall between Walk-in Closet and Walkway (at Z = 0.6) */}
+          {/* Exact half-height wall from the reference image separating clothes from hallway */}
+          <CutawayWall
+            extents={[1.5, 1.05, 0.14]}
+            position={[0.15, 0.525, 0.6]}
+            opacity={wallOpacity}
+          />
+
+          {/* 5. Interior Partition Wall between Walkway and Bathroom (at X = 1.3) */}
+          {/* Rear section (separating shower from closet) */}
+          <CutawayWall
+            extents={[0.14, 2.7, 3.2]}
+            position={[1.3, 1.35, -1.2]}
+            opacity={wallOpacity}
+            isTiled
+          />
+          {/* Doorway Header above bathroom door */}
+          <CutawayWall
+            extents={[0.14, 0.5, 0.9]}
+            position={[1.3, 2.45, 0.85]}
+            opacity={wallOpacity}
+          />
+          {/* Front section beside toilet (cutaway to 0.65m) */}
+          <CutawayWall
+            extents={[0.14, 0.65, 1.1]}
+            position={[1.3, 0.325, 1.85]}
+            opacity={wallOpacity}
+          />
+
+          {/* 6. Tall Right Exterior Wall (East, X = 3.7, full height 2.7m) */}
+          <CutawayWall
+            extents={[0.16, 2.7, 5.2]}
+            position={[3.7, 1.35, -0.2]}
+            opacity={wallOpacity}
+            isTiled
+          />
+
+          {/* 7. Low Cutaway South Front Wall (Z = 2.4, cut down to 0.65m with white caps) */}
+          {/* Front Bedroom segment */}
+          <CutawayWall
+            extents={[3.2, 0.65, 0.16]}
+            position={[-2.2, 0.325, 2.4]}
+            opacity={wallOpacity}
+          />
+          {/* Front Corridor segment */}
+          <CutawayWall
+            extents={[1.9, 0.65, 0.16]}
+            position={[0.35, 0.325, 2.4]}
+            opacity={wallOpacity}
+          />
+          {/* Front Bathroom segment */}
+          <CutawayWall
+            extents={[2.4, 0.65, 0.16]}
+            position={[2.5, 0.325, 2.4]}
+            opacity={wallOpacity}
+          />
+        </group>
+      ) : (
+        /* Standard Single Room Mode (Backwards compatibility) */
+        <group>
+          <mesh
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, 0.002, 0]}
+            receiveShadow
+          >
+            <planeGeometry args={[width, length]} />
+            <meshStandardMaterial
+              color={
+                floorMaterial === "CERAMIC_TILE"
+                  ? "#e2e8f0"
+                  : floorMaterial === "NON_SLIP_VINYL"
+                  ? "#cbd5e1"
+                  : "#d2b48e"
+              }
+              roughness={isWet ? 0.05 : 0.55}
+              metalness={isWet ? 0.35 : 0.05}
+            />
+          </mesh>
+
+          {/* Standard 4 Walls */}
+          <mesh position={[0, height * 0.5, -length / 2]} receiveShadow>
+            <boxGeometry args={[width, height, 0.15]} />
+            <meshStandardMaterial
+              color="#f8fafc"
+              transparent
+              opacity={wallOpacity}
+              roughness={0.8}
+            />
+          </mesh>
+          <mesh position={[-width / 2, height * 0.5, 0]} receiveShadow>
+            <boxGeometry args={[0.15, height, length]} />
+            <meshStandardMaterial
+              color="#f1f5f9"
+              transparent
+              opacity={wallOpacity}
+              roughness={0.8}
+            />
+          </mesh>
+          <mesh position={[width / 2, height * 0.2, 0]} receiveShadow>
+            <boxGeometry args={[0.15, height * 0.4, length]} />
+            <meshStandardMaterial
+              color="#cbd5e1"
+              transparent
+              opacity={0.4}
+              roughness={0.9}
+            />
+          </mesh>
+          <mesh position={[0, height * 0.15, length / 2]} receiveShadow>
+            <boxGeometry args={[width, height * 0.3, 0.15]} />
+            <meshStandardMaterial
+              color="#cbd5e1"
+              transparent
+              opacity={0.4}
+              roughness={0.9}
+            />
+          </mesh>
+        </group>
       )}
 
-      {/* Grid Floor Guides */}
+      {/* Grid Floor Guides if enabled */}
       {showGrid && (
         <gridHelper
-          args={[Math.max(width, length) * 1.5, 20, "#94a3b8", "#e2e8f0"]}
-          position={[0, 0.002, 0]}
+          args={[Math.max(width, length) * 1.5, 24, "#0284c7", "#94a3b8"]}
+          position={[0, 0.008, 0]}
         />
       )}
 
@@ -128,64 +555,19 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
           return (
             <group
               key={zone.id}
-              position={[midX, 0.008, midZ]}
+              position={[midX, 0.012, midZ]}
               rotation={[-Math.PI / 2, 0, -angle]}
             >
               <planeGeometry args={[zone.width, distance]} />
               <meshBasicMaterial
                 color={zone.importance === "CRITICAL" ? "#10b981" : "#06b6d4"}
                 transparent
-                opacity={0.22}
+                opacity={0.25}
                 side={THREE.DoubleSide}
               />
             </group>
           );
         })}
-
-      {/* Architectural Cutaway Walls */}
-      {/* Back Wall (Z = -halfL) */}
-      <mesh position={[0, height * 0.5, -halfL]} receiveShadow>
-        <boxGeometry args={[width, height, 0.15]} />
-        <meshStandardMaterial
-          color="#f1f5f9"
-          transparent
-          opacity={wallOpacity}
-          roughness={0.8}
-        />
-      </mesh>
-
-      {/* Left Wall (X = -halfW) */}
-      <mesh position={[-halfW, height * 0.5, 0]} receiveShadow>
-        <boxGeometry args={[0.15, height, length]} />
-        <meshStandardMaterial
-          color="#e2e8f0"
-          transparent
-          opacity={wallOpacity}
-          roughness={0.8}
-        />
-      </mesh>
-
-      {/* Low Cutaway Front Wall (X = halfW) */}
-      <mesh position={[halfW, height * 0.2, 0]} receiveShadow>
-        <boxGeometry args={[0.15, height * 0.4, length]} />
-        <meshStandardMaterial
-          color="#cbd5e1"
-          transparent
-          opacity={0.4}
-          roughness={0.9}
-        />
-      </mesh>
-
-      {/* Low Cutaway South Wall (Z = halfL) */}
-      <mesh position={[0, height * 0.15, halfL]} receiveShadow>
-        <boxGeometry args={[width, height * 0.3, 0.15]} />
-        <meshStandardMaterial
-          color="#cbd5e1"
-          transparent
-          opacity={0.4}
-          roughness={0.9}
-        />
-      </mesh>
     </group>
   );
 };

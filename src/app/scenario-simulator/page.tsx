@@ -63,6 +63,16 @@ export default function ScenarioSimulatorPage() {
               Kịch bản mẫu:
             </span>
             <button
+              onClick={() => switchRoom("room-photoreal-dollhouse-01")}
+              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition ${
+                currentRoomId === "room-photoreal-dollhouse-01"
+                  ? "bg-white text-teal-700 shadow-sm font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              ★ Dollhouse 3D
+            </button>
+            <button
               onClick={() => switchRoom("room-bedroom-01")}
               className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition ${
                 currentRoomId === "room-bedroom-01"

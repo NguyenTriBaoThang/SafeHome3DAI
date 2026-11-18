@@ -12,6 +12,8 @@ export interface VisionProviderOptions {
   modelId?: string;
   roomType?: "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
   viewpoint?: ViewpointType;
+  apiUrl?: string;
+  imageBufferBase64?: string;
 }
 
 /**
@@ -46,11 +48,49 @@ export async function runVisionAnalysis(
     };
   }
 
+  const timestamp = new Date().toISOString();
+
+  // Mode C: Configured External GPU / FastAPI Inference Service
+  const externalEndpoint = options.apiUrl || process.env.VISION_SERVICE_URL;
+  if (externalEndpoint && options.imageBufferBase64) {
+    try {
+      const resp = await fetch(externalEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: options.imageBufferBase64,
+          roomType,
+          viewpoint,
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json.detections) {
+          return {
+            id: analysisId,
+            roomId,
+            imageId,
+            modelId: json.modelId || "fastapi-yolo-depth-v2",
+            modelVersion: json.modelVersion || "2.1.0",
+            analysisStatus: "COMPLETED",
+            detections: json.detections,
+            observations: json.observations || [],
+            clarifications: json.clarifications || [],
+            startedAt: timestamp,
+            completedAt: new Date().toISOString(),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("External vision inference unreachable, falling back to local dataset:", err);
+    }
+  }
+
   // Mode A: AI Vision
   const detections: VisionDetection[] = [];
   const observations: VisionObservation[] = [];
   const clarifications: VisionClarificationQuestion[] = [];
-  const timestamp = new Date().toISOString();
 
   if (roomType === "BEDROOM") {
     // 1. Bed detection
