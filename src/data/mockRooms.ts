@@ -1,4 +1,7 @@
 import { RoomState } from "@/types";
+import { PHOTOREALISTIC_DOLLHOUSE_ROOM } from "./dollhouseReferenceScene";
+
+export { PHOTOREALISTIC_DOLLHOUSE_ROOM };
 
 export const MOCK_BEDROOM_ROOM: RoomState = {
   id: "room-bedroom-01",
@@ -310,5 +313,6 @@ export const INITIAL_ROOMS: RoomState[] = [
   MOCK_BEDROOM_ROOM,
   MOCK_BATHROOM_ROOM,
   MOCK_LIVINGROOM_ROOM,
+  PHOTOREALISTIC_DOLLHOUSE_ROOM,
 ];
 

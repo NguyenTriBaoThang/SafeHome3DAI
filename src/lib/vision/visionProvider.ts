@@ -6,12 +6,15 @@ import {
   ViewpointType,
 } from "./types";
 import { normalizePredictedLabel } from "./taxonomy";
+import { analyzeRoomPhotoWithGemini } from "./geminiVisionAdapter";
 
 export interface VisionProviderOptions {
   mode?: "AI_VISION" | "MANUAL_REVIEW";
   modelId?: string;
   roomType?: "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
   viewpoint?: ViewpointType;
+  apiUrl?: string;
+  imageBufferBase64?: string;
 }
 
 /**
@@ -46,11 +49,80 @@ export async function runVisionAnalysis(
     };
   }
 
-  // Mode A: AI Vision
+  const timestamp = new Date().toISOString();
+
+  // Mode C: Configured External GPU / FastAPI Inference Service (e.g. YOLOv8 / RT-DETR)
+  const externalEndpoint = options.apiUrl || process.env.VISION_SERVICE_URL;
+  if (externalEndpoint && options.imageBufferBase64) {
+    try {
+      const resp = await fetch(externalEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: options.imageBufferBase64,
+          roomType,
+          viewpoint,
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json.detections) {
+          return {
+            id: analysisId,
+            roomId,
+            imageId,
+            modelId: json.modelId || "fastapi-yolo-depth-v2",
+            modelVersion: json.modelVersion || "2.1.0",
+            analysisStatus: "COMPLETED",
+            detections: json.detections,
+            observations: json.observations || [],
+            clarifications: json.clarifications || [],
+            startedAt: timestamp,
+            completedAt: new Date().toISOString(),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("External vision inference unreachable, falling back to local dataset:", err);
+    }
+  }
+
+  // Mode D: Gemini Multimodal Vision Engine
+  if (process.env.GEMINI_API_KEY && options.imageBufferBase64) {
+    try {
+      const buffer = Buffer.from(options.imageBufferBase64, "base64");
+      const geminiRes = await analyzeRoomPhotoWithGemini(buffer, "image/jpeg", {
+        roomType,
+        viewpoint,
+        imageId,
+        analysisId,
+      });
+
+      if (geminiRes.detections.length > 0) {
+        return {
+          id: analysisId,
+          roomId,
+          imageId,
+          modelId: geminiRes.modelUsed || "gemini-3.5-flash-lite",
+          modelVersion: "3.5.0",
+          analysisStatus: "COMPLETED",
+          detections: geminiRes.detections,
+          observations: geminiRes.observations,
+          clarifications: [],
+          startedAt: timestamp,
+          completedAt: new Date().toISOString(),
+        };
+      }
+    } catch (geminiErr) {
+      console.warn("Gemini vision inference failed, falling back to local dataset:", geminiErr);
+    }
+  }
+
+  // Mode A: Local Mock/Deterministic Fallback Dataset
   const detections: VisionDetection[] = [];
   const observations: VisionObservation[] = [];
   const clarifications: VisionClarificationQuestion[] = [];
-  const timestamp = new Date().toISOString();
 
   if (roomType === "BEDROOM") {
     // 1. Bed detection

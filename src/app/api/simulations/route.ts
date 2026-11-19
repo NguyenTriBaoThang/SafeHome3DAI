@@ -13,6 +13,7 @@ const CreateRoomSchema = z.object({
   height: z.number().default(2.8),
   lightingLevel: z.number().default(150),
   objects: z.array(z.any()).optional(),
+  photoUrl: z.string().optional(),
 });
 
 export async function GET() {
@@ -175,6 +176,24 @@ export async function POST(request: Request) {
         lightingLevel: data.lightingLevel,
       },
     });
+
+    // 3.1. Create RoomImage if photoUrl provided
+    if (data.photoUrl) {
+      try {
+        await prisma.roomImage.create({
+          data: {
+            roomId: room.id,
+            storageKey: data.photoUrl,
+            imageWidth: 1280,
+            imageHeight: 720,
+            caption: `Ảnh chụp không gian ${data.name}`,
+            viewpoint: "ENTRANCE",
+          },
+        });
+      } catch (imgErr) {
+        console.warn("Lưu RoomImage thất bại:", imgErr);
+      }
+    }
 
     // 4. Create default scene objects according to room type
     const initialObjects = data.objects && data.objects.length > 0 ? data.objects : (

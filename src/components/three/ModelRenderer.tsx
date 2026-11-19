@@ -1,0 +1,216 @@
+"use client";
+
+import React, { useMemo, Suspense } from "react";
+import * as THREE from "three";
+import { useGLTF } from "@react-three/drei";
+import { SceneObjectState } from "@/types";
+import { ASSET_REGISTRY } from "@/data/assetRegistry";
+import { ProceduralModelBody } from "./ProceduralFurniture";
+
+interface ModelRendererProps {
+  object: SceneObjectState;
+  isSelected: boolean;
+  hasHazard: boolean;
+  hazardSeverity?: "LOW" | "MEDIUM" | "HIGH";
+  onClick: (e: any) => void;
+}
+
+/**
+ * GLB Asset Loader with automatic cloning, shadow assignment, and material tuning.
+ */
+function GLBModel({
+  glbPath,
+  assetId,
+  dimensions,
+}: {
+  glbPath: string;
+  assetId?: string;
+  dimensions: { width: number; length: number; height: number };
+}) {
+  const { scene } = useGLTF(glbPath);
+
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone(true);
+    const assetDef = assetId ? ASSET_REGISTRY[assetId] : null;
+
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        // Enhance material properties for PBR fidelity
+        if (mesh.material) {
+          const mat = (
+            Array.isArray(mesh.material) ? mesh.material[0] : mesh.material
+          ) as THREE.MeshStandardMaterial;
+
+          if (mat) {
+            mat.envMapIntensity = 1.0;
+            // Glass materials tuning
+            if (
+              mat.name.toLowerCase().includes("glass") ||
+              mat.transparent ||
+              mat.opacity < 0.95
+            ) {
+              mat.transparent = true;
+              mat.opacity = 0.35;
+              mat.roughness = 0.05;
+              mat.metalness = 0.1;
+              mat.side = THREE.DoubleSide;
+            } else if (
+              mat.name.toLowerCase().includes("metal") ||
+              mat.name.toLowerCase().includes("chrome")
+            ) {
+              mat.metalness = 0.9;
+              mat.roughness = 0.15;
+            }
+          }
+        }
+      }
+    });
+
+    return clone;
+  }, [scene, assetId]);
+
+  return <primitive object={clonedScene} />;
+}
+
+/**
+ * Universal ModelRenderer that dynamically loads GLB assets or photorealistic procedural meshes.
+ */
+export const ModelRenderer: React.FC<ModelRendererProps> = ({
+  object,
+  isSelected,
+  hasHazard,
+  hazardSeverity,
+  onClick,
+}) => {
+  const { assetId, glbPath, modelType, dimensions } = object;
+
+  // Resolve GLB path from object or asset registry only if not explicitly marked procedural
+  const isExplicitProcedural = assetId?.startsWith("procedural_");
+
+  const resolvedGlb = isExplicitProcedural
+    ? null
+    : glbPath ||
+      (assetId && ASSET_REGISTRY[assetId]?.glbPath) ||
+      (modelType === "bed" ? "/models/bedroom/double_bed_photoreal.glb" : null) ||
+      (modelType === "toilet" ? "/models/bathroom/toilet_modern.glb" : null) ||
+      (modelType === "sink" ? "/models/bathroom/bathroom_vanity.glb" : null) ||
+      (modelType === "shower" ? "/models/bathroom/shower_enclosure.glb" : null) ||
+      (modelType === "plant" ? "/models/decoration/potted_plant.glb" : null) ||
+      (modelType === "window" ? "/models/architecture/modern_window.glb" : null) ||
+      (modelType === "grab_bar" ? "/models/safety/safety_grab_bar.glb" : null);
+
+  const hazardColor =
+    hazardSeverity === "HIGH"
+      ? "#ef4444"
+      : hazardSeverity === "MEDIUM"
+      ? "#f59e0b"
+      : "#3b82f6";
+
+  return (
+    <group
+      position={object.position}
+      rotation={object.rotation}
+      scale={object.scale}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+    >
+      {/* 3D Model Rendering: Real GLB or Photorealistic Procedural PBR Model */}
+      {resolvedGlb ? (
+        <Suspense
+          fallback={
+            <mesh position={[0, dimensions.height * 0.5, 0]}>
+              <boxGeometry
+                args={[dimensions.width, dimensions.height, dimensions.length]}
+              />
+              <meshStandardMaterial color="#94a3b8" wireframe />
+            </mesh>
+          }
+        >
+          <GLBModel
+            glbPath={resolvedGlb}
+            assetId={assetId}
+            dimensions={dimensions}
+          />
+        </Suspense>
+      ) : (
+        <ProceduralModelBody object={object} hasHazard={hasHazard} />
+      )}
+
+      {/* Selected Wireframe Bounding Box Indicator */}
+      {isSelected && (
+        <group position={[0, dimensions.height * 0.5, 0]}>
+          <mesh>
+            <boxGeometry
+              args={[
+                dimensions.width + 0.08,
+                dimensions.height + 0.08,
+                dimensions.length + 0.08,
+              ]}
+            />
+            <meshBasicMaterial
+              color="#0284c7"
+              wireframe
+              transparent
+              opacity={0.75}
+            />
+          </mesh>
+        </group>
+      )}
+
+      {/* Subtle Hazard Danger Floor Perimeter Indicator */}
+      {hasHazard && (
+        <group position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh receiveShadow>
+            <planeGeometry
+              args={[dimensions.width + 0.2, dimensions.length + 0.2]}
+            />
+            <meshBasicMaterial
+              color={hazardColor}
+              transparent
+              opacity={0.22}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          <mesh>
+            <ringGeometry
+              args={[
+                Math.max(dimensions.width, dimensions.length) * 0.5 + 0.08,
+                Math.max(dimensions.width, dimensions.length) * 0.5 + 0.12,
+                32,
+              ]}
+            />
+            <meshBasicMaterial
+              color={hazardColor}
+              side={THREE.DoubleSide}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        </group>
+      )}
+    </group>
+  );
+};
+
+// Pre-preload common models for zero-lag rendering
+try {
+  useGLTF.preload("/models/bedroom/double_bed_photoreal.glb");
+  useGLTF.preload("/models/bedroom/bedside_table_lamp.glb");
+  useGLTF.preload("/models/wardrobe/walkin_closet_system.glb");
+  useGLTF.preload("/models/wardrobe/drawer_cabinet.glb");
+  useGLTF.preload("/models/bathroom/toilet_modern.glb");
+  useGLTF.preload("/models/bathroom/bathroom_vanity.glb");
+  useGLTF.preload("/models/bathroom/shower_enclosure.glb");
+  useGLTF.preload("/models/decoration/potted_plant.glb");
+  useGLTF.preload("/models/decoration/framed_wall_art.glb");
+  useGLTF.preload("/models/architecture/modern_window.glb");
+  useGLTF.preload("/models/safety/safety_grab_bar.glb");
+} catch (e) {
+  // Preload is optional in test environments
+}

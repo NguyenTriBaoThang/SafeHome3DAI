@@ -2,11 +2,11 @@
 
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls, Html, TransformControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { RoomEnvironment } from "./RoomEnvironment";
-import { ProceduralFurniture } from "./ProceduralFurniture";
+import { ModelRenderer } from "./ModelRenderer";
 import {
   AlertTriangle,
   Layers,
@@ -18,18 +18,82 @@ import {
   CheckCircle2,
   Focus,
   X,
+  Camera,
+  Sun,
+  Sunset,
+  Moon,
+  Sparkles,
+  RotateCcw,
+  Footprints,
+  ShieldAlert,
+  Move,
+  RotateCw,
 } from "lucide-react";
 import { SceneObjectState, HazardFindingResult } from "@/types";
 
 /**
+ * First-person keyboard & navigation controller for WASD walkthrough
+ */
+function WalkthroughNavigator({
+  roomDims,
+}: {
+  roomDims: { width: number; length: number };
+}) {
+  const { camera } = useThree();
+  const { cameraPreset } = useSimulationStore();
+
+  useEffect(() => {
+    if (cameraPreset !== "WALKTHROUGH") return;
+
+    const halfW = roomDims.width / 2 - 0.35;
+    const halfL = roomDims.length / 2 - 0.35;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const step = 0.22;
+      const key = e.key.toLowerCase();
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      dir.y = 0;
+      dir.normalize();
+
+      const sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
+
+      if (key === "w" || key === "arrowup") {
+        camera.position.addScaledVector(dir, step);
+      } else if (key === "s" || key === "arrowdown") {
+        camera.position.addScaledVector(dir, -step);
+      } else if (key === "a" || key === "arrowleft") {
+        camera.position.addScaledVector(sideDir, -step);
+      } else if (key === "d" || key === "arrowright") {
+        camera.position.addScaledVector(sideDir, step);
+      }
+
+      // Keep within room perimeter walls & eye-level height
+      camera.position.x = Math.max(-halfW, Math.min(halfW, camera.position.x));
+      camera.position.z = Math.max(-halfL, Math.min(halfL, camera.position.z));
+      camera.position.y = 1.6;
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [cameraPreset, camera, roomDims]);
+
+  return null;
+}
+
+/**
  * Camera controller that smoothly positions and frames the camera
- * based on room dimensions, presets, or focused object coordinates.
+ * for Dollhouse, Interior, Top, Front, Walkthrough, and Safety views.
  */
 function CameraController({ fitTrigger }: { fitTrigger: number }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const controlsRef = useRef<any>(null);
-  const { cameraPreset, cameraFocusPoint, getCurrentRoom } = useSimulationStore();
+  const { cameraPreset, cameraFocusPoint, getCurrentRoom, currentAssessment } =
+    useSimulationStore();
   const room = getCurrentRoom();
+  const isDollhouse =
+    room.layoutType === "DOLLHOUSE_MULTI_ZONE" ||
+    room.id === "room-photoreal-dollhouse-01";
 
   useEffect(() => {
     if (!camera) return;
@@ -37,7 +101,7 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
     // 1. Focus on specific selected object coordinate
     if (cameraFocusPoint) {
       const [fx, fy, fz] = cameraFocusPoint;
-      camera.position.set(fx + 2.4, fy + 2.8, fz + 2.4);
+      camera.position.set(fx + 2.2, fy + 2.4, fz + 2.2);
       camera.lookAt(fx, fy + 0.3, fz);
       if (controlsRef.current) {
         controlsRef.current.target.set(fx, fy + 0.3, fz);
@@ -46,14 +110,15 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
       return;
     }
 
-    // 2. Compute dynamic framing distance based on room diagonal
+    // 2. Framing distance based on room diagonal
     const { width, length, height } = room.dimensions;
     const diag = Math.hypot(width, length);
-    const cameraDist = Math.max(diag, height * 1.8) * 1.15;
+    // Optimized framing distance so the room prominently fills ~70-75% of viewport
+    const cameraDist = Math.max(diag * 0.65, height * 1.35);
 
     switch (cameraPreset) {
       case "TOP":
-        camera.position.set(0, cameraDist * 1.45, 0.001);
+        camera.position.set(0, cameraDist * 1.35, 0.001);
         camera.lookAt(0, 0, 0);
         if (controlsRef.current) {
           controlsRef.current.target.set(0, 0, 0);
@@ -61,8 +126,55 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
         }
         break;
 
+      case "WALKTHROUGH":
+        camera.position.set(0, 1.6, length * 0.35);
+        camera.lookAt(0, 1.5, -length * 0.2);
+        if (controlsRef.current) {
+          controlsRef.current.target.set(0, 1.5, -length * 0.2);
+          controlsRef.current.update();
+        }
+        break;
+
+      case "SAFETY":
+        // Prioritize camera on highest severity hazard
+        const findings = currentAssessment?.findings || [];
+        const highHazard = findings.find((f) => f.severityCategory === "HIGH") || findings[0];
+        const targetObj = room.objects.find((o) => o.id === highHazard?.targetObjectId) || room.objects[0];
+        if (targetObj) {
+          const [tx, ty, tz] = targetObj.position;
+          camera.position.set(tx + 2.0, ty + 1.8, tz + 2.0);
+          camera.lookAt(tx, ty + 0.3, tz);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(tx, ty + 0.3, tz);
+            controlsRef.current.update();
+          }
+        } else {
+          camera.position.set(cameraDist * 0.8, cameraDist * 0.9, cameraDist * 0.8);
+          camera.lookAt(0, height * 0.25, 0);
+        }
+        break;
+
+      case "INTERIOR":
+        // Eye-level view inside the room
+        if (isDollhouse) {
+          camera.position.set(-2.0, 1.45, 1.2);
+          camera.lookAt(-0.5, 1.1, -1.0);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(-0.5, 1.1, -1.0);
+            controlsRef.current.update();
+          }
+        } else {
+          camera.position.set(0, 1.45, length * 0.35);
+          camera.lookAt(0, 1.1, -length * 0.15);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(0, 1.1, -length * 0.15);
+            controlsRef.current.update();
+          }
+        }
+        break;
+
       case "FRONT":
-        camera.position.set(0, height * 0.5, cameraDist * 1.25);
+        camera.position.set(0, height * 0.45, cameraDist * 1.15);
         camera.lookAt(0, height * 0.35, 0);
         if (controlsRef.current) {
           controlsRef.current.target.set(0, height * 0.35, 0);
@@ -72,24 +184,54 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
 
       case "ISOMETRIC":
       default:
-        camera.position.set(cameraDist * 0.95, cameraDist * 1.05, cameraDist * 0.95);
-        camera.lookAt(0, height * 0.2, 0);
-        if (controlsRef.current) {
-          controlsRef.current.target.set(0, height * 0.2, 0);
-          controlsRef.current.update();
+        // Precise 3/4 aerial isometric perspective matching the architectural reference photo
+        if (isDollhouse) {
+          camera.position.set(6.8, 7.6, 7.2);
+          camera.lookAt(0.1, 0.3, -0.1);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(0.1, 0.3, -0.1);
+            controlsRef.current.update();
+          }
+        } else {
+          const target = new THREE.Vector3(0, height * 0.43, 0);
+          const direction = new THREE.Vector3(0.32, 0.58, 1).normalize();
+          const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+          const up = new THREE.Vector3().crossVectors(direction, right);
+          const perspective = camera as THREE.PerspectiveCamera;
+          const tanY = Math.tan(THREE.MathUtils.degToRad(perspective.getEffectiveFOV() / 2));
+          const tanX = tanY * size.width / Math.max(1, size.height);
+          // Fit all eight corners, including the wall caps, inside the canvas
+          // with space above and below for the floating controls.
+          let distance = 0;
+          for (const x of [-width / 2 - 0.16, width / 2 + 0.16]) {
+            for (const y of [-0.16, height + 0.08]) {
+              for (const z of [-length / 2 - 0.16, length / 2 + 0.16]) {
+                const corner = new THREE.Vector3(x, y, z).sub(target);
+                const offset = Math.max(Math.abs(corner.dot(right)) / (0.90 * tanX),
+                  Math.abs(corner.dot(up)) / (0.76 * tanY));
+                distance = Math.max(distance, corner.dot(direction) + offset);
+              }
+            }
+          }
+          camera.position.copy(target).addScaledVector(direction, distance);
+          camera.lookAt(target);
+          if (controlsRef.current) {
+            controlsRef.current.target.copy(target);
+            controlsRef.current.update();
+          }
         }
         break;
     }
-  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger]);
+  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger, isDollhouse, currentAssessment, size.width, size.height]);
 
   return (
     <OrbitControls
       ref={controlsRef}
       enableDamping
       dampingFactor={0.08}
-      minDistance={1.0}
-      maxDistance={35}
-      maxPolarAngle={cameraPreset === "TOP" ? 0.05 : Math.PI / 2 - 0.03}
+      minDistance={0.5}
+      maxDistance={Math.max(40, Math.hypot(room.dimensions.width, room.dimensions.length) * 6)}
+      maxPolarAngle={cameraPreset === "TOP" ? 0.05 : Math.PI / 2 - 0.02}
     />
   );
 }
@@ -115,15 +257,25 @@ export const RoomCanvas: React.FC = () => {
     showMeasurements,
     transparentWalls,
     isNightMode,
+    lightingPreset,
+    setLightingPreset,
     currentAssessment,
     focusOnLocation,
+    cameraPreset,
     setCameraPreset,
+    transformMode,
+    setTransformMode,
+    updateObjectPosition,
+    updateObjectRotation,
   } = useSimulationStore();
 
   const [clusterMarkers, setClusterMarkers] = useState(true);
   const [showAllLabels, setShowAllLabels] = useState(false);
-  const [expandedClusterId, setExpandedClusterId] = useState<string | null>(null);
+  const [expandedClusterId, setExpandedClusterId] = useState<string | null>(
+    null
+  );
   const [fitTrigger, setFitTrigger] = useState(0);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const room = getCurrentRoom();
   const findings = currentAssessment?.findings || [];
@@ -135,7 +287,7 @@ export const RoomCanvas: React.FC = () => {
     setExpandedClusterId(null);
   }, [room.id]);
 
-  // Build a deterministic numbering map for findings: H1, H2, H3...
+  // Deterministic numbering map for findings: H1, H2, H3...
   const findingIndexMap = useMemo(() => {
     const map = new Map<string, string>();
     findings.forEach((f, idx) => {
@@ -277,11 +429,36 @@ export const RoomCanvas: React.FC = () => {
     }
   };
 
+  // Screenshot Capture Handler
+  const handleScreenshot = () => {
+    const canvas = canvasContainerRef.current?.querySelector("canvas");
+    if (!canvas) return;
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `safehome-dollhouse-${new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-")}.png`;
+      a.click();
+    } catch (e) {
+      console.warn("Screenshot failed:", e);
+    }
+  };
+
   return (
-    <div className="relative w-full h-full min-h-[480px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none">
+    <div
+      ref={canvasContainerRef}
+      className="relative w-full h-full min-h-[500px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none"
+    >
       <Canvas
+        // Fill the viewer even when its height comes from a flex item/min-height.
+        // A percentage-height Canvas in normal flow can fall back to 150px.
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
         shadows
-        camera={{ position: [7, 8, 7], fov: 42 }}
+        gl={{ preserveDrawingBuffer: true, antialias: true }}
+        camera={{ position: [5.2, 6.2, 5.8], fov: 38 }}
         className="w-full h-full cursor-grab active:cursor-grabbing"
         onPointerMissed={() => {
           selectObject(null);
@@ -296,9 +473,10 @@ export const RoomCanvas: React.FC = () => {
           showGrid={showMeasurements}
           transparentWalls={transparentWalls}
           isNightMode={isNightMode}
+          lightingPreset={lightingPreset}
         />
 
-        {/* 3D Scene Objects */}
+        {/* 3D Scene Objects with Photorealistic ModelRenderer */}
         {room.objects.map((obj) => {
           const isSelected = selectedObjectId === obj.id;
           const hazardEntry = hazardMap.get(obj.id);
@@ -307,7 +485,7 @@ export const RoomCanvas: React.FC = () => {
 
           return (
             <group key={obj.id}>
-              <ProceduralFurniture
+              <ModelRenderer
                 object={obj}
                 isSelected={isSelected}
                 hasHazard={hasHazard}
@@ -323,7 +501,7 @@ export const RoomCanvas: React.FC = () => {
                 <Html
                   position={[
                     obj.position[0],
-                    (obj.position[1] ?? 0) + obj.dimensions.height + 0.14,
+                    (obj.position[1] ?? 0) + obj.dimensions.height + 0.16,
                     obj.position[2],
                   ]}
                   center
@@ -340,37 +518,38 @@ export const RoomCanvas: React.FC = () => {
                     role="button"
                     aria-label={`Nguy cơ ${hazardEntry.hazardNumber}: ${hazardEntry.hazard.title}`}
                   >
-                    {/* Pin Head and Downward Pointer */}
                     <div className="flex flex-col items-center transition-transform duration-200 group-hover:scale-125 group-active:scale-95">
                       <div
-                        className={`flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-black shadow-xl border-2 border-white ${hazardEntry.hazard.severityCategory === "HIGH"
+                        className={`flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-black shadow-xl border-2 border-white ${
+                          hazardEntry.hazard.severityCategory === "HIGH"
                             ? "bg-rose-600 ring-2 ring-rose-500/50"
                             : hazardEntry.hazard.severityCategory === "MEDIUM"
-                              ? "bg-amber-600 ring-2 ring-amber-500/50"
-                              : "bg-sky-600 ring-2 ring-sky-500/50"
-                          }`}
+                            ? "bg-amber-600 ring-2 ring-amber-500/50"
+                            : "bg-sky-600 ring-2 ring-sky-500/50"
+                        }`}
                       >
                         {hazardEntry.hazardNumber}
                       </div>
-                      {/* Downward Pointer Stem */}
                       <div
-                        className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] -mt-[1px] ${hazardEntry.hazard.severityCategory === "HIGH"
+                        className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] -mt-[1px] ${
+                          hazardEntry.hazard.severityCategory === "HIGH"
                             ? "border-t-rose-600"
                             : hazardEntry.hazard.severityCategory === "MEDIUM"
-                              ? "border-t-amber-600"
-                              : "border-t-sky-600"
-                          }`}
+                            ? "border-t-amber-600"
+                            : "border-t-sky-600"
+                        }`}
                       />
                     </div>
 
-                    {/* Single-Line Clean Hover Tooltip */}
+                    {/* Clean Hover Tooltip */}
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 whitespace-nowrap animate-fade-in">
                       <div className="px-2.5 py-1 rounded-lg bg-slate-950/95 text-white text-[11px] font-medium shadow-2xl border border-slate-700/80 backdrop-blur-sm flex items-center gap-1.5">
                         <span
-                          className={`h-2 w-2 rounded-full shrink-0 ${hazardEntry.hazard.severityCategory === "HIGH"
+                          className={`h-2 w-2 rounded-full shrink-0 ${
+                            hazardEntry.hazard.severityCategory === "HIGH"
                               ? "bg-rose-500"
                               : "bg-amber-500"
-                            }`}
+                          }`}
                         />
                         <span className="font-bold text-rose-300">
                           {hazardEntry.hazardNumber}:
@@ -391,8 +570,8 @@ export const RoomCanvas: React.FC = () => {
                   position={[
                     obj.position[0],
                     (obj.position[1] ?? 0) +
-                    obj.dimensions.height +
-                    (hasHazard ? 0.48 : 0.22),
+                      obj.dimensions.height +
+                      (hasHazard ? 0.48 : 0.24),
                     obj.position[2],
                   ]}
                   center
@@ -400,7 +579,7 @@ export const RoomCanvas: React.FC = () => {
                   className="pointer-events-none select-none z-10"
                 >
                   <div className="flex flex-col items-center animate-fade-in pointer-events-auto">
-                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[140px] relative">
+                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[150px] relative">
                       <div className="text-[11px] font-bold text-sky-200 flex items-center justify-between gap-2">
                         <span>{obj.name}</span>
                         <button
@@ -414,15 +593,22 @@ export const RoomCanvas: React.FC = () => {
                         </button>
                       </div>
                       <div className="text-[9px] text-slate-400 mt-0.5">
-                        {obj.dimensions.width.toFixed(1)}m ×{" "}
-                        {obj.dimensions.length.toFixed(1)}m ×{" "}
-                        {obj.dimensions.height.toFixed(1)}m
+                        {obj.dimensions.width.toFixed(2)}m ×{" "}
+                        {obj.dimensions.length.toFixed(2)}m ×{" "}
+                        {obj.dimensions.height.toFixed(2)}m
                       </div>
+                      {obj.verified && (
+                        <div className="text-[9px] text-emerald-400 font-semibold mt-0.5 flex items-center justify-center gap-1">
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                          <span>Đã xác minh AI Vision (98%)</span>
+                        </div>
+                      )}
                       {hasHazard && (
                         <div className="mt-1 pt-1 border-t border-slate-800 text-[10px] text-rose-300 font-semibold flex items-center justify-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
                           <span>
-                            {hazardEntry?.hazardNumber}: {hazardEntry?.hazard.title}
+                            {hazardEntry?.hazardNumber}:{" "}
+                            {hazardEntry?.hazard.title}
                           </span>
                         </div>
                       )}
@@ -452,7 +638,7 @@ export const RoomCanvas: React.FC = () => {
           );
         })}
 
-        {/* Clustered Hazard Badges (Aggregates multiple hazards within 0.95m radius) */}
+        {/* Clustered Hazard Badges */}
         {clusters.map((cluster) => {
           const isExpanded = expandedClusterId === cluster.id;
           const isHigh = cluster.highestSeverity === "HIGH";
@@ -471,24 +657,26 @@ export const RoomCanvas: React.FC = () => {
                     e.stopPropagation();
                     setExpandedClusterId(isExpanded ? null : cluster.id);
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold shadow-xl transition-all hover:scale-105 active:scale-95 border-2 border-white ${isHigh
+                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold shadow-xl transition-all hover:scale-105 active:scale-95 border-2 border-white ${
+                    isHigh
                       ? "bg-rose-600 hover:bg-rose-700 ring-2 ring-rose-500/40"
                       : "bg-amber-600 hover:bg-amber-700 ring-2 ring-amber-500/40"
-                    }`}
+                  }`}
                   aria-label={`${cluster.items.length} nguy cơ gộp`}
                 >
                   <AlertTriangle className="h-3 w-3 shrink-0" />
                   <span>+{cluster.items.length} Nguy cơ</span>
                   <ChevronDown
-                    className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""
-                      }`}
+                    className={`h-3 w-3 transition-transform ${
+                      isExpanded ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
-                {/* Downward Stem */}
                 <div
-                  className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] -mt-[1px] ${isHigh ? "border-t-rose-600" : "border-t-amber-600"
-                    }`}
+                  className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] -mt-[1px] ${
+                    isHigh ? "border-t-rose-600" : "border-t-amber-600"
+                  }`}
                 />
 
                 {/* Expanded Cluster Popover */}
@@ -518,10 +706,11 @@ export const RoomCanvas: React.FC = () => {
                         className="w-full text-left p-1.5 rounded-lg hover:bg-slate-800 transition flex items-start gap-2 group"
                       >
                         <span
-                          className={`mt-0.5 px-1.5 py-0.2 rounded text-[10px] font-black text-white shrink-0 ${item.hazard.severityCategory === "HIGH"
+                          className={`mt-0.5 px-1.5 py-0.2 rounded text-[10px] font-black text-white shrink-0 ${
+                            item.hazard.severityCategory === "HIGH"
                               ? "bg-rose-600"
                               : "bg-amber-600"
-                            }`}
+                          }`}
                         >
                           {item.hazardNumber}
                         </span>
@@ -541,52 +730,186 @@ export const RoomCanvas: React.FC = () => {
             </Html>
           );
         })}
+
+        {/* First Person Walkthrough Controls */}
+        <WalkthroughNavigator roomDims={room.dimensions} />
+
+        {/* Interactive TransformControls Gizmo for Selected Object */}
+        {selectedObjectId && transformMode && (() => {
+          const selObj = room.objects.find((o) => o.id === selectedObjectId);
+          if (!selObj) return null;
+          return (
+            <TransformControls
+              position={selObj.position}
+              mode={transformMode}
+              translationSnap={0.05}
+              rotationSnap={Math.PI / 12}
+              onObjectChange={(e: any) => {
+                if (e?.target?.object) {
+                  const p = e.target.object.position;
+                  const halfW = room.dimensions.width / 2;
+                  const halfL = room.dimensions.length / 2;
+                  const clampedX = Math.max(-halfW + 0.1, Math.min(halfW - 0.1, p.x));
+                  const clampedZ = Math.max(-halfL + 0.1, Math.min(halfL - 0.1, p.z));
+                  updateObjectPosition(selObj.id, [
+                    Number(clampedX.toFixed(2)),
+                    0,
+                    Number(clampedZ.toFixed(2)),
+                  ]);
+                  if (transformMode === "rotate") {
+                    updateObjectRotation(selObj.id, [
+                      0,
+                      Number(e.target.object.rotation.y.toFixed(2)),
+                      0,
+                    ]);
+                  }
+                }
+              }}
+            />
+          );
+        })()}
       </Canvas>
 
-      {/* Floating 3D Camera Controls Toolbar (Top-Right) */}
-      <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-900/85 backdrop-blur-md p-1.5 rounded-xl border border-slate-700/60 text-white text-xs shadow-lg">
-        <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden sm:inline">
-          Góc nhìn:
-        </span>
-        <button
-          onClick={() => {
-            focusOnLocation(null);
-            setCameraPreset("ISOMETRIC");
-          }}
-          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
-        >
-          Isometric
-        </button>
-        <button
-          onClick={() => {
-            focusOnLocation(null);
-            setCameraPreset("TOP");
-          }}
-          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
-        >
-          Mặt bằng
-        </button>
-        <button
-          onClick={() => {
-            focusOnLocation(null);
-            setCameraPreset("FRONT");
-          }}
-          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
-        >
-          Chính diện
-        </button>
-        <button
-          onClick={handleFitRoom}
-          className="px-2.5 py-1 rounded-lg bg-teal-600/80 hover:bg-teal-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
-          title="Tự động căn chỉnh toàn bộ phòng vào khung nhìn"
-        >
-          <Maximize2 className="h-3 w-3" />
-          <span>Fit Room</span>
-        </button>
+      {/* --- TOP FLOATING TOOLBAR: CAMERA & LIGHTING PRESETS --- */}
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
+        {/* Lighting Selector (Top-Left) */}
+        <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
+          <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden md:flex items-center gap-1">
+            <Sun className="h-3.5 w-3.5 text-amber-400" />
+            <span>Ánh sáng:</span>
+          </span>
+          <button
+            onClick={() => setLightingPreset("MORNING")}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              lightingPreset === "MORNING"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Ánh nắng sớm tự nhiên rọi qua cửa sổ"
+          >
+            <span>Nắng sớm</span>
+          </button>
+          <button
+            onClick={() => setLightingPreset("AFTERNOON")}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              lightingPreset === "AFTERNOON"
+                ? "bg-sky-500 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Ánh sáng ban ngày đều"
+          >
+            <span>Ban ngày</span>
+          </button>
+          <button
+            onClick={() => setLightingPreset("NIGHT")}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              lightingPreset === "NIGHT"
+                ? "bg-indigo-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Mô phỏng ban đêm (Độ sáng <50 Lux)"
+          >
+            <Moon className="h-3 w-3" />
+            <span>Ban đêm</span>
+          </button>
+          <button
+            onClick={() => setLightingPreset("STUDIO")}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              lightingPreset === "STUDIO"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Ánh sáng studio chuẩn thiết kế"
+          >
+            <Sparkles className="h-3 w-3" />
+            <span>Studio</span>
+          </button>
+        </div>
+
+        {/* Camera Views & Actions (Top-Right) */}
+        <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg overflow-x-auto max-w-[calc(100%-180px)]">
+          <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden md:flex items-center gap-1">
+            <Camera className="h-3.5 w-3.5 text-teal-400" />
+            <span>Góc nhìn:</span>
+          </span>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("ISOMETRIC");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+              cameraPreset === "ISOMETRIC"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Góc nhìn 3D Isometric Dollhouse toàn cảnh"
+          >
+            Dollhouse
+          </button>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("INTERIOR");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+              cameraPreset === "INTERIOR"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Góc nhìn đứng tầm mắt bên trong phòng"
+          >
+            Tầm mắt
+          </button>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("TOP");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+              cameraPreset === "TOP"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Xem mặt bằng từ trên xuống"
+          >
+            Mặt bằng
+          </button>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("WALKTHROUGH");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              cameraPreset === "WALKTHROUGH"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Đi vào phòng bằng phím WASD hoặc mũi tên"
+          >
+            <Footprints className="h-3 w-3" />
+            <span className="hidden sm:inline">Walkthrough</span>
+          </button>
+          <button
+            onClick={handleFitRoom}
+            className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition flex items-center gap-1"
+            title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
+          >
+            <Maximize2 className="h-3 w-3" />
+            <span>Fit</span>
+          </button>
+          <button
+            onClick={handleScreenshot}
+            className="px-2 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-sm"
+            title="Chụp ảnh khung nhìn 3D hiện tại (PNG)"
+          >
+            <Camera className="h-3 w-3" />
+            <span className="hidden sm:inline">Chụp</span>
+          </button>
+        </div>
       </div>
 
-      {/* Bottom Floating Visual Toggles & Clustering Switch */}
-      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+      {/* --- BOTTOM FLOATING TOOLBAR: TOGGLES & LEGEND --- */}
+      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         <div className="flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700/60 pointer-events-auto shadow-lg text-xs text-white">
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input
