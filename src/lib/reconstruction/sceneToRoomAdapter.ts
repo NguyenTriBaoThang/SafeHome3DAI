@@ -28,6 +28,7 @@ export function convertSceneGraphToRoomState(
       isLoose: obj.isLoose,
       isWalkwayObstacle: obj.isWalkwayObstacle,
       isSlippery: obj.isSlippery,
+      surfaceColor: obj.surfaceColor,
       verified: obj.verified,
       confidence: obj.detectionConfidence,
     };

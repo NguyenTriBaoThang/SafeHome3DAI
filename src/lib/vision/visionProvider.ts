@@ -6,6 +6,7 @@ import {
   ViewpointType,
 } from "./types";
 import { normalizePredictedLabel } from "./taxonomy";
+import { analyzeRoomPhotoWithGemini } from "./geminiVisionAdapter";
 
 export interface VisionProviderOptions {
   mode?: "AI_VISION" | "MANUAL_REVIEW";
@@ -50,7 +51,7 @@ export async function runVisionAnalysis(
 
   const timestamp = new Date().toISOString();
 
-  // Mode C: Configured External GPU / FastAPI Inference Service
+  // Mode C: Configured External GPU / FastAPI Inference Service (e.g. YOLOv8 / RT-DETR)
   const externalEndpoint = options.apiUrl || process.env.VISION_SERVICE_URL;
   if (externalEndpoint && options.imageBufferBase64) {
     try {
@@ -87,7 +88,38 @@ export async function runVisionAnalysis(
     }
   }
 
-  // Mode A: AI Vision
+  // Mode D: Gemini Multimodal Vision Engine
+  if (process.env.GEMINI_API_KEY && options.imageBufferBase64) {
+    try {
+      const buffer = Buffer.from(options.imageBufferBase64, "base64");
+      const geminiRes = await analyzeRoomPhotoWithGemini(buffer, "image/jpeg", {
+        roomType,
+        viewpoint,
+        imageId,
+        analysisId,
+      });
+
+      if (geminiRes.detections.length > 0) {
+        return {
+          id: analysisId,
+          roomId,
+          imageId,
+          modelId: geminiRes.modelUsed || "gemini-3.5-flash-lite",
+          modelVersion: "3.5.0",
+          analysisStatus: "COMPLETED",
+          detections: geminiRes.detections,
+          observations: geminiRes.observations,
+          clarifications: [],
+          startedAt: timestamp,
+          completedAt: new Date().toISOString(),
+        };
+      }
+    } catch (geminiErr) {
+      console.warn("Gemini vision inference failed, falling back to local dataset:", geminiErr);
+    }
+  }
+
+  // Mode A: Local Mock/Deterministic Fallback Dataset
   const detections: VisionDetection[] = [];
   const observations: VisionObservation[] = [];
   const clarifications: VisionClarificationQuestion[] = [];

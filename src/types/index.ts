@@ -39,6 +39,7 @@ export interface SceneObjectState {
   assetId?: string;
   glbPath?: string;
   verified?: boolean;
+  surfaceColor?: string;
   materialVariant?: string;
   confidence?: number;
   safetyRecommendation?: string;

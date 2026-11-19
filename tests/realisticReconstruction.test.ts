@@ -11,6 +11,28 @@ import { VisionDetection } from "@/lib/vision/types";
 import { runEnvironmentalAssessment } from "@/features/risk-engine/rules";
 
 describe("Realistic AI Room Reconstruction & Asset Matching Suite", () => {
+  it("places side-wall fixtures along the wall and carries the photo material into the simulation", () => {
+    const fixture: VisionDetection = {
+      id: "partition", analysisId: "scan", imageId: "photo", originalLabel: "Vách nan gỗ",
+      category: "other", sceneModelType: "slat_partition", placementWall: "left",
+      confidence: 0.9, bbox: { xMin: 0.04, yMin: 0.08, xMax: 0.24, yMax: 0.72 },
+      source: "OBJECT_DETECTOR", verificationStatus: "CONFIRMED", createdAt: "", updatedAt: "",
+    };
+    const scene = reconstructSceneFromDetections([fixture, {
+      ...fixture, id: "curtain", originalLabel: "Rèm cửa", sceneModelType: "curtain", placementWall: "right",
+      bbox: { xMin: 0.76, yMin: 0.12, xMax: 0.88, yMax: 0.76 },
+    }], { roomType: "LIVING_ROOM", imageAspect: 1.2, surfaceColors: { partition: "#ad835c" } });
+    const [partition, curtain] = convertSceneGraphToRoomState(scene).objects;
+    expect(partition.surfaceColor).toBe("#ad835c");
+    expect(partition.position[1]).toBe(0);
+    expect(partition.rotation[1]).toBe(Math.PI / 2);
+    expect(partition.dimensions.width).toBeGreaterThan(partition.dimensions.length);
+    expect(curtain.position[1]).toBeGreaterThanOrEqual(0);
+    expect(curtain.position[1] + curtain.dimensions.height).toBeCloseTo(scene.dimensions.height - 0.06);
+    expect(curtain.rotation[1]).toBe(-Math.PI / 2);
+    expect(matchAssetForDetection({category: "sofa", name: "Tủ tab đầu sofa"}).assetId).toBe("side_table");
+  });
+
   it("ASSET_REGISTRY contains valid models for all major elderly room categories", () => {
     expect(ASSET_REGISTRY.double_bed_photoreal).toBeDefined();
     expect(ASSET_REGISTRY.double_bed_photoreal.glbPath).toBe(

@@ -86,7 +86,7 @@ function WalkthroughNavigator({
  * for Dollhouse, Interior, Top, Front, Walkthrough, and Safety views.
  */
 function CameraController({ fitTrigger }: { fitTrigger: number }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const controlsRef = useRef<any>(null);
   const { cameraPreset, cameraFocusPoint, getCurrentRoom, currentAssessment } =
     useSimulationStore();
@@ -193,20 +193,36 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
             controlsRef.current.update();
           }
         } else {
-          camera.position.set(
-            cameraDist * 0.9,
-            cameraDist * 1.05,
-            cameraDist * 0.9
-          );
-          camera.lookAt(0, height * 0.22, 0);
+          const target = new THREE.Vector3(0, height * 0.43, 0);
+          const direction = new THREE.Vector3(0.32, 0.58, 1).normalize();
+          const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+          const up = new THREE.Vector3().crossVectors(direction, right);
+          const perspective = camera as THREE.PerspectiveCamera;
+          const tanY = Math.tan(THREE.MathUtils.degToRad(perspective.getEffectiveFOV() / 2));
+          const tanX = tanY * size.width / Math.max(1, size.height);
+          // Fit all eight corners, including the wall caps, inside the canvas
+          // with space above and below for the floating controls.
+          let distance = 0;
+          for (const x of [-width / 2 - 0.16, width / 2 + 0.16]) {
+            for (const y of [-0.16, height + 0.08]) {
+              for (const z of [-length / 2 - 0.16, length / 2 + 0.16]) {
+                const corner = new THREE.Vector3(x, y, z).sub(target);
+                const offset = Math.max(Math.abs(corner.dot(right)) / (0.90 * tanX),
+                  Math.abs(corner.dot(up)) / (0.76 * tanY));
+                distance = Math.max(distance, corner.dot(direction) + offset);
+              }
+            }
+          }
+          camera.position.copy(target).addScaledVector(direction, distance);
+          camera.lookAt(target);
           if (controlsRef.current) {
-            controlsRef.current.target.set(0, height * 0.22, 0);
+            controlsRef.current.target.copy(target);
             controlsRef.current.update();
           }
         }
         break;
     }
-  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger, isDollhouse, currentAssessment]);
+  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger, isDollhouse, currentAssessment, size.width, size.height]);
 
   return (
     <OrbitControls
@@ -214,7 +230,7 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
       enableDamping
       dampingFactor={0.08}
       minDistance={0.5}
-      maxDistance={40}
+      maxDistance={Math.max(40, Math.hypot(room.dimensions.width, room.dimensions.length) * 6)}
       maxPolarAngle={cameraPreset === "TOP" ? 0.05 : Math.PI / 2 - 0.02}
     />
   );

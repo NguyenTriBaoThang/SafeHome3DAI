@@ -6,7 +6,7 @@ export interface MatchAssetRequest {
   name?: string;
   estimatedDimensions?: {
     width: number;
-    length: number;
+    length?: number;
     height: number;
   };
   colorHex?: string;
@@ -36,13 +36,37 @@ export interface MatchedAssetResult {
 export function matchAssetForDetection(
   req: MatchAssetRequest
 ): MatchedAssetResult {
-  const normCat = (req.category || "").toLowerCase().trim();
+  let normCat = (req.category || "").toLowerCase().trim();
   const normName = (req.name || "").toLowerCase().trim();
+
+  // Smart taxonomy normalization
+  if (normCat === "side_table" || normName.includes("tủ tab") || normName.includes("bàn góc sofa")) {
+    normCat = "side_table";
+  } else if (normName.includes("đôn") || normName.includes("bench") || normCat === "bench") {
+    normCat = "bench";
+  } else if (normName.includes("bàn trà") || normName.includes("coffee") || normCat === "coffee_table") {
+    normCat = "coffee_table";
+  } else if (normName.includes("sofa") || normCat === "sofa") {
+    normCat = "sofa";
+  } else if (normName.includes("kệ tv") || normName.includes("media") || normCat === "media_console") {
+    normCat = "media_console";
+  } else if (normName.includes("tranh") || normName.includes("painting") || normCat === "wall_art") {
+    normCat = "wall_art";
+  } else if (normName.includes("quạt trần") || normName.includes("ceiling fan") || normCat === "ceiling_fan") {
+    normCat = "ceiling_fan";
+  } else if (normName.includes("điều hòa") || normName.includes("máy lạnh") || normName.includes("air conditioner") || normCat === "air_conditioner") {
+    normCat = "air_conditioner";
+  } else if (normName.includes("lam gỗ") || normName.includes("nan gỗ") || normName.includes("vách ngăn") || normName.includes("partition") || normCat === "slat_partition") {
+    normCat = "slat_partition";
+  } else if (normName.includes("rèm") || normName.includes("curtain") || normCat === "curtain") {
+    normCat = "curtain";
+  }
 
   // 1. Direct Category Mapping Candidates
   const categoryMap: Record<string, string[]> = {
     bed: ["double_bed_photoreal"],
     nightstand: ["bedside_table_lamp", "side_table"],
+    side_table: ["side_table"],
     "side table": ["side_table", "bedside_table_lamp"],
     table: ["side_table", "bedside_table_lamp"],
     wardrobe: ["walkin_closet_system", "drawer_cabinet"],
@@ -77,7 +101,7 @@ export function matchAssetForDetection(
     }
 
     // Aspect ratio similarity bonus
-    if (req.estimatedDimensions && entry.nominalDimensions) {
+    if (req.estimatedDimensions?.length && entry.nominalDimensions) {
       const reqRatio =
         req.estimatedDimensions.width /
         Math.max(req.estimatedDimensions.length, 0.1);
@@ -104,7 +128,7 @@ export function matchAssetForDetection(
     // Calculate clamped scale factors (avoid excessive distortion)
     const scaleX = Math.min(Math.max(est.width / nom.width, 0.7), 1.4);
     const scaleY = Math.min(Math.max(est.height / nom.height, 0.7), 1.4);
-    const scaleZ = Math.min(Math.max(est.length / nom.length, 0.7), 1.4);
+    const scaleZ = Math.min(Math.max((est.length ?? nom.length) / nom.length, 0.7), 1.4);
 
     return {
       assetId: bestEntry.id,
@@ -123,18 +147,26 @@ export function matchAssetForDetection(
     };
   }
 
-  // 3. Fallback to calibrated procedural models (rug, cable, chair, etc.)
+  // 3. Fallback to calibrated procedural models with realistic ergonomic dimensions
   const fallbackDimensions: Record<
     string,
     { width: number; length: number; height: number }
   > = {
-    rug: { width: 1.2, length: 1.6, height: 0.02 },
+    rug: { width: 2.2, length: 2.8, height: 0.02 },
     cable: { width: 0.12, length: 1.4, height: 0.03 },
     chair: { width: 0.55, length: 0.55, height: 0.85 },
-    coffee_table: { width: 0.7, length: 0.7, height: 0.45 },
-    box: { width: 0.4, length: 0.4, height: 0.3 },
-    lamp: { width: 0.3, length: 0.3, height: 1.4 },
-    sofa: { width: 1.8, length: 0.9, height: 0.8 },
+    coffee_table: { width: 1.25, length: 0.65, height: 0.42 },
+    bench: { width: 1.25, length: 0.45, height: 0.44 },
+    stool: { width: 0.45, length: 0.45, height: 0.44 },
+    box: { width: 0.5, length: 0.5, height: 0.45 },
+    lamp: { width: 0.35, length: 0.35, height: 1.5 },
+    sofa: { width: 2.4, length: 0.92, height: 0.82 },
+    media_console: { width: 1.8, length: 0.42, height: 0.48 },
+    wall_art: { width: 1.5, length: 0.04, height: 0.85 },
+    ceiling_fan: { width: 1.25, length: 1.25, height: 0.42 },
+    air_conditioner: { width: 0.88, length: 0.24, height: 0.3 },
+    slat_partition: { width: 0.12, length: 1.45, height: 2.7 },
+    curtain: { width: 0.14, length: 2.2, height: 2.65 },
   };
 
   const defaultDims = fallbackDimensions[normCat] || {
@@ -142,7 +174,7 @@ export function matchAssetForDetection(
     length: 0.8,
     height: 0.8,
   };
-  const finalDims = req.estimatedDimensions || defaultDims;
+  const finalDims = { ...defaultDims, ...req.estimatedDimensions, length: req.estimatedDimensions?.length ?? defaultDims.length };
 
   return {
     assetId: `procedural_${normCat}`,

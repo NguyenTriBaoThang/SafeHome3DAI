@@ -17,6 +17,7 @@ export const SemanticSceneObjectSchema = z.object({
     length: z.number().positive(),
     height: z.number().positive(),
   }),
+  surfaceColor: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
   detectionConfidence: z.number().min(0).max(1).default(0.85),
   measurementStatus: z.enum(["estimated", "calibrated", "user_verified"]).default("estimated"),
   verified: z.boolean().default(false),

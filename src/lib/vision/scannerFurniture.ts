@@ -12,16 +12,23 @@ export const furniture: [string, DetectionCategory, string, string?][] = [
   ["a wardrobe", "cabinet", "Tủ quần áo", "wardrobe"],
   ["a desk", "table", "Bàn", "desk"],
   ["a stool", "chair", "Ghế đẩu", "stool"],
+  ["a bench", "chair", "Băng ghế đôn", "bench"],
   ["a chair", "chair", "Ghế"],
-  ["a sofa", "sofa", "Sofa"],
-  ["an area rug", "rug", "Thảm"],
+  ["a sofa", "sofa", "Sofa", "sofa"],
+  ["a coffee table", "table", "Bàn trà", "coffee_table"],
+  ["an area rug", "rug", "Thảm", "rug"],
   ["a potted plant", "other", "Chậu cây", "plant"],
+  ["wall art painting", "other", "Tranh treo tường", "wall_art"],
+  ["a ceiling fan", "other", "Quạt trần", "ceiling_fan"],
+  ["an air conditioner", "other", "Điều hòa treo tường", "air_conditioner"],
+  ["a wooden slat partition", "other", "Vách lam gỗ", "slat_partition"],
   ["a toilet", "toilet", "Bồn cầu"],
   ["a sink", "sink", "Bồn rửa"],
   ["a shower enclosure", "bathtub", "Buồng tắm", "shower"],
 ];
 
 export function estimateWall(modelType: string, centerX: number): VisionDetection["placementWall"] {
-  if (!["bed", "tv", "window", "curtain", "mirror", "cabinet", "wardrobe", "media_console"].includes(modelType)) return "free";
+  if (modelType === "ceiling_fan") return "free";
+  if (!["bed", "tv", "window", "curtain", "mirror", "cabinet", "wardrobe", "media_console", "sofa", "bench", "wall_art", "air_conditioner", "slat_partition"].includes(modelType)) return "free";
   return centerX < 1 / 3 ? "left" : centerX > 2 / 3 ? "right" : "back";
 }

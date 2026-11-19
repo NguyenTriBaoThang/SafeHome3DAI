@@ -34,6 +34,7 @@ import { VisionDetection, ViewpointType } from "@/lib/vision/types";
 import { reconstructSceneFromDetections } from "@/lib/reconstruction/spatialReconstructor";
 import { convertSceneGraphToRoomState } from "@/lib/reconstruction/sceneToRoomAdapter";
 import { furniture, estimateWall } from "@/lib/vision/scannerFurniture";
+import { sampleSurfaceColors } from "@/lib/reconstruction/sampleSurfaceColors";
 import { extractKeyframesFromVideo } from "@/lib/vision/videoProcessor";
 import { ASSET_REGISTRY } from "@/data/assetRegistry";
 import { runEnvironmentalAssessment, calculateSafetyScore } from "@/features/risk-engine/rules";
@@ -82,6 +83,7 @@ export const AiRoomScannerWizard: React.FC<{
   );
   const [selectedImgIndex, setSelectedImgIndex] = useState<number>(0);
   const [isProcessingVideo, setIsProcessingVideo] = useState<boolean>(false);
+  const photoPixels = useRef<ImageData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,6 +103,7 @@ export const AiRoomScannerWizard: React.FC<{
   const [viewpoint, setViewpoint] = useState<ViewpointType>("ENTRANCE");
 
   // Reconstructed Scene & Assessment
+  const [showSourcePhoto, setShowSourcePhoto] = useState(false);
   const [reconstructedRoomId, setReconstructedRoomId] = useState<string | null>(null);
 
   // Handle Space Switch
@@ -180,6 +183,7 @@ export const AiRoomScannerWizard: React.FC<{
       const context = canvas.getContext("2d");
       if (!context) throw new Error("Không thể đọc ảnh trên trình duyệt.");
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      photoPixels.current = context.getImageData(0, 0, canvas.width, canvas.height);
       const jpeg = await new Promise<Blob>((resolve, reject) => canvas.toBlob(
         blob => blob ? resolve(blob) : reject(new Error("Không thể chuyển đổi ảnh.")), "image/jpeg", 0.92
       ));
@@ -190,6 +194,15 @@ export const AiRoomScannerWizard: React.FC<{
       setAddingObject(false);
       setFirstCorner(null);
       setDetections(result.detections);
+      if (result.floorMaterial) {
+        setFloorMaterial(result.floorMaterial);
+      }
+      if (result.detectedRoomType) {
+        setRoomType(result.detectedRoomType);
+        if (result.detectedRoomType === "LIVING_ROOM") {
+          setRoomName("Phòng khách (Tự động nhận diện)");
+        }
+      }
       setCurrentStep(4);
     } catch (error) {
       setScanError(error instanceof Error ? error.message : "Không thể phân tích ảnh đã chọn.");
@@ -204,6 +217,8 @@ export const AiRoomScannerWizard: React.FC<{
     const sceneGraph = reconstructSceneFromDetections(detections, {
       roomType,
       viewpoint,
+      imageAspect: photoPixels.current ? photoPixels.current.width / photoPixels.current.height : 1,
+      surfaceColors: photoPixels.current ? sampleSurfaceColors(photoPixels.current, detections) : {},
       manualDimensions: {
         width: roomWidth,
         length: roomLength,
@@ -709,6 +724,7 @@ export const AiRoomScannerWizard: React.FC<{
                               setDetections(prev => prev.map(d => d.id === det.id ? { ...d, category, originalLabel, sceneModelType, placementWall, verificationStatus: "CORRECTED" } : d));
                             }}
                             className="min-w-0 flex-1 bg-transparent text-xs font-semibold">
+                            {!furniture.some(item => item[2] === det.originalLabel) && <option>{det.originalLabel}</option>}
                             {furniture.map(([, , label]) => <option key={label}>{label}</option>)}
                           </select>
                         </div>
@@ -823,13 +839,20 @@ export const AiRoomScannerWizard: React.FC<{
             </div>
 
             <div className="text-[11px] text-slate-500 font-medium flex items-center gap-2">
-              <span>🖱️ Chuột trái xoay 3D · Con lăn phóng to/thu nhỏ · Chuột phải di chuyển</span>
+              <button type="button" aria-pressed={showSourcePhoto} onClick={() => setShowSourcePhoto(!showSourcePhoto)}
+                className="px-3 py-1.5 border rounded-lg bg-white text-teal-800 font-semibold">
+                {showSourcePhoto ? "Ẩn ảnh gốc" : "Đối chiếu ảnh gốc"}
+              </button>
             </div>
           </div>
 
           {/* 3D Canvas */}
-          <div className="relative h-[clamp(500px,65vh,820px)] w-full flex-none">
-            <RoomViewer />
+          <div className={showSourcePhoto ? "grid md:grid-cols-2" : ""}>
+            {showSourcePhoto && <img src={imageUrls[selectedImgIndex]} alt="Ảnh phòng đã dùng để dựng mô hình"
+              className="w-full h-56 md:h-[clamp(500px,65vh,820px)] object-contain bg-slate-900" />}
+            <div className="relative h-[clamp(500px,65vh,820px)] min-w-0">
+              <RoomViewer />
+            </div>
           </div>
 
           {/* Bottom Bar */}

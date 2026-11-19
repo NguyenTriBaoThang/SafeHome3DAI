@@ -66,11 +66,13 @@ function TileFloorSegment({
   length,
   position,
   isWet,
+  paleCeramic = false,
 }: {
   width: number;
   length: number;
   position: [number, number, number];
   isWet?: boolean;
+  paleCeramic?: boolean;
 }) {
   const [diffMap, roughMap, norMap] = useTexture([
     "/textures/tiles/floor_tiles_06_diffuse_1k.jpg",
@@ -95,7 +97,8 @@ function TileFloorSegment({
       >
         <planeGeometry args={[width, length]} />
         <meshStandardMaterial
-          map={diffMap}
+          map={paleCeramic ? undefined : diffMap}
+          color={paleCeramic ? "#e6dfd3" : "#ffffff"}
           roughnessMap={roughMap}
           normalMap={norMap}
           roughness={isWet ? 0.08 : 0.25}
@@ -473,64 +476,56 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
           />
         </group>
       ) : (
-        /* Standard Single Room Mode (Backwards compatibility) */
+        /* Standard Single Room Mode (Fully Upgraded with PBR Textures & Architectural Skirting) */
         <group>
-          <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, 0.002, 0]}
-            receiveShadow
-          >
-            <planeGeometry args={[width, length]} />
-            <meshStandardMaterial
-              color={
-                floorMaterial === "CERAMIC_TILE"
-                  ? "#e2e8f0"
-                  : floorMaterial === "NON_SLIP_VINYL"
-                  ? "#cbd5e1"
-                  : "#d2b48e"
-              }
-              roughness={isWet ? 0.05 : 0.55}
-              metalness={isWet ? 0.35 : 0.05}
+          {floorMaterial === "CERAMIC_TILE" || floorMaterial === "NON_SLIP_VINYL" ? (
+            <TileFloorSegment
+              width={width}
+              length={length}
+              position={[0, 0.002, 0]}
+              isWet={isWet}
+              paleCeramic={floorMaterial === "CERAMIC_TILE"}
             />
-          </mesh>
+          ) : (
+            <WoodFloorSegment
+              width={width}
+              length={length}
+              position={[0, 0.002, 0]}
+            />
+          )}
 
-          {/* Standard 4 Walls */}
-          <mesh position={[0, height * 0.5, -length / 2]} receiveShadow>
-            <boxGeometry args={[width, height, 0.15]} />
-            <meshStandardMaterial
-              color="#f8fafc"
-              transparent
-              opacity={wallOpacity}
-              roughness={0.8}
-            />
-          </mesh>
-          <mesh position={[-width / 2, height * 0.5, 0]} receiveShadow>
-            <boxGeometry args={[0.15, height, length]} />
-            <meshStandardMaterial
-              color="#f1f5f9"
-              transparent
-              opacity={wallOpacity}
-              roughness={0.8}
-            />
-          </mesh>
-          <mesh position={[width / 2, height * 0.2, 0]} receiveShadow>
-            <boxGeometry args={[0.15, height * 0.4, length]} />
-            <meshStandardMaterial
-              color="#cbd5e1"
-              transparent
-              opacity={0.4}
-              roughness={0.9}
-            />
-          </mesh>
-          <mesh position={[0, height * 0.15, length / 2]} receiveShadow>
-            <boxGeometry args={[width, height * 0.3, 0.15]} />
-            <meshStandardMaterial
-              color="#cbd5e1"
-              transparent
-              opacity={0.4}
-              roughness={0.9}
-            />
-          </mesh>
+          {/* Architectural Cutaway Walls with Skirting and Caps */}
+          {/* 1. North / Rear Main Wall (Full Height - Solid Backdrop for Furniture & Art) */}
+          <CutawayWall
+            extents={[width, height, 0.16]}
+            position={[0, height * 0.5, -length / 2]}
+            opacity={transparentWalls ? 0.9 : 1.0}
+            isTiled={floorMaterial === "CERAMIC_TILE"}
+          />
+
+          {/* 2. West / Left Wall (Full Height - Side Backdrop for Bench & Divider) */}
+          <CutawayWall
+            extents={[0.16, height, length]}
+            position={[-width / 2, height * 0.5, 0]}
+            opacity={transparentWalls ? 0.82 : 1.0}
+            isTiled={floorMaterial === "CERAMIC_TILE"}
+          />
+
+          {/* 3. East / Right Wall (Cut down to 0.75m for Dollhouse perspective visibility) */}
+          <CutawayWall
+            extents={[0.16, Math.min(height * 0.35, 0.85), length]}
+            position={[width / 2, Math.min(height * 0.35, 0.85) * 0.5, 0]}
+            opacity={Math.min(wallOpacity, 0.55)}
+            isTiled={floorMaterial === "CERAMIC_TILE"}
+          />
+
+          {/* 4. South / Front Wall (Cut down to 0.5m so camera can look into the room cleanly) */}
+          <CutawayWall
+            extents={[width, Math.min(height * 0.22, 0.55), 0.16]}
+            position={[0, Math.min(height * 0.22, 0.55) * 0.5, length / 2]}
+            opacity={Math.min(wallOpacity, 0.4)}
+            isTiled={floorMaterial === "CERAMIC_TILE"}
+          />
         </group>
       )}
 
