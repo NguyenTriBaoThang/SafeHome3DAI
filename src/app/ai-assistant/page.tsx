@@ -29,10 +29,16 @@ import {
   MessageSquare,
   ShieldAlert,
   Flame,
+  Camera,
+  Layers,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { StructuredCitation, EvidenceStatus } from "@/lib/rag/types";
 import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { SafeHomeMarkdown } from "@/components/chat/SafeHomeMarkdown";
+import { ItemHazardCard } from "@/components/chat/ItemHazardCard";
+import { ItemAssessmentModal } from "@/components/chat/ItemAssessmentModal";
+import type { ItemHazardAssessment } from "@/lib/vision/itemHazardTypes";
 
 interface ChatMessageItem {
   id: string;
@@ -44,6 +50,7 @@ interface ChatMessageItem {
   suggestedFollowUps?: string[];
   timestamp: string;
   isStreaming?: boolean;
+  itemAssessment?: ItemHazardAssessment;
 }
 
 interface ConversationItem {
@@ -80,8 +87,13 @@ export default function AIAssistantPage() {
 
   // Right Inspector state
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
-  const [activeRightTab, setActiveRightTab] = useState<"evidence" | "sources" | "eval">("evidence");
+  const [activeRightTab, setActiveRightTab] = useState<"evidence" | "sources" | "eval" | "items">("evidence");
   const [selectedCitation, setSelectedCitation] = useState<StructuredCitation | null>(null);
+
+  // Item Hazard Assessment state
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [recentItemAssessments, setRecentItemAssessments] = useState<ItemHazardAssessment[]>([]);
+  const [selectedItemAssessment, setSelectedItemAssessment] = useState<ItemHazardAssessment | null>(null);
 
   // RAG Evaluation live report state
   const [evalReport, setEvalReport] = useState<any>(null);
@@ -425,6 +437,61 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
     }
   };
 
+  const handleSendItemToChat = (assessment: ItemHazardAssessment) => {
+    setRecentItemAssessments((prev) => [
+      assessment,
+      ...prev.filter((a) => a.id !== assessment.id),
+    ]);
+    setSelectedItemAssessment(assessment);
+
+    const userMessage: ChatMessageItem = {
+      id: `user-item-${Date.now()}`,
+      role: "user",
+      content: `🔍 Yêu cầu thẩm định nguy cơ té ngã cho vật dụng: **${assessment.itemName}**`,
+      timestamp: new Date().toISOString(),
+    };
+
+    const assistantMessage: ChatMessageItem = {
+      id: `asst-item-${Date.now()}`,
+      role: "assistant",
+      content: `Tôi đã hoàn thành **Thẩm định an toàn té ngã theo tiêu chuẩn CDC STEADI & WHO** cho vật dụng: **${assessment.itemName}**.
+
+### 1. Mức độ nguy hiểm: **${assessment.severityLabel}**
+- Điểm đánh giá rủi ro: **${assessment.riskScore}/100**
+- Mức độ ưu tiên xử lý: **${assessment.urgencyLevel}**
+
+### 2. Tại sao nguy hiểm đối với người cao tuổi?
+${assessment.whyDangerous.summary}
+- **Cơ chế sinh cơ học:** ${assessment.whyDangerous.biomechanicalRationale}
+- **Nguy cơ chấn thương:** ${assessment.whyDangerous.consequenceRisk}
+
+### 3. Nguy hiểm ở chỗ nào?
+Hệ thống phát hiện **${assessment.whereDangerous.length} điểm nguy cơ** cụ thể trên bức ảnh (H1 - H${assessment.whereDangerous.length}):
+${assessment.whereDangerous.map((s) => `- **H${s.number} - ${s.title}:** ${s.description} *(Cơ chế: ${s.mechanism})*`).join("\n")}
+
+### 4. Đề xuất khắc phục tức thì:
+${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư: *${r.materialsNeeded}*\n   - Chi phí: **${r.costEstimate}** (Thời gian: ${r.timeEstimate})`).join("\n")}
+
+---
+* ⚠️ Tuyên bố an toàn: Đánh giá này tuân thủ danh mục kiểm định nguy cơ môi trường CDC STEADI và WHO. Hãy ưu tiên xử lý các điểm nguy cơ mức độ CRITICAL và HIGH trong vòng 24 giờ để ngăn ngừa té ngã tái diễn.*`,
+      evidenceStatus: assessment.riskScore >= 75 ? "SUPPORTED" : "PARTIALLY_SUPPORTED",
+      responseMode: "LOCAL_GROUNDED",
+      citations: assessment.citations,
+      itemAssessment: assessment,
+      suggestedFollowUps: [
+        `Cách cố định mép ${assessment.itemName} an toàn nhất?`,
+        `Cần lưu ý gì khi mua vật tư thay thế cho ${assessment.itemName}?`,
+        `Tiêu chuẩn thông thủy lối đi phòng ngừa vấp ngã theo CDC là bao nhiêu?`,
+      ],
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    if (assessment.citations && assessment.citations.length > 0) {
+      setSelectedCitation(assessment.citations[0]);
+    }
+  };
+
   // Render clickable inline citations [1], [2]
   const renderMessageContent = (content: string, citations?: StructuredCitation[]) => {
     const parts = content.split(/(\[\d+(?:,\s*\d+)*\])/g);
@@ -675,6 +742,16 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Quick Item Assessment Trigger */}
+            <button
+              onClick={() => setIsItemModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs active:scale-95"
+              title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
+            >
+              <Camera className="h-3.5 w-3.5 text-teal-700" />
+              <span className="hidden sm:inline">Thẩm định ảnh vật dụng</span>
+            </button>
+
             {/* Toggle Inspector Drawer */}
             <button
               onClick={() => setRightPanelOpen(!rightPanelOpen)}
@@ -737,10 +814,27 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
                       </div>
                     )}
 
-                    {/* Content with interactive [1], [2] citations */}
-                    {isUser
-                      ? msg.content
-                      : renderMessageContent(msg.content, msg.citations)}
+                    {/* Rich Item Hazard Assessment Card if present */}
+                    {msg.itemAssessment && (
+                      <div className="mb-4">
+                        <ItemHazardCard
+                          assessment={msg.itemAssessment}
+                          onAskCopilot={(q) => handleSendMessage(q)}
+                        />
+                      </div>
+                    )}
+
+                    {/* Rich Markdown & Typography Formatter with interactive citations */}
+                    <SafeHomeMarkdown
+                      content={msg.content}
+                      citations={msg.citations}
+                      onCitationClick={(citation) => {
+                        setSelectedCitation(citation);
+                        setActiveRightTab("evidence");
+                        setRightPanelOpen(true);
+                      }}
+                      isUser={isUser}
+                    />
 
                     {/* Citations Preview strip inside assistant message */}
                     {!isUser && msg.citations && msg.citations.length > 0 && (
@@ -817,6 +911,14 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
         {/* Composer */}
         <div className="p-4 bg-white border-t border-slate-200 space-y-2">
           <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-teal-500 focus-within:bg-white transition">
+            <button
+              type="button"
+              onClick={() => setIsItemModalOpen(true)}
+              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-teal-50 text-slate-600 hover:text-teal-700 transition shadow-2xs self-end shrink-0"
+              title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
+            >
+              <Camera className="h-4 w-4" />
+            </button>
             <textarea
               ref={textareaRef}
               rows={2}
@@ -855,30 +957,40 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
         <aside className="w-88 xl:w-96 border-l border-slate-200 bg-white flex flex-col shrink-0 overflow-hidden">
           {/* Tabs Header */}
           <div className="p-2 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 overflow-x-auto">
               <button
                 onClick={() => setActiveRightTab("evidence")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
                   activeRightTab === "evidence"
                     ? "bg-white text-teal-800 shadow-xs"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                Bằng chứng trích dẫn
+                Bằng chứng
+              </button>
+              <button
+                onClick={() => setActiveRightTab("items")}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+                  activeRightTab === "items"
+                    ? "bg-white text-teal-800 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Vật dụng ({recentItemAssessments.length})
               </button>
               <button
                 onClick={() => setActiveRightTab("sources")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
                   activeRightTab === "sources"
                     ? "bg-white text-teal-800 shadow-xs"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                Kho nguồn chuẩn
+                Kho nguồn
               </button>
               <button
                 onClick={() => setActiveRightTab("eval")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
                   activeRightTab === "eval"
                     ? "bg-white text-teal-800 shadow-xs"
                     : "text-slate-500 hover:text-slate-800"
@@ -1016,6 +1128,80 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
             </div>
           )}
 
+          {/* Tab 4: Evaluated Items History & Inspector */}
+          {activeRightTab === "items" && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span className="text-xs font-bold text-slate-800">
+                  Vật dụng đã thẩm định ({recentItemAssessments.length})
+                </span>
+                <button
+                  onClick={() => setIsItemModalOpen(true)}
+                  className="text-xs font-bold text-teal-600 hover:text-teal-800 flex items-center gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Tải ảnh mới</span>
+                </button>
+              </div>
+
+              {recentItemAssessments.length > 0 ? (
+                <div className="space-y-3">
+                  {recentItemAssessments.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        setSelectedItemAssessment(item);
+                        setIsItemModalOpen(true);
+                      }}
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 cursor-pointer shadow-xs transition space-y-2 group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                          {item.itemCategory}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            item.riskScore >= 80
+                              ? "bg-rose-100 text-rose-800 border border-rose-200"
+                              : "bg-amber-100 text-amber-800 border border-amber-200"
+                          }`}
+                        >
+                          {item.riskScore}/100 — {item.severity}
+                        </span>
+                      </div>
+
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-teal-900 line-clamp-1">
+                        {item.itemName}
+                      </h4>
+
+                      <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                        {item.whyDangerous.summary}
+                      </p>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                        <span>{item.whereDangerous.length} điểm nguy cơ (H1..H{item.whereDangerous.length})</span>
+                        <span className="text-teal-600 font-bold group-hover:underline flex items-center gap-0.5">
+                          Xem chi tiết &rarr;
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-xs text-slate-400 space-y-3">
+                  <Camera className="h-8 w-8 text-slate-300 mx-auto" />
+                  <p>Chưa có ảnh vật dụng nào được thẩm định.</p>
+                  <button
+                    onClick={() => setIsItemModalOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs"
+                  >
+                    Tải ảnh vật dụng ngay
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Tab 3: Live RAG Evaluation Benchmark */}
           {activeRightTab === "eval" && (
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1110,6 +1296,13 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
           )}
         </aside>
       )}
+
+      {/* Item Hazard Assessment Modal */}
+      <ItemAssessmentModal
+        isOpen={isItemModalOpen}
+        onClose={() => setIsItemModalOpen(false)}
+        onSendToChat={handleSendItemToChat}
+      />
     </div>
   );
 }
