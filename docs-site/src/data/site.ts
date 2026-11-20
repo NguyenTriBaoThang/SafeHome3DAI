@@ -27,19 +27,46 @@ export interface NavItem {
   label: string
   path: string
   blurb: string
+  badge?: string
 }
 
-export const NAV: NavItem[] = [
-  { id: 'overview', label: 'Tổng quan (Overview)', path: '/', blurb: 'Tầm nhìn, thách thức té ngã người cao tuổi & hành trình 7 bước' },
-  { id: 'architecture', label: 'Kiến trúc (Architecture)', path: '/architecture', blurb: 'Kiến trúc phân tầng, CSDL Prisma 16 bảng & luồng dữ liệu' },
-  { id: 'survey', label: 'AI Guided Survey', path: '/survey', blurb: 'Khảo sát AI thích ứng, tỉa nhánh câu hỏi động & NLP tiếng Việt' },
-  { id: 'vision', label: 'AI Vision & Items', path: '/vision', blurb: 'Thị giác đa tầng, Bounding Box HTML & thẩm định vật dụng CDC STEADI' },
-  { id: 'digital-twin', label: '3D Digital Twin', path: '/digital-twin', blurb: 'Bản sao số 3D WebGL, Photorealistic Dollhouse & gom cụm <0.95m' },
-  { id: 'risk', label: 'Risk Engine (WHO/CDC)', path: '/risk', blurb: '8 quy tắc y khoa tất định, chấm điểm 0-100 & ưu tiên can thiệp' },
-  { id: 'xai', label: 'XAI & Copilot RAG', path: '/xai', blurb: 'Sơ đồ cây quyết định ReactFlow & trợ lý tra cứu y khoa 4 tab' },
-  { id: 'tests', label: 'Kiểm thử & QA', path: '/tests', blurb: '109/109 ca kiểm thử Vitest thành công (20 test suites), 100% xanh lá' },
-  { id: 'api', label: 'Đặc tả API', path: '/api', blurb: 'Tài liệu chi tiết 15+ endpoint RESTful của nền tảng' },
+export interface NavGroup {
+  id: string
+  title: string
+  items: NavItem[]
+}
+
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'overview-group',
+    title: 'TỔNG QUAN & BẢN ĐỒ',
+    items: [
+      { id: 'overview', label: 'Tổng quan (Overview)', path: '/', blurb: 'Tầm nhìn, thách thức té ngã người cao tuổi & hành trình 7 bước', badge: '7 Bước' },
+      { id: 'architecture', label: 'Kiến trúc (Architecture)', path: '/architecture', blurb: 'Cây tri thức kiến trúc, CSDL Prisma 16 bảng & luồng dữ liệu', badge: 'Cây Tri Thức' },
+      { id: 'tests', label: 'Kiểm thử & QA', path: '/tests', blurb: '109/109 ca kiểm thử Vitest thành công (20 test suites), 100% xanh lá', badge: '109 Tests' },
+    ]
+  },
+  {
+    id: 'core-modules',
+    title: 'PHÂN HỆ LÕI (CORE ENGINES)',
+    items: [
+      { id: 'survey', label: 'AI Guided Survey', path: '/survey', blurb: 'Khảo sát AI thích ứng, tỉa nhánh câu hỏi động & NLP tiếng Việt', badge: 'DAG & NLP' },
+      { id: 'vision', label: 'AI Vision & Items', path: '/vision', blurb: 'Thị giác đa tầng, Bounding Box HTML & thẩm định vật dụng CDC STEADI', badge: 'CDC STEADI' },
+      { id: 'digital-twin', label: '3D Digital Twin', path: '/digital-twin', blurb: 'Bản sao số 3D WebGL, Photorealistic Dollhouse & gom cụm <0.95m', badge: 'Dollhouse' },
+      { id: 'risk', label: 'Risk Engine (WHO/CDC)', path: '/risk', blurb: '8 quy tắc y khoa tất định, chấm điểm 0-100 & ưu tiên can thiệp', badge: '8 Rules' },
+      { id: 'xai', label: 'XAI & Copilot RAG', path: '/xai', blurb: 'Sơ đồ cây quyết định ReactFlow & trợ lý tra cứu y khoa 4 tab', badge: 'Cây Quyết Định' },
+    ]
+  },
+  {
+    id: 'integration',
+    title: 'TÍCH HỢP & ĐẶC TẢ',
+    items: [
+      { id: 'api', label: 'Đặc tả API (API Reference)', path: '/api', blurb: 'Tài liệu chi tiết 15+ endpoint RESTful của nền tảng', badge: '15+ APIs' },
+    ]
+  }
 ]
+
+export const NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)
 
 export const SYSTEM_STATS = [
   { label: 'Quy tắc nguy cơ y khoa', value: '8 Rules (WHO/CDC)' },

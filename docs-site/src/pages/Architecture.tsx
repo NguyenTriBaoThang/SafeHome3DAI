@@ -1,6 +1,7 @@
-import { Layers, Lock, GitBranch, Cpu, Database, Server } from 'lucide-react'
+import { Layers, Lock, GitBranch, Cpu, Database, Server, Network } from 'lucide-react'
 import { PageHeader, Callout, Src } from '../components/ui'
 import { CodeBlock } from '../components/CodeBlock'
+import { SystemKnowledgeTree } from '../components/SystemKnowledgeTree'
 import { SRC } from '../data/site'
 
 export default function Architecture() {
@@ -12,53 +13,18 @@ export default function Architecture() {
         lead="Mô hình kiến trúc phân tầng, luồng xử lý dữ liệu và hệ sinh thái lưu trữ đồng bộ cho nền tảng SafeHome 3D AI."
       />
 
-      <section className="card">
-        <div className="card-title">
-          <Layers size={20} color="var(--primary-hover)" />
-          <span>Sơ Đồ Phân Tầng Hệ Thống (High-Level Architecture)</span>
+      <section style={{ marginBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem', flexWrap: 'wrap', gap: 10 }}>
+          <h2 style={{ fontSize: '1.4rem', color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: 'var(--cyan)' }}>■</span> Cây Tri Thức Kiến Trúc Hệ Thống (Knowledge Graph Architecture)
+          </h2>
+          <span className="badge badge-verified">5 Tầng Tri Thức · 14 Mắt Xích Lõi</span>
         </div>
-        <pre>{`┌────────────────────────────────────────────────────────────────────────┐
-│                        TẦNG GIAO DIỆN & TRÌNH DIỄN                      │
-│   Next.js 14 App Router · React 18 · Tailwind CSS · Three.js · @xyflow │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐   │
-│  │ AI Survey    │ │ Vision Studio│ │ Digital Twin │ │ Risk & XAI   │   │
-│  │(/ai-guided-  │ │(/ai-vision & │ │(/digital-twin│ │(/explainabili│   │
-│  │ survey)      │ │ /vision)     │ │ & dollhouse) │ │ ty, /ai-asst)│   │
-│  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘   │
-└────────────────────────────────────┬───────────────────────────────────┘
-                                     │ HTTPS / JSON API
-┌────────────────────────────────────▼───────────────────────────────────┐
-│                    TẦNG BẢO MẬT & XÁC THỰC ĐẦU VÀO                     │
-│  - Magic Bytes Check (FF D8 FF / 89 50 4E 47 / 52 49 46 46)             │
-│  - EXIF / GPS Metadata Stripper · Bảo vệ tuyệt đối thông tin vị trí    │
-│  - Zod Runtime Gatekeeper · Kiểm tra kiểu dữ liệu & schema nghiêm ngặt  │
-└────────────────────────────────────┬───────────────────────────────────┘
-                                     │ Verified Data
-┌────────────────────────────────────▼───────────────────────────────────┐
-│                    TẦNG ĐỘNG CƠ XỬ LÝ LÕI (CORE ENGINES)               │
-│  ┌───────────────────────┐  ┌───────────────────────────────────────┐  │
-│  │ Adaptive Survey Engine │  │ Deterministic Clinical Risk Engine    │  │
-│  │ (Dynamic Irrelevance   │  │ (8 Y khoa quy tắc · WHO 2021 & CDC    │  │
-│  │  Pruning + NLP parsing)│  │  STEADI · 0% Hallucination)          │  │
-│  └───────────────────────┘  └───────────────────────────────────────┘  │
-│  ┌───────────────────────┐  ┌───────────────────────────────────────┐  │
-│  │ Item Hazard Analyzer  │  │ Evidence-Grounded RAG Pipeline        │  │
-│  │ (CDC STEADI Hotspots  │  │ (Vector search + SafeHomeMarkdown     │  │
-│  │  H1..H4 & Biomechanics│  │  + Whitelist citation grounding)      │  │
-│  └───────────────────────┘  └───────────────────────────────────────┘  │
-│  ┌───────────────────────┐  ┌───────────────────────────────────────┐  │
-│  │ 3D Spatial Clustering │  │ Spatial Validation Engine             │  │
-│  │ (<0.95m Euclidean tag │  │ (Boundary, Clearance, Collision       │  │
-│  │  clustering algorithm)│  │  detection & 3D mesh reconstruction)  │  │
-│  └───────────────────────┘  └───────────────────────────────────────┘  │
-└────────────────────────────────────┬───────────────────────────────────┘
-                                     │ Prisma ORM
-┌────────────────────────────────────▼───────────────────────────────────┐
-│                    TẦNG LƯU TRỮ & KIỂM TOÁN (DATA PERSISTENCE)         │
-│  Prisma ORM (16 Relational Models) · SQLite (Dev) / PostgreSQL (Prod)   │
-│  - Rooms, Object3D, SurveySession, SurveyAnswer, VisionAnalysis        │
-│  - RiskAssessment, RiskFinding, ActionPlan, Simulation, AuditEvent     │
-└────────────────────────────────────────────────────────────────────────┘`}</pre>
+        <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: '1.2rem' }}>
+          Đồ thị cây tri thức nhân quả trực quan hóa toàn diện kiến trúc phân tầng của SafeHome 3D AI (tương đồng với sơ đồ cây giải trình XAI trong ứng dụng). Nhấp vào bất kỳ mắt xích nào trên cây để tra cứu công nghệ, thuật toán lõi, file mã nguồn và tiêu chuẩn y tế tương ứng.
+        </p>
+
+        <SystemKnowledgeTree />
       </section>
 
       <Callout title="Kiến Trúc Phân Ly Thị Giác & Bounding Box Mới">
