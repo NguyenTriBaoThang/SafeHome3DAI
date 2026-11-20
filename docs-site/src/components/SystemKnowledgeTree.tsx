@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Camera,
   ClipboardCheck,
@@ -17,7 +17,8 @@ import {
   Play,
   Pause,
   ArrowRight,
-  Info
+  Info,
+  GitCommit
 } from 'lucide-react'
 import { Src } from './ui'
 
@@ -35,7 +36,9 @@ export interface KnowledgeNode {
   testSuite: string
   description: string
   tags: string[]
-  streams: string[] // which streams this node belongs to
+  streams: string[]
+  upstream: string[]
+  downstream: string[]
 }
 
 export const KNOWLEDGE_NODES: KnowledgeNode[] = [
@@ -54,7 +57,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/visionEngine.test.ts (14 tests passed)',
     description: 'Bóc tách ảnh hiện trường thành danh mục vật thể số hóa. Kiểm tra Magic Bytes nhị phân (FF D8 FF / 89 50 4E 47), cắt bỏ 100% tọa độ GPS, chuẩn hóa bounding boxes và dùng nhãn CSS HTML Overlay loại trừ triệt để lỗi phóng to chữ Chromium.',
     tags: ['Multimodal AI', 'Privacy Guard', '18 Classes'],
-    streams: ['stream-1']
+    streams: ['stream-1'],
+    upstream: ['Ảnh chụp hiện trường phòng ngủ / nhà vệ sinh'],
+    downstream: ['Spatial Validation Engine']
   },
   {
     id: 'item-hazard',
@@ -70,7 +75,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/itemHazardAssessment.test.ts (4 tests passed)',
     description: 'Thẩm định chuyên sâu đồ vật chụp gần: trả lời 3 câu hỏi lâm sàng (Mức độ nguy hiểm bao nhiêu? Tại sao nguy hiểm? Nguy hiểm ở chỗ nào?). Định vị ghim rủi ro H1..H4 trực tiếp trên ảnh và hỗ trợ kéo thả căn chỉnh tọa độ.',
     tags: ['CDC STEADI', 'Hotspots H1..H4', 'Biomechanics'],
-    streams: ['stream-1']
+    streams: ['stream-1'],
+    upstream: ['Ảnh chụp cận cảnh bàn/ghế/vật dụng'],
+    downstream: ['Spatial Validation Engine']
   },
   {
     id: 'survey-nlp',
@@ -86,7 +93,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/surveyEngine.test.ts (9 tests passed)',
     description: 'Hệ thống khảo sát thích ứng DAG. Tự động bỏ qua câu hỏi không liên quan khi câu hỏi cha = NO (ví dụ không có thảm thì không hỏi viền thảm). Hiểu từ đo lường dân dã tiếng Việt (phân, tấc, mét) và tín hiệu chưa chắc chắn (chưa rõ, không biết).',
     tags: ['DAG Pruning', 'Vietnamese NLP', 'Zero Skew'],
-    streams: ['stream-2']
+    streams: ['stream-2'],
+    upstream: ['Khảo sát giao thoại người chăm sóc'],
+    downstream: ['Stale Dependency Purger']
   },
   {
     id: 'digital-twin-core',
@@ -102,7 +111,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/dollhouseReferenceScene.test.ts (5 tests passed)',
     description: 'Không gian phòng ngủ và nhà vệ sinh khép kín tỷ lệ 1:1. Tích hợp 4 chế độ ánh sáng (Nắng sớm, Ban ngày, Đêm 40 Lux nguy hiểm, Studio 320 Lux) và chuyển đổi ma sát mặt sàn khô ráo vs trơn ướt.',
     tags: ['Three.js', 'Dollhouse', 'Lighting Studio'],
-    streams: ['stream-1']
+    streams: ['stream-1'],
+    upstream: ['Tọa độ phòng & mesh 3D Dollhouse'],
+    downstream: ['Smart Marker Clustering']
   },
 
   // Tier 2: Spatial Normalization & Facts
@@ -120,7 +131,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/spatialValidationEngine.test.ts (8 tests passed)',
     description: 'Xác thực tọa độ hình học 3 chiều: ngăn chặn đồ vật bay lơ lửng, chìm sàn, xuyên tường; phát hiện lối đi bị thu hẹp dưới 80cm gây cản trở cho người già dùng khung tập đi hoặc gậy chống.',
     tags: ['AABB/OBB Bounds', 'Clearance <80cm', 'Snapping'],
-    streams: ['stream-1', 'stream-3']
+    streams: ['stream-1', 'stream-3'],
+    upstream: ['Thị Giác AI', 'Thẩm Định Vật Dụng CDC'],
+    downstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng', 'Chỉ Mục Vector Y Khoa RAG']
   },
   {
     id: 'marker-clustering',
@@ -136,7 +149,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/workflowEngine.test.ts (4 tests passed)',
     description: 'Khi nhiều điểm nguy cơ nằm cạnh nhau trong không gian hẹp, thuật toán tự động gom các nhãn riêng lẻ thành 1 nhãn cụm duy nhất (ví dụ: [🔴 +3 Nguy cơ]), bấm vào để mở rộng, loại bỏ 100% hiện tượng đè lấn chữ.',
     tags: ['Radius <0.95m', 'Anti-clutter', 'Zero Overlap'],
-    streams: ['stream-1']
+    streams: ['stream-1'],
+    upstream: ['Bản Sao Số 3D WebGL'],
+    downstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng']
   },
   {
     id: 'stale-dependency',
@@ -152,7 +167,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/surveyIntegration.test.ts (4 tests passed)',
     description: 'Khi người dùng quay lại sửa câu trả lời cha (ví dụ đổi từ Có thảm sang Không thảm), hệ thống tự động tìm và xóa câu trả lời con cũ trong database, hủy bỏ mối nguy RISK-001 phát sinh trước đó.',
     tags: ['Data Integrity', 'Auto Purge', 'Cascade'],
-    streams: ['stream-2']
+    streams: ['stream-2'],
+    upstream: ['Khảo Sát Thích Ứng & NLP'],
+    downstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng']
   },
 
   // Tier 3: Evidence-Based Clinical Rules
@@ -170,7 +187,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/riskIntelligence.test.ts (10 tests passed)',
     description: '8 quy tắc y khoa lâm sàng phiên bản 1.0.0: Thảm trượt (RISK-001), Dây điện lối đi (RISK-002), Vật cản thông thủy (RISK-003), Thiếu sáng ban đêm <50 Lux (RISK-004), Sàn phòng tắm trơn (RISK-005), Thiếu thanh vịn bồn cầu/vòi sen (RISK-006), Gờ bậc cửa >1.5cm (RISK-007), Công tắc ngoài tầm với (RISK-008).',
     tags: ['WHO 2021', 'CDC STEADI', 'ADA Barrier-free'],
-    streams: ['stream-1', 'stream-2']
+    streams: ['stream-1', 'stream-2'],
+    upstream: ['Spatial Validation Engine', 'Smart Marker Clustering', 'Stale Purger'],
+    downstream: ['Deterministic Risk Engine', 'Cây Phả Hệ Quyết Định (XAI)']
   },
   {
     id: 'rag-knowledge',
@@ -186,7 +205,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/ragEngine.test.ts (4 tests passed)',
     description: 'Kho tri thức chuyên sâu gồm 114 đoạn trích y khoa chuẩn mực được lập chỉ mục vector, phục vụ truy vấn thời gian thực cho trợ lý AI Copilot kèm số trang và liên kết cổng thông tin chính thống.',
     tags: ['Vector Chunks', 'Ministry of Health', 'NCOA'],
-    streams: ['stream-3']
+    streams: ['stream-3'],
+    upstream: ['Spatial Validation Engine'],
+    downstream: ['Trợ Lý AI SafeHome Copilot']
   },
 
   // Tier 4: Deterministic Reasoning & XAI
@@ -197,14 +218,16 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     tierColor: '#f87171',
     title: 'Deterministic Risk Engine',
     icon: 'Activity',
-    subtitle: 'S = max(0, 100 - ∑Penalties) · 0% Ảo giác',
+    subtitle: 'S = max(0, 100 - ∑P) · 0% Ảo giác',
     tech: 'Deterministic Penalty Formulation · Risk Classification',
     sourcePath: 'src/lib/risk/ruleEngine.ts',
     clinicalStandard: 'Y học chứng cứ tất định (Zero Hallucination Guarantee)',
     testSuite: 'tests/riskEngine.test.ts (11 tests passed)',
     description: 'Công thức toán học tất định tính toán điểm an toàn (0 - 100) và phân tầng rủi ro lâm sàng: An toàn cao (80-100), Trung bình (60-79), Nguy cơ cao (0-59). Không dựa vào xác suất sinh từ của LLM.',
     tags: ['Pure Math', 'Zero Hallucination', 'Score 0-100'],
-    streams: ['stream-1', 'stream-2']
+    streams: ['stream-1', 'stream-2'],
+    upstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng'],
+    downstream: ['Mô Phỏng Can Thiệp (What-If)']
   },
   {
     id: 'rag-copilot',
@@ -220,7 +243,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/copilotEngine.test.ts (10 tests passed)',
     description: 'Hội thoại y học thông minh: tự động liên kết trạng thái phòng 3D đang khảo sát, gắn thẻ trích dẫn [1]..[4] và cung cấp ngăn tra cứu 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG 8 tiêu chí).',
     tags: ['Grounded RAG', '4-Tab Drawer', '3D Context'],
-    streams: ['stream-3']
+    streams: ['stream-3'],
+    upstream: ['Chỉ Mục Vector Y Khoa RAG'],
+    downstream: ['Prisma Relational Store & Audit']
   },
   {
     id: 'xai-tree',
@@ -236,7 +261,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/copilotIntegration.test.ts (4 tests passed)',
     description: 'Trực quan hóa đường suy luận: Không gian phòng → Vật thể 3D → Số đo hình học → Quy chuẩn y tế → Nguy cơ cảnh báo → Đề xuất can thiệp. Bấm vào bất kỳ node nào để xem căn cứ pháp lý và y văn.',
     tags: ['ReactFlow', 'Explainable AI', 'No Black Box'],
-    streams: ['stream-1', 'stream-2', 'stream-3']
+    streams: ['stream-1', 'stream-2', 'stream-3'],
+    upstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng'],
+    downstream: ['Prisma Relational Store & Audit']
   },
 
   // Tier 5: Actionable Interventions & Persistence
@@ -254,7 +281,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/simulationUndoRedo.test.ts (3 tests passed)',
     description: 'Cho phép người dùng thử nghiệm can thiệp ảo (thêm thanh vịn, dán băng dính thảm, kẹp dây điện, tăng độ sáng 320 Lux) để xem ngay điểm an toàn hồi phục (từ 28 lên 100) trước khi tốn tiền mua sắm thật.',
     tags: ['What-If', 'Undo/Redo', '+72 Points Recovery'],
-    streams: ['stream-1']
+    streams: ['stream-1'],
+    upstream: ['Deterministic Risk Engine'],
+    downstream: ['Báo cáo PDF & Kế hoạch thi công']
   },
   {
     id: 'prisma-store',
@@ -270,7 +299,9 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     testSuite: 'tests/workflowIntegration.test.ts (1 test passed)',
     description: 'Hệ thống quản lý 16 models quan hệ đồng bộ (Room, Object3D, SurveySession, RiskAssessment, AuditEvent,...). Lưu trữ toàn bộ lịch sử biến đổi trạng thái y tế và xuất báo cáo PDF chuẩn in ấn.',
     tags: ['16 Models', 'Prisma ORM', 'Audit Trail'],
-    streams: ['stream-1', 'stream-2', 'stream-3']
+    streams: ['stream-1', 'stream-2', 'stream-3'],
+    upstream: ['Trợ Lý AI SafeHome Copilot', 'Cây Phả Hệ Quyết Định (XAI)'],
+    downstream: ['Hồ sơ an toàn người cao tuổi bất biến']
   }
 ]
 
@@ -278,38 +309,37 @@ export interface ConduitEdge {
   id: string
   fromNode: string
   toNode: string
-  fromY: number
-  toY: number
+  fallbackY1: number
+  fallbackY2: number
   stream: string
   label: string
   color: string
 }
 
-// Causal conduits with exact vertical alignments between cards
 const CONDUITS_T1_T2: ConduitEdge[] = [
-  { id: 'c-v-s', fromNode: 'vision-studio', toNode: 'spatial-validation', fromY: 48, toY: 60, stream: 'stream-1', label: 'BBox 2D ➔ Snapping & Thông thủy <80cm', color: '#22d3ee' },
-  { id: 'c-h-s', fromNode: 'item-hazard', toNode: 'spatial-validation', fromY: 158, toY: 60, stream: 'stream-1', label: 'Hotspot H1..H4 ➔ Tọa độ va chạm', color: '#fbbf24' },
-  { id: 'c-s-p', fromNode: 'survey-nlp', toNode: 'stale-dependency', fromY: 268, toY: 330, stream: 'stream-2', label: 'DAG khảo sát ➔ Xóa quan hệ con lỗi thời', color: '#22d3ee' },
-  { id: 'c-d-m', fromNode: 'digital-twin-core', toNode: 'marker-clustering', fromY: 378, toY: 195, stream: 'stream-1', label: 'Vật thể 3D ➔ Gom cụm nhãn r=0.95m', color: '#22d3ee' }
+  { id: 'c-v-s', fromNode: 'vision-studio', toNode: 'spatial-validation', fallbackY1: 55, fallbackY2: 80, stream: 'stream-1', label: 'BBox 2D ➔ Snapping & Thông thủy <80cm', color: '#22d3ee' },
+  { id: 'c-h-s', fromNode: 'item-hazard', toNode: 'spatial-validation', fallbackY1: 180, fallbackY2: 80, stream: 'stream-1', label: 'Hotspot H1..H4 ➔ Tọa độ va chạm', color: '#fbbf24' },
+  { id: 'c-s-p', fromNode: 'survey-nlp', toNode: 'stale-dependency', fallbackY1: 305, fallbackY2: 400, stream: 'stream-2', label: 'DAG khảo sát ➔ Xóa quan hệ con lỗi thời', color: '#22d3ee' },
+  { id: 'c-d-m', fromNode: 'digital-twin-core', toNode: 'marker-clustering', fallbackY1: 430, fallbackY2: 240, stream: 'stream-1', label: 'Vật thể 3D ➔ Gom cụm nhãn r=0.95m', color: '#22d3ee' }
 ]
 
 const CONDUITS_T2_T3: ConduitEdge[] = [
-  { id: 'c-sp-rr', fromNode: 'spatial-validation', toNode: 'risk-registry', fromY: 60, toY: 100, stream: 'stream-1', label: 'Vi phạm hình học ➔ 8 Quy tắc WHO/CDC', color: '#38bdf8' },
-  { id: 'c-mc-rr', fromNode: 'marker-clustering', toNode: 'risk-registry', fromY: 195, toY: 100, stream: 'stream-1', label: 'Tọa độ điểm nguy hiểm ➔ Chuẩn y khoa', color: '#38bdf8' },
-  { id: 'c-sd-rr', fromNode: 'stale-dependency', toNode: 'risk-registry', fromY: 330, toY: 100, stream: 'stream-2', label: 'Lọc sạch vi phạm ảo ➔ Quy tắc hợp lệ', color: '#38bdf8' },
-  { id: 'c-sp-rag', fromNode: 'spatial-validation', toNode: 'rag-knowledge', fromY: 60, toY: 290, stream: 'stream-3', label: 'Dữ liệu đo đạc ➔ Đối chiếu vector y văn', color: '#38bdf8' }
+  { id: 'c-sp-rr', fromNode: 'spatial-validation', toNode: 'risk-registry', fallbackY1: 80, fallbackY2: 120, stream: 'stream-1', label: 'Vi phạm hình học ➔ 8 Quy tắc WHO/CDC', color: '#38bdf8' },
+  { id: 'c-mc-rr', fromNode: 'marker-clustering', toNode: 'risk-registry', fallbackY1: 240, fallbackY2: 120, stream: 'stream-1', label: 'Tọa độ điểm nguy hiểm ➔ Chuẩn y khoa', color: '#38bdf8' },
+  { id: 'c-sd-rr', fromNode: 'stale-dependency', toNode: 'risk-registry', fallbackY1: 400, fallbackY2: 120, stream: 'stream-2', label: 'Lọc sạch vi phạm ảo ➔ Quy tắc hợp lệ', color: '#38bdf8' },
+  { id: 'c-sp-rag', fromNode: 'spatial-validation', toNode: 'rag-knowledge', fallbackY1: 80, fallbackY2: 360, stream: 'stream-3', label: 'Dữ liệu đo đạc ➔ Đối chiếu vector y văn', color: '#38bdf8' }
 ]
 
 const CONDUITS_T3_T4: ConduitEdge[] = [
-  { id: 'c-rr-re', fromNode: 'risk-registry', toNode: 'risk-engine', fromY: 100, toY: 60, stream: 'stream-1', label: '8 Quy tắc ➔ Trừ điểm phạt tất định S = max(0, 100 - ∑P)', color: '#fbbf24' },
-  { id: 'c-rr-xai', fromNode: 'risk-registry', toNode: 'xai-tree', fromY: 100, toY: 330, stream: 'stream-2', label: 'Căn cứ quy chuẩn ➔ Cây phả hệ nhân quả XAI', color: '#fbbf24' },
-  { id: 'c-rag-cop', fromNode: 'rag-knowledge', toNode: 'rag-copilot', fromY: 290, toY: 195, stream: 'stream-3', label: '114 Chunks y văn ➔ Hội thoại có trích dẫn [1]..[4]', color: '#fbbf24' }
+  { id: 'c-rr-re', fromNode: 'risk-registry', toNode: 'risk-engine', fallbackY1: 120, fallbackY2: 80, stream: 'stream-1', label: '8 Quy tắc ➔ Trừ điểm phạt tất định S = max(0, 100 - ∑P)', color: '#fbbf24' },
+  { id: 'c-rr-xai', fromNode: 'risk-registry', toNode: 'xai-tree', fallbackY1: 120, fallbackY2: 400, stream: 'stream-2', label: 'Căn cứ quy chuẩn ➔ Cây phả hệ nhân quả XAI', color: '#fbbf24' },
+  { id: 'c-rag-cop', fromNode: 'rag-knowledge', toNode: 'rag-copilot', fallbackY1: 360, fallbackY2: 240, stream: 'stream-3', label: '114 Chunks y văn ➔ Hội thoại có trích dẫn [1]..[4]', color: '#fbbf24' }
 ]
 
 const CONDUITS_T4_T5: ConduitEdge[] = [
-  { id: 'c-re-sim', fromNode: 'risk-engine', toNode: 'scenario-simulator', fromY: 60, toY: 100, stream: 'stream-1', label: 'Điểm số 28/100 ➔ Mô phỏng can thiệp What-If (+72 điểm)', color: '#f87171' },
-  { id: 'c-xai-db', fromNode: 'xai-tree', toNode: 'prisma-store', fromY: 330, toY: 290, stream: 'stream-2', label: 'Chuỗi nhân quả ➔ AuditEvent Store bất biến', color: '#f87171' },
-  { id: 'c-cop-db', fromNode: 'rag-copilot', toNode: 'prisma-store', fromY: 195, toY: 290, stream: 'stream-3', label: 'Tư vấn y khoa ➔ 16 Models Prisma Store', color: '#f87171' }
+  { id: 'c-re-sim', fromNode: 'risk-engine', toNode: 'scenario-simulator', fallbackY1: 80, fallbackY2: 120, stream: 'stream-1', label: 'Điểm số 28/100 ➔ Mô phỏng can thiệp What-If (+72 điểm)', color: '#f87171' },
+  { id: 'c-xai-db', fromNode: 'xai-tree', toNode: 'prisma-store', fallbackY1: 400, fallbackY2: 360, stream: 'stream-2', label: 'Chuỗi nhân quả ➔ AuditEvent Store bất biến', color: '#f87171' },
+  { id: 'c-cop-db', fromNode: 'rag-copilot', toNode: 'prisma-store', fallbackY1: 240, fallbackY2: 360, stream: 'stream-3', label: 'Tư vấn y khoa ➔ 16 Models Prisma Store', color: '#f87171' }
 ]
 
 export function SystemKnowledgeTree() {
@@ -340,7 +370,7 @@ export function SystemKnowledgeTree() {
   const renderConduitBridge = (conduits: ConduitEdge[]) => {
     return (
       <div className="tree-conduit-col" aria-hidden="true">
-        <svg className="conduit-svg" viewBox="0 0 54 440" preserveAspectRatio="none">
+        <svg className="conduit-svg" viewBox="0 0 54 480" preserveAspectRatio="none">
           <defs>
             <marker id="arrow-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
               <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#22d3ee" />
@@ -364,8 +394,11 @@ export function SystemKnowledgeTree() {
             const isNodeConnected = selectedId === edge.fromNode || selectedId === edge.toNode
             const isActive = isStreamActive && (activeStream !== 'all' || isNodeConnected || true)
 
+            const y1 = edge.fallbackY1
+            const y2 = edge.fallbackY2
+
             // Cubic bezier curve path
-            const pathData = `M 0 ${edge.fromY} C 27 ${edge.fromY}, 27 ${edge.toY}, 50 ${edge.toY}`
+            const pathData = `M 0 ${y1} C 27 ${y1}, 27 ${y2}, 50 ${y2}`
 
             let strokeColor = edge.color
             let markerId = `url(#arrow-${edge.color === '#22d3ee' ? 'cyan' : edge.color === '#38bdf8' ? 'sky' : edge.color === '#fbbf24' ? 'amber' : 'red'})`
@@ -447,8 +480,8 @@ export function SystemKnowledgeTree() {
 
         <div className="hud-right">
           <div className="hud-metric mono">
-            <span className="metric-label">Gói tin / giây:</span>
-            <strong className="metric-val">{packetCount.toLocaleString()} pkts</strong>
+            <span className="metric-label">Gói tin:</span>
+            <strong className="metric-val">{packetCount.toLocaleString()} pkts/s</strong>
           </div>
           <div className="hud-metric mono hide-sm">
             <span className="metric-label">Độ trễ:</span>
@@ -481,9 +514,9 @@ export function SystemKnowledgeTree() {
         ))}
       </div>
 
-      {/* Main Visual Knowledge Tree Area */}
+      {/* Main Visual Knowledge Tree Area (Full-Width Canvas) */}
       <div className="tree-workspace">
-        {/* Left Tree Graph View with Inter-Tier Connectors */}
+        {/* Tree Graph Canvas */}
         <div className="tree-graph-view">
           <div className="tree-canvas">
             {/* TIER 1 COLUMN (4 nodes) */}
@@ -492,7 +525,7 @@ export function SystemKnowledgeTree() {
                 <span className="tier-tag mono" style={{ color: '#22d3ee' }}>TIER 01 · 4 MẮT XÍCH</span>
                 <strong className="tier-title">Cảm Biến & Thu Nhận Hiện Trường</strong>
               </div>
-              <div className="tier-nodes-list fixed-height-4">
+              <div className="tier-nodes-list">
                 {KNOWLEDGE_NODES.filter((n) => n.tier === 1).map((node) => {
                   const isSelected = node.id === selectedId
                   const isStreamActive = activeStream === 'all' || node.streams.includes(activeStream)
@@ -513,7 +546,6 @@ export function SystemKnowledgeTree() {
                           <span key={t} className="node-tag mono">{t}</span>
                         ))}
                       </div>
-                      {/* Port out */}
                       <span className="node-port port-out" style={{ background: isSelected ? node.tierColor : 'var(--line)' }} />
                     </div>
                   )
@@ -530,7 +562,7 @@ export function SystemKnowledgeTree() {
                 <span className="tier-tag mono" style={{ color: '#38bdf8' }}>TIER 02 · 3 MẮT XÍCH</span>
                 <strong className="tier-title">Bóc Tách & Chuẩn Hóa Hình Học</strong>
               </div>
-              <div className="tier-nodes-list fixed-height-3">
+              <div className="tier-nodes-list">
                 {KNOWLEDGE_NODES.filter((n) => n.tier === 2).map((node) => {
                   const isSelected = node.id === selectedId
                   const isStreamActive = activeStream === 'all' || node.streams.includes(activeStream)
@@ -568,7 +600,7 @@ export function SystemKnowledgeTree() {
                 <span className="tier-tag mono" style={{ color: '#fbbf24' }}>TIER 03 · 2 MẮT XÍCH</span>
                 <strong className="tier-title">Tri Thức Y Học Chứng Cứ</strong>
               </div>
-              <div className="tier-nodes-list fixed-height-2">
+              <div className="tier-nodes-list">
                 {KNOWLEDGE_NODES.filter((n) => n.tier === 3).map((node) => {
                   const isSelected = node.id === selectedId
                   const isStreamActive = activeStream === 'all' || node.streams.includes(activeStream)
@@ -606,7 +638,7 @@ export function SystemKnowledgeTree() {
                 <span className="tier-tag mono" style={{ color: '#f87171' }}>TIER 04 · 3 MẮT XÍCH</span>
                 <strong className="tier-title">Suy Luận Tất Định & XAI</strong>
               </div>
-              <div className="tier-nodes-list fixed-height-3">
+              <div className="tier-nodes-list">
                 {KNOWLEDGE_NODES.filter((n) => n.tier === 4).map((node) => {
                   const isSelected = node.id === selectedId
                   const isStreamActive = activeStream === 'all' || node.streams.includes(activeStream)
@@ -644,7 +676,7 @@ export function SystemKnowledgeTree() {
                 <span className="tier-tag mono" style={{ color: '#34d399' }}>TIER 05 · 2 MẮT XÍCH</span>
                 <strong className="tier-title">Can Thiệp & Lưu Trữ Bất Biến</strong>
               </div>
-              <div className="tier-nodes-list fixed-height-2">
+              <div className="tier-nodes-list">
                 {KNOWLEDGE_NODES.filter((n) => n.tier === 5).map((node) => {
                   const isSelected = node.id === selectedId
                   const isStreamActive = activeStream === 'all' || node.streams.includes(activeStream)
@@ -674,57 +706,84 @@ export function SystemKnowledgeTree() {
           </div>
         </div>
 
-        {/* Right Node Inspector Panel */}
-        <div className="tree-inspector">
-          <div className="inspector-card">
+        {/* Full-Width Node Inspector Deck Below */}
+        <div className="tree-inspector-bottom">
+          <div className="inspector-card-bottom">
+            {/* Inspector Top Row */}
             <div className="inspector-head">
-              <span
-                className="badge badge-verified"
-                style={{
-                  background: `${selectedNode.tierColor}1a`,
-                  color: selectedNode.tierColor,
-                  borderColor: selectedNode.tierColor
-                }}
-              >
-                {selectedNode.tierName}
-              </span>
-              <span className="status-badge-green">
-                <CheckCircle2 size={13} /> Verified in CI
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span
+                  className="badge badge-verified"
+                  style={{
+                    background: `${selectedNode.tierColor}1a`,
+                    color: selectedNode.tierColor,
+                    borderColor: selectedNode.tierColor,
+                    fontSize: '0.74rem'
+                  }}
+                >
+                  {selectedNode.tierName}
+                </span>
+                <span className="status-badge-green">
+                  <CheckCircle2 size={13} /> Verified in CI Test Suite
+                </span>
+              </div>
+              <div className="mono dim small">
+                Bấm vào thẻ bất kỳ trên sơ đồ để thanh tra chi tiết
+              </div>
             </div>
 
-            <h3 className="inspector-title" style={{ color: '#fff', margin: '10px 0 4px', fontSize: '1.2rem' }}>
-              {selectedNode.title}
-            </h3>
-            <p className="inspector-sub" style={{ color: 'var(--muted)', fontSize: '0.88rem', margin: '0 0 16px' }}>
-              {selectedNode.subtitle}
-            </p>
+            <div style={{ margin: '12px 0 16px' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 4px', fontSize: '1.35rem', fontWeight: 700 }}>
+                {selectedNode.title}
+              </h3>
+              <p style={{ color: 'var(--muted)', fontSize: '0.92rem', margin: 0 }}>
+                {selectedNode.subtitle}
+              </p>
+            </div>
 
-            <div className="inspector-detail-rows">
-              <div className="inspect-row">
-                <dt><Code2 size={14} /> Công nghệ lõi / Thuật toán</dt>
+            {/* 4-Item Executive Detail Grid */}
+            <div className="inspector-grid-4">
+              <div className="inspect-item">
+                <dt><Code2 size={14} color="var(--cyan)" /> Công nghệ lõi / Thuật toán</dt>
                 <dd className="mono">{selectedNode.tech}</dd>
               </div>
 
-              <div className="inspect-row">
-                <dt><FileText size={14} /> File mã nguồn dự án</dt>
+              <div className="inspect-item">
+                <dt><FileText size={14} color="var(--green)" /> File mã nguồn dự án</dt>
                 <dd><Src path={selectedNode.sourcePath} /></dd>
               </div>
 
-              <div className="inspect-row">
-                <dt><ShieldCheck size={14} /> Tiêu chuẩn y khoa liên quan</dt>
+              <div className="inspect-item">
+                <dt><ShieldCheck size={14} color="var(--amber)" /> Tiêu chuẩn y khoa liên quan</dt>
                 <dd style={{ color: 'var(--amber)' }}>{selectedNode.clinicalStandard}</dd>
               </div>
 
-              <div className="inspect-row">
-                <dt><CheckCircle2 size={14} /> Ca kiểm thử tự động (Vitest)</dt>
+              <div className="inspect-item">
+                <dt><CheckCircle2 size={14} color="var(--green)" /> Ca kiểm thử tự động (Vitest)</dt>
                 <dd className="mono" style={{ color: 'var(--green)' }}>{selectedNode.testSuite}</dd>
               </div>
             </div>
 
-            <div className="inspector-desc-box">
-              <div className="desc-title"><Info size={14} /> Cơ Chế Hoạt Động Cốt Lõi:</div>
-              <p className="desc-text">{selectedNode.description}</p>
+            {/* 2-Column Split: Detailed Mechanics & Causal Links */}
+            <div className="inspector-split-2">
+              <div className="desc-box">
+                <div className="desc-title"><Info size={14} /> Cơ Chế Hoạt Động Cốt Lõi:</div>
+                <p className="desc-text">{selectedNode.description}</p>
+              </div>
+
+              <div className="links-box">
+                <div className="desc-title"><GitCommit size={14} /> Chuỗi Nhân Quả Liên Kết:</div>
+                <div className="link-rows">
+                  <div className="link-row">
+                    <span className="link-dir mono text-cyan">▲ ĐẦU VÀO (IN):</span>
+                    <span className="link-names">{selectedNode.upstream.join(' · ')}</span>
+                  </div>
+                  <div className="link-row">
+                    <span className="link-dir mono text-green">▼ ĐẦU RA (OUT):</span>
+                    <span className="link-names">{selectedNode.downstream.join(' · ')}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

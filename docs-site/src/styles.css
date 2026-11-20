@@ -877,76 +877,86 @@ pre {
 
 /* Tree Workspace */
 .tree-workspace {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 20px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
 }
 .tree-graph-view {
   background: #050a12;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 18px 12px;
+  padding: 22px 18px;
   overflow-x: auto;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
+  width: 100%;
+}
+.tree-graph-view::-webkit-scrollbar {
+  height: 8px;
+}
+.tree-graph-view::-webkit-scrollbar-track {
+  background: #070e1a;
+  border-radius: 4px;
+}
+.tree-graph-view::-webkit-scrollbar-thumb {
+  background: #1c2b45;
+  border-radius: 4px;
+}
+.tree-graph-view::-webkit-scrollbar-thumb:hover {
+  background: #22d3ee;
 }
 .tree-canvas {
   display: flex;
   align-items: stretch;
   gap: 0;
-  min-width: 1100px;
+  min-width: 1380px;
+  width: max-content;
+  margin: 0 auto;
 }
 .tree-tier-column {
-  flex: 1;
-  min-width: 180px;
-  max-width: 210px;
+  flex: 0 0 230px;
+  min-width: 230px;
+  max-width: 245px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 .tier-header {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-left: 3px solid;
   background: var(--panel2);
   border-radius: 0 6px 6px 0;
   border: 1px solid var(--line);
   border-left-width: 3px;
-  height: 48px;
+  min-height: 58px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 .tier-tag {
-  font-size: 0.64rem;
+  font-size: 0.65rem;
   font-weight: 700;
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+  letter-spacing: 0.04em;
 }
 .tier-title {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: #fff;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
-/* Fixed-Height Node Column Lists for Precise SVG Conduit Alignment */
+/* Node Column Lists with Balanced Vertical Height for Precise Conduits */
 .tier-nodes-list {
   display: flex;
   flex-direction: column;
-  height: 440px;
+  justify-content: space-around;
+  min-height: 480px;
+  height: 480px;
   position: relative;
-}
-.fixed-height-4 {
-  justify-content: space-between;
-}
-.fixed-height-3 {
-  justify-content: space-around;
-}
-.fixed-height-2 {
-  justify-content: space-around;
+  gap: 12px;
 }
 
 /* Node Cards */
@@ -954,13 +964,14 @@ pre {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 84px;
+  min-height: 94px;
+  box-sizing: border-box;
 }
 .tree-node-card:hover {
   transform: translateY(-2px);
@@ -969,49 +980,50 @@ pre {
 }
 .tree-node-card.selected {
   background: #091322;
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
 }
 .node-dimmed {
-  opacity: 0.28;
+  opacity: 0.25;
   filter: grayscale(60%);
 }
 .node-head {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 3px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 .node-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 .node-title {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: #fff;
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 700;
+  line-height: 1.3;
 }
 .node-sub {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--muted);
-  margin: 0 0 6px;
-  line-height: 1.3;
+  margin: 0 0 8px;
+  line-height: 1.35;
 }
 .node-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
   margin-top: auto;
 }
 .node-tag {
-  font-size: 0.62rem;
-  padding: 1px 5px;
+  font-size: 0.64rem;
+  padding: 2px 6px;
   border-radius: 4px;
   background: #03070f;
   border: 1px solid var(--line);
   color: var(--muted);
+  white-space: nowrap;
 }
 
 /* Ports on Nodes */
@@ -1031,17 +1043,18 @@ pre {
 
 /* SVG Inter-Tier Conduits & Flowing Particles ("Chạy Dữ Liệu") */
 .tree-conduit-col {
+  flex: 0 0 54px;
   width: 54px;
   min-width: 54px;
   max-width: 54px;
   display: flex;
   flex-direction: column;
-  padding-top: 60px; /* offset for tier header */
+  padding-top: 72px; /* offset for tier header */
   pointer-events: none;
 }
 .conduit-svg {
   width: 100%;
-  height: 440px;
+  height: 480px;
   overflow: visible;
 }
 .flowing-conduit {
@@ -1055,22 +1068,22 @@ pre {
   filter: drop-shadow(0 0 4px currentColor);
 }
 .conduit-group.dim {
-  opacity: 0.18;
+  opacity: 0.16;
 }
 .conduit-group.active {
   opacity: 1;
 }
 
-/* Tree Inspector */
-.tree-inspector {
-  position: sticky;
-  top: 76px;
+/* Full-Width Node Inspector Deck Below */
+.tree-inspector-bottom {
+  width: 100%;
+  margin-top: 8px;
 }
-.inspector-card {
+.inspector-card-bottom {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 20px;
+  padding: 22px 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 .inspector-head {
@@ -1078,7 +1091,7 @@ pre {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 .status-badge-green {
@@ -1093,15 +1106,16 @@ pre {
   padding: 2px 8px;
   border-radius: 99px;
 }
-.inspector-detail-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.inspector-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
   margin: 16px 0;
   border-top: 1px solid var(--line);
-  padding-top: 14px;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
 }
-.inspect-row dt {
+.inspect-item dt {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1111,17 +1125,28 @@ pre {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.inspect-row dd {
-  margin: 3px 0 0;
-  font-size: 0.85rem;
+.inspect-item dd {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
   color: var(--text);
+  line-height: 1.45;
 }
-.inspector-desc-box {
+.inspector-split-2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .inspector-split-2 {
+    grid-template-columns: 1fr;
+  }
+}
+.desc-box, .links-box {
   background: #03070f;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px;
-  margin-top: 14px;
+  padding: 14px 16px;
 }
 .desc-title {
   display: flex;
@@ -1130,24 +1155,36 @@ pre {
   font-size: 0.76rem;
   color: var(--cyan);
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 .desc-text {
-  font-size: 0.84rem;
-  color: var(--muted);
+  font-size: 0.86rem;
+  color: #c5d0e2;
   margin: 0;
-  line-height: 1.55;
+  line-height: 1.6;
 }
-
-@media (max-width: 1100px) {
-  .tree-workspace {
-    grid-template-columns: 1fr;
-  }
-  .tree-inspector {
-    position: static;
-  }
+.link-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.link-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.link-dir {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.text-cyan { color: var(--cyan); }
+.link-names {
+  font-size: 0.84rem;
+  color: #fff;
+  line-height: 1.4;
 }
 
 /* Footer */
