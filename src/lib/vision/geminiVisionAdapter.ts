@@ -300,7 +300,13 @@ Với mỗi vật thể, trích xuất:
     detections.push(detection);
 
     // If marked as fall hazard, attach clinical observation
-    if (raw.isFallHazard || category === "rug" || category === "electrical_cable" || category === "obstacle_route") {
+    if (
+      raw.isFallHazard ||
+      category === "rug" ||
+      category === "electrical_cable" ||
+      category === "obstacle_route" ||
+      category === "table"
+    ) {
       observations.push({
         id: `obs_${crypto.randomUUID()}`,
         analysisId,
@@ -312,7 +318,9 @@ Với mỗi vật thể, trích xuất:
             : "OBSTACLE_CANDIDATE",
         description:
           raw.hazardNote ||
-          `Phát hiện ${raw.labelVi || category} có thể gây rủi ro vấp hoặc trượt ngã cho người cao tuổi.`,
+          (category === "table"
+            ? "Bàn sinh hoạt có cạnh góc vuông và kết cấu chân tự do. Cần kiểm tra đệm bọc góc silicon chống va đập và bảo đảm lối đi thông thủy tối thiểu 80cm theo CDC STEADI."
+            : `Phát hiện ${raw.labelVi || category} có thể gây rủi ro vấp hoặc trượt ngã cho người cao tuổi.`),
         relatedDetectionIds: [detId],
         uncertaintyType: "CONDITION_UNCERTAINTY",
         requiresConfirmation: true,

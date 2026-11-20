@@ -101,17 +101,20 @@ function computeImageRiskAssessment(
   const hasWetFloor =
     obs.some((o) => o.observationType === "WET_SURFACE_UNCERTAIN") ||
     roomType === "BATHROOM";
-  const hasObstacle = dets.some(
-    (d) =>
-      d.category === "obstacle_route" ||
-      (d.placementWall === "free" && d.category !== "bed" && d.category !== "sofa")
-  );
+  const hasTable = dets.some((d) => d.category === "table");
+  const hasObstacle =
+    dets.some(
+      (d) =>
+        d.category === "obstacle_route" ||
+        d.category === "chair" ||
+        (d.placementWall === "free" && d.category !== "bed" && d.category !== "sofa")
+    ) || hasTable;
 
   const displayRoomName = customCaption
-    ? `Khu vực khảo sát: ${customCaption}`
+    ? `Khu vực: ${customCaption}`
     : roomType === "BATHROOM"
     ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)"
-    : "Phòng ngủ (Ảnh hiện trường)";
+    : "Phòng sinh hoạt (Ảnh hiện trường)";
 
   const rawInput = {
     roomId: `vision-eval-${Date.now()}`,
@@ -133,16 +136,58 @@ function computeImageRiskAssessment(
     rugs: {
       present: hasRug,
       secured: !hasUnsecuredRug,
-      items: hasRug ? [{ isSecured: !hasUnsecuredRug, hasCurledEdges: hasUnsecuredRug }] : [],
+      items: hasRug
+        ? [
+            {
+              id: "rug-eval-1",
+              name: "Thảm trải sàn",
+              location: "Gần vị trí sinh hoạt",
+              isSecured: !hasUnsecuredRug,
+              edgesCurled: hasUnsecuredRug,
+              inWalkway: true,
+            },
+          ]
+        : [],
     },
     cables: {
-      crossingWalkways: hasCable,
+      crossingWalkway: hasCable,
+      items: hasCable
+        ? [
+            {
+              id: "cable-eval-1",
+              name: "Dây điện / dây sạc thiết bị",
+              location: "Vắt ngang lối đi",
+              crossesWalkway: true,
+              hasCordCover: false,
+              hasSkirtingTrunking: false,
+            },
+          ]
+        : [],
+    },
+    obstacles: {
+      present: hasObstacle,
+      walkwayClearWidthM: hasObstacle ? 0.72 : 1.1,
+      items: hasObstacle
+        ? [
+            {
+              id: "obstacle-eval-1",
+              name: hasTable ? "Bàn sinh hoạt / Bàn làm việc" : "Vật cản lối đi",
+              location: "Lối đi chính",
+              obstructsWalkway: true,
+              clearanceWidthM: 0.72,
+            },
+          ]
+        : [],
     },
     grabBars: {
+      present: hasGrabBar,
+      count: hasGrabBar ? 1 : 0,
       toiletPresent: hasGrabBar,
       showerPresent: hasGrabBar,
+      toiletGrabBarPresent: hasGrabBar,
+      showerGrabBarPresent: hasGrabBar,
+      inspectedSecure: hasGrabBar,
     },
-    clearWalkways: !hasObstacle,
   };
 
   return evaluateRoomHazards(rawInput);
@@ -1256,91 +1301,117 @@ export default function AiVisionStudioPage() {
             {/* TAB 2: POTENTIAL CONCERNS */}
             {activeTab === "CONCERNS" && (
               <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
-                {observations.map((obs) => (
-                  <div
-                    key={obs.id}
-                    className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 text-xs space-y-1.5"
-                  >
-                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
-                      <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                      <span>{obs.observationType.replace(/_/g, " ")}</span>
+                {observations.length === 0 ? (
+                  <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 text-center space-y-2">
+                    <CheckCircle2 className="h-7 w-7 text-emerald-600 mx-auto" />
+                    <div className="font-bold text-xs text-emerald-900">
+                      Không phát hiện mối nguy té ngã trực tiếp
                     </div>
-                    <p className="text-[11px] text-slate-700 leading-relaxed">
-                      {obs.description}
+                    <p className="text-[11px] text-emerald-700 leading-relaxed">
+                      Vật thể và bề mặt sàn trong hình ảnh này đáp ứng tốt các tiêu chuẩn an toàn môi trường cơ bản của WHO &amp; CDC STEADI.
                     </p>
-                    <div className="text-[10px] text-slate-500 font-mono">
-                      Yếu tố bất định: {obs.uncertaintyType}
-                    </div>
                   </div>
-                ))}
+                ) : (
+                  observations.map((obs) => (
+                    <div
+                      key={obs.id}
+                      className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 text-xs space-y-1.5"
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                        <span>{obs.observationType.replace(/_/g, " ")}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-700 leading-relaxed">
+                        {obs.description}
+                      </p>
+                      <div className="text-[10px] text-slate-500 font-mono">
+                        Yếu tố bất định: {obs.uncertaintyType}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 
             {/* TAB 3: CLARIFICATION QUESTIONS */}
             {activeTab === "CLARIFY" && (
               <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
-                <div className="text-[11px] text-slate-500 font-medium">
-                  AI đặt câu hỏi làm rõ các chi tiết hình ảnh chưa thể khẳng định 100%:
-                </div>
-
-                {clarifications.map((q) => {
-                  const isAnswered = q.status === "ANSWERED";
-
-                  return (
-                    <div
-                      key={q.id}
-                      className={`p-3 rounded-xl border text-xs space-y-2.5 transition ${
-                        isAnswered
-                          ? "bg-slate-50 border-slate-200 opacity-70"
-                          : "bg-teal-50/40 border-teal-200"
-                      }`}
-                    >
-                      <div className="flex items-start gap-1.5">
-                        <HelpCircle className="h-4 w-4 text-teal-600 shrink-0 mt-0.5" />
-                        <div>
-                          <div className="font-bold text-slate-900 leading-snug">
-                            {q.questionText}
-                          </div>
-                          {q.helpText && (
-                            <p className="text-[10px] text-slate-500 mt-0.5">
-                              {q.helpText}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Options */}
-                      <div className="space-y-1.5 pl-5">
-                        {q.options.map((opt) => {
-                          const isSelected = q.userResponse === opt.value;
-
-                          return (
-                            <button
-                              key={opt.value}
-                              onClick={() => handleAnswerClarification(q.id, opt.value)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border flex items-center justify-between ${
-                                isSelected
-                                  ? "bg-teal-600 text-white border-teal-600 font-bold"
-                                  : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
-                              }`}
-                            >
-                              <span>{opt.label}</span>
-                              {isSelected && <Check className="h-3 w-3" />}
-                            </button>
-                          );
-                        })}
-                      </div>
+                {clarifications.length === 0 ? (
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 text-center space-y-2">
+                    <ShieldCheck className="h-7 w-7 text-teal-600 mx-auto" />
+                    <div className="font-bold text-xs text-slate-800">
+                      Thông tin hiện trường đã rõ ràng
                     </div>
-                  );
-                })}
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Không có chi tiết bị che khuất hoặc yếu tố bất định cần người dùng xác nhận thêm.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-[11px] text-slate-500 font-medium">
+                      AI đặt câu hỏi làm rõ các chi tiết hình ảnh chưa thể khẳng định 100%:
+                    </div>
 
-                <button
-                  onClick={handleSyncAndReassess}
-                  className="w-full mt-2 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  <span>Cập nhật &amp; Đánh giá Nguy cơ</span>
-                </button>
+                    {clarifications.map((q) => {
+                      const isAnswered = q.status === "ANSWERED";
+
+                      return (
+                        <div
+                          key={q.id}
+                          className={`p-3 rounded-xl border text-xs space-y-2.5 transition ${
+                            isAnswered
+                              ? "bg-slate-50 border-slate-200 opacity-70"
+                              : "bg-teal-50/40 border-teal-200"
+                          }`}
+                        >
+                          <div className="flex items-start gap-1.5">
+                            <HelpCircle className="h-4 w-4 text-teal-600 shrink-0 mt-0.5" />
+                            <div>
+                              <div className="font-bold text-slate-900 leading-snug">
+                                {q.questionText}
+                              </div>
+                              {q.helpText && (
+                                <p className="text-[10px] text-slate-500 mt-0.5">
+                                  {q.helpText}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Options */}
+                          <div className="space-y-1.5 pl-5">
+                            {q.options.map((opt) => {
+                              const isSelected = q.userResponse === opt.value;
+
+                              return (
+                                <button
+                                  key={opt.value}
+                                  onClick={() => handleAnswerClarification(q.id, opt.value)}
+                                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border flex items-center justify-between ${
+                                    isSelected
+                                      ? "bg-teal-600 text-white border-teal-600 font-bold"
+                                      : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+                                  }`}
+                                >
+                                  <span>{opt.label}</span>
+                                  {isSelected && <Check className="h-3 w-3" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <button
+                      onClick={handleSyncAndReassess}
+                      className="w-full mt-2 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      <span>Cập nhật &amp; Đánh giá Nguy cơ</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -1351,34 +1422,54 @@ export default function AiVisionStudioPage() {
                   <div className="space-y-3">
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
                       <div className="text-[10px] font-bold text-slate-400 uppercase">
-                        Điểm an toàn phòng ({riskSnapshot.roomName})
+                        Điểm an toàn ({riskSnapshot.roomName})
                       </div>
-                      <div className="text-3xl font-black text-rose-600 mt-1">
+                      <div
+                        className={`text-3xl font-black mt-1 ${
+                          riskSnapshot.safetyScore >= 80
+                            ? "text-emerald-600"
+                            : riskSnapshot.safetyScore >= 60
+                            ? "text-amber-600"
+                            : "text-rose-600"
+                        }`}
+                      >
                         {riskSnapshot.safetyScore}
                         <span className="text-xs text-slate-400 font-normal"> / 100</span>
                       </div>
                       <div className="text-[10px] text-slate-500 mt-1">
-                        Phát hiện {riskSnapshot.detectedCount} mối nguy kích hoạt
+                        Phát hiện {riskSnapshot.detectedCount} yếu tố rủi ro kích hoạt
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      {riskSnapshot.findings.map((f) => (
-                        <div
-                          key={f.id}
-                          className="p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 text-xs space-y-1"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-rose-900">{f.title}</span>
-                            <span className="font-mono text-[9px] font-bold text-rose-700">
-                              {f.ruleId}
-                            </span>
+                      {riskSnapshot.findings.length === 0 ? (
+                        <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-1.5 text-center">
+                          <div className="flex items-center justify-center gap-1.5 font-bold text-emerald-900">
+                            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                            <span>Khu vực Đạt Tiêu Chuẩn An Toàn Lâm Sàng</span>
                           </div>
-                          <p className="text-[11px] text-slate-600 leading-relaxed">
-                            {f.description}
+                          <p className="text-[11px] text-emerald-700 leading-relaxed">
+                            Không phát hiện nguy cơ vấp ngã kích hoạt quy tắc WHO 2021 &amp; CDC STEADI. Khuyến nghị duy trì dọn dẹp lối đi thông thoáng &gt;80cm.
                           </p>
                         </div>
-                      ))}
+                      ) : (
+                        riskSnapshot.findings.map((f) => (
+                          <div
+                            key={f.id}
+                            className="p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 text-xs space-y-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-rose-900">{f.title}</span>
+                              <span className="font-mono text-[9px] font-bold text-rose-700">
+                                {f.ruleId}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 leading-relaxed">
+                              {f.description}
+                            </p>
+                          </div>
+                        ))
+                      )}
                     </div>
 
                     <button
