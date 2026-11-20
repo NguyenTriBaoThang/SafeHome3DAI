@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import * as THREE from "three";
-import { ContactShadows, useTexture } from "@react-three/drei";
+import { ContactShadows, useTexture, Environment, Lightformer } from "@react-three/drei";
 import { RoomState } from "@/types";
+const CutawayContext = React.createContext(false);
 
 interface RoomEnvironmentProps {
   room: RoomState;
@@ -11,7 +12,9 @@ interface RoomEnvironmentProps {
   showGrid: boolean;
   transparentWalls: boolean;
   isNightMode: boolean;
-  lightingPreset?: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
+  lightingPreset?: "MORNING" | "AFTERNOON" | "DAYLIGHT" | "EVENING" | "NIGHT" | "STUDIO";
+  quality?: "LOW" | "HIGH";
+  cutaway?: boolean;
 }
 
 /**
@@ -26,11 +29,14 @@ function WoodFloorSegment({
   length: number;
   position: [number, number, number];
 }) {
-  const [diffMap, roughMap, norMap] = useTexture([
+  const loaded = useTexture([
     "/textures/wood/laminate_floor_02_diffuse_1k.jpg",
     "/textures/wood/laminate_floor_02_rough_1k.jpg",
     "/textures/wood/laminate_floor_02_nor_gl_1k.jpg",
   ]);
+  const [diffMap, roughMap, norMap] = useMemo(() => loaded.map((texture) => texture.clone()), [loaded[0], loaded[1], loaded[2]]);
+  useEffect(() => () => { [diffMap, roughMap, norMap].forEach((texture) => texture.dispose()); }, [diffMap, roughMap, norMap]);
+  diffMap.colorSpace = THREE.SRGBColorSpace;
 
   useMemo(() => {
     [diffMap, roughMap, norMap].forEach((tex) => {
@@ -67,18 +73,23 @@ function TileFloorSegment({
   position,
   isWet,
   paleCeramic = false,
+  stone = false,
 }: {
   width: number;
   length: number;
   position: [number, number, number];
   isWet?: boolean;
   paleCeramic?: boolean;
+  stone?: boolean;
 }) {
-  const [diffMap, roughMap, norMap] = useTexture([
+  const loaded = useTexture([
     "/textures/tiles/floor_tiles_06_diffuse_1k.jpg",
     "/textures/tiles/floor_tiles_06_rough_1k.jpg",
     "/textures/tiles/floor_tiles_06_nor_gl_1k.jpg",
   ]);
+  const [diffMap, roughMap, norMap] = useMemo(() => loaded.map((texture) => texture.clone()), [loaded[0], loaded[1], loaded[2]]);
+  useEffect(() => () => { [diffMap, roughMap, norMap].forEach((texture) => texture.dispose()); }, [diffMap, roughMap, norMap]);
+  diffMap.colorSpace = THREE.SRGBColorSpace;
 
   useMemo(() => {
     [diffMap, roughMap, norMap].forEach((tex) => {
@@ -97,8 +108,8 @@ function TileFloorSegment({
       >
         <planeGeometry args={[width, length]} />
         <meshStandardMaterial
-          map={paleCeramic ? undefined : diffMap}
-          color={paleCeramic ? "#e6dfd3" : "#ffffff"}
+          map={paleCeramic || stone ? undefined : diffMap}
+          color={stone ? "#858b87" : paleCeramic ? "#e6dfd3" : "#ffffff"}
           roughnessMap={roughMap}
           normalMap={norMap}
           roughness={isWet ? 0.08 : 0.25}
@@ -143,12 +154,17 @@ function CutawayWall({
   isTiled?: boolean;
   showCap?: boolean;
 }) {
-  const [w, h, d] = extents;
+  const cutaway = React.useContext(CutawayContext);
+  const [w, originalHeight, d] = extents;
+  const shortened = cutaway && d > w && position[0] > -1 && originalHeight > 1.5;
+  const h = shortened ? 0.72 : originalHeight;
+  const displayPosition: [number, number, number] = shortened ? [position[0], h / 2, position[2]] : position;
+  if (cutaway && d > w && position[1] > 2 && originalHeight < 0.7) return null;
   const wallColor = isTiled ? "#f1f5f9" : "#fafaf9"; // Warm matte plaster
   const capColor = "#ffffff";
 
   return (
-    <group position={position}>
+    <group position={displayPosition}>
       {/* Wall Body */}
       <mesh receiveShadow castShadow position={[0, 0, 0]}>
         <boxGeometry args={[w, h, d]} />
@@ -187,6 +203,8 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
   transparentWalls,
   isNightMode,
   lightingPreset = "MORNING",
+  quality = "HIGH",
+  cutaway = false,
 }) => {
   const isDollhouse =
     room.layoutType === "DOLLHOUSE_MULTI_ZONE" ||
@@ -194,12 +212,18 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
   const { dimensions, floorMaterial, isWet } = room;
   const { width, length, height } = dimensions;
 
-  const wallOpacity = transparentWalls ? 0.35 : 1.0;
-  const activeLight = isNightMode ? "NIGHT" : lightingPreset;
+  const wallOpacity = cutaway ? 1 : transparentWalls ? 0.28 : 1.0;
+  const activeLight = isNightMode ? "NIGHT" : lightingPreset === "DAYLIGHT" ? "AFTERNOON" : lightingPreset;
+  const shadowSize = quality === "LOW" ? 512 : 1024;
 
   return (
-    <group>
+    <CutawayContext.Provider value={cutaway}><group>
       {/* --- ARCHITECTURAL LIGHTING SYSTEM --- */}
+      {quality === "HIGH" && <Environment resolution={64} frames={1}>
+        <Lightformer form="rect" intensity={2} color="#fff6e9" scale={[10, 8, 1]} position={[0, 7, 0]} rotation={[-Math.PI / 2, 0, 0]} />
+        <Lightformer form="rect" intensity={1.2} color="#f1f6ff" scale={[10, 5, 1]} position={[-7, 3, -4]} rotation={[0, Math.PI / 2, 0]} />
+        <Lightformer form="rect" intensity={0.8} color="#ffefe0" scale={[7, 4, 1]} position={[6, 3, 5]} rotation={[0, -Math.PI / 2, 0]} />
+      </Environment>}
       {activeLight === "NIGHT" ? (
         <>
           <ambientLight intensity={0.12} color="#1e1b4b" />
@@ -231,16 +255,16 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
             color="#fde047"
           />
         </>
-      ) : activeLight === "MORNING" ? (
+      ) : activeLight === "MORNING" || activeLight === "EVENING" ? (
         <>
           {/* Warm Golden Morning Sunlight streaming from the rear window */}
           <ambientLight intensity={0.65} color="#fdfbf7" />
           <directionalLight
             position={[-6, 13, -8]}
-            intensity={1.85}
-            color="#fff8e7"
+            intensity={activeLight === "EVENING" ? 1.1 : 1.85}
+            color={activeLight === "EVENING" ? "#ffcf99" : "#fff8e7"}
             castShadow
-            shadow-mapSize={[2048, 2048]}
+            shadow-mapSize={[shadowSize, shadowSize]}
             shadow-camera-left={-8}
             shadow-camera-right={8}
             shadow-camera-top={8}
@@ -267,7 +291,7 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
             intensity={1.6}
             color="#ffffff"
             castShadow
-            shadow-mapSize={[2048, 2048]}
+            shadow-mapSize={[shadowSize, shadowSize]}
             shadow-camera-left={-7}
             shadow-camera-right={7}
             shadow-camera-top={7}
@@ -288,7 +312,7 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
             intensity={1.2}
             color="#ffffff"
             castShadow
-            shadow-mapSize={[2048, 2048]}
+            shadow-mapSize={[shadowSize, shadowSize]}
           />
           <directionalLight
             position={[-8, 10, -6]}
@@ -299,15 +323,17 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
       )}
 
       {/* --- CONTACT SHADOWS ON FLOOR FOR GROUNDING --- */}
-      <ContactShadows
+      {quality === "HIGH" && <ContactShadows
+        key={`${lightingPreset}-${room.objects.map((object) => object.position.join(",")).join(";")}`}
+        frames={1}
         position={[0, 0.001, 0]}
         opacity={0.45}
         scale={14}
         blur={1.8}
         far={3.5}
-        resolution={1024}
+        resolution={512}
         color="#0f172a"
-      />
+      />}
 
       {/* --- ARCHITECTURAL PODIUM / BASE SLAB --- */}
       <mesh position={[0, -0.06, 0]} receiveShadow>
@@ -338,6 +364,7 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
             length={5.2}
             position={[2.5, 0.002, -0.2]}
             isWet={isWet}
+            stone
           />
 
           {/* Floor Threshold Strip between Corridor and Bathroom (at X = 1.3) */}
@@ -548,7 +575,7 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
           const angle = Math.atan2(dx, dz);
 
           return (
-            <group
+            <mesh
               key={zone.id}
               position={[midX, 0.012, midZ]}
               rotation={[-Math.PI / 2, 0, -angle]}
@@ -560,9 +587,9 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
                 opacity={0.25}
                 side={THREE.DoubleSide}
               />
-            </group>
+            </mesh>
           );
         })}
-    </group>
+    </group></CutawayContext.Provider>
   );
 };

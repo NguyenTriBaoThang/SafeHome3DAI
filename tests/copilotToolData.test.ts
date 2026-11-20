@@ -8,7 +8,7 @@ vi.mock("@/lib/database/prisma", () => ({ prisma: {
 } }));
 
 describe("Copilot tools use persisted data", () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); });
 
   it("reports the saved survey status and answer count", async () => {
     database.survey.mockResolvedValue({ status: "IN_PROGRESS", profile: { completenessScore: 37 }, _count: { answers: 3 } });

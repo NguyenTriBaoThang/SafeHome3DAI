@@ -32,6 +32,17 @@ export interface AssetRegistryEntry {
   description: string;
 }
 
+export interface AssetPhysicalSpec {
+  semanticClass: string;
+  unit: "m";
+  upAxis: "Y";
+  anchor: "FLOOR" | "WALL" | "CEILING" | "SURFACE";
+  mountingSurfaces: string[];
+  defaultRotation: [number, number, number];
+  collisionBounds: { min: [number, number, number]; max: [number, number, number] };
+  lodUrls: string[];
+}
+
 export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
   double_bed_photoreal: {
     id: "double_bed_photoreal",
@@ -61,7 +72,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 13312,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Giường đôi cao cấp với khung gỗ sồi, đầu giường bọc nệm, chăn phủ nếp gấp và 4 gối ngủ theo phong cách ảnh tham chiếu.",
   },
 
@@ -83,7 +94,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 11988,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Tủ đầu giường 2 ngăn kéo gỗ sồi sáng kèm đèn bàn ánh sáng ấm và sách đọc trang trí.",
   },
 
@@ -104,7 +115,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 445856,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Bàn góc tròn chân gỗ sồi chắc chắn để đèn hoặc ly nước cạnh giường ngủ.",
   },
 
@@ -126,7 +137,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 43212,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Hệ tủ quần áo mở phong cách Walk-in closet gồm nhiều tầng ngăn kéo, giỏ đựng, thanh treo và các bộ quần áo móc treo đa dạng màu sắc.",
   },
 
@@ -147,7 +158,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "PolyHaven CC0",
     fileSizeBytes: 1251784,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Tủ ngăn kéo thấp 3 tầng để phụ kiện, đồng hồ và khăn tắm trong phòng thay đồ.",
   },
 
@@ -169,7 +180,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 12185,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Bồn cầu sứ cao cấp kiểu dáng công thái học hiện đại với nắp êm, két nước xả kép và phím nhấn kim loại chrome.",
   },
 
@@ -191,7 +202,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 18124,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Bộ bàn chậu rửa tay cao cấp kèm gương soi khổ lớn có đèn LED hắt sáng, vòi nước kim loại chrome và bình rửa tay.",
   },
 
@@ -213,7 +224,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "SafeHome Custom 3D",
     fileSizeBytes: 14233,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Khu vực tắm đứng hiện đại với vách kính cường lực trong suốt, đế thu nước thanh thoát và hệ thống vòi sen cây chrome cao cấp.",
   },
 
@@ -234,7 +245,7 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     ],
     license: "PolyHaven CC0",
     fileSizeBytes: 6603392,
-    lodAvailable: true,
+    lodAvailable: false,
     description: "Chậu cây cảnh nội thất tán lá xanh mềm mại đặt cạnh cửa sổ đón ánh nắng tự nhiên.",
   },
 
@@ -304,3 +315,27 @@ export const ASSET_REGISTRY: Record<string, AssetRegistryEntry> = {
     description: "Thanh tay vịn tiêu chuẩn y tế gắn tường cạnh bồn cầu và phòng tắm đứng giúp người cao tuổi chống ngã.",
   },
 };
+
+
+/** Physical contract for existing original GLB assemblies. No LOD variant is
+ * advertised until an actual additional model is shipped. ModelRenderer fits
+ * the measured GLB bounds to these nominal dimensions before instance scale. */
+export const ASSET_PHYSICAL_SPECS: Record<string, AssetPhysicalSpec> = Object.fromEntries(
+  Object.entries(ASSET_REGISTRY).map(([id, asset]) => {
+    const wall = /grab_bar|wall_art|window/.test(id);
+    const dimensions = asset.nominalDimensions;
+    return [id, {
+      semanticClass: id,
+      unit: "m",
+      upAxis: "Y",
+      anchor: wall ? "WALL" : "FLOOR",
+      mountingSurfaces: wall ? ["wall"] : ["floor"],
+      defaultRotation: [0, 0, 0],
+      collisionBounds: {
+        min: [-dimensions.width / 2, 0, -dimensions.length / 2],
+        max: [dimensions.width / 2, dimensions.height, dimensions.length / 2],
+      },
+      lodUrls: [],
+    } satisfies AssetPhysicalSpec];
+  })
+);

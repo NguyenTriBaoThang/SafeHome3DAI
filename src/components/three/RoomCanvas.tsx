@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useMemo } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, TransformControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { RoomEnvironment } from "./RoomEnvironment";
 import { ModelRenderer } from "./ModelRenderer";
+import { canWalkTo } from "@/lib/experience/navigation";
 import {
   AlertTriangle,
   Layers,
@@ -49,6 +50,7 @@ function WalkthroughNavigator({
     const halfL = roomDims.length / 2 - 0.35;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.closest("input,textarea,select,button,[contenteditable=true]")) return;
       const step = 0.22;
       const key = e.key.toLowerCase();
       const dir = new THREE.Vector3();
@@ -57,6 +59,7 @@ function WalkthroughNavigator({
       dir.normalize();
 
       const sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
+      const previous = camera.position.clone();
 
       if (key === "w" || key === "arrowup") {
         camera.position.addScaledVector(dir, step);
@@ -66,7 +69,9 @@ function WalkthroughNavigator({
         camera.position.addScaledVector(sideDir, -step);
       } else if (key === "d" || key === "arrowright") {
         camera.position.addScaledVector(sideDir, step);
-      }
+      } else return;
+      e.preventDefault();
+      if (!canWalkTo(useSimulationStore.getState().getCurrentRoom(), camera.position.x, camera.position.z)) camera.position.copy(previous);
 
       // Keep within room perimeter walls & eye-level height
       camera.position.x = Math.max(-halfW, Math.min(halfW, camera.position.x));
@@ -88,6 +93,9 @@ function WalkthroughNavigator({
 function CameraController({ fitTrigger }: { fitTrigger: number }) {
   const { camera, size } = useThree();
   const controlsRef = useRef<any>(null);
+  const desiredPosition = useRef(new THREE.Vector3());
+  const desiredTarget = useRef(new THREE.Vector3());
+  const transitioning = useRef(false);
   const { cameraPreset, cameraFocusPoint, getCurrentRoom, currentAssessment } =
     useSimulationStore();
   const room = getCurrentRoom();
@@ -97,16 +105,15 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
 
   useEffect(() => {
     if (!camera) return;
+    const previousPosition = camera.position.clone();
+    const previousTarget = controlsRef.current?.target.clone() || new THREE.Vector3();
 
     // 1. Focus on specific selected object coordinate
     if (cameraFocusPoint) {
       const [fx, fy, fz] = cameraFocusPoint;
-      camera.position.set(fx + 2.2, fy + 2.4, fz + 2.2);
-      camera.lookAt(fx, fy + 0.3, fz);
-      if (controlsRef.current) {
-        controlsRef.current.target.set(fx, fy + 0.3, fz);
-        controlsRef.current.update();
-      }
+      desiredPosition.current.set(fx + 2.2, fy + 2.4, fz + 2.2);
+      desiredTarget.current.set(fx, fy + 0.3, fz);
+      transitioning.current = true;
       return;
     }
 
@@ -241,16 +248,31 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
         }
         break;
     }
-  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger, isDollhouse, currentAssessment, size.width, size.height]);
+    desiredPosition.current.copy(camera.position);
+    desiredTarget.current.copy(controlsRef.current?.target || new THREE.Vector3());
+    camera.position.copy(previousPosition);
+    controlsRef.current?.target.copy(previousTarget);
+    transitioning.current = true;
+  }, [cameraPreset, cameraFocusPoint, room.id, fitTrigger, isDollhouse, size.width, size.height]);
+
+  useFrame((_, delta) => {
+    if (!transitioning.current || !controlsRef.current) return;
+    const amount = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 1 - Math.exp(-delta * 5);
+    camera.position.lerp(desiredPosition.current, amount);
+    controlsRef.current.target.lerp(desiredTarget.current, amount);
+    controlsRef.current.update();
+    if (camera.position.distanceTo(desiredPosition.current) < 0.005) transitioning.current = false;
+  });
 
   return (
     <OrbitControls
       ref={controlsRef}
+      onStart={() => { transitioning.current = false; }}
       enableDamping
       dampingFactor={0.08}
       minDistance={0.5}
       maxDistance={Math.max(40, Math.hypot(room.dimensions.width, room.dimensions.length) * 6)}
-      maxPolarAngle={cameraPreset === "TOP" ? 0.05 : Math.PI / 2 - 0.02}
+      maxPolarAngle={Math.PI / 2 - 0.02}
     />
   );
 }

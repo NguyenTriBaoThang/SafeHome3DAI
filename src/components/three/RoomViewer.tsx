@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import React from "react";
 import { Loader2 } from "lucide-react";
+import { useSimulationStore } from "@/stores/useSimulationStore";
+import { WebGLBoundary } from "./WebGLBoundary";
 
 const RoomCanvas = dynamic(
   () => import("./RoomCanvas").then((mod) => mod.RoomCanvas),
@@ -17,7 +19,10 @@ const RoomCanvas = dynamic(
   }
 );
 
+const ComparisonViewer = dynamic(() => import("./ComparisonViewer").then((module) => module.ComparisonViewer), { ssr: false });
+
 export const RoomViewer: React.FC = () => {
-  return <RoomCanvas />;
+  const mode = useSimulationStore((state) => state.cameraPreset);
+  return <WebGLBoundary>{mode === "COMPARISON" ? <ComparisonViewer /> : <RoomCanvas />}</WebGLBoundary>;
 };
 

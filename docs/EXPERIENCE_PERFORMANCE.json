@@ -1,0 +1,62 @@
+{
+  "runAt": "2026-11-20T17:51:49.514Z",
+  "browser": "157.0.4341.60",
+  "measurements": [
+    {
+      "profile": {
+        "name": "desktop-high",
+        "width": 1440,
+        "height": 960,
+        "quality": "HIGH"
+      },
+      "renderer": "ANGLE (Intel, Intel(R) HD Graphics 620 (0x00005916) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "sampleDurationMs": 5009,
+      "frames": 296,
+      "meanRafFps": 59.1,
+      "p95FrameMs": 17.6,
+      "canvasResolution": [
+        979,
+        752
+      ]
+    },
+    {
+      "profile": {
+        "name": "desktop-low",
+        "width": 1440,
+        "height": 960,
+        "quality": "LOW"
+      },
+      "renderer": "ANGLE (Intel, Intel(R) HD Graphics 620 (0x00005916) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "sampleDurationMs": 5001,
+      "frames": 301,
+      "meanRafFps": 60.2,
+      "p95FrameMs": 17,
+      "canvasResolution": [
+        979,
+        752
+      ]
+    },
+    {
+      "profile": {
+        "name": "mobile-emulation-low",
+        "width": 390,
+        "height": 844,
+        "quality": "LOW"
+      },
+      "renderer": "ANGLE (Intel, Intel(R) HD Graphics 620 (0x00005916) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "sampleDurationMs": 5005,
+      "frames": 301,
+      "meanRafFps": 60.1,
+      "p95FrameMs": 17,
+      "canvasResolution": [
+        390,
+        320
+      ]
+    }
+  ],
+  "caveats": [
+    "Five-second requestAnimationFrame sampling in headless Edge on this execution host.",
+    "Not a physical midrange-mobile benchmark or a guarantee of presented GPU FPS.",
+    "Concurrent host/browser workloads affect these measurements."
+  ]
+}

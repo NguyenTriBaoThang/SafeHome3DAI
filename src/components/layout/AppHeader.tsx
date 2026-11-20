@@ -37,6 +37,8 @@ export const AppHeader: React.FC = () => {
       ? "bg-amber-50 text-amber-700 border-amber-200"
       : "bg-rose-50 text-rose-700 border-rose-200";
 
+  if (pathname === "/experience") return null;
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">

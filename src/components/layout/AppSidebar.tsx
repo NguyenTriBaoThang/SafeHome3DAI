@@ -89,6 +89,8 @@ export const AppSidebar: React.FC = () => {
   const isWorkflowActive = pathname === "/workflow";
   const [showComponents, setShowComponents] = useState(false);
 
+  if (pathname === "/experience") return null;
+
   return (
     <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
       {/* Navigation Links */}

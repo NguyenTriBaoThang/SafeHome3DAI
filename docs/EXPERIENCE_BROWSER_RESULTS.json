@@ -1,0 +1,110 @@
+{
+  "runAt": "2026-11-20T17:50:21.123Z",
+  "browser": "157.0.4341.60",
+  "base": "http://localhost:3210",
+  "results": [
+    {
+      "name": "Desktop house loads and renders actual WebGL pixels",
+      "status": "PASS",
+      "detail": {
+        "distinctSampledColors": 163,
+        "viewport": "1440x960",
+        "browser": "157.0.4341.60"
+      }
+    },
+    {
+      "name": "Scroll chapters and room selection",
+      "status": "PASS",
+      "detail": {
+        "unsafePresetScore": 28,
+        "hotspots": 6
+      }
+    },
+    {
+      "name": "Risk hotspot selects an actual finding and evidence rule",
+      "status": "PASS",
+      "detail": {
+        "rule": "RULE_RUG_01"
+      }
+    },
+    {
+      "name": "Intervention recalculation and undo/redo",
+      "status": "PASS",
+      "detail": {
+        "before": 28,
+        "after": 58
+      }
+    },
+    {
+      "name": "Save and reload preserve scene identity and score",
+      "status": "PASS",
+      "detail": {
+        "objectCount": 7,
+        "restoredScore": 58,
+        "storage": "browser-local"
+      }
+    },
+    {
+      "name": "Synchronized comparison slider and score difference",
+      "status": "PASS",
+      "detail": {
+        "slider": 51,
+        "canvases": 1,
+        "score": 58
+      }
+    },
+    {
+      "name": "Visual lighting does not change risk facts",
+      "status": "PASS",
+      "detail": {
+        "unchangedScore": 58
+      }
+    },
+    {
+      "name": "Top view and first-person movement respond to controls",
+      "status": "PASS"
+    },
+    {
+      "name": "Keyboard chapter navigation and user-controlled playback",
+      "status": "PASS"
+    },
+    {
+      "name": "WebGL context loss and recovery",
+      "status": "PASS",
+      "detail": {
+        "recovered": true
+      }
+    },
+    {
+      "name": "Apply scenario into existing Digital Twin and use editor comparison",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile touch layout, rendering and chapter navigation",
+      "status": "PASS",
+      "detail": {
+        "viewport": "390x844",
+        "horizontalPageOverflow": false
+      }
+    },
+    {
+      "name": "Reduced-motion accessibility",
+      "status": "PASS"
+    },
+    {
+      "name": "WebGL unavailable fallback remains useful",
+      "status": "PASS"
+    },
+    {
+      "name": "No missing desktop assets or unexpected page errors",
+      "status": "PASS"
+    }
+  ],
+  "failedAssets": [],
+  "errors": [],
+  "limitations": [
+    "Desktop/mobile FPS targets require measurements on physical target devices.",
+    "Mobile checks use browser emulation, not a physical mobile GPU.",
+    "WebGL screenshot checks verify rendering and interactions, not photographic equivalence."
+  ]
+}

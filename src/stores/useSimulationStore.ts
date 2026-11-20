@@ -63,6 +63,7 @@ interface SimulationStore {
 
   // Assessments & Scenarios
   baselineAssessments: Record<string, AssessmentResult>;
+  baselineRoomStates: Record<string, RoomState>;
   currentAssessment: AssessmentResult | null;
   scenarioHistory: ScenarioHistoryEntry[];
   comparison: ScenarioComparison | null;
@@ -98,6 +99,7 @@ interface SimulationStore {
   restoreBaseline: () => void;
   saveCurrentScenario: (name: string, description?: string) => void;
   loadReconstructedRoom: (room: RoomState) => void;
+  applyRoomSnapshot: (room: RoomState) => void;
 
   // Undo / Redo & Spatial Auto-Fix
   undoStack: RoomState[];
@@ -158,13 +160,14 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     isNightMode: false,
 
     baselineAssessments: initialBaselines,
+    baselineRoomStates: Object.fromEntries(INITIAL_ROOMS.map((room) => [room.id, JSON.parse(JSON.stringify(room))])),
     currentAssessment: initialCurrentAssessment,
     scenarioHistory: [
       {
         id: "scenario-baseline",
         name: "Hiện trạng ban đầu (Baseline)",
         timestamp: new Date().toISOString(),
-        roomState: JSON.parse(JSON.stringify(INITIAL_ROOMS[0])),
+        roomState: JSON.parse(JSON.stringify(dollhouseRoom || INITIAL_ROOMS[0])),
         assessment: initialCurrentAssessment,
         isBaseline: true,
       },
@@ -610,7 +613,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
 
     restoreBaseline: () => {
       const roomId = get().currentRoomId;
-      const initialRoom = INITIAL_ROOMS.find((r) => r.id === roomId) || INITIAL_ROOMS[0];
+      const initialRoom = get().baselineRoomStates[roomId] || INITIAL_ROOMS.find((r) => r.id === roomId) || get().getCurrentRoom();
       const updatedRooms = get().rooms.map((r) =>
         r.id === roomId ? JSON.parse(JSON.stringify(initialRoom)) : r
       );
@@ -637,6 +640,17 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         isBaseline: false,
       };
       set((s) => ({ scenarioHistory: [entry, ...s.scenarioHistory] }));
+    },
+
+    applyRoomSnapshot: (room: RoomState) => {
+      const previous = get().getCurrentRoom();
+      if (room.id !== previous.id) throw new Error("Kịch bản phải thuộc phòng đang chọn.");
+      set((state) => ({
+        rooms: state.rooms.map((entry) => entry.id === room.id ? JSON.parse(JSON.stringify(room)) : entry),
+        undoStack: [...state.undoStack, JSON.parse(JSON.stringify(previous))].slice(-20),
+        redoStack: [],
+      }));
+      get().runSimulation();
     },
 
     loadReconstructedRoom: (room: RoomState) => {
@@ -675,6 +689,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
             ...state.baselineAssessments,
             [room.id]: assessment,
           },
+          baselineRoomStates: { ...state.baselineRoomStates, [room.id]: JSON.parse(JSON.stringify(room)) },
         };
       });
     },

@@ -9,6 +9,11 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "dev:experience": "node scripts/run-experience.cjs dev",
+    "build:experience": "node scripts/run-experience.cjs build",
+    "start:experience": "node scripts/run-experience.cjs start",
+    "test:experience": "vitest run --config vitest.experience.config.ts tests/homeExperience.test.ts tests/modelPlacement.test.ts tests/dollhouseReferenceScene.test.ts tests/spatialValidationEngine.test.ts tests/simulationUndoRedo.test.ts tests/realisticReconstruction.test.ts tests/riskEngine.test.ts tests/visionIntegration.test.ts",
+    "test:experience:browser": "node scripts/verify_cinematic_experience.cjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js"

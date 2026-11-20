@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useMemo, Suspense } from "react";
+import React, { useMemo, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
 import { SceneObjectState } from "@/types";
 import { ASSET_REGISTRY } from "@/data/assetRegistry";
 import { ProceduralModelBody } from "./ProceduralFurniture";
+import { normalizeModel } from "@/lib/assets/modelPlacement";
+import { ArchitecturalBed } from "./ArchitecturalBed";
+import { ArchitecturalToilet, ArchitecturalVanity } from "./ArchitecturalFixtures";
 
 interface ModelRendererProps {
   object: SceneObjectState;
@@ -38,6 +41,7 @@ function GLBModel({
         const mesh = child as THREE.Mesh;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
+        mesh.material = Array.isArray(mesh.material) ? mesh.material.map((material) => material.clone()) : mesh.material.clone();
 
         // Enhance material properties for PBR fidelity
         if (mesh.material) {
@@ -47,6 +51,9 @@ function GLBModel({
 
           if (mat) {
             mat.envMapIntensity = 1.0;
+            // Trimesh-generated GLBs may inherit metallic=1 without an IBL.
+            // Keep porcelain, wood and textiles dielectric instead of black.
+            if (!/metal|chrome|steel/i.test(mat.name)) mat.metalness = Math.min(mat.metalness, 0.08);
             // Glass materials tuning
             if (
               mat.name.toLowerCase().includes("glass") ||
@@ -70,8 +77,11 @@ function GLBModel({
       }
     });
 
-    return clone;
-  }, [scene, assetId]);
+    return normalizeModel(clone, dimensions);
+  }, [scene, assetId, dimensions.width, dimensions.height, dimensions.length]);
+  useEffect(() => () => clonedScene.traverse((child) => {
+    if (child instanceof THREE.Mesh) (Array.isArray(child.material) ? child.material : [child.material]).forEach((material) => material.dispose());
+  }), [clonedScene]);
 
   return <primitive object={clonedScene} />;
 }
@@ -105,7 +115,7 @@ export const ModelRenderer: React.FC<ModelRendererProps> = ({
 
   const hazardColor =
     hazardSeverity === "HIGH"
-      ? "#ef4444"
+      ? "#db8540"
       : hazardSeverity === "MEDIUM"
       ? "#f59e0b"
       : "#3b82f6";
@@ -121,7 +131,7 @@ export const ModelRenderer: React.FC<ModelRendererProps> = ({
       }}
     >
       {/* 3D Model Rendering: Real GLB or Photorealistic Procedural PBR Model */}
-      {resolvedGlb ? (
+      {modelType === "bed" ? <Suspense fallback={null}><ArchitecturalBed dimensions={dimensions} /></Suspense> : modelType === "toilet" ? <ArchitecturalToilet dimensions={dimensions} /> : modelType === "sink" ? <ArchitecturalVanity dimensions={dimensions} /> : resolvedGlb ? (
         <Suspense
           fallback={
             <mesh position={[0, dimensions.height * 0.5, 0]}>
@@ -198,19 +208,5 @@ export const ModelRenderer: React.FC<ModelRendererProps> = ({
   );
 };
 
-// Pre-preload common models for zero-lag rendering
-try {
-  useGLTF.preload("/models/bedroom/double_bed_photoreal.glb");
-  useGLTF.preload("/models/bedroom/bedside_table_lamp.glb");
-  useGLTF.preload("/models/wardrobe/walkin_closet_system.glb");
-  useGLTF.preload("/models/wardrobe/drawer_cabinet.glb");
-  useGLTF.preload("/models/bathroom/toilet_modern.glb");
-  useGLTF.preload("/models/bathroom/bathroom_vanity.glb");
-  useGLTF.preload("/models/bathroom/shower_enclosure.glb");
-  useGLTF.preload("/models/decoration/potted_plant.glb");
-  useGLTF.preload("/models/decoration/framed_wall_art.glb");
-  useGLTF.preload("/models/architecture/modern_window.glb");
-  useGLTF.preload("/models/safety/safety_grab_bar.glb");
-} catch (e) {
-  // Preload is optional in test environments
-}
+// useGLTF caches assets after first use. Load only the models used by the
+// current room, including on clients which do not have a WebGL context.

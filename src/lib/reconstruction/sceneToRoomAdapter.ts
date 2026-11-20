@@ -31,6 +31,14 @@ export function convertSceneGraphToRoomState(
       surfaceColor: obj.surfaceColor,
       verified: obj.verified,
       confidence: obj.detectionConfidence,
+      customProperties: {
+        sourceImageId: obj.sourceImageId,
+        sourceDetectionId: obj.sourceDetectionId,
+        measurementStatus: obj.measurementStatus,
+        confirmationStatus: obj.verified ? "CONFIRMED" : "NEEDS_REVIEW",
+        geometrySource: scene.geometrySource,
+        associatedRiskIds: obj.riskIds,
+      },
     };
   });
 
