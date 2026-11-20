@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Camera,
   Upload,
@@ -46,37 +47,124 @@ import {
 import { explainHazardFinding, FindingExplanation } from "@/lib/risk/explanationEngine";
 import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
 import { AssessmentSnapshot } from "@/lib/risk/types";
+import { useSimulationStore } from "@/stores/useSimulationStore";
+import { RoomState, SceneObjectState, ObjectCategory } from "@/types";
 
-// Default mock room image for instant zero-setup demonstration
+// Default mock room images for instant zero-setup demonstration
 const DEFAULT_DEMO_BEDROOM =
   "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=1200&auto=format&fit=crop";
 const DEFAULT_DEMO_BATHROOM =
   "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200&auto=format&fit=crop";
 
+export interface StudioImageItem {
+  id: string;
+  fileUrl: string;
+  viewpoint: ViewpointType;
+  caption?: string;
+  base64?: string;
+  isCustom?: boolean;
+}
+
+export interface ImageAnalysisData {
+  detections: VisionDetection[];
+  observations: VisionObservation[];
+  clarifications: VisionClarificationQuestion[];
+  riskSnapshot: AssessmentSnapshot;
+  analyzedAt: string;
+}
+
+/**
+ * Computes deterministic clinical fall-risk assessment snapshot tailored directly to the detections in a photo
+ */
+function computeImageRiskAssessment(
+  roomType: "BEDROOM" | "BATHROOM",
+  dets: VisionDetection[],
+  obs: VisionObservation[]
+): AssessmentSnapshot {
+  const hasRug = dets.some((d) => d.category === "rug");
+  const hasUnsecuredRug = dets.some(
+    (d) =>
+      d.category === "rug" &&
+      (d.userLabel?.toLowerCase().includes("trượt") ||
+        d.originalLabel?.toLowerCase().includes("trượt") ||
+        (d as any).isFallHazard)
+  );
+  const hasCable = dets.some(
+    (d) =>
+      d.category === "electrical_cable" ||
+      d.originalLabel?.toLowerCase().includes("dây") ||
+      d.userLabel?.toLowerCase().includes("dây") ||
+      (d as any).isFallHazard
+  );
+  const hasGrabBar = dets.some((d) => d.category === "grab_bar");
+  const hasWetFloor =
+    obs.some((o) => o.observationType === "WET_SURFACE_UNCERTAIN") ||
+    roomType === "BATHROOM";
+  const hasObstacle = dets.some(
+    (d) =>
+      d.category === "obstacle_route" ||
+      (d.placementWall === "free" && d.category !== "bed" && d.category !== "sofa")
+  );
+
+  const rawInput = {
+    roomId: `vision-eval-${Date.now()}`,
+    roomName: roomType === "BATHROOM" ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)" : "Phòng ngủ (Ảnh hiện trường)",
+    roomType,
+    dimensions: { lengthM: 4.5, widthM: 4.0, heightM: 2.8 },
+    floor: {
+      material: roomType === "BATHROOM" ? "Gạch men" : "Sàn gỗ",
+      isWet: hasWetFloor,
+      isSlipResistant: !hasWetFloor,
+      thresholdStepPresent: false,
+    },
+    lighting: {
+      daytimeLux: 200,
+      nighttimeLux: 40,
+      nightLightPresent: false,
+      adequateAtNight: false,
+    },
+    rugs: {
+      present: hasRug,
+      secured: !hasUnsecuredRug,
+      items: hasRug ? [{ isSecured: !hasUnsecuredRug, hasCurledEdges: hasUnsecuredRug }] : [],
+    },
+    cables: {
+      crossingWalkways: hasCable,
+    },
+    grabBars: {
+      toiletPresent: hasGrabBar,
+      showerPresent: hasGrabBar,
+    },
+    clearWalkways: !hasObstacle,
+  };
+
+  return evaluateRoomHazards(rawInput);
+}
+
 export default function AiVisionStudioPage() {
-  const [activeRoomId, setActiveRoomId] = useState<string>("room-bedroom-1");
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [activeRoomId, setActiveRoomId] = useState<string>("room-bedroom-01");
   const [activeRoomType, setActiveRoomType] = useState<"BEDROOM" | "BATHROOM">("BEDROOM");
   const [selectedViewpoint, setSelectedViewpoint] = useState<ViewpointType>("ENTRANCE");
 
   // Image list
-  const [images, setImages] = useState<
-    Array<{
-      id: string;
-      fileUrl: string;
-      viewpoint: ViewpointType;
-      caption?: string;
-    }>
-  >([
+  const [images, setImages] = useState<StudioImageItem[]>([
     {
       id: "img-demo-bed",
       fileUrl: DEFAULT_DEMO_BEDROOM,
       viewpoint: "ENTRANCE",
       caption: "Góc nhìn toàn cảnh phòng ngủ từ cửa",
+      isCustom: false,
     },
   ]);
   const [selectedImageId, setSelectedImageId] = useState<string>("img-demo-bed");
 
-  // Detections & Observations state
+  // Image-specific analysis cache map
+  const [analysisByImage, setAnalysisByImage] = useState<Record<string, ImageAnalysisData>>({});
+
+  // Active Detections & Observations state for selected image
   const [detections, setDetections] = useState<VisionDetection[]>([]);
   const [observations, setObservations] = useState<VisionObservation[]>([]);
   const [clarifications, setClarifications] = useState<VisionClarificationQuestion[]>([]);
@@ -84,6 +172,7 @@ export default function AiVisionStudioPage() {
   const [activeTab, setActiveTab] = useState<"OBJECTS" | "CONCERNS" | "CLARIFY" | "RISK">("OBJECTS");
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string>("Đã sẵn sàng");
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // Canvas / Workspace interactions
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -123,80 +212,165 @@ export default function AiVisionStudioPage() {
     setActiveRoomType(type);
     const demoUrl = type === "BEDROOM" ? DEFAULT_DEMO_BEDROOM : DEFAULT_DEMO_BATHROOM;
     const newImgId = `img-demo-${type.toLowerCase()}`;
-    const newImgs = [
+    const newImgs: StudioImageItem[] = [
       {
         id: newImgId,
         fileUrl: demoUrl,
         viewpoint: "ENTRANCE" as ViewpointType,
         caption: type === "BEDROOM" ? "Toàn cảnh phòng ngủ" : "Toàn cảnh nhà vệ sinh",
+        isCustom: false,
       },
     ];
     setImages(newImgs);
     setSelectedImageId(newImgId);
   };
 
-  // Run AI Vision Analysis API
-  const handleRunAnalysis = async (imgId: string, rId: string, rType: string) => {
+  // Run AI Vision Analysis API (supports passing real image base64)
+  const handleRunAnalysis = async (
+    imgId: string,
+    rId: string,
+    rType: "BEDROOM" | "BATHROOM",
+    base64Payload?: string
+  ) => {
     setIsAnalyzing(true);
-    setSyncStatus("Đang phân tích hình ảnh AI...");
+    setSyncStatus("Đang phân tích hình ảnh AI đa phương thức...");
+
+    // Find base64 from current image list if not directly passed
+    const targetImg = images.find((i) => i.id === imgId);
+    const base64 = base64Payload || targetImg?.base64;
+
     try {
       const res = await fetch(`/api/vision/images/${imgId}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: rId, roomType: rType, viewpoint: selectedViewpoint }),
+        body: JSON.stringify({
+          roomId: rId,
+          roomType: rType,
+          viewpoint: selectedViewpoint,
+          imageBufferBase64: base64,
+        }),
       });
       const data = await res.json();
       if (data.success && data.data) {
-        setDetections(data.data.detections || []);
-        setObservations(data.data.observations || []);
-        setClarifications(data.data.clarifications || []);
-        setSyncStatus("Phân tích hoàn tất — Chờ người dùng xác nhận");
+        const newDets: VisionDetection[] = data.data.detections || [];
+        const newObs: VisionObservation[] = data.data.observations || [];
+        const newClars: VisionClarificationQuestion[] = data.data.clarifications || [];
+
+        // Compute tailored clinical risk assessment for THIS specific image
+        const newRisk = computeImageRiskAssessment(rType, newDets, newObs);
+
+        const analysisEntry: ImageAnalysisData = {
+          detections: newDets,
+          observations: newObs,
+          clarifications: newClars,
+          riskSnapshot: newRisk,
+          analyzedAt: new Date().toISOString(),
+        };
+
+        setAnalysisByImage((prev) => ({ ...prev, [imgId]: analysisEntry }));
+        setDetections(newDets);
+        setObservations(newObs);
+        setClarifications(newClars);
+        setRiskSnapshot(newRisk);
+        setSyncStatus(`Phân tích hoàn tất: ${newDets.length} vật thể, điểm an toàn ${newRisk.safetyScore}/100`);
+      } else {
+        setSyncStatus("Không thể hoàn tất phân tích hình ảnh");
       }
     } catch (err) {
       console.error(err);
-      setSyncStatus("Lỗi phân tích hình ảnh");
+      setSyncStatus("Lỗi kết nối phân tích hình ảnh");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Upload Photo handler
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // Switch active image & load corresponding detections & risk evaluation
+  const handleSelectImage = (img: StudioImageItem) => {
+    setSelectedImageId(img.id);
+    setSelectedViewpoint(img.viewpoint);
+    if (analysisByImage[img.id]) {
+      const cached = analysisByImage[img.id];
+      setDetections(cached.detections);
+      setObservations(cached.observations);
+      setClarifications(cached.clarifications);
+      setRiskSnapshot(cached.riskSnapshot);
+      setSyncStatus(`Đã tải kết quả phân tích cho: ${img.caption || img.id}`);
+    } else {
+      handleRunAnalysis(img.id, activeRoomId, activeRoomType, img.base64);
+    }
+  };
+
+  // Delete an image from studio gallery
+  const handleDeleteImage = (imgId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const remaining = images.filter((i) => i.id !== imgId);
+    if (remaining.length === 0) return;
+    setImages(remaining);
+    if (selectedImageId === imgId) {
+      handleSelectImage(remaining[0]);
+    }
+  };
+
+  // Core file processor for both input pick & drag-and-drop
+  const processUploadFile = (file: File) => {
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("roomId", activeRoomId);
-    formData.append("viewpoint", selectedViewpoint);
-    formData.append("caption", `Ảnh chụp góc ${selectedViewpoint}`);
+    if (!file.type.startsWith("image/")) {
+      alert("Vui lòng chọn một tệp hình ảnh hợp lệ (JPG, PNG, WebP).");
+      return;
+    }
 
-    setIsAnalyzing(true);
-    setSyncStatus("Đang tải ảnh và kiểm tra bảo mật...");
-    try {
-      const res = await fetch("/api/vision/images", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success && data.data) {
-        const newImg = {
-          id: data.data.id,
-          fileUrl: data.data.fileUrl,
-          viewpoint: data.data.viewpoint,
-          caption: data.data.caption,
-        };
-        setImages((prev) => [newImg, ...prev]);
-        setSelectedImageId(newImg.id);
-        await handleRunAnalysis(newImg.id, activeRoomId, activeRoomType);
-      } else {
-        alert(data.error || "Lỗi tải ảnh lên.");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Dung lượng ảnh vượt quá 15MB. Vui lòng chọn ảnh nhỏ hơn.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      const base64Data = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+      const newImgId = `img-user-${Date.now()}`;
+
+      const newImgItem: StudioImageItem = {
+        id: newImgId,
+        fileUrl: dataUrl,
+        viewpoint: selectedViewpoint,
+        caption: file.name.replace(/\.[^/.]+$/, ""),
+        base64: base64Data,
+        isCustom: true,
+      };
+
+      // 1. Immediately display new image in gallery & on canvas
+      setImages((prev) => [newImgItem, ...prev]);
+      setSelectedImageId(newImgItem.id);
+
+      // 2. Clear file input value to allow re-uploading same file
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi kết nối khi tải ảnh.");
-    } finally {
-      setIsAnalyzing(false);
+
+      // 3. Run analysis with real image base64 & compute new risk evaluation
+      await handleRunAnalysis(newImgId, activeRoomId, activeRoomType, base64Data);
+
+      // 4. Also persist to /api/vision/images in background
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("roomId", activeRoomId);
+        formData.append("viewpoint", selectedViewpoint);
+        formData.append("caption", newImgItem.caption || "");
+        fetch("/api/vision/images", { method: "POST", body: formData }).catch(() => {});
+      } catch {}
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  // Upload Photo handler from file input
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processUploadFile(file);
     }
   };
 
@@ -231,36 +405,11 @@ export default function AiVisionStudioPage() {
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(async (blob) => {
+    canvas.toBlob((blob) => {
       if (!blob) return;
       handleCloseCamera();
-
-      const formData = new FormData();
-      formData.append("file", blob, `camera_capture_${Date.now()}.jpg`);
-      formData.append("roomId", activeRoomId);
-      formData.append("viewpoint", selectedViewpoint);
-      formData.append("caption", "Ảnh chụp trực tiếp từ camera");
-
-      setIsAnalyzing(true);
-      try {
-        const res = await fetch("/api/vision/images", { method: "POST", body: formData });
-        const data = await res.json();
-        if (data.success && data.data) {
-          const newImg = {
-            id: data.data.id,
-            fileUrl: data.data.fileUrl,
-            viewpoint: data.data.viewpoint,
-            caption: data.data.caption,
-          };
-          setImages((prev) => [newImg, ...prev]);
-          setSelectedImageId(newImg.id);
-          await handleRunAnalysis(newImg.id, activeRoomId, activeRoomType);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsAnalyzing(false);
-      }
+      const file = new File([blob], `camera_capture_${Date.now()}.jpg`, { type: "image/jpeg" });
+      processUploadFile(file);
     }, "image/jpeg", 0.92);
   };
 
@@ -270,6 +419,71 @@ export default function AiVisionStudioPage() {
       setCameraStream(null);
     }
     setCameraModalOpen(false);
+  };
+
+  // Convert detections to 3D room objects and load into 3D Digital Twin
+  const handleBuild3DFromImage = () => {
+    if (!detections || detections.length === 0) {
+      alert("Chưa có vật thể nào được nhận diện để dựng 3D.");
+      return;
+    }
+    const newRoomId = `reconstructed-${Date.now()}`;
+    const roomName = `Mô phỏng 3D từ ảnh (${selectedImage.caption || "Hiện trường"})`;
+
+    const newObjects: SceneObjectState[] = detections.map((det, idx) => {
+      const centerX = (det.bbox.xMin + det.bbox.xMax) / 2;
+      const centerY = (det.bbox.yMin + det.bbox.yMax) / 2;
+      const posX = Number(((centerX - 0.5) * 3.8).toFixed(2));
+      const posZ = Number(((centerY - 0.5) * 3.4).toFixed(2));
+      const isHazard =
+        det.category === "electrical_cable" ||
+        (det.category === "rug" && det.verificationStatus !== "REJECTED");
+
+      let category: ObjectCategory = "FURNITURE";
+      if (det.category === "rug") category = "RUG";
+      else if (det.category === "electrical_cable") category = "CABLE";
+      else if (det.category === "grab_bar") category = "SAFETY_DEVICE";
+      else if (det.category === "obstacle_route") category = "OBSTACLE";
+
+      return {
+        id: `obj-rec-${idx}-${Date.now()}`,
+        roomId: newRoomId,
+        name: det.userLabel || CATEGORY_TAXONOMY[det.category]?.vietnameseName || det.originalLabel,
+        category,
+        modelType: det.category,
+        position: [posX, det.category === "rug" ? 0.02 : 0.4, posZ],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        dimensions: {
+          width: 1.0,
+          length: 1.0,
+          height: det.category === "rug" ? 0.02 : 0.8,
+        },
+        verified: det.verificationStatus === "CONFIRMED",
+        isLoose: isHazard,
+      };
+    });
+
+    const newRoom: RoomState = {
+      id: newRoomId,
+      name: roomName,
+      roomType: activeRoomType,
+      dimensions: {
+        width: 4.5,
+        length: 4.0,
+        height: 2.8,
+      },
+      floorMaterial: activeRoomType === "BATHROOM" ? "CERAMIC_TILE" : "WOOD",
+      lightingLevel: 200,
+      isWet: activeRoomType === "BATHROOM",
+      isSlipResistant: activeRoomType !== "BATHROOM",
+      grabBarsCount: detections.filter((d) => d.category === "grab_bar").length,
+      walkingZones: [],
+      objects: newObjects,
+    };
+
+    useSimulationStore.getState().loadReconstructedRoom(newRoom);
+    router.push("/digital-twin");
   };
 
   // Verification Actions (Confirm, Correct, Reject)
@@ -505,12 +719,17 @@ export default function AiVisionStudioPage() {
 
             {/* Upload & Camera Buttons */}
             <div className="grid grid-cols-2 gap-2 pt-1">
-              <label className="cursor-pointer px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <label
+                htmlFor="vision-file-upload-input"
+                className="cursor-pointer px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+              >
                 <Upload className="h-3.5 w-3.5 text-teal-600" />
                 <span>Tải ảnh</span>
                 <input
+                  id="vision-file-upload-input"
+                  ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={handleFileUpload}
                   className="hidden"
                 />
@@ -518,7 +737,7 @@ export default function AiVisionStudioPage() {
 
               <button
                 onClick={handleStartCamera}
-                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <Camera className="h-3.5 w-3.5 text-indigo-600" />
                 <span>Mở Camera</span>
@@ -542,8 +761,8 @@ export default function AiVisionStudioPage() {
                 return (
                   <div
                     key={img.id}
-                    onClick={() => setSelectedImageId(img.id)}
-                    className={`p-2 rounded-xl border cursor-pointer transition flex items-center gap-2.5 ${
+                    onClick={() => handleSelectImage(img)}
+                    className={`group p-2 rounded-xl border cursor-pointer transition flex items-center gap-2.5 ${
                       isSelected
                         ? "bg-teal-50/60 border-teal-500 ring-2 ring-teal-500/20 shadow-sm"
                         : "bg-white border-slate-200 hover:border-slate-300"
@@ -552,23 +771,36 @@ export default function AiVisionStudioPage() {
                     <img
                       src={img.fileUrl}
                       alt="Room preview"
-                      className="w-14 h-11 object-cover rounded-lg bg-slate-100 shrink-0"
+                      className="w-14 h-11 object-cover rounded-lg bg-slate-100 shrink-0 border border-slate-200"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold text-slate-700 truncate">
-                          {img.viewpoint === "ENTRANCE"
+                          {img.caption || (img.viewpoint === "ENTRANCE"
                             ? "Cửa vào"
                             : img.viewpoint === "WALKWAY"
                             ? "Lối đi"
-                            : "Cận cảnh"}
+                            : "Cận cảnh")}
                         </span>
-                        {isSelected && (
-                          <span className="h-2 w-2 rounded-full bg-teal-500" />
-                        )}
+                        <div className="flex items-center gap-1">
+                          {img.isCustom && (
+                            <button
+                              onClick={(e) => handleDeleteImage(img.id, e)}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-rose-600 transition rounded"
+                              title="Xóa ảnh này"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          {isSelected && (
+                            <span className="h-2 w-2 rounded-full bg-teal-500" />
+                          )}
+                        </div>
                       </div>
                       <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                        {img.caption || "Ảnh hiện trường"}
+                        {analysisByImage[img.id]
+                          ? `Đã phân tích (${analysisByImage[img.id].detections.length} vật thể)`
+                          : img.caption || "Ảnh hiện trường"}
                       </p>
                     </div>
                   </div>
@@ -642,8 +874,30 @@ export default function AiVisionStudioPage() {
               </div>
             </div>
 
-            {/* Interactive Image Container with SVG Overlay */}
-            <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center min-h-[380px] max-h-[520px]">
+            {/* Interactive Image Container with SVG Overlay & Drag-Drop */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) processUploadFile(file);
+              }}
+              className={`relative overflow-hidden rounded-xl bg-slate-900 border flex items-center justify-center min-h-[380px] max-h-[520px] transition ${
+                isDragging ? "border-2 border-dashed border-teal-400 bg-teal-950/40" : "border-slate-800"
+              }`}
+            >
+              {isDragging && (
+                <div className="absolute inset-0 z-30 bg-teal-900/70 backdrop-blur-xs flex flex-col items-center justify-center text-white pointer-events-none">
+                  <Upload className="h-10 w-10 text-teal-300 animate-bounce mb-2" />
+                  <span className="font-bold text-sm">Thả ảnh vào đây</span>
+                  <span className="text-xs text-teal-200 mt-1">Hệ thống sẽ tải ảnh và kích hoạt phân tích ngay</span>
+                </div>
+              )}
               <div
                 className="relative transition-transform duration-200 origin-center inline-block max-w-full"
                 style={{ transform: `scale(${zoomLevel})` }}
@@ -1133,6 +1387,15 @@ export default function AiVisionStudioPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleBuild3DFromImage}
+            className="px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 transition flex items-center gap-1.5 shadow-xs"
+            title="Dựng phòng số hóa 3D từ các vật thể nhận diện trong ảnh này"
+          >
+            <Layers className="h-3.5 w-3.5 text-indigo-600" />
+            <span>Dựng Mô Phỏng 3D Từ Ảnh Này</span>
+          </button>
+
           <button
             onClick={handleSyncAndReassess}
             className="px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold border border-teal-200 transition flex items-center gap-1.5"

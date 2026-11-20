@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { runVisionAnalysis } from "@/lib/vision/visionProvider";
+import fs from "fs";
+import path from "path";
 
 export async function POST(
   req: NextRequest,
@@ -9,15 +11,40 @@ export async function POST(
   try {
     const { imageId } = params;
     const body = await req.json().catch(() => ({}));
-    const roomId = body.roomId || "room-bedroom-1";
+    const roomId = body.roomId || "room-bedroom-01";
     const mode = body.mode || "AI_VISION";
     const roomType = body.roomType || (roomId.toLowerCase().includes("bath") ? "BATHROOM" : "BEDROOM");
+
+    // Extract base64 image if provided
+    let imageBufferBase64 = body.imageBufferBase64;
+    if (imageBufferBase64 && imageBufferBase64.includes(",")) {
+      imageBufferBase64 = imageBufferBase64.split(",")[1];
+    }
+
+    // If not in body, check disk or database storage
+    if (!imageBufferBase64 && imageId) {
+      try {
+        const roomImg = await prisma.roomImage.findUnique({
+          where: { id: imageId },
+        });
+        if (roomImg?.storageKey) {
+          const filePath = path.join(process.cwd(), "public", "uploads", "vision", path.basename(roomImg.storageKey));
+          if (fs.existsSync(filePath)) {
+            const buf = await fs.promises.readFile(filePath);
+            imageBufferBase64 = buf.toString("base64");
+          }
+        }
+      } catch (err) {
+        // ignore fallback
+      }
+    }
 
     // 1. Run inference/heuristic
     const analysisResult = await runVisionAnalysis(imageId, roomId, {
       mode,
       roomType,
       viewpoint: body.viewpoint,
+      imageBufferBase64,
     });
 
     // 2. Persist analysis & detections in database

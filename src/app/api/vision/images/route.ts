@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const roomId = (formData.get("roomId") as string) || "room-bedroom-1";
+    const roomId = (formData.get("roomId") as string) || "room-bedroom-01";
     const viewpoint = (formData.get("viewpoint") as ViewpointType) || "ENTRANCE";
     const caption = (formData.get("caption") as string) || "";
 
