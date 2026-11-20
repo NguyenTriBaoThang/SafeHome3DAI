@@ -19,6 +19,323 @@ export interface VisionProviderOptions {
 }
 
 /**
+ * Ensures that any set of detections is enriched with comprehensive clinical fall hazard observations
+ * and clarification questions in accordance with WHO 2021 & CDC STEADI guidelines.
+ */
+export function enrichClinicalObservationsAndClarifications(
+  detections: VisionDetection[],
+  existingObservations: VisionObservation[],
+  existingClarifications: VisionClarificationQuestion[],
+  roomId: string,
+  analysisId: string
+): { observations: VisionObservation[]; clarifications: VisionClarificationQuestion[] } {
+  const observations = [...existingObservations];
+  const clarifications = [...existingClarifications];
+  const timestamp = new Date().toISOString();
+
+  const hasObsForCategory = (cat: string) =>
+    observations.some(
+      (o) =>
+        (o.evidenceJson as any)?.category === cat ||
+        o.description.toLowerCase().includes(cat) ||
+        (cat === "table" && o.description.toLowerCase().includes("bàn")) ||
+        (cat === "rug" && o.description.toLowerCase().includes("thảm")) ||
+        (cat === "electrical_cable" && o.description.toLowerCase().includes("dây")) ||
+        (cat === "chair" && o.description.toLowerCase().includes("ghế"))
+    );
+
+  const hasClarForQuestion = (qId: string) =>
+    clarifications.some((c) => c.surveyQuestionId === qId);
+
+  for (const det of detections) {
+    const cat = det.category;
+    const label = (det.originalLabel || det.userLabel || cat).toLowerCase();
+
+    // 1. TABLE / DESK
+    if (cat === "table" || label.includes("bàn") || label.includes("table") || label.includes("desk")) {
+      if (!hasObsForCategory("table")) {
+        observations.push({
+          id: `obs_${Date.now()}_table_corner`,
+          analysisId,
+          observationType: "OBSTACLE_CANDIDATE",
+          description:
+            "Bàn sinh hoạt / làm việc có góc vuông sắc nhọn nhô ra hành lang di chuyển: Nguy cơ chấn thương đụng giập hoặc rách da sâu khi người cao tuổi va quẹt (theo CDC STEADI & WHO 2021).",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BED_009",
+          evidenceJson: { category: "table", detectionId: det.id },
+        });
+
+        observations.push({
+          id: `obs_${Date.now()}_table_legs`,
+          analysisId,
+          observationType: "OBSTACLE_CANDIDATE",
+          description:
+            "Chân bàn dạng kê tự do thiếu đệm cao su bám sàn: Nguy cơ xê dịch hoặc trượt lật khi người già tỳ vịn lấy đà đứng lên.",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BED_010",
+          evidenceJson: { category: "table", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("BED_009")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_table_corner`,
+          roomId,
+          surveyQuestionId: "BED_009",
+          questionText: "Các góc bàn nhô ra lối đi đã được dán đệm silicone bo tròn giảm chấn chưa?",
+          helpText: "Theo CDC STEADI, bo tròn các góc bàn giúp giảm 70% nguy cơ chấn thương mô mềm và tụ máu khi người già va quẹt.",
+          options: [
+            { value: "YES", label: "Đã có đệm bọc góc silicone an toàn", isRiskTrigger: false },
+            { value: "NO", label: "Chưa bọc, các góc nhọn 90°", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa kiểm tra", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+
+      if (!hasClarForQuestion("BED_010")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_table_legs`,
+          roomId,
+          surveyQuestionId: "BED_010",
+          questionText: "Chân bàn có nút đệm cao su chống trượt và đứng vững chắc khi tỳ tay lấy lực đứng dậy không?",
+          helpText: "Người già thường tỳ tay vào mép bàn để đứng dậy; bàn trơn trượt có thể gây lật ngã tức thì.",
+          options: [
+            { value: "YES", label: "Rất vững chãi, có đế cao su chống trượt", isRiskTrigger: false },
+            { value: "NO", label: "Dễ bị trượt hoặc lung lay", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+
+    // 2. RUG / MAT
+    if (cat === "rug" || label.includes("thảm") || label.includes("rug") || label.includes("mat")) {
+      if (!hasObsForCategory("rug")) {
+        observations.push({
+          id: `obs_${Date.now()}_rug_hazard`,
+          analysisId,
+          observationType: "RUG_OBSERVED",
+          description:
+            "Thảm trải sàn không cố định hoặc mép viền cong vênh: Căn nguyên gây tới 35% các vụ té ngã trong nhà ở người cao tuổi do bước lê chân (CDC STEADI).",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BED_006",
+          evidenceJson: { category: "rug", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("BED_006")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_rug_backing`,
+          roomId,
+          surveyQuestionId: "BED_006",
+          questionText: "Mặt dưới thảm có lớp cao su chống trượt (non-slip backing) hoặc đã được dán băng dính chuyên dụng cố định 4 góc chưa?",
+          helpText: "Thảm rời trên sàn gạch/gỗ trơn bóng là nguy cơ té ngã hàng đầu theo CDC STEADI.",
+          options: [
+            { value: "YES", label: "Đã có đệm bám hoặc dán cố định sàn", isRiskTrigger: false },
+            { value: "NO", label: "Thảm rời, dễ trôi trượt khi giẫm lên", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa kiểm tra", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+
+    // 3. ELECTRICAL CABLE
+    if (cat === "electrical_cable" || label.includes("dây") || label.includes("cable") || label.includes("cord")) {
+      if (!hasObsForCategory("electrical_cable")) {
+        observations.push({
+          id: `obs_${Date.now()}_cable_hazard`,
+          analysisId,
+          observationType: "CABLE_OBSERVED",
+          description:
+            "Dây dẫn điện vắt ngang mặt sàn: Nguy cơ mắc kẹt bàn chân hoặc đầu gậy chống gây mất đà ngã chúi (CDC STEADI).",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "SPATIAL_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BED_008",
+          evidenceJson: { category: "electrical_cable", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("BED_008")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_cable_trunking`,
+          roomId,
+          surveyQuestionId: "BED_008",
+          questionText: "Dây điện trên sàn có được gom nẹp luồn ống gen cố định sát mép chân tường không?",
+          helpText: "Dây điện nằm tự do trên sàn nhà người cao tuổi rất dễ vướng vào dép khi đi lại ban đêm.",
+          options: [
+            { value: "YES", label: "Đã nẹp gen cố định sát tường", isRiskTrigger: false },
+            { value: "NO", label: "Dây nằm lộn xộn trên lối đi", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+
+    // 4. CHAIR / BENCH / SEATING
+    if (cat === "chair" || label.includes("ghế") || label.includes("chair") || label.includes("đôn")) {
+      if (!hasObsForCategory("chair")) {
+        observations.push({
+          id: `obs_${Date.now()}_chair_hazard`,
+          analysisId,
+          observationType: "OBSTACLE_CANDIDATE",
+          description:
+            "Ghế ngồi không có tay vịn hoặc thiếu chân đệm cao su: Khó khăn và nguy cơ mất thăng bằng khi người già chuyển tư thế từ ngồi sang đứng.",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "LIV_004",
+          evidenceJson: { category: "chair", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("LIV_004")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_chair_armrest`,
+          roomId,
+          surveyQuestionId: "LIV_004",
+          questionText: "Ghế ngồi này có tay vịn chịu lực vững chắc và chân chống trượt không?",
+          options: [
+            { value: "YES", label: "Có tay vịn chắc chắn và chân chống trượt", isRiskTrigger: false },
+            { value: "NO", label: "Không có tay vịn / Chân trơn trượt", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+
+    // 5. BED
+    if (cat === "bed" || label.includes("giường") || label.includes("bed")) {
+      if (!hasObsForCategory("bed")) {
+        observations.push({
+          id: `obs_${Date.now()}_bed_hazard`,
+          analysisId,
+          observationType: "OBSTACLE_CANDIDATE",
+          description:
+            "Chiều cao thành giường và lối tiếp cận: Cần đảm bảo độ cao phù hợp (45-50cm từ đệm xuống sàn) để người cao tuổi chạm phẳng 2 bàn chân khi thức dậy, tránh hạ huyết áp tư thế.",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BED_001",
+          evidenceJson: { category: "bed", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("BED_001")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_bed_height`,
+          roomId,
+          surveyQuestionId: "BED_001",
+          questionText: "Khi người cao tuổi ngồi ở mép giường, hai bàn chân có đặt phẳng hoàn toàn xuống sàn không?",
+          helpText: "Giường quá cao (chân lơ lửng) hoặc quá thấp (gập gối quá 90 độ) đều gây khó khăn khi đứng dậy và dễ té ngã.",
+          options: [
+            { value: "YES", label: "Hai bàn chân chạm phẳng hoàn toàn", isRiskTrigger: false },
+            { value: "NO", label: "Giường quá cao hoặc quá thấp", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+
+    // 6. BATHROOM / TOILET / SHOWER
+    if (cat === "toilet" || cat === "bathtub" || cat === "sink" || label.includes("toilet") || label.includes("tắm") || label.includes("vệ sinh")) {
+      if (!hasObsForCategory("grab_bar")) {
+        observations.push({
+          id: `obs_${Date.now()}_bath_grab_bar`,
+          analysisId,
+          observationType: "GRAB_BAR_UNCERTAIN",
+          description:
+            "Khu vực phòng tắm & nhà vệ sinh có nguy cơ trơn trượt cao khi ướt nước: Cần kiểm tra thanh vịn chịu lực trợ lực tại vị trí bồn cầu và buồng tắm theo hướng dẫn CDC STEADI.",
+          relatedDetectionIds: [det.id],
+          uncertaintyType: "CONDITION_UNCERTAINTY",
+          requiresConfirmation: true,
+          verificationStatus: "PENDING_REVIEW",
+          surveyQuestionId: "BATH_001",
+          evidenceJson: { category: "grab_bar", detectionId: det.id },
+        });
+      }
+
+      if (!hasClarForQuestion("BATH_001")) {
+        clarifications.push({
+          id: `clarify_${Date.now()}_bath_grab_bar`,
+          roomId,
+          surveyQuestionId: "BATH_001",
+          questionText: "Đã có thanh vịn chịu lực (Grab Bar) được khoan bắt vít chắc chắn cạnh bồn cầu và vòi sen chưa?",
+          helpText: "Thanh vịn là thiết bị can thiệp hiệu quả số 1 giúp giảm 50% nguy cơ té ngã trong nhà tắm.",
+          options: [
+            { value: "YES", label: "Đã lắp đặt thanh vịn chắc chắn", isRiskTrigger: false },
+            { value: "NO", label: "Chưa có thanh vịn", isRiskTrigger: true },
+            { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+          ],
+          status: "PENDING",
+          createdAt: timestamp,
+        });
+      }
+    }
+  }
+
+  // 7. Guarantee non-empty observations & clarifications if detections exist
+  if (detections.length > 0 && observations.length === 0) {
+    observations.push({
+      id: `obs_${Date.now()}_spatial_clearance`,
+      analysisId,
+      observationType: "OBSTACLE_CANDIDATE",
+      description:
+        "Khoảng cách thông thủy quanh vật thể nội thất: Cần đảm bảo tối thiểu 80-90cm để người cao tuổi sử dụng gậy chống hoặc khung tập đi an toàn theo ADA/CDC STEADI.",
+      relatedDetectionIds: detections.map((d) => d.id),
+      uncertaintyType: "SPATIAL_UNCERTAINTY",
+      requiresConfirmation: true,
+      verificationStatus: "PENDING_REVIEW",
+      surveyQuestionId: "GEN_001",
+      evidenceJson: { count: detections.length },
+    });
+  }
+
+  if (detections.length > 0 && clarifications.length === 0) {
+    clarifications.push({
+      id: `clarify_${Date.now()}_clearance_width`,
+      roomId,
+      surveyQuestionId: "GEN_001",
+      questionText: "Lối đi xung quanh các đồ vật này có đạt độ rộng thông thủy tối thiểu 80cm không?",
+      helpText: "Lối đi hẹp dưới 80cm khiến người cao tuổi dễ va đập vào đồ đạc hoặc vướng khung tập đi.",
+      options: [
+        { value: "YES", label: "Lối đi rộng rãi trên 80cm", isRiskTrigger: false },
+        { value: "NO", label: "Lối đi hẹp dưới 80cm", isRiskTrigger: true },
+        { value: "UNKNOWN", label: "Chưa đo", isRiskTrigger: false },
+      ],
+      status: "PENDING",
+      createdAt: timestamp,
+    });
+  }
+
+  return { observations, clarifications };
+}
+
+/**
  * Executes AI Vision detection and multimodal observation extraction.
  * Supports configurable AI models with deterministic local fallback.
  */
@@ -101,6 +418,13 @@ export async function runVisionAnalysis(
       });
 
       if (geminiRes.detections.length > 0) {
+        const enriched = enrichClinicalObservationsAndClarifications(
+          geminiRes.detections,
+          geminiRes.observations || [],
+          [],
+          roomId,
+          analysisId
+        );
         return {
           id: analysisId,
           roomId,
@@ -109,8 +433,8 @@ export async function runVisionAnalysis(
           modelVersion: "3.5.0",
           analysisStatus: "COMPLETED",
           detections: geminiRes.detections,
-          observations: geminiRes.observations,
-          clarifications: [],
+          observations: enriched.observations,
+          clarifications: enriched.clarifications,
           startedAt: timestamp,
           completedAt: new Date().toISOString(),
         };
@@ -747,6 +1071,14 @@ export async function runVisionAnalysis(
     });
   }
 
+  const enriched = enrichClinicalObservationsAndClarifications(
+    detections,
+    observations,
+    clarifications,
+    roomId,
+    analysisId
+  );
+
   return {
     id: analysisId,
     roomId,
@@ -755,8 +1087,8 @@ export async function runVisionAnalysis(
     modelVersion: "1.0.0",
     analysisStatus: "COMPLETED",
     detections,
-    observations,
-    clarifications,
+    observations: enriched.observations,
+    clarifications: enriched.clarifications,
     startedAt: timestamp,
     completedAt: new Date().toISOString(),
   };

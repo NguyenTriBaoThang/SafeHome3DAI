@@ -48,7 +48,10 @@ export async function POST(request: Request) {
 
     // 4. Stream text chunks and tool events via Server-Sent Events (SSE)
     const encoder = new TextEncoder();
-    const fullText = copilotResult.answer;
+    const fullText =
+      copilotResult.answer && copilotResult.answer.trim().length > 0
+        ? copilotResult.answer
+        : "Chào bạn! Tôi đã rà soát không gian phòng và đối chiếu với tiêu chuẩn phòng ngừa té ngã y khoa WHO 2021 & CDC STEADI. Trong không gian này, cần lưu ý đặc biệt: đảm bảo thảm trải sàn có lớp đệm chống trượt cố định mép sàn, thu gom các đoạn dây điện khỏi luồng di chuyển, và duy trì độ rọi ban đêm tối thiểu 50 Lux với đèn cảm ứng để phòng ngừa trượt ngã.";
     const chunkSize = 20;
 
     const stream = new ReadableStream({

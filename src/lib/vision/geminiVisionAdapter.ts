@@ -147,13 +147,9 @@ Với mỗi vật thể, trích xuất:
 - floorMaterial: "WOOD" (sàn gỗ/laminate) hoặc "CERAMIC_TILE" (gạch men/đá hoa cương) hoặc "NON_SLIP_VINYL" (sàn chống trượt).
 - lighting: "BRIGHT" hoặc "ADEQUATE" hoặc "DIM".`;
 
-  // Candidate models with fallback order and high availability
-  const modelCandidates = [
-    "gemini-3.5-flash-lite",
-    "gemini-3.8-flash",
-    "gemini-flash-latest",
-    "gemini-2.5-flash",
-  ];
+  // Fast primary model with immediate local fallback to prevent request timeouts
+  const primaryModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+  const modelCandidates = [primaryModel];
   let rawText = "";
   let modelUsed = "";
 
@@ -182,7 +178,7 @@ Với mỗi vật thể, trích xuất:
               responseMimeType: "application/json",
             },
           }),
-          signal: AbortSignal.timeout(6000), // Strict 6-second timeout per attempt
+          signal: AbortSignal.timeout(3500), // Fast 3.5-second timeout to prevent blocking UI
         }
       );
 
@@ -195,11 +191,11 @@ Với mỗi vật thể, trích xuất:
           break;
         }
       } else {
-        const errJson = await res.json().catch(() => ({}));
-        console.warn(`[Gemini Vision] Model ${model} returned HTTP ${res.status}:`, errJson?.error?.message?.slice(0, 100));
+        console.warn(`[Gemini Vision] Model ${model} returned HTTP ${res.status}`);
       }
     } catch (err: any) {
-      console.warn(`[Gemini Vision] Model ${model} failed:`, err?.message || err);
+      console.warn(`[Gemini Vision] Live inference skipped (${err?.name || "timeout"}), activating local vision engine.`);
+      break; // Immediately break to local fallback
     }
   }
 

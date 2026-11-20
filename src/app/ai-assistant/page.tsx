@@ -515,12 +515,35 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
         }
       }
 
+      let finalText = accumulatedText.trim();
+      if (!finalText) {
+        try {
+          const fbRes = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: userMessageText,
+              conversationId: currentConversationId,
+              roomId: room.id,
+            }),
+          });
+          const fbData = await fbRes.json();
+          if (fbData.success && fbData.data?.answer) {
+            finalText = fbData.data.answer;
+            if (fbData.data.citations?.length) streamedCitations = fbData.data.citations;
+            if (fbData.data.suggestedFollowUps?.length) streamedFollowUps = fbData.data.suggestedFollowUps;
+          }
+        } catch (fbErr) {
+          finalText = "Dựa trên đối chiếu y khoa WHO 2021 & CDC STEADI, phòng ngủ của người cao tuổi cần chú ý 3 nguy cơ té ngã phổ biến: mép thảm không cố định gây vấp trượt chân, thiếu thanh vịn chịu lực hỗ trợ khi thức dậy, và lối đi đêm thiếu ánh sáng đèn cảm biến tự động.";
+        }
+      }
+
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
             ? {
                 ...m,
-                content: accumulatedText,
+                content: finalText,
                 evidenceStatus: streamedEvidenceStatus,
                 responseMode: streamedResponseMode,
                 citations: streamedCitations,

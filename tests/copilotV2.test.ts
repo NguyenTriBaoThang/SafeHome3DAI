@@ -116,6 +116,30 @@ describe("SafeHome AI Copilot 2.0 Test Suite", () => {
       expect(res.suggestedFollowUps.length).toBeGreaterThan(0);
     });
 
+    it("should answer room objects inventory question without repeating chunk templates", async () => {
+      const res = await processCopilotChat({
+        message: "Trong phòng có vật dụng gì ?",
+        roomId: "room-bedroom-01",
+      });
+
+      expect(res.answer).toContain("vật dụng");
+      expect(res.answer).toContain("Giường");
+      expect(res.answer).not.toContain("### An toàn phòng tắm và bề mặt ướt");
+      expect(res.suggestedFollowUps.length).toBeGreaterThan(0);
+    });
+
+    it("should answer grab bar material question specifically with Inox 304 and CDC STEADI", async () => {
+      const res = await processCopilotChat({
+        message: "Nên chọn thanh vịn chất liệu gì cho nhà tắm?",
+        roomId: "room-bathroom-01",
+      });
+
+      expect(res.answer).toContain("Inox 304");
+      expect(res.answer).toContain("Bộ Y tế");
+      expect(res.answer).toContain("CDC STEADI");
+      expect(res.answer).not.toContain("### An toàn phòng tắm và bề mặt ướt");
+    });
+
     it("should attach tool action when user asks to see object on 3D", async () => {
       const res = await processCopilotChat({
         message: "Hãy cho tôi xem tấm thảm nguy hiểm trên 3D",

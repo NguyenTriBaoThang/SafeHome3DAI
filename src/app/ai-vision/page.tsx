@@ -303,7 +303,7 @@ export default function AiVisionStudioPage() {
           caption,
           imageBufferBase64: base64,
         }),
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(25000),
       });
       const data = await res.json();
       if (data.success && data.data) {

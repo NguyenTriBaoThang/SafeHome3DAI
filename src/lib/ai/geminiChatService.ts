@@ -63,7 +63,7 @@ export async function processCopilotChat(options: CopilotChatOptions): Promise<C
 
   // 4. Check if live Gemini API is available
   const apiKey = process.env.GEMINI_API_KEY;
-  const configuredModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+  const configuredModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
   if (apiKey) {
     try {
@@ -100,34 +100,47 @@ ${evidencePrompt}
         parts: [{ text: message }],
       });
 
-      // Call Gemini REST API with timeout
-      const res = await Promise.race([
-        fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${configuredModel}:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents,
-              systemInstruction: {
-                parts: [{ text: systemInstruction }],
-              },
-              generationConfig: {
-                temperature: 0.2,
-                maxOutputTokens: 1200,
-              },
-            }),
-          }
-        ),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Gemini API call timed out after 12s")), 12000)
-        ),
-      ]);
-
       let rawText = "";
-      if (res && (res as any).ok) {
-        const json = await (res as any).json();
-        rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      // Fast single attempt (max 3.5s) to ensure ultra-responsive chat without blocking server resources
+      try {
+        const res = await Promise.race([
+          fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${configuredModel}:generateContent?key=${apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents,
+                systemInstruction: {
+                  parts: [{ text: systemInstruction }],
+                },
+                generationConfig: {
+                  temperature: 0.2,
+                  maxOutputTokens: 1200,
+                },
+              }),
+            }
+          ),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Gemini live API timed out after 3.5s")), 3500)
+          ),
+        ]);
+
+        if (res && (res as any).ok) {
+          const json = await (res as any).json();
+          const candidateText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (candidateText && candidateText.trim().length > 0) {
+            rawText = candidateText.trim();
+          }
+        }
+      } catch (fastErr) {
+        // Immediately falls through to grounded clinical engine without waiting
+      }
+
+      // If live Gemini didn't return valid text in 3.5s, trigger grounded clinical engine immediately
+      if (!rawText || rawText.trim().length === 0) {
+        throw new Error("Activating grounded clinical engine fallback");
       }
 
       // Format citations from retrieved chunks
@@ -170,6 +183,11 @@ ${evidencePrompt}
     }
   }
 
+  const activeRoom =
+    sysContext.rooms.find((r) => r.id === roomId) ||
+    sysContext.rooms.find((r) => r.id === sysContext.activeRoomId) ||
+    sysContext.rooms[0];
+
   // 5. High-quality Grounded Deterministic Generation Fallback
   const deterministicResult = await generateGroundedAnswer({
     query: message,
@@ -178,10 +196,16 @@ ${evidencePrompt}
     evaluation,
     retrievedChunks,
     roomContext: {
-      roomName: sysContext.rooms.find((r) => r.id === roomId)?.name || "Phòng ngủ",
-      hazardCount: sysContext.rooms.find((r) => r.id === roomId)?.hazards.length || 0,
-      hazardTitles: sysContext.rooms.find((r) => r.id === roomId)?.hazards.map((h) => h.title) || [],
-      lightingLux: sysContext.rooms.find((r) => r.id === roomId)?.lightingLevel || 150,
+      roomId: activeRoom.id,
+      roomName: activeRoom.name,
+      hazardCount: activeRoom.hazards.length,
+      hazardTitles: activeRoom.hazards.map((h) => h.title),
+      lightingLux: activeRoom.lightingLevel,
+      objects: activeRoom.objects,
+      hazards: activeRoom.hazards,
+      residentName: sysContext.residentProfile.name,
+      residentAge: sysContext.residentProfile.age,
+      healthConditions: sysContext.residentProfile.healthConditions,
     },
   });
 
