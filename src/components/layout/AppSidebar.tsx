@@ -26,6 +26,13 @@ import { cn } from "@/lib/utils";
 // Các phân hệ độc lập bên ngoài (không nằm trong luồng tuyến tính 7 bước)
 const EXTERNAL_MODULES = [
   {
+    href: "/experience",
+    label: "Trải nghiệm Cinematic",
+    icon: Compass,
+    badge: "Tour 3D",
+    highlight: true,
+  },
+  {
     href: "/dashboard",
     label: "Tổng quan & Chỉ số",
     icon: LayoutDashboard,

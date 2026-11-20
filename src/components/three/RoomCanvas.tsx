@@ -154,6 +154,25 @@ function CameraController({ fitTrigger }: { fitTrigger: number }) {
         }
         break;
 
+      case "COMPARISON":
+        // Cinematic perspective for before/after layout comparison
+        if (isDollhouse) {
+          camera.position.set(5.2, 5.8, 5.6);
+          camera.lookAt(0.2, 0.4, 0);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(0.2, 0.4, 0);
+            controlsRef.current.update();
+          }
+        } else {
+          camera.position.set(cameraDist * 0.75, cameraDist * 0.85, cameraDist * 0.75);
+          camera.lookAt(0, height * 0.3, 0);
+          if (controlsRef.current) {
+            controlsRef.current.target.set(0, height * 0.3, 0);
+            controlsRef.current.update();
+          }
+        }
+        break;
+
       case "INTERIOR":
         // Eye-level view inside the room
         if (isDollhouse) {
@@ -901,6 +920,36 @@ export const RoomCanvas: React.FC = () => {
           >
             <Footprints className="h-3 w-3" />
             <span className="hidden sm:inline">Walkthrough</span>
+          </button>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("SAFETY");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              cameraPreset === "SAFETY"
+                ? "bg-rose-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Tập trung góc nhìn vào điểm nguy cơ cao nhất"
+          >
+            <AlertTriangle className="h-3 w-3 text-rose-400" />
+            <span className="hidden sm:inline">Nguy cơ</span>
+          </button>
+          <button
+            onClick={() => {
+              focusOnLocation(null);
+              setCameraPreset("COMPARISON");
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              cameraPreset === "COMPARISON"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Xem góc nhìn phối cảnh Trước / Sau cải tạo"
+          >
+            <Sliders className="h-3 w-3 text-sky-400" />
+            <span className="hidden sm:inline">Trước/Sau</span>
           </button>
           <button
             onClick={handleFitRoom}

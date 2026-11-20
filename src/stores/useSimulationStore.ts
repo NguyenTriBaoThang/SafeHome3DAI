@@ -33,7 +33,7 @@ interface SimulationStore {
 
   // Selection & 3D Controls
   selectedObjectId: string | null;
-  cameraPreset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY";
+  cameraPreset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY" | "COMPARISON";
   cameraFocusPoint: [number, number, number] | null;
   transformMode: "translate" | "rotate" | null;
   lightingPreset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
@@ -55,7 +55,7 @@ interface SimulationStore {
   // Actions
   switchRoom: (roomId: string) => void;
   selectObject: (id: string | null) => void;
-  setCameraPreset: (preset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY") => void;
+  setCameraPreset: (preset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY" | "COMPARISON") => void;
   setLightingPreset: (preset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO") => void;
   focusOnLocation: (point: [number, number, number] | null) => void;
   setTransformMode: (mode: "translate" | "rotate" | null) => void;
