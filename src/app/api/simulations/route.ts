@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { z } from "zod";
 import { INITIAL_ROOMS } from "@/data/mockRooms";
+import {
+  runEnvironmentalAssessment,
+  calculateSafetyScore,
+} from "@/features/risk-engine/rules";
 
 const CreateRoomSchema = z.object({
   name: z.string().min(2),
@@ -72,51 +76,75 @@ export async function GET() {
       };
     });
 
-    // If DB is empty, map initial mock rooms so the gallery is never empty
-    if (formattedRooms.length === 0) {
-      const initialFormatted = INITIAL_ROOMS.map((r, idx) => ({
+    // 1. Build canonical entries from INITIAL_ROOMS (all 4 core spaces: Dollhouse, Bedroom, Bathroom, Living room)
+    const canonicalRooms = INITIAL_ROOMS.map((r, idx) => {
+      const findings = runEnvironmentalAssessment(r);
+      const score = calculateSafetyScore(findings);
+      const isDh = r.layoutType === "DOLLHOUSE_MULTI_ZONE" || r.id.includes("dollhouse");
+      return {
         id: r.id,
         name: r.name,
-        roomType: r.roomType,
+        roomType: (r.roomType || (isDh ? "DOLLHOUSE" : "BEDROOM")) as any,
         dimensions: r.dimensions,
-        projectName: "Dự án mẫu - Căn hộ 502",
-        targetResident: "Bác Nam (75 tuổi, giảm thị lực)",
+        projectName: isDh
+          ? "Dự án Kiến Trúc Chuẩn Quốc Tế & Digital Twin"
+          : "Chương Trình Nhà Ở An Toàn Cho Người Cao Tuổi Việt Nam",
+        targetResident: isDh
+          ? "Mô hình kiến trúc tham chiếu đa phân vùng (Bedroom + Closet + Bathroom)"
+          : r.id === "room-living-01"
+          ? "Bác Nam & Gia đình (Khu vực sinh hoạt chung)"
+          : "Bác Nam (75 tuổi, đi lại chậm, giảm thị lực)",
         objectsCount: r.objects.length,
         lightingLevel: r.lightingLevel,
         isWet: r.isWet,
         isSlipResistant: r.isSlipResistant,
-        safetyScore: idx === 0 ? 38 : idx === 1 ? 45 : 60,
-        hazardsResolved: 1,
-        hazardsRemaining: idx === 0 ? 3 : 2,
-        totalHazards: idx === 0 ? 4 : 3,
+        safetyScore: score,
+        hazardsResolved: 0,
+        hazardsRemaining: findings.length,
+        totalHazards: findings.length,
         updatedAt: new Date().toISOString(),
         isCustom: false,
-      }));
-      return NextResponse.json({ success: true, data: initialFormatted });
-    }
+      };
+    });
 
-    return NextResponse.json({ success: true, data: formattedRooms });
+    // 2. Filter DB rooms that are genuinely custom (IDs not in canonical INITIAL_ROOMS)
+    const canonicalIds = new Set(INITIAL_ROOMS.map((r) => r.id));
+    const customDbRooms = formattedRooms.filter((r) => !canonicalIds.has(r.id));
+
+    // 3. Combined list: All 4 canonical 3D rooms + any custom rooms created by user
+    const allRooms = [...canonicalRooms, ...customDbRooms];
+
+    return NextResponse.json({ success: true, data: allRooms });
   } catch (error: any) {
     console.error("Lỗi lấy danh sách phòng 3D:", error);
     // Fallback to in-memory initial rooms
-    const fallbackRooms = INITIAL_ROOMS.map((r, idx) => ({
-      id: r.id,
-      name: r.name,
-      roomType: r.roomType,
-      dimensions: r.dimensions,
-      projectName: "Dự án mẫu - Căn hộ 502",
-      targetResident: "Bác Nam (75 tuổi)",
-      objectsCount: r.objects.length,
-      lightingLevel: r.lightingLevel,
-      isWet: r.isWet,
-      isSlipResistant: r.isSlipResistant,
-      safetyScore: idx === 0 ? 38 : 45,
-      hazardsResolved: 0,
-      hazardsRemaining: 3,
-      totalHazards: 3,
-      updatedAt: new Date().toISOString(),
-      isCustom: false,
-    }));
+    const fallbackRooms = INITIAL_ROOMS.map((r, idx) => {
+      const findings = runEnvironmentalAssessment(r);
+      const score = calculateSafetyScore(findings);
+      const isDh = r.layoutType === "DOLLHOUSE_MULTI_ZONE" || r.id.includes("dollhouse");
+      return {
+        id: r.id,
+        name: r.name,
+        roomType: (r.roomType || (isDh ? "DOLLHOUSE" : "BEDROOM")) as any,
+        dimensions: r.dimensions,
+        projectName: isDh
+          ? "Dự án Kiến Trúc Chuẩn Quốc Tế & Digital Twin"
+          : "Chương Trình Nhà Ở An Toàn Cho Người Cao Tuổi Việt Nam",
+        targetResident: isDh
+          ? "Mô hình kiến trúc tham chiếu đa phân vùng"
+          : "Bác Nam (75 tuổi, giảm thị lực)",
+        objectsCount: r.objects.length,
+        lightingLevel: r.lightingLevel,
+        isWet: r.isWet,
+        isSlipResistant: r.isSlipResistant,
+        safetyScore: score,
+        hazardsResolved: 0,
+        hazardsRemaining: findings.length,
+        totalHazards: findings.length,
+        updatedAt: new Date().toISOString(),
+        isCustom: false,
+      };
+    });
     return NextResponse.json({ success: true, data: fallbackRooms });
   }
 }

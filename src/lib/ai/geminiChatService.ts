@@ -67,12 +67,6 @@ export async function processCopilotChat(options: CopilotChatOptions): Promise<C
 
   if (apiKey) {
     try {
-      // Dynamic import of @google/genai to avoid webpack static analysis bundling issues
-      // @ts-ignore
-      const loadGenAI = new Function('return import("@google/genai")');
-      const { GoogleGenAI } = await loadGenAI();
-      const ai = new GoogleGenAI({ apiKey });
-
       // Build system instruction
       const contextPrompt = formatSystemContextPrompt(sysContext);
       let evidencePrompt = "### TÀI LIỆU Y KHOA ĐÃ THẨM ĐỊNH (WHO, CDC, BỘ Y TẾ VIỆT NAM):\n";
@@ -106,23 +100,35 @@ ${evidencePrompt}
         parts: [{ text: message }],
       });
 
-      // Call Gemini API with timeout
-      const response = await Promise.race([
-        ai.models.generateContent({
-          model: configuredModel,
-          contents,
-          config: {
-            systemInstruction,
-            temperature: 0.2,
-            maxOutputTokens: 1200,
-          },
-        }),
+      // Call Gemini REST API with timeout
+      const res = await Promise.race([
+        fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${configuredModel}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents,
+              systemInstruction: {
+                parts: [{ text: systemInstruction }],
+              },
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 1200,
+              },
+            }),
+          }
+        ),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("Gemini API call timed out after 12s")), 12000)
         ),
       ]);
 
-      const rawText = response.text || "";
+      let rawText = "";
+      if (res && (res as any).ok) {
+        const json = await (res as any).json();
+        rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      }
 
       // Format citations from retrieved chunks
       const citations: StructuredCitation[] = retrievedChunks.map((c, idx) => ({

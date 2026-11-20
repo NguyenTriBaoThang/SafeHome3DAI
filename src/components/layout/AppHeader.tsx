@@ -9,7 +9,6 @@ import {
   Sun,
   Play,
   RotateCcw,
-  Home,
   CheckCircle2,
   AlertTriangle,
   Compass,
@@ -21,9 +20,6 @@ import { cn } from "@/lib/utils";
 export const AppHeader: React.FC = () => {
   const pathname = usePathname();
   const {
-    rooms,
-    currentRoomId,
-    switchRoom,
     isNightMode,
     toggleNightMode,
     currentAssessment,
@@ -31,7 +27,6 @@ export const AppHeader: React.FC = () => {
     restoreBaseline,
   } = useSimulationStore();
 
-  const currentRoom = rooms.find((r) => r.id === currentRoomId) || rooms[0];
   const hazardCount = currentAssessment?.findings.length ?? 0;
   const safetyScore = currentAssessment?.safetyScore ?? 70;
 
@@ -73,28 +68,7 @@ export const AppHeader: React.FC = () => {
             <Compass className="h-4 w-4 text-teal-600 animate-spin-slow" />
             <span>Quy Trình Khảo Sát &amp; Đánh Giá An Toàn (7 Bước Khép Kín)</span>
           </div>
-        ) : (
-          <div className="flex items-center space-x-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 hidden md:flex">
-            {rooms.map((r) => {
-              const isActive = r.id === currentRoomId;
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => switchRoom(r.id)}
-                  className={cn(
-                    "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
-                    isActive
-                      ? "bg-white text-teal-700 shadow-sm font-bold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  )}
-                >
-                  <Home className="h-3.5 w-3.5" />
-                  {r.name.split("(")[0].trim()}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        ) : null}
 
         {/* Real-time Status Badges & Quick Action Controls */}
         <div className="flex items-center space-x-2.5">

@@ -165,6 +165,14 @@ export default function DigitalTwinPage() {
                 </button>
               );
             })}
+            <Link
+              href="/simulations"
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:text-teal-700 hover:bg-slate-200/60 transition flex items-center gap-1 border border-dashed border-slate-300 ml-1"
+              title="Quản lý toàn bộ các phòng trong Kho Mô Phỏng 3D"
+            >
+              <Layers className="h-3 w-3 text-teal-600" />
+              <span>Kho 3D Hub ➔</span>
+            </Link>
           </div>
         </div>
 

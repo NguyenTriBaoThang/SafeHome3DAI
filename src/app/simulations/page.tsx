@@ -33,7 +33,7 @@ import { AiRoomScannerWizard } from "@/components/scanner/AiRoomScannerWizard";
 interface SavedRoom {
   id: string;
   name: string;
-  roomType: "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
+  roomType: "BEDROOM" | "BATHROOM" | "LIVING_ROOM" | "DOLLHOUSE" | string;
   dimensions: { width: number; length: number; height: number };
   projectName: string;
   targetResident: string;
@@ -108,7 +108,37 @@ export default function SimulationsArchivePage() {
 
   // Handle open in 3D Digital Twin
   const handleOpenIn3D = (roomId: string) => {
-    switchRoom(roomId);
+    const storeRooms = useSimulationStore.getState().rooms;
+    const exists = storeRooms.some((r) => r.id === roomId);
+    if (!exists) {
+      const target = savedRooms.find((r) => r.id === roomId);
+      if (target) {
+        useSimulationStore.getState().loadReconstructedRoom({
+          id: target.id,
+          name: target.name,
+          roomType: (target.roomType as any) || "BEDROOM",
+          dimensions: target.dimensions,
+          floorMaterial: target.roomType === "BATHROOM" ? "CERAMIC_TILE" : "WOOD",
+          lightingLevel: target.lightingLevel || 200,
+          isWet: Boolean(target.isWet),
+          isSlipResistant: Boolean(target.isSlipResistant),
+          grabBarsCount: 0,
+          walkingZones: [
+            {
+              id: `zone-${target.id}-1`,
+              name: "Lối đi chính",
+              startPoint: [0, 0],
+              endPoint: [0, target.dimensions.length / 2 - 0.5],
+              width: 0.9,
+              importance: "CRITICAL",
+            },
+          ],
+          objects: [],
+        });
+      }
+    } else {
+      switchRoom(roomId);
+    }
     router.push("/digital-twin");
   };
 
@@ -166,7 +196,11 @@ export default function SimulationsArchivePage() {
     const matchesSearch =
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.projectName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "ALL" || r.roomType === filterType;
+    const isDh = r.roomType === "DOLLHOUSE" || r.id.includes("dollhouse");
+    const matchesType =
+      filterType === "ALL" ||
+      (filterType === "DOLLHOUSE" && isDh) ||
+      (!isDh && r.roomType === filterType);
     return matchesSearch && matchesType;
   });
 
@@ -269,6 +303,7 @@ export default function SimulationsArchivePage() {
           </span>
           {[
             { id: "ALL", label: "Tất cả" },
+            { id: "DOLLHOUSE", label: "Bản sao Dollhouse" },
             { id: "BEDROOM", label: "Phòng ngủ" },
             { id: "BATHROOM", label: "Nhà vệ sinh" },
             { id: "LIVING_ROOM", label: "Phòng khách" },
@@ -324,14 +359,18 @@ export default function SimulationsArchivePage() {
                   <div className="flex items-center justify-between">
                     <span
                       className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                        room.roomType === "BEDROOM"
+                        room.id.includes("dollhouse") || room.roomType === "DOLLHOUSE"
+                          ? "bg-purple-50 text-purple-700 border border-purple-200"
+                          : room.roomType === "BEDROOM"
                           ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
                           : room.roomType === "BATHROOM"
                           ? "bg-cyan-50 text-cyan-700 border border-cyan-200"
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {room.roomType === "BEDROOM"
+                      {room.id.includes("dollhouse") || room.roomType === "DOLLHOUSE"
+                        ? "✨ Bản sao Dollhouse 3D"
+                        : room.roomType === "BEDROOM"
                         ? "Phòng ngủ"
                         : room.roomType === "BATHROOM"
                         ? "Nhà vệ sinh"
