@@ -97,10 +97,10 @@ export const SAMPLE_ITEM_PRESETS = [
   },
   {
     id: "sample-table",
-    title: "Bàn trà mặt kính góc nhọn",
-    subtitle: "Chắn luồng đi lại & nguy cơ va đập",
+    title: "Bàn học / Bàn làm việc góc nhọn chân sắt",
+    subtitle: "Góc vuông 90° & chân kim loại trơn trượt",
     category: "table",
-    suggestedQuery: "Khắc phục góc bàn nhọn trên lối đi như thế nào?",
+    suggestedQuery: "Khắc phục góc bàn vuông nhọn trên lối đi như thế nào?",
     mockImage: "/samples/table-hazard.jpg",
   },
 ];

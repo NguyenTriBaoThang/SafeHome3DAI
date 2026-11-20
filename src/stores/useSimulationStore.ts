@@ -11,6 +11,10 @@ import {
   runEnvironmentalAssessment,
   calculateSafetyScore,
 } from "@/features/risk-engine/rules";
+import {
+  autoFixSceneGeometry,
+  AutoFixResult,
+} from "@/lib/reconstruction/spatialValidationEngine";
 
 export interface ScenarioHistoryEntry {
   id: string;
@@ -79,6 +83,15 @@ interface SimulationStore {
   restoreBaseline: () => void;
   saveCurrentScenario: (name: string, description?: string) => void;
   loadReconstructedRoom: (room: RoomState) => void;
+
+  // Undo / Redo & Spatial Auto-Fix
+  undoStack: RoomState[];
+  redoStack: RoomState[];
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+  validateAndAutoFixRoom: () => AutoFixResult;
 }
 
 export const useSimulationStore = create<SimulationStore>((set, get) => {
@@ -263,6 +276,8 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     },
 
     removeObject: (id) => {
+      const curRoom = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(curRoom))].slice(-20);
       const updatedRooms = get().rooms.map((room) => {
         if (room.id !== get().currentRoomId) return room;
         return {
@@ -272,12 +287,16 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
       });
       set({
         rooms: updatedRooms,
+        undoStack: newUndo,
+        redoStack: [],
         selectedObjectId: get().selectedObjectId === id ? null : get().selectedObjectId,
       });
       get().runSimulation();
     },
 
     fixObject: (id) => {
+      const curRoom = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(curRoom))].slice(-20);
       const updatedRooms = get().rooms.map((room) => {
         if (room.id !== get().currentRoomId) return room;
         return {
@@ -321,12 +340,13 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
           }),
         };
       });
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
     addSafetyDevice: (deviceType) => {
       const room = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(room))].slice(-20);
       let newObj: SceneObjectState;
 
       if (deviceType === "grab_bar_toilet") {
@@ -396,43 +416,47 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         };
       });
 
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
     setLightingLevel: (lux: number) => {
       const current = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(current))].slice(-20);
       const updatedRooms = get().rooms.map((r) =>
         r.id === current.id ? { ...r, lightingLevel: lux } : r
       );
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
     setFloorWetness: (isWet: boolean) => {
       const current = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(current))].slice(-20);
       const updatedRooms = get().rooms.map((r) =>
         r.id === current.id ? { ...r, isWet } : r
       );
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
     setAntiSlip: (isSlip: boolean) => {
       const current = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(current))].slice(-20);
       const updatedRooms = get().rooms.map((r) =>
         r.id === current.id ? { ...r, isSlipResistant: isSlip } : r
       );
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
     setGrabBarsCount: (count: number) => {
       const current = get().getCurrentRoom();
+      const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(current))].slice(-20);
       const updatedRooms = get().rooms.map((r) =>
         r.id === current.id ? { ...r, grabBarsCount: count } : r
       );
-      set({ rooms: updatedRooms });
+      set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();
     },
 
@@ -571,6 +595,71 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
           },
         };
       });
+    },
+
+    undoStack: [],
+    redoStack: [],
+    canUndo: () => get().undoStack.length > 0,
+    canRedo: () => get().redoStack.length > 0,
+
+    undo: () => {
+      const { undoStack, redoStack, currentRoomId, rooms } = get();
+      if (undoStack.length === 0) return;
+      const currentRoom = rooms.find((r) => r.id === currentRoomId);
+      if (!currentRoom) return;
+      const previousRoom = undoStack[undoStack.length - 1];
+      const newUndoStack = undoStack.slice(0, -1);
+      const newRedoStack = [...redoStack, JSON.parse(JSON.stringify(currentRoom))];
+      const updatedRooms = rooms.map((r) =>
+        r.id === currentRoomId ? JSON.parse(JSON.stringify(previousRoom)) : r
+      );
+      set({
+        rooms: updatedRooms,
+        undoStack: newUndoStack,
+        redoStack: newRedoStack,
+      });
+      get().runSimulation();
+    },
+
+    redo: () => {
+      const { undoStack, redoStack, currentRoomId, rooms } = get();
+      if (redoStack.length === 0) return;
+      const currentRoom = rooms.find((r) => r.id === currentRoomId);
+      if (!currentRoom) return;
+      const nextRoom = redoStack[redoStack.length - 1];
+      const newRedoStack = redoStack.slice(0, -1);
+      const newUndoStack = [...undoStack, JSON.parse(JSON.stringify(currentRoom))];
+      const updatedRooms = rooms.map((r) =>
+        r.id === currentRoomId ? JSON.parse(JSON.stringify(nextRoom)) : r
+      );
+      set({
+        rooms: updatedRooms,
+        undoStack: newUndoStack,
+        redoStack: newRedoStack,
+      });
+      get().runSimulation();
+    },
+
+    validateAndAutoFixRoom: () => {
+      const currentRoom = get().getCurrentRoom();
+      const fixResult = autoFixSceneGeometry(currentRoom);
+      if (fixResult.fixesApplied.length > 0) {
+        const { undoStack, rooms, currentRoomId } = get();
+        const newUndoStack = [
+          ...undoStack,
+          JSON.parse(JSON.stringify(currentRoom)),
+        ].slice(-20);
+        const updatedRooms = rooms.map((r) =>
+          r.id === currentRoomId ? fixResult.fixedRoom : r
+        );
+        set({
+          rooms: updatedRooms,
+          undoStack: newUndoStack,
+          redoStack: [],
+        });
+        get().runSimulation();
+      }
+      return fixResult;
     },
   };
 });

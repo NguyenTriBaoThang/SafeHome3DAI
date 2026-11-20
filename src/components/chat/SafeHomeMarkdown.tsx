@@ -11,7 +11,7 @@ interface SafeHomeMarkdownProps {
 
 /**
  * SafeHomeMarkdown - Professional clinical & engineering markdown renderer for SafeHome Copilot.
- * Gracefully parses headings, bold typography, bullet points, callout warnings,
+ * Gracefully parses headings, bold typography, bullet & numbered lists, callout warnings,
  * 3D digital twin highlights, and interactive clinical citations [1], [2].
  */
 export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
@@ -26,10 +26,11 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
   const renderInline = (text: string, keyPrefix: string = "inline"): React.ReactNode => {
     // Regex matches:
     // 1. Citations: [1] or [1, 2]
-    // 2. Bold: **text**
-    // 3. Italic: *text* (when not part of **)
-    // 4. Code: `text`
-    const regex = /(\[\d+(?:,\s*\d+)*\]|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+    // 2. Bold Italic: ***text***
+    // 3. Bold: **text**
+    // 4. Italic: *text* (when not part of **)
+    // 5. Code: `text`
+    const regex = /(\[\d+(?:,\s*\d+)*\]|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
     const parts = text.split(regex);
 
     return parts.map((part, index) => {
@@ -69,6 +70,16 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
               );
             })}
           </span>
+        );
+      }
+
+      // Check Bold Italic ***text***
+      if (part.startsWith("***") && part.endsWith("***") && part.length >= 6) {
+        const inner = part.slice(3, -3);
+        return (
+          <strong key={key} className={`font-bold ${isUser ? "text-white" : "text-slate-900"}`}>
+            <em className="italic">{renderInline(inner, `${key}-bi`)}</em>
+          </strong>
         );
       }
 
@@ -127,24 +138,50 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
   // Parse assistant response into block structures
   const lines = content.split("\n");
   const blocks: React.ReactNode[] = [];
-  let currentList: { type: "ul" | "ol"; items: string[] } | null = null;
+  let currentList: { type: "ul" | "ol"; items: { text: string; indent: number }[] } | null = null;
 
   const flushList = (blockIdx: number) => {
     if (!currentList) return;
-    const { items } = currentList;
-    blocks.push(
-      <ul key={`ul-${blockIdx}`} className="my-2.5 space-y-1.5 pl-1">
-        {items.map((item, idx) => (
-          <li
-            key={`li-${blockIdx}-${idx}`}
-            className="flex items-start gap-2 text-xs sm:text-sm text-slate-700 leading-relaxed"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 mt-2 shrink-0" />
-            <div className="flex-1">{renderInline(item, `li-${blockIdx}-${idx}`)}</div>
-          </li>
-        ))}
-      </ul>
-    );
+    const { type, items } = currentList;
+    if (type === "ol") {
+      blocks.push(
+        <div key={`ol-${blockIdx}`} className="my-2.5 space-y-2 pl-0.5">
+          {items.map((item, idx) => (
+            <div
+              key={`oli-${blockIdx}-${idx}`}
+              className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 leading-relaxed"
+            >
+              <span className="h-5 w-5 rounded-full bg-teal-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                {idx + 1}
+              </span>
+              <div className="flex-1">{renderInline(item.text, `oli-${blockIdx}-${idx}`)}</div>
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      blocks.push(
+        <ul key={`ul-${blockIdx}`} className="my-2.5 space-y-1.5 pl-1">
+          {items.map((item, idx) => (
+            <li
+              key={`li-${blockIdx}-${idx}`}
+              className={`flex items-start gap-2 text-xs sm:text-sm leading-relaxed ${
+                item.indent > 0 ? "pl-5 text-slate-600 text-[11px]" : "text-slate-700"
+              }`}
+            >
+              <span
+                className={`rounded-full shrink-0 mt-2 ${
+                  item.indent > 0
+                    ? "h-1 w-1 bg-teal-400 ml-1"
+                    : "h-1.5 w-1.5 bg-teal-500"
+                }`}
+              />
+              <div className="flex-1">{renderInline(item.text, `li-${blockIdx}-${idx}`)}</div>
+            </li>
+          ))}
+        </ul>
+      );
+    }
     currentList = null;
   };
 
@@ -217,7 +254,12 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
       // Collect all following bullet lines that belong to this 3D context
       const contextLines: string[] = [];
       let nextIdx = i + 1;
-      while (nextIdx < lines.length && (lines[nextIdx].trim().startsWith("-") || lines[nextIdx].trim().startsWith("*"))) {
+      while (
+        nextIdx < lines.length &&
+        !lines[nextIdx].trim().startsWith("---") &&
+        !lines[nextIdx].trim().includes("⚠️") &&
+        (lines[nextIdx].trim().startsWith("-") || lines[nextIdx].trim().startsWith("*"))
+      ) {
         contextLines.push(lines[nextIdx].trim().replace(/^[-*]\s*/, ""));
         nextIdx++;
       }
@@ -249,7 +291,23 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
       continue;
     }
 
-    // 6. Headings (###, ##, #)
+    // 6. Bold Section Title on its own line: e.g. "**Khuyến nghị thực tế cho gia đình:**"
+    if (/^\*\*[^*]+\*\*$/.test(trimmed)) {
+      flushList(i);
+      const inner = trimmed.slice(2, -2);
+      blocks.push(
+        <div
+          key={`subhead-${i}`}
+          className="mt-3.5 mb-1.5 text-xs sm:text-sm font-extrabold text-teal-950 flex items-center gap-1.5"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-teal-600 shrink-0" />
+          <span>{renderInline(inner, `sh-${i}`)}</span>
+        </div>
+      );
+      continue;
+    }
+
+    // 7. Headings (###, ##, #, ####)
     if (trimmed.startsWith("### ")) {
       flushList(i);
       const title = trimmed.replace(/^###\s+/, "");
@@ -297,18 +355,46 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
       continue;
     }
 
-    // 7. Bullet items (- or *)
-    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-      const itemText = trimmed.replace(/^[-*]\s+/, "");
-      if (!currentList) {
-        currentList = { type: "ul", items: [itemText] };
-      } else {
-        currentList.items.push(itemText);
-      }
+    if (trimmed.startsWith("#### ")) {
+      flushList(i);
+      const title = trimmed.replace(/^####\s+/, "");
+      blocks.push(
+        <div key={`h4-${i}`} className="mt-3 mb-1.5 flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-900">
+          <div className="h-2 w-2 rounded-sm bg-teal-500 shrink-0" />
+          <span>{renderInline(title, `h4-${i}`)}</span>
+        </div>
+      );
       continue;
     }
 
-    // 8. Normal paragraph text
+    // 8. Numbered list items (e.g. "1. ", "2. ")
+    const numMatch = trimmed.match(/^(\d+)[\.\)]\s+(.*)/);
+    if (numMatch) {
+      if (currentList && currentList.type !== "ol") {
+        flushList(i);
+      }
+      if (!currentList) {
+        currentList = { type: "ol", items: [] };
+      }
+      currentList.items.push({ text: numMatch[2], indent: 0 });
+      continue;
+    }
+
+    // 9. Bullet items (- or *)
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      if (currentList && currentList.type !== "ul") {
+        flushList(i);
+      }
+      const itemText = trimmed.replace(/^[-*]\s+/, "");
+      const indent = rawLine.search(/\S/);
+      if (!currentList) {
+        currentList = { type: "ul", items: [] };
+      }
+      currentList.items.push({ text: itemText, indent });
+      continue;
+    }
+
+    // 10. Normal paragraph text
     flushList(i);
     blocks.push(
       <p
@@ -324,4 +410,3 @@ export const SafeHomeMarkdown: React.FC<SafeHomeMarkdownProps> = ({
 
   return <div className="space-y-1">{blocks}</div>;
 };
-

@@ -28,9 +28,11 @@ export type DetectionCategory =
   | "other";            // Vật thể khác
 
 export type DetectionSource =
-  | "OBJECT_DETECTOR"       // Mô hình nhận diện vật thể
-  | "VISION_LANGUAGE_MODEL" // Mô hình ngôn ngữ thị giác đa phương thức
-  | "MANUAL_ANNOTATION";    // Người dùng tự vẽ gắn nhãn thủ công
+  | "OBJECT_DETECTOR"       // Mô hình nhận diện vật thể (CNN/YOLO)
+  | "VISION_LANGUAGE_MODEL" // Mô hình ngôn ngữ thị giác đa phương thức (Gemini VLM - REAL_AI_INFERENCE)
+  | "MANUAL_ANNOTATION"    // Người dùng tự vẽ gắn nhãn thủ công (MANUAL_REVIEW)
+  | "MOCK_DEMO"             // Dữ liệu mẫu minh họa / Fallback khi không có API (MOCK_DEMO)
+  | "HEURISTIC";            // Suy luận quy tắc hình học không gian (HEURISTIC)
 
 export type VerificationStatus =
   | "PENDING_REVIEW"   // Chờ người dùng xác nhận

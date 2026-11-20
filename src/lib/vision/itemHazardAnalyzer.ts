@@ -360,63 +360,84 @@ const HEURISTIC_KNOWLEDGE: Record<
   },
 
   table: {
-    itemName: "Bàn trà góc nhọn / Bàn kính chân thấp chắn lối đi",
+    itemName: "Bàn học / Bàn làm việc góc nhọn chân sắt",
     itemCategory: "table",
-    riskScore: 68,
-    severity: "MEDIUM",
-    severityLabel: "NGUY CƠ TRUNG BÌNH (68/100)",
-    urgencyLevel: "CẦN LƯU Ý",
+    riskScore: 72,
+    severity: "HIGH",
+    severityLabel: "NGUY CƠ CAO (72/100)",
+    urgencyLevel: "ƯU TIÊN CAO",
     whyDangerous: {
       summary:
-        "Bàn trà mặt kính hoặc bàn có góc cạnh sắc nhọn đặt tại giữa luồng giao thông làm thu hẹp khoảng thông thủy lối đi và tiềm ẩn chấn thương rách da, tụ máu nếu không may trượt ngã va vào cạnh bàn.",
+        "Bàn làm việc hoặc bàn ăn có các góc vuông 90° sắc nhọn nhô ra hành lang di chuyển và chân kim loại thanh mảnh dễ trơn trượt trên sàn gạch men khi người cao tuổi tỳ vịn đứng dậy.",
       biomechanicalRationale:
-        "Da của người cao tuổi rất mỏng manh do suy giảm collagen và teo lớp mỡ dưới da (senile purpura). Một cú va quẹt nhẹ vào góc nhọn sắc cũng có thể gây toác da diện rộng hoặc gãy xương sườn nếu ngã đập mạn sườn vào mặt bàn.",
+        "Da và mao mạch người cao tuổi rất mỏng manh do lão hóa biểu mô. Một cú va đập vào góc bàn 90 độ sẽ tập trung toàn bộ động năng tại một điểm hẹp (Focal Impact), gây rách da sâu, tụ máu cơ hông hoặc gãy xương sườn nếu ngã đập mạn sườn. Ngoài ra, chân bàn sắt không có giác hút cao su dễ bị trượt văng khi người già mất thăng bằng cố bám vào mép bàn.",
       clinicalReference:
         "Bộ Y tế Việt Nam - Hướng dẫn Chăm sóc Dự phòng Chấn thương Người Cao Tuổi & CDC STEADI.",
       consequenceRisk:
-        "Chấn thương phần mềm, rách da sâu, đụng giập mạn sườn và chấn thương mắt nếu ngã đập mặt.",
+        "Chấn thương phần mềm đụng giập, toác da mạn sườn, vỡ xương bánh chè và trượt ngã do điểm tựa không vững.",
     },
     whereDangerous: [
       {
         id: "spot-1",
         number: 1,
-        title: "Góc bàn vuông sắc nhọn chưa được bọc đệm",
-        description: "Các góc 90 độ nhô ra ngoài tầm đi lại, nguy cơ va đập vào xương hông hoặc đầu gối.",
-        coordinates: { x: 25, y: 55 },
+        title: "Góc bàn vuông 90° sắc nhọn (Mép trước trái)",
+        description:
+          "Góc bàn nhô thẳng ra luồng di chuyển, tiềm ẩn nguy cơ chấn thương đụng giập hoặc rách da sâu khi người già ngã va quẹt.",
+        coordinates: { x: 9, y: 41 },
         severity: "HIGH",
         mechanism: "Tập trung áp lực va đập tại góc nhọn (Focal Blunt Impact)",
       },
       {
         id: "spot-2",
         number: 2,
-        title: "Mặt bàn bằng kính cường lực không viền",
-        description: "Mặt kính trong suốt khiến người cao tuổi bị suy giảm thị lực chiều sâu khó ước lượng khoảng cách.",
-        coordinates: { x: 60, y: 40 },
+        title: "Mép bàn cạnh ngoài nhô vào lối đi (Mép trước phải)",
+        description:
+          "Mép bàn góc phải chiếm khoảng không gian bước chân, làm thu hẹp khoảng cách an toàn khi người già xoay trở.",
+        coordinates: { x: 44, y: 43 },
         severity: "MEDIUM",
-        mechanism: "Thị giác khó định vị ranh giới trong bóng tối (Transparent Boundary Illusion)",
+        mechanism: "Thu hẹp luồng di chuyển an toàn (<80cm)",
       },
       {
         id: "spot-3",
         number: 3,
-        title: "Vị trí đặt lấn chiếm bề rộng thông thủy lối đi",
-        description: "Khoảng cách giữa bàn và sofa < 50cm, gây khó khăn khi người già xoay trở hoặc dùng khung vịn.",
-        coordinates: { x: 50, y: 75 },
+        title: "Thanh giằng chéo & cơ chế gấp dưới gầm bàn",
+        description:
+          "Thanh giằng sắt đan chéo dưới gầm dễ móc vào mũi chân khi bước ngắn hoặc làm kẹt đầu gậy chống / khung tập đi.",
+        coordinates: { x: 23, y: 56 },
         severity: "HIGH",
-        mechanism: "Thu hẹp luồng di chuyển an toàn (Pathway Obstruction)",
+        mechanism: "Mắc kẹt ngón chân hoặc thiết bị trợ khí (Mobility Aid Jamming)",
+      },
+      {
+        id: "spot-4",
+        number: 4,
+        title: "Đế chân sắt tiếp xúc sàn thiếu đệm chống trượt",
+        description:
+          "Chân sắt dạng ống tròn dễ trượt xê dịch trên nền gạch men khi người cao tuổi tỳ tay vịn để lấy lực đứng dậy.",
+        coordinates: { x: 35, y: 73 },
+        severity: "HIGH",
+        mechanism: "Trượt lùi bất ổn khi tỳ vịn (Support Instability)",
       },
     ],
     remediation: [
       {
         id: "rem-1",
-        step: "Dán miếng đệm silicon bo tròn góc bàn (Corner Guards) để tiêu biến điểm nhọn nguy hiểm.",
+        step: "Dán miếng đệm silicon bo tròn góc bàn (Corner Guards) để tiêu biến điểm nhọn 90 độ nguy hiểm.",
         priority: "IMMEDIATE",
         costEstimate: "20.000 - 35.000 VNĐ",
-        materialsNeeded: "Bộ đệm góc bàn silicon chống va đập",
+        materialsNeeded: "Bộ 4 miếng đệm góc bàn silicon chống va đập",
         timeEstimate: "5 phút",
       },
       {
         id: "rem-2",
-        step: "Dịch chuyển bàn để đảm bảo hành lang di chuyển tối thiểu rộng ≥ 80cm.",
+        step: "Lắp nút bọc cao su chống trượt cho cả 4 chân bàn để tăng độ ma sát trên sàn gạch men.",
+        priority: "IMMEDIATE",
+        costEstimate: "25.000 - 40.000 VNĐ",
+        materialsNeeded: "Nút cao su chụp chân bàn kim loại",
+        timeEstimate: "5 phút",
+      },
+      {
+        id: "rem-3",
+        step: "Dịch chuyển bàn áp sát tường để duy trì hành lang di chuyển tối thiểu rộng ≥ 80cm theo chuẩn CDC.",
         priority: "IMMEDIATE",
         costEstimate: "0 VNĐ",
         materialsNeeded: "Không cần",

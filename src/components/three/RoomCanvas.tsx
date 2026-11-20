@@ -751,9 +751,22 @@ export const RoomCanvas: React.FC = () => {
                   const halfL = room.dimensions.length / 2;
                   const clampedX = Math.max(-halfW + 0.1, Math.min(halfW - 0.1, p.x));
                   const clampedZ = Math.max(-halfL + 0.1, Math.min(halfL - 0.1, p.z));
+                  const isElevated = [
+                    "grab_bar",
+                    "mirror",
+                    "wall_art",
+                    "window",
+                    "curtain",
+                    "air_conditioner",
+                    "ceiling_fan",
+                    "lamp",
+                  ].includes(selObj.modelType);
+                  const isFlatFloor = ["rug", "cable"].includes(selObj.modelType);
+                  const targetY = isElevated ? Number(p.y.toFixed(2)) : isFlatFloor ? 0.005 : 0;
+
                   updateObjectPosition(selObj.id, [
                     Number(clampedX.toFixed(2)),
-                    0,
+                    targetY,
                     Number(clampedZ.toFixed(2)),
                   ]);
                   if (transformMode === "rotate") {

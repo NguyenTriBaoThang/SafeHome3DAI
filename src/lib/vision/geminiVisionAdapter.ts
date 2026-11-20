@@ -112,9 +112,10 @@ export async function analyzeRoomPhotoWithGemini(
     throw new Error("GEMINI_API_KEY is not configured in environment variables.");
   }
 
-  // Dynamically import @google/genai to avoid build/test failures when package is not installed
+  // Dynamically import @google/genai with runtime loader to prevent webpack build-time failure
   // @ts-ignore
-  const { GoogleGenAI } = await import("@google/genai");
+  const loadGenAI = new Function('return import("@google/genai")');
+  const { GoogleGenAI } = await loadGenAI();
   const ai = new GoogleGenAI({ apiKey });
   const base64Data = imageBuffer.toString("base64");
   const imageId = options.imageId || crypto.randomUUID();

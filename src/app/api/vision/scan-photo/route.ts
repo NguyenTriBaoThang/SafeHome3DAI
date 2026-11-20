@@ -15,7 +15,8 @@ export const runtime = "nodejs";
 async function runLocalOwlVitFallback(blob: Blob): Promise<VisionDetection[]> {
   try {
     // @ts-ignore
-    const { pipeline, RawImage } = await import("@huggingface/transformers");
+    const loadTransformers = new Function('return import("@huggingface/transformers")');
+    const { pipeline, RawImage } = await loadTransformers();
     const detector = await pipeline("zero-shot-object-detection", "Xenova/owlvit-base-patch32", {
       dtype: "q8",
       cache_dir: ".next/cache/room-vision",

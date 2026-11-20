@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import Link from "next/link";
 import {
   Upload,
   Camera,
@@ -170,12 +171,25 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/ai-vision"
+              onClick={onClose}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold transition shadow-2xs"
+              title="Chuyển sang Quét toàn bộ căn phòng bằng Thị giác AI"
+            >
+              <Camera className="h-3.5 w-3.5 text-sky-600" />
+              <span>Chuyển tới AI Vision</span>
+              <ArrowRight className="h-3 w-3 text-sky-600" />
+            </Link>
+
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
@@ -190,6 +204,29 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
           {!resultAssessment ? (
             /* Uploader & Presets View */
             <div className="space-y-6">
+              {/* Vision Banner CTA */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-50 via-teal-50 to-indigo-50 border border-sky-200 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                    <Camera className="h-4 w-4" />
+                  </div>
+                  <div className="text-xs">
+                    <span className="font-extrabold text-sky-950">Bạn muốn quét toàn cảnh căn phòng? </span>
+                    <span className="text-slate-600 hidden sm:inline">
+                      Dùng phân hệ Thị giác AI để phát hiện tự động đa vật dụng và xuất trực tiếp vào Bản sao số 3D.
+                    </span>
+                  </div>
+                </div>
+                <Link
+                  href="/ai-vision"
+                  onClick={onClose}
+                  className="shrink-0 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-1 transition shadow-xs"
+                >
+                  <span>Chuyển tới AI Vision</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+
               {/* Dropzone */}
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -319,35 +356,48 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
                   onClose();
                 }}
               />
-
-              {/* Footer Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
-                >
-                  Thẩm định ảnh khác
-                </button>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSendToChat?.(resultAssessment);
-                      onClose();
-                    }}
-                    className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Đưa kết quả vào cuộc trò chuyện AI</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>
+
+        {/* Sticky Bottom Actions Bar when assessment is present */}
+        {resultAssessment && (
+          <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-100 transition shadow-2xs"
+              >
+                Thẩm định ảnh khác
+              </button>
+
+              <Link
+                href="/ai-vision"
+                onClick={onClose}
+                className="px-4 py-2 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs"
+                title="Chuyển tới phân hệ Thị giác AI để quét toàn bộ căn phòng"
+              >
+                <Camera className="h-3.5 w-3.5 text-sky-600" />
+                <span>Quét toàn cảnh phòng (AI Vision)</span>
+                <ArrowRight className="h-3.5 w-3.5 text-sky-600" />
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                onSendToChat?.(resultAssessment);
+                onClose();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm active:scale-95"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Đưa kết quả vào cuộc trò chuyện AI</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

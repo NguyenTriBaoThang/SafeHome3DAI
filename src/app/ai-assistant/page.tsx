@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   Bot,
   Send,
@@ -31,6 +32,9 @@ import {
   Flame,
   Camera,
   Layers,
+  ArrowRight,
+  Eye,
+  Compass,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { StructuredCitation, EvidenceStatus } from "@/lib/rag/types";
@@ -742,13 +746,23 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Direct Link to AI Vision */}
+            <Link
+              href="/ai-vision"
+              className="px-3 py-1.5 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs active:scale-95"
+              title="Chuyển đến phân hệ Thị giác AI: Quét toàn bộ căn phòng & tạo Bản sao số 3D"
+            >
+              <Camera className="h-3.5 w-3.5 text-sky-600" />
+              <span>Thị giác AI (Vision)</span>
+            </Link>
+
             {/* Quick Item Assessment Trigger */}
             <button
               onClick={() => setIsItemModalOpen(true)}
               className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs active:scale-95"
               title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
             >
-              <Camera className="h-3.5 w-3.5 text-teal-700" />
+              <Sparkles className="h-3.5 w-3.5 text-teal-700" />
               <span className="hidden sm:inline">Thẩm định ảnh vật dụng</span>
             </button>
 
@@ -914,11 +928,18 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
             <button
               type="button"
               onClick={() => setIsItemModalOpen(true)}
-              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-teal-50 text-slate-600 hover:text-teal-700 transition shadow-2xs self-end shrink-0"
+              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-teal-50 text-teal-700 transition shadow-2xs self-end shrink-0"
               title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
             >
-              <Camera className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" />
             </button>
+            <Link
+              href="/ai-vision"
+              className="p-2.5 rounded-xl border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-700 transition shadow-2xs self-end shrink-0"
+              title="Quét toàn cảnh căn phòng bằng Thị giác AI (AI Vision)"
+            >
+              <Camera className="h-4 w-4" />
+            </Link>
             <textarea
               ref={textareaRef}
               rows={2}
@@ -1186,17 +1207,33 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
                       </div>
                     </div>
                   ))}
+
+                  <Link
+                    href="/ai-vision"
+                    className="p-3 rounded-2xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold flex items-center justify-center gap-1.5 transition text-center"
+                  >
+                    <Camera className="h-3.5 w-3.5 text-sky-600" />
+                    <span>Quét toàn cảnh phòng (AI Vision) &rarr;</span>
+                  </Link>
                 </div>
               ) : (
                 <div className="p-8 text-center text-xs text-slate-400 space-y-3">
                   <Camera className="h-8 w-8 text-slate-300 mx-auto" />
                   <p>Chưa có ảnh vật dụng nào được thẩm định.</p>
-                  <button
-                    onClick={() => setIsItemModalOpen(true)}
-                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs"
-                  >
-                    Tải ảnh vật dụng ngay
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => setIsItemModalOpen(true)}
+                      className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs"
+                    >
+                      Tải ảnh vật dụng ngay
+                    </button>
+                    <Link
+                      href="/ai-vision"
+                      className="px-4 py-2 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs shadow-xs text-center"
+                    >
+                      Quét toàn cảnh phòng (AI Vision) &rarr;
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

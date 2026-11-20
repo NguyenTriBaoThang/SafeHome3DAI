@@ -32,6 +32,13 @@ const EXTERNAL_MODULES = [
     badge: null,
   },
   {
+    href: "/ai-vision",
+    label: "Thị giác AI (AI Vision)",
+    icon: Camera,
+    badge: "Vision",
+    highlight: true,
+  },
+  {
     href: "/simulations",
     label: "Kho mô phỏng 3D",
     icon: Box,

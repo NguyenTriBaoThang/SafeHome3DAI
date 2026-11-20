@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   ShieldAlert,
@@ -32,10 +33,32 @@ export const ItemHazardCard: React.FC<ItemHazardCardProps> = ({
   onSelectHotspot,
   compact = false,
 }) => {
+  const [hotspots, setHotspots] = useState<ItemDangerHotspot[]>(assessment.whereDangerous);
   const [activeSpotId, setActiveSpotId] = useState<string | null>(
     assessment.whereDangerous.length > 0 ? assessment.whereDangerous[0].id : null
   );
   const [showFullWhy, setShowFullWhy] = useState(false);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setHotspots(assessment.whereDangerous);
+    if (assessment.whereDangerous.length > 0) {
+      setActiveSpotId(assessment.whereDangerous[0].id);
+    }
+  }, [assessment]);
+
+  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!activeSpotId) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    const pctX = Math.max(3, Math.min(97, Math.round((clickX / rect.width) * 100)));
+    const pctY = Math.max(3, Math.min(97, Math.round((clickY / rect.height) * 100)));
+
+    setHotspots((prev) =>
+      prev.map((s) => (s.id === activeSpotId ? { ...s, coordinates: { x: pctX, y: pctY } } : s))
+    );
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-rose-600 bg-rose-50 border-rose-300";
@@ -113,62 +136,66 @@ export const ItemHazardCard: React.FC<ItemHazardCardProps> = ({
       {/* 2. Interactive Visual Hotspot Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-slate-200">
         {/* Left Column: Image with Interactive Pin Markers */}
-        <div className="lg:col-span-6 bg-slate-950 relative flex items-center justify-center min-h-[260px] max-h-[360px] overflow-hidden select-none">
-          {assessment.imageUrl ? (
-            <img
-              src={assessment.imageUrl}
-              alt={assessment.itemName}
-              className="w-full h-full object-cover max-h-[360px]"
-            />
-          ) : (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              <CameraOff className="h-8 w-8 mx-auto mb-2 text-slate-600" />
-              <span>Chưa có ảnh xem trước</span>
-            </div>
-          )}
+        <div className="lg:col-span-6 bg-slate-950/95 flex flex-col items-center justify-center p-3 sm:p-4 select-none relative">
+          <div
+            ref={imageContainerRef}
+            onClick={handleImageClick}
+            className="relative inline-block max-w-full cursor-crosshair rounded-2xl overflow-hidden shadow-md border border-white/10 group"
+            title="Nhấp chuột lên ảnh để di chuyển điểm ghim đang chọn"
+          >
+            {assessment.imageUrl ? (
+              <img
+                src={assessment.imageUrl}
+                alt={assessment.itemName}
+                className="max-h-[340px] w-auto max-w-full object-contain block select-none pointer-events-none"
+              />
+            ) : (
+              <div className="p-8 text-center text-slate-500 text-xs">
+                <CameraOff className="h-8 w-8 mx-auto mb-2 text-slate-600" />
+                <span>Chưa có ảnh xem trước</span>
+              </div>
+            )}
 
-          {/* Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+            {/* Visual Hotspot Markers H1, H2, H3 */}
+            {hotspots.map((spot) => {
+              const isActive = spot.id === activeSpotId;
+              return (
+                <button
+                  key={spot.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveSpotId(spot.id);
+                    onSelectHotspot?.(spot);
+                  }}
+                  style={{
+                    left: `${spot.coordinates.x}%`,
+                    top: `${spot.coordinates.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                  className={`absolute group z-10 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "h-9 w-9 bg-rose-600 text-white ring-4 ring-rose-400/60 scale-110 shadow-lg shadow-rose-600/50"
+                      : "h-7 w-7 bg-amber-500 hover:bg-rose-500 text-white ring-2 ring-white/90 shadow-md hover:scale-105"
+                  }`}
+                  title={`${spot.title}: ${spot.description} (Nhấp lên ảnh để dời vị trí)`}
+                >
+                  <span className="font-mono text-xs font-bold">H{spot.number}</span>
 
-          {/* Visual Hotspot Markers H1, H2, H3 */}
-          {assessment.whereDangerous.map((spot) => {
-            const isActive = spot.id === activeSpotId;
-            return (
-              <button
-                key={spot.id}
-                type="button"
-                onClick={() => {
-                  setActiveSpotId(spot.id);
-                  onSelectHotspot?.(spot);
-                }}
-                style={{
-                  left: `${spot.coordinates.x}%`,
-                  top: `${spot.coordinates.y}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-                className={`absolute group z-10 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? "h-9 w-9 bg-rose-600 text-white ring-4 ring-rose-400/50 scale-110 shadow-lg shadow-rose-600/50"
-                    : "h-7 w-7 bg-amber-500 hover:bg-rose-500 text-white ring-2 ring-white/80 shadow-md hover:scale-105"
-                }`}
-                title={`${spot.title}: ${spot.description}`}
-              >
-                <span className="font-mono text-xs font-bold">H{spot.number}</span>
+                  {/* Radar pulse for active hotspot */}
+                  {isActive && (
+                    <span className="absolute -inset-1 rounded-full bg-rose-500/40 animate-ping -z-10" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-                {/* Radar pulse for active hotspot */}
-                {isActive && (
-                  <span className="absolute -inset-1 rounded-full bg-rose-500/40 animate-ping -z-10" />
-                )}
-              </button>
-            );
-          })}
-
-          {/* Legend badge on bottom-left of photo */}
-          <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md text-[11px] text-white/90 border border-white/20">
-            <MapPin className="h-3.5 w-3.5 text-rose-400" />
+          {/* Interactive Hint bar under image */}
+          <div className="mt-2 text-center text-[10px] text-teal-300/90 flex items-center gap-1">
+            <MapPin className="h-3 w-3 text-rose-400 shrink-0" />
             <span>
-              {assessment.whereDangerous.length} điểm nguy cơ được chỉ định (H1..H
-              {assessment.whereDangerous.length})
+              Đang chọn <strong>H{activeSpot?.number || 1}</strong> — Nhấp lên ảnh để căn chỉnh vị trí ghim
             </span>
           </div>
         </div>
@@ -187,8 +214,8 @@ export const ItemHazardCard: React.FC<ItemHazardCardProps> = ({
             </div>
 
             {/* List of Danger Hotspots */}
-            <div className="space-y-2 mt-3 max-h-[220px] overflow-y-auto pr-1">
-              {assessment.whereDangerous.map((spot) => {
+            <div className="space-y-2 mt-2.5 max-h-[300px] overflow-y-auto pr-1">
+              {hotspots.map((spot) => {
                 const isActive = spot.id === activeSpotId;
                 return (
                   <div
@@ -345,9 +372,9 @@ export const ItemHazardCard: React.FC<ItemHazardCardProps> = ({
           ))}
         </div>
 
-        {/* 5. Follow-up Copilot Interaction Button */}
-        {onAskCopilot && (
-          <div className="pt-2 flex flex-wrap gap-2">
+        {/* 5. Follow-up Copilot Interaction & Vision Navigation */}
+        <div className="pt-2 flex flex-wrap gap-2">
+          {onAskCopilot && (
             <button
               onClick={() =>
                 onAskCopilot(
@@ -360,8 +387,18 @@ export const ItemHazardCard: React.FC<ItemHazardCardProps> = ({
               <span>Tiếp tục hỏi SafeHome Copilot về vật dụng này</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
-          </div>
-        )}
+          )}
+
+          <Link
+            href="/ai-vision"
+            className="py-2.5 px-4 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs flex items-center gap-1.5 transition shadow-xs active:scale-95"
+            title="Chuyển sang phân hệ Thị giác AI để quét toàn bộ không gian phòng và tạo Bản sao số 3D"
+          >
+            <Camera className="h-3.5 w-3.5 text-sky-600" />
+            <span>Chuyển tới Thị giác AI (Quét phòng 3D)</span>
+            <ArrowRight className="h-3.5 w-3.5 text-sky-600" />
+          </Link>
+        </div>
       </div>
     </div>
   );

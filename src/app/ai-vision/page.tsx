@@ -645,13 +645,13 @@ export default function AiVisionStudioPage() {
             {/* Interactive Image Container with SVG Overlay */}
             <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center min-h-[380px] max-h-[520px]">
               <div
-                className="relative transition-transform duration-200 origin-center"
+                className="relative transition-transform duration-200 origin-center inline-block max-w-full"
                 style={{ transform: `scale(${zoomLevel})` }}
               >
                 <img
                   src={selectedImage.fileUrl}
                   alt="Room Analysis"
-                  className="max-h-[500px] w-auto object-contain block mx-auto select-none"
+                  className="max-h-[500px] w-auto object-contain block mx-auto select-none rounded-lg"
                 />
 
                 {/* SVG Bounding Boxes Overlay */}
@@ -686,45 +686,79 @@ export default function AiVisionStudioPage() {
                         >
                           {/* Box Rect */}
                           <rect
-                            x={`${det.bbox.xMin * 100}%`}
-                            y={`${det.bbox.yMin * 100}%`}
-                            width={`${w}%`}
-                            height={`${h}%`}
+                            x={det.bbox.xMin * 100}
+                            y={det.bbox.yMin * 100}
+                            width={w}
+                            height={h}
+                            rx={0.8}
                             fill={strokeColor}
                             fillOpacity={isSelected ? 0.25 : 0.08}
                             stroke={strokeColor}
-                            strokeWidth={isSelected ? "1" : "0.5"}
-                            strokeDasharray={isRejected ? "2,2" : undefined}
+                            strokeWidth={isSelected ? 0.8 : 0.4}
+                            strokeDasharray={isRejected ? "1.5,1.5" : undefined}
                             className="transition-all"
                           />
-
-                          {/* Label Pill */}
-                          {showLabels && (
-                            <foreignObject
-                              x={`${det.bbox.xMin * 100}%`}
-                              y={`${Math.max(0, det.bbox.yMin * 100 - 6)}%`}
-                              width="60%"
-                              height="20%"
-                              className="overflow-visible pointer-events-none"
-                            >
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className="px-1.5 py-0.5 rounded text-[8px] font-bold text-white shadow-sm whitespace-nowrap"
-                                  style={{ backgroundColor: strokeColor }}
-                                >
-                                  {det.userLabel ||
-                                    CATEGORY_TAXONOMY[det.category]?.vietnameseName ||
-                                    det.originalLabel}
-                                  {" "}
-                                  ({Math.round(det.confidence * 100)}%)
-                                </span>
-                              </div>
-                            </foreignObject>
-                          )}
                         </g>
                       );
                     })}
                   </svg>
+                )}
+
+                {/* Clean HTML Labels Overlay (Free from SVG scaling distortion) */}
+                {showBoxes && showLabels && (
+                  <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden select-none">
+                    {detections.map((det) => {
+                      const isSelected = det.id === selectedDetectionId;
+                      const isConfirmed = det.verificationStatus === "CONFIRMED";
+                      const isRejected = det.verificationStatus === "REJECTED";
+                      const isCorrected = det.verificationStatus === "CORRECTED";
+
+                      const strokeColor = isRejected
+                        ? "#f43f5e"
+                        : isConfirmed
+                        ? "#10b981"
+                        : isCorrected
+                        ? "#3b82f6"
+                        : "#f59e0b";
+
+                      const leftPct = det.bbox.xMin * 100;
+                      const topPct = det.bbox.yMin * 100;
+                      const isNearTop = topPct < 7;
+
+                      const labelText =
+                        det.userLabel ||
+                        CATEGORY_TAXONOMY[det.category]?.vietnameseName ||
+                        det.originalLabel;
+
+                      return (
+                        <div
+                          key={`label-${det.id}`}
+                          style={{
+                            position: "absolute",
+                            left: `${Math.max(1, Math.min(88, leftPct))}%`,
+                            top: `${Math.max(1, Math.min(94, topPct))}%`,
+                            transform: isNearTop ? "translateY(4px)" : "translateY(-100%)",
+                          }}
+                          onClick={() => setSelectedDetectionId(det.id)}
+                          className="pointer-events-auto cursor-pointer z-10 transition-all"
+                        >
+                          <span
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold text-white shadow-xs whitespace-nowrap transition-all ${
+                              isSelected
+                                ? "scale-105 ring-2 ring-white/90 shadow-md font-extrabold"
+                                : "opacity-90 hover:opacity-100 hover:scale-102"
+                            }`}
+                            style={{ backgroundColor: strokeColor }}
+                          >
+                            <span>{labelText}</span>
+                            <span className="opacity-85 text-[9px] font-medium">
+                              ({Math.round(det.confidence * 100)}%)
+                            </span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>

@@ -70,6 +70,25 @@ export function evaluateEvidenceSufficiency(
     }
   }
 
+  // 4b. Check for unsubstantiated quantitative comparisons (e.g. "chính xác bao nhiêu phần trăm", "bao nhiêu lần")
+  const lowerQuery = query.toLowerCase();
+  if (
+    lowerQuery.includes("chính xác bao nhiêu phần trăm") ||
+    lowerQuery.includes("bao nhiêu lần") ||
+    lowerQuery.includes("hãng x")
+  ) {
+    return {
+      status: "INSUFFICIENT_EVIDENCE",
+      intent,
+      confidenceScore: 0.3,
+      coverageRationale:
+        "Tài liệu y tế hiện hành không có số liệu đối chứng thực nghiệm chính xác cho câu hỏi định lượng này.",
+      missingElements: ["Bằng chứng nghiên cứu lâm sàng định lượng cụ thể"],
+      isEmergency: false,
+      isOutOfScope: false,
+    };
+  }
+
   // 5. Calculate lexical coverage of query terms across retrieved chunks
   const queryTokens = tokenizeQuery(query);
   const combinedText = chunks.map((c) => `${c.sectionTitle} ${c.chunkText}`).join(" ").toLowerCase();

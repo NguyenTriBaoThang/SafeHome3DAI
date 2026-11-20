@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Compass,
+  Camera,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { cn } from "@/lib/utils";
@@ -154,6 +155,15 @@ export const AppHeader: React.FC = () => {
           {/* Run Simulation & Restore Baseline (Shown on 3D & interactive pages, hidden on workflow to keep header clean) */}
           {pathname !== "/workflow" && (
             <>
+              <Link
+                href="/ai-vision"
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 font-semibold text-xs shadow-2xs active:scale-95 transition-all"
+                title="Thị giác AI: Nhận diện không gian & Quét phòng 3D"
+              >
+                <Camera className="h-3.5 w-3.5 text-sky-600" />
+                <span>AI Vision</span>
+              </Link>
+
               <button
                 onClick={() => runSimulation()}
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-md shadow-teal-600/20 active:scale-95 transition-all"

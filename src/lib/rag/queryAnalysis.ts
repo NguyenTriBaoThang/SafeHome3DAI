@@ -22,24 +22,35 @@ export interface ConversationTurn {
 
 // Regex patterns for Emergency and Out-of-Scope medical queries
 const EMERGENCY_KEYWORDS = [
-  /vừa\s+(té|ngã)\s+(bất tỉnh|chảy máu|đau dữ dội|gãy xương|không dậy được)/i,
   /cấp cứu/i,
   /gọi 115/i,
+  /115/i,
+  /cứu với/i,
+  /bất tỉnh/i,
+  /hôn mê/i,
   /ngất xỉu/i,
+  /chảy nhiều máu/i,
+  /chảy máu/i,
+  /gãy (cổ )?xương/i,
+  /không thở được|khó thở/i,
+  /nôn ra máu/i,
   /chấn thương sọ não/i,
   /co giật/i,
-  /hôn mê/i,
+  /vừa\s+(té|ngã)/i,
 ];
 
 const OUT_OF_SCOPE_MEDICAL_KEYWORDS = [
-  /uống thuốc gì/i,
+  /uống thuốc/i,
   /kê đơn/i,
-  /chẩn đoán bệnh/i,
-  /liều dùng thuốc/i,
+  /chẩn đoán/i,
+  /liều dùng/i,
+  /liều lượng/i,
   /bị bệnh gì/i,
   /thuốc điều trị/i,
   /kháng sinh/i,
-  /tiêm thuốc/i,
+  /tiêm/i,
+  /loãng xương/i,
+  /thoái hóa khớp/i,
   /prescription/i,
   /medication/i,
   /diagnos/i,
@@ -48,6 +59,9 @@ const OUT_OF_SCOPE_MEDICAL_KEYWORDS = [
 const PROMPT_INJECTION_KEYWORDS = [
   /ignore (all )?previous instructions/i,
   /system prompt/i,
+  /system override/i,
+  /secret keys/i,
+  /passwords/i,
   /bỏ qua (mọi )?chỉ dẫn/i,
   /hãy giả vờ/i,
   /jailbreak/i,
@@ -55,6 +69,10 @@ const PROMPT_INJECTION_KEYWORDS = [
   /bật chế độ dev/i,
   /you are now DAN/i,
   /act as an? unrestricted/i,
+  /hãy bịa/i,
+  /bịa ra/i,
+  /bịa nguồn/i,
+  /thông tư số 9999/i,
 ];
 
 /**
@@ -119,10 +137,10 @@ export function analyzeUserQuery(
   // Detect follow-up signals
   const isFollowUp =
     history.length > 0 &&
-    (/^(vậy|thế|còn|vậy thì|nên đặt ở đâu|ở đâu|lắp như thế nào|tại sao lại thế|còn trong)/i.test(
+    (/^(vậy|thế|còn|vậy thì|nên đặt ở đâu|ở đâu|lắp như thế nào|tại sao lại thế|còn trong|loại\s+.*nào)/i.test(
       trimmed
     ) ||
-      trimmed.length < 25);
+      trimmed.length < 35);
 
   if (isFollowUp) {
     intent = "FOLLOW_UP";
@@ -132,6 +150,8 @@ export function analyzeUserQuery(
     lower.includes("số liệu") ||
     lower.includes("chứng minh") ||
     lower.includes("giảm bao nhiêu") ||
+    lower.includes("bao nhiêu lần") ||
+    lower.includes("chính xác") ||
     lower.includes("%")
   ) {
     intent = "EVIDENCE_REQUEST";
