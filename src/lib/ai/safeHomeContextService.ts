@@ -1,6 +1,6 @@
 import { INITIAL_ROOMS } from "@/data/mockRooms";
 import { runEnvironmentalAssessment, calculateSafetyScore } from "@/features/risk-engine/rules";
-import { RoomState, SceneObjectState, HazardFindingResult, AssessmentResult } from "@/types";
+import { RoomState, HazardFindingResult } from "@/types";
 
 export interface SystemRoomContext {
   id: string;
@@ -49,8 +49,11 @@ export interface FullSystemContext {
 /**
  * Returns complete context of all rooms, objects, and clinical risk findings.
  */
-export function getSafeHomeSystemContext(activeRoomId?: string): FullSystemContext {
-  const rooms: SystemRoomContext[] = INITIAL_ROOMS.map((r) => {
+export function getSafeHomeSystemContext(activeRoomId?: string, roomState?: RoomState): FullSystemContext {
+  const sourceRooms = roomState
+    ? [...INITIAL_ROOMS.filter((room) => room.id !== roomState.id), roomState]
+    : INITIAL_ROOMS;
+  const rooms: SystemRoomContext[] = sourceRooms.map((r) => {
     const findings: HazardFindingResult[] = runEnvironmentalAssessment(r);
     const score = calculateSafetyScore(findings);
 
@@ -128,7 +131,7 @@ export function formatSystemContextPrompt(ctx: FullSystemContext): string {
 
   prompt += `\n### CÁC MỐI NGUY TÉ NGÃ PHÁT HIỆN TẠI HIỆN TRƯỜNG (${activeRoom.hazards.length} vi phạm):\n`;
   if (activeRoom.hazards.length === 0) {
-    prompt += `- Không ghi nhận nguy cơ nào. Không gian đạt chuẩn an toàn y khoa.\n`;
+    prompt += `- Không ghi nhận nguy cơ theo bộ quy tắc đánh giá hiện tại.\n`;
   } else {
     activeRoom.hazards.forEach((h, idx) => {
       prompt += `${idx + 1}. [${h.id}] (${h.severityCategory}) ${h.title}: ${h.description} [Vật thể liên quan: ${h.targetObjectId || "Toàn phòng"}]. Khuyến nghị: ${h.recommendationText}\n`;
@@ -151,11 +154,20 @@ export function resolveContextReference(
   inferredIntent?: "FOCUS_3D" | "EXPLAIN_WHY" | "FIX_SUGGESTION" | "GENERAL";
 } {
   const q = userQuery.toLowerCase();
-  const activeRoom = ctx.rooms.find((r) => r.id === ctx.activeRoomId) || ctx.rooms[0];
+  let activeRoom = ctx.rooms.find((r) => r.id === ctx.activeRoomId) || ctx.rooms[0];
 
   let resolvedTargetId = lastMentionedObjectId;
   let resolvedRoomId = activeRoom.id;
   let inferredIntent: "FOCUS_3D" | "EXPLAIN_WHY" | "FIX_SUGGESTION" | "GENERAL" = "GENERAL";
+
+  // Resolve the room before looking for its objects (e.g. a bathroom grab bar
+  // while the bedroom is currently selected).
+  if (/phòng ngủ|bedroom/.test(q) && activeRoom.roomType !== "BEDROOM") {
+    activeRoom = ctx.rooms.find((r) => r.roomType === "BEDROOM") || activeRoom;
+  } else if (/nhà vệ sinh|phòng tắm|toilet|wc|bathroom/.test(q) && activeRoom.roomType !== "BATHROOM") {
+    activeRoom = ctx.rooms.find((r) => r.roomType === "BATHROOM") || activeRoom;
+  }
+  resolvedRoomId = activeRoom.id;
 
   if (q.includes("3d") || q.includes("xem") || q.includes("cho tôi thấy") || q.includes("chỉ cho tôi")) {
     inferredIntent = "FOCUS_3D";
@@ -173,7 +185,7 @@ export function resolveContextReference(
     const cableObj = activeRoom.objects.find((o) => o.modelType === "cable" || o.category === "CABLE");
     if (cableObj) resolvedTargetId = cableObj.id;
   } else if (q.includes("giường") || q.includes("bed")) {
-    const bedObj = activeRoom.objects.find((o) => o.modelType === "bed" || o.category === "FURNITURE");
+    const bedObj = activeRoom.objects.find((o) => o.modelType === "bed");
     if (bedObj) resolvedTargetId = bedObj.id;
   } else if (q.includes("bồn cầu") || q.includes("toilet") || q.includes("wc")) {
     const toiletObj = activeRoom.objects.find((o) => o.modelType === "toilet");
@@ -181,15 +193,6 @@ export function resolveContextReference(
   } else if (q.includes("thanh vịn") || q.includes("tay vịn") || q.includes("grab")) {
     const grabObj = activeRoom.objects.find((o) => o.modelType === "grab_bar");
     if (grabObj) resolvedTargetId = grabObj.id;
-  }
-
-  // Room keyword resolution
-  if (q.includes("phòng ngủ") || q.includes("bedroom")) {
-    const bedRoom = ctx.rooms.find((r) => r.roomType === "BEDROOM");
-    if (bedRoom) resolvedRoomId = bedRoom.id;
-  } else if (q.includes("nhà vệ sinh") || q.includes("phòng tắm") || q.includes("toilet") || q.includes("wc") || q.includes("bathroom")) {
-    const bathRoom = ctx.rooms.find((r) => r.roomType === "BATHROOM");
-    if (bathRoom) resolvedRoomId = bathRoom.id;
   }
 
   return {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   getSafeHomeSystemContext,
   formatSystemContextPrompt,
@@ -7,6 +7,15 @@ import {
 import { executeCopilotTool, COPILOT_TOOLS } from "@/lib/ai/copilotToolRegistry";
 import { processCopilotChat } from "@/lib/ai/geminiChatService";
 import { useSimulationStore } from "@/stores/useSimulationStore";
+
+vi.mock("@/lib/database/prisma", () => ({
+  prisma: {
+    simulationScenario: { findMany: vi.fn(async () => [
+      { id: "before", isBaseline: true, assessments: [{ safetyScore: 31 }] },
+      { id: "after", isBaseline: false, assessments: [{ safetyScore: 54 }] },
+    ]) },
+  },
+}));
 
 describe("SafeHome AI Copilot 2.0 Test Suite", () => {
   beforeEach(() => {
@@ -95,9 +104,9 @@ describe("SafeHome AI Copilot 2.0 Test Suite", () => {
     it("should execute compareScenarioResults tool", async () => {
       const res = await executeCopilotTool("compareScenarioResults", {}, "room-bedroom-01");
       expect(res.success).toBe(true);
-      expect(res.data.beforeScore).toBe(28);
-      expect(res.data.afterScore).toBe(100);
-      expect(res.data.delta).toBe(72);
+      expect(res.data.beforeScore).toBe(31);
+      expect(res.data.afterScore).toBe(54);
+      expect(res.data.delta).toBe(23);
     });
   });
 

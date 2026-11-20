@@ -1,25 +1,11 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { ChatRequestSchema } from "@/lib/ai/chatRequest";
 import { processCopilotChat } from "@/lib/ai/geminiChatService";
 import {
   saveUserMessage,
   saveAssistantMessage,
   getRecentConversationTurns,
 } from "@/lib/ai/conversationManager";
-
-const ChatRequestSchema = z.object({
-  message: z.string().min(1, "Tin nhắn không được để trống").max(3000, "Tin nhắn quá dài"),
-  conversationId: z.string().optional(),
-  roomId: z.string().optional(),
-  roomContext: z
-    .object({
-      roomName: z.string(),
-      hazardCount: z.number(),
-      hazardTitles: z.array(z.string()),
-      lightingLux: z.number(),
-    })
-    .optional(),
-});
 
 export async function POST(request: Request) {
   try {
@@ -33,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { message, conversationId = `conv-${Date.now()}`, roomId } = parseResult.data;
+    const { message, conversationId = `conv-${Date.now()}`, roomId, roomState } = parseResult.data;
 
     // 1. Retrieve recent history for conversational memory
     const history = await getRecentConversationTurns(conversationId, 6);
@@ -43,6 +29,8 @@ export async function POST(request: Request) {
       message,
       history,
       roomId,
+      roomState,
+      signal: request.signal,
       conversationId,
     });
 

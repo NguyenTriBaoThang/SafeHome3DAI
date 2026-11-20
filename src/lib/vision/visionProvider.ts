@@ -409,12 +409,14 @@ export async function runVisionAnalysis(
   // Mode D: Gemini Multimodal Vision Engine
   if (process.env.GEMINI_API_KEY && options.imageBufferBase64) {
     try {
+      const isCustomImage = Boolean(options.imageBufferBase64) || imageId.startsWith("img-user-");
       const buffer = Buffer.from(options.imageBufferBase64, "base64");
       const geminiRes = await analyzeRoomPhotoWithGemini(buffer, "image/jpeg", {
         roomType,
         viewpoint,
         imageId,
         analysisId,
+        isCustom: isCustomImage,
       });
 
       if (geminiRes.detections.length > 0) {
@@ -471,39 +473,7 @@ export async function runVisionAnalysis(
       originalLabel: "Bàn làm việc / Bàn gỗ gấp",
       userLabel: "Bàn làm việc",
       confidence: 0.95,
-      bbox: { xMin: 0.20, yMin: 0.32, xMax: 0.84, yMax: 0.85 },
-      source: "OBJECT_DETECTOR",
-      verificationStatus: "PENDING_REVIEW",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    });
-
-    const chairId = `det_${Date.now()}_chair`;
-    detections.push({
-      id: chairId,
-      analysisId,
-      imageId,
-      category: "chair",
-      originalLabel: "Ghế ngồi tựa lưng",
-      userLabel: "Ghế tựa",
-      confidence: 0.89,
-      bbox: { xMin: 0.08, yMin: 0.52, xMax: 0.28, yMax: 0.88 },
-      source: "OBJECT_DETECTOR",
-      verificationStatus: "PENDING_REVIEW",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    });
-
-    const cableId = `det_${Date.now()}_cable`;
-    detections.push({
-      id: cableId,
-      analysisId,
-      imageId,
-      category: "electrical_cable",
-      originalLabel: "Dây nguồn sạc thiết bị điện tử",
-      userLabel: "Dây điện máy tính",
-      confidence: 0.82,
-      bbox: { xMin: 0.55, yMin: 0.74, xMax: 0.88, yMax: 0.94 },
+      bbox: { xMin: 0.16, yMin: 0.36, xMax: 0.86, yMax: 0.85 },
       source: "OBJECT_DETECTOR",
       verificationStatus: "PENDING_REVIEW",
       createdAt: timestamp,
@@ -511,39 +481,57 @@ export async function runVisionAnalysis(
     });
 
     observations.push({
-      id: `obs_${Date.now()}_1`,
-      analysisId,
-      observationType: "CABLE_OBSERVED",
-      description: "Phát hiện dây dẫn nguồn điện máy tính / sạc thiết bị chạy sát sàn dưới chân bàn, nguy cơ vướng chân khi đứng lên hoặc di chuyển theo CDC STEADI.",
-      relatedDetectionIds: [cableId],
-      uncertaintyType: "SPATIAL_UNCERTAINTY",
-      requiresConfirmation: true,
-      verificationStatus: "PENDING_REVIEW",
-      surveyQuestionId: "BED_008",
-    });
-
-    observations.push({
-      id: `obs_${Date.now()}_2`,
+      id: `obs_${Date.now()}_table_corner`,
       analysisId,
       observationType: "OBSTACLE_CANDIDATE",
-      description: "Bàn có chân kim loại/gỗ vuông góc, cần chú ý bọc đệm cao su bo tròn góc cạnh chống va đập bầm tím cho người cao tuổi.",
+      description:
+        "Bàn sinh hoạt / làm việc có 4 góc vuông sắc nhọn ở độ cao 70-75cm: Tiềm ẩn nguy cơ chấn thương đụng giập, bầm tím phần mềm hoặc rách da sâu khi người cao tuổi va quẹt lúc di chuyển theo CDC STEADI & WHO 2021.",
       relatedDetectionIds: [tableId],
       uncertaintyType: "CONDITION_UNCERTAINTY",
       requiresConfirmation: true,
       verificationStatus: "PENDING_REVIEW",
       surveyQuestionId: "BED_009",
+      evidenceJson: { category: "table", detectionId: tableId },
+    });
+
+    observations.push({
+      id: `obs_${Date.now()}_table_legs`,
+      analysisId,
+      observationType: "OBSTACLE_CANDIDATE",
+      description:
+        "Chân bàn kim loại dạng gập thiếu đệm cao su cố định bám sàn: Nguy cơ xê dịch hoặc trượt lật khi người cao tuổi tỳ tay lấy đà đứng lên.",
+      relatedDetectionIds: [tableId],
+      uncertaintyType: "CONDITION_UNCERTAINTY",
+      requiresConfirmation: true,
+      verificationStatus: "PENDING_REVIEW",
+      surveyQuestionId: "BED_010",
+      evidenceJson: { category: "table", detectionId: tableId },
     });
 
     clarifications.push({
-      id: `clarify_${Date.now()}_cable`,
+      id: `clarify_${Date.now()}_table_corner`,
       roomId,
-      observationId: `obs_${Date.now()}_1`,
-      surveyQuestionId: "BED_008",
-      questionText: "Đoạn dây điện dưới gầm bàn có được gom nẹp luồn ống gen cố định vào chân bàn không?",
-      helpText: "Dây điện tự do trên sàn nhà người cao tuổi rất dễ vướng mắc vào dép gây té ngã.",
+      surveyQuestionId: "BED_009",
+      questionText: "Các góc bàn nhô ra lối đi đã được dán đệm silicone bo tròn giảm chấn thương va đập chưa?",
+      helpText: "Theo CDC STEADI, bo tròn các góc bàn giúp giảm 70% nguy cơ chấn thương mô mềm và tụ máu khi người già va quẹt.",
       options: [
-        { value: "YES", label: "Đã có nẹp luồn ống an toàn", isRiskTrigger: false },
-        { value: "NO", label: "Chưa nẹp, dây nằm lộn xộn", isRiskTrigger: true },
+        { value: "YES", label: "Đã có đệm bọc góc silicone an toàn", isRiskTrigger: false },
+        { value: "NO", label: "Chưa bọc, các góc nhọn 90°", isRiskTrigger: true },
+        { value: "UNKNOWN", label: "Chưa kiểm tra", isRiskTrigger: false },
+      ],
+      status: "PENDING",
+      createdAt: timestamp,
+    });
+
+    clarifications.push({
+      id: `clarify_${Date.now()}_table_legs`,
+      roomId,
+      surveyQuestionId: "BED_010",
+      questionText: "Chân bàn có nút đệm cao su chống trượt và đứng vững chắc khi tỳ tay lấy lực đứng dậy không?",
+      helpText: "Người già thường tỳ tay vào mép bàn để đứng dậy; bàn trơn trượt có thể gây lật ngã tức thì.",
+      options: [
+        { value: "YES", label: "Rất vững chãi, có đế cao su chống trượt", isRiskTrigger: false },
+        { value: "NO", label: "Dễ bị trượt hoặc lung lay", isRiskTrigger: true },
         { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
       ],
       status: "PENDING",

@@ -277,20 +277,21 @@ export default function AiVisionStudioPage() {
     setSelectedImageId(newImgId);
   };
 
-  // Run AI Vision Analysis API (supports passing real image base64)
+  // Run AI Vision Analysis API (supports passing real image base64 & explicit caption)
   const handleRunAnalysis = async (
     imgId: string,
     rId: string,
     rType: "BEDROOM" | "BATHROOM",
-    base64Payload?: string
+    base64Payload?: string,
+    captionPayload?: string
   ) => {
     setIsAnalyzing(true);
     setSyncStatus("Đang phân tích hình ảnh AI đa phương thức...");
 
-    // Find base64 & caption from current image list if not directly passed
+    // Find base64 & caption from current image list or explicit parameters
     const targetImg = images.find((i) => i.id === imgId);
     const base64 = base64Payload || targetImg?.base64;
-    const caption = targetImg?.caption || "";
+    const caption = captionPayload ?? targetImg?.caption ?? "";
 
     try {
       const res = await fetch(`/api/vision/images/${imgId}/analyze`, {
@@ -351,7 +352,7 @@ export default function AiVisionStudioPage() {
       setRiskSnapshot(cached.riskSnapshot);
       setSyncStatus(`Đã tải kết quả phân tích cho: ${img.caption || img.id}`);
     } else {
-      handleRunAnalysis(img.id, activeRoomId, activeRoomType, img.base64);
+      handleRunAnalysis(img.id, activeRoomId, activeRoomType, img.base64, img.caption);
     }
   };
 
@@ -410,8 +411,8 @@ export default function AiVisionStudioPage() {
         fileInputRef.current.value = "";
       }
 
-      // 4. Run analysis with real image base64 & compute new risk evaluation
-      await handleRunAnalysis(newImgId, activeRoomId, activeRoomType, base64Data);
+      // 4. Run analysis with real image base64 & explicit caption to avoid state async delay
+      await handleRunAnalysis(newImgId, activeRoomId, activeRoomType, base64Data, newImgItem.caption);
 
       // 4. Also persist to /api/vision/images in background
       try {
@@ -727,7 +728,7 @@ export default function AiVisionStudioPage() {
           </div>
 
           <button
-            onClick={() => handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType)}
+            onClick={() => handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType, selectedImage.base64, selectedImage.caption)}
             disabled={isAnalyzing}
             className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >

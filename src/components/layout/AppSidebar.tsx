@@ -54,9 +54,9 @@ const EXTERNAL_MODULES = [
   },
   {
     href: "/ai-assistant",
-    label: "Trợ lý AI & RAG",
+    label: "Trợ lý AI Agent",
     icon: Bot,
-    badge: "RAG",
+    badge: "Agent",
     highlight: true,
   },
   {

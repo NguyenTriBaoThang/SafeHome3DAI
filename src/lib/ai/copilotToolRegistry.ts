@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { getSafeHomeSystemContext } from "./safeHomeContextService";
+import { getSafeHomeSystemContext, FullSystemContext } from "./safeHomeContextService";
+import { prisma } from "@/lib/database/prisma";
 
 export interface ToolExecutionResult {
   tool: string;
@@ -135,12 +136,24 @@ export const COPILOT_TOOLS = [
  */
 export async function executeCopilotTool(
   toolName: string,
-  args: any,
-  activeRoomId?: string
+  args: unknown,
+  activeRoomId?: string,
+  systemContext?: FullSystemContext
 ): Promise<ToolExecutionResult> {
-  const ctx = getSafeHomeSystemContext(activeRoomId);
-  const targetRoomId = args?.roomId || ctx.activeRoomId;
-  const currentRoom = ctx.rooms.find((r) => r.id === targetRoomId) || ctx.rooms[0];
+  const tool = COPILOT_TOOLS.find((entry) => entry.name === toolName);
+  if (!tool) return { tool: toolName, success: false, message: "Công cụ không tồn tại trong hệ thống." };
+  const parsed = tool.parameters.strict().safeParse(args);
+  if (!parsed.success) {
+    return { tool: toolName, success: false, message: "Tham số công cụ không hợp lệ.", data: parsed.error.flatten() };
+  }
+  const input = parsed.data as Record<string, string | undefined>;
+  const ctx = systemContext || getSafeHomeSystemContext(activeRoomId);
+  const targetRoomId = input.roomId || activeRoomId || ctx.activeRoomId;
+  const currentRoom = ctx.rooms.find((r) => r.id === targetRoomId);
+  if (!currentRoom) return { tool: toolName, success: false, message: `Không tìm thấy phòng có mã ${targetRoomId}.` };
+
+  // Every case below receives validated arguments only.
+  const validatedArgs = input;
 
   switch (toolName) {
     case "getCurrentRoom": {
@@ -174,8 +187,8 @@ export async function executeCopilotTool(
 
     case "getRoomRiskFindings": {
       let filtered = currentRoom.hazards;
-      if (args?.severity && args.severity !== "ALL") {
-        filtered = filtered.filter((h) => h.severityCategory === args.severity);
+      if (validatedArgs.severity && validatedArgs.severity !== "ALL") {
+        filtered = filtered.filter((h) => h.severityCategory === validatedArgs.severity);
       }
       return {
         tool: toolName,
@@ -200,7 +213,7 @@ export async function executeCopilotTool(
     }
 
     case "focus3DObject": {
-      const objId = args?.objectId;
+      const objId = validatedArgs.objectId;
       // Search across all rooms
       let foundObj: any = null;
       let foundRoomId: string = currentRoom.id;
@@ -225,7 +238,7 @@ export async function executeCopilotTool(
       return {
         tool: toolName,
         success: true,
-        message: `Đã định vị đồ vật [${foundObj.name}] trong ${foundRoomId}. Máy quay 3D sẽ tự động tập trung vào vị trí này.`,
+        message: `Đã định vị đồ vật [${foundObj.name}]. Bấm mở trên 3D để tập trung vào vị trí này.`,
         data: { object: foundObj, roomId: foundRoomId },
         clientAction: {
           type: "FOCUS_3D_OBJECT",
@@ -235,7 +248,7 @@ export async function executeCopilotTool(
     }
 
     case "focus3DRoom": {
-      const rId = args?.roomId;
+      const rId = validatedArgs.roomId;
       const targetR = ctx.rooms.find((r) => r.id === rId);
       if (!targetR) {
         return {
@@ -247,7 +260,7 @@ export async function executeCopilotTool(
       return {
         tool: toolName,
         success: true,
-        message: `Đã chuyển sang xem phòng ${targetR.name} trên không gian 3D.`,
+        message: `Sẵn sàng mở phòng ${targetR.name} trên không gian 3D.`,
         data: { roomId: targetR.id, name: targetR.name },
         clientAction: {
           type: "FOCUS_3D_ROOM",
@@ -257,28 +270,28 @@ export async function executeCopilotTool(
     }
 
     case "highlight3DRisk": {
-      const fId = args?.findingId;
+      const fId = validatedArgs.findingId;
       const finding = currentRoom.hazards.find((h) => h.id === fId || h.ruleId === fId);
       return {
         tool: toolName,
         success: Boolean(finding),
         message: finding
-          ? `Đã làm nổi bật điểm cảnh báo [${finding.title}] trên mô hình 3D.`
+          ? `Sẵn sàng làm nổi bật điểm cảnh báo [${finding.title}] trên mô hình 3D.`
           : `Không tìm thấy nguy cơ có mã ${fId}.`,
         data: finding,
-        clientAction: {
+        clientAction: finding ? {
           type: "HIGHLIGHT_RISK",
-          payload: { findingId: fId, targetObjectId: finding?.targetObjectId },
-        },
+          payload: { findingId: finding.id, roomId: currentRoom.id, targetObjectId: finding.targetObjectId },
+        } : undefined,
       };
     }
 
     case "set3DCameraMode": {
-      const mode = args?.mode || "ISOMETRIC";
+      const mode = validatedArgs.mode;
       return {
         tool: toolName,
         success: true,
-        message: `Đã chuyển góc nhìn máy quay 3D sang chế độ ${mode}.`,
+        message: `Sẵn sàng mở góc nhìn máy quay 3D ở chế độ ${mode}.`,
         data: { mode },
         clientAction: {
           type: "SET_CAMERA_MODE",
@@ -288,11 +301,17 @@ export async function executeCopilotTool(
     }
 
     case "getSurveyProgress": {
+      const survey = await prisma.surveyRoom.findFirst({
+        where: { linked3dRoomId: currentRoom.id },
+        orderBy: { updatedAt: "desc" },
+        include: { profile: true, _count: { select: { answers: true } } },
+      });
       return {
         tool: toolName,
-        success: true,
-        message: `Tiến độ khảo sát phòng ${currentRoom.name}: 100% (Đã thu thập đầy đủ câu trả lời)`,
-        data: { completed: true, answeredCount: 8, totalQuestions: 8 },
+        success: Boolean(survey),
+        message: survey ? `Đã truy xuất tiến độ khảo sát phòng ${currentRoom.name}.` : "Chưa có khảo sát liên kết với phòng này.",
+        data: survey ? { completed: survey.status === "COMPLETED", status: survey.status,
+          answeredCount: survey._count.answers, completenessScore: survey.profile?.completenessScore ?? null } : undefined,
       };
     }
 
@@ -309,35 +328,71 @@ export async function executeCopilotTool(
     }
 
     case "getAvailableScenarios": {
+      const scenarios = await prisma.simulationScenario.findMany({
+        where: { roomId: currentRoom.id },
+        orderBy: { updatedAt: "desc" },
+        take: 20,
+        select: { id: true, name: true, isBaseline: true },
+      });
       return {
         tool: toolName,
         success: true,
-        message: "Đã tải 2 kịch bản cải tạo sẵn có: [Hiện trạng ban đầu] và [Kịch bản can thiệp an toàn tối ưu].",
-        data: [
-          { id: "baseline", name: "Hiện trạng ban đầu (Điểm: 28/100)" },
-          { id: "safe-recommended", name: "Đã dán nẹp thảm, giấu dây, lắp thanh vịn (Điểm: 100/100)" },
-        ],
+        message: `Tìm thấy ${scenarios.length} kịch bản đã lưu cho phòng này.`,
+        data: scenarios,
       };
     }
 
     case "previewScenario": {
       return {
         tool: toolName,
-        success: true,
-        message: "Đã kích hoạt chế độ xem trước kịch bản can thiệp trên Digital Twin.",
+        success: false,
+        message: "Hãy chọn kịch bản đã lưu trong bộ mô phỏng để xem trước. Agent chưa thể nạp trực tiếp kịch bản.",
         clientAction: {
-          type: "SET_CAMERA_MODE",
-          payload: { mode: "COMPARISON" },
+          type: "NAVIGATE",
+          payload: { route: "/scenario-simulator" },
         },
       };
     }
 
     case "compareScenarioResults": {
+      let beforeScore: number | undefined;
+      let afterScore: number | undefined;
+      let baselineId: string | undefined;
+      let interventionId: string | undefined;
+
+      try {
+        const scenarios = await prisma.simulationScenario.findMany({
+          where: { roomId: currentRoom.id },
+          orderBy: { updatedAt: "desc" },
+          include: { assessments: { orderBy: { assessmentDate: "desc" }, take: 1 } },
+        });
+        const baseline = scenarios.find((scenario) => scenario.isBaseline && scenario.assessments.length);
+        const intervention = scenarios.find((scenario) => !scenario.isBaseline && scenario.assessments.length);
+        if (baseline && intervention) {
+          beforeScore = baseline.assessments[0].safetyScore;
+          afterScore = intervention.assessments[0].safetyScore;
+          baselineId = baseline.id;
+          interventionId = intervention.id;
+        }
+      } catch {
+        return { tool: toolName, success: false, message: "Chưa thể đọc các đánh giá đã lưu để so sánh. Vui lòng thử lại." };
+      }
+
+      if (beforeScore === undefined || afterScore === undefined) {
+        return { tool: toolName, success: false, message: "Chưa có đủ đánh giá trước và sau của các kịch bản đã lưu để so sánh." };
+      }
+
       return {
         tool: toolName,
         success: true,
-        message: "So sánh trước/sau: Điểm an toàn tăng từ 28/100 lên 100/100 (+72 điểm), loại trừ 100% rủi ro trượt ngã và vấp dây.",
-        data: { beforeScore: 28, afterScore: 100, delta: 72 },
+        message: `Điểm an toàn từ ${beforeScore}/100 lên ${afterScore}/100 (chênh lệch ${afterScore - beforeScore} điểm).`,
+        data: {
+          beforeScore,
+          afterScore,
+          delta: afterScore - beforeScore,
+          baselineScenarioId: baselineId,
+          comparedScenarioId: interventionId,
+        },
         clientAction: {
           type: "NAVIGATE",
           payload: { route: "/analytics" },
@@ -358,7 +413,7 @@ export async function executeCopilotTool(
     }
 
     case "navigateToPage": {
-      const route = args?.route || "/digital-twin";
+      const route = validatedArgs.route;
       return {
         tool: toolName,
         success: true,

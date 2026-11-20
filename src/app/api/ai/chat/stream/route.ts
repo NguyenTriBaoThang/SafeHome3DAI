@@ -1,4 +1,5 @@
 import { processCopilotChat } from "@/lib/ai/geminiChatService";
+import { ChatRequestSchema } from "@/lib/ai/chatRequest";
 import {
   saveUserMessage,
   saveAssistantMessage,
@@ -8,14 +9,14 @@ import {
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json();
-    const { message, conversationId = `conv-${Date.now()}`, roomId } = rawBody;
-
-    if (!message || typeof message !== "string") {
-      return new Response(JSON.stringify({ error: "Tin nhắn không hợp lệ" }), {
+    const parsed = ChatRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Tin nhắn không hợp lệ", details: parsed.error.flatten() }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
+    const { message, conversationId = `conv-${Date.now()}`, roomId, roomState } = parsed.data;
 
     // 1. Retrieve recent history for conversational memory
     const history = await getRecentConversationTurns(conversationId, 6);
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
       message,
       history,
       roomId,
+      roomState,
+      signal: request.signal,
       conversationId,
     });
 
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
     const fullText =
       copilotResult.answer && copilotResult.answer.trim().length > 0
         ? copilotResult.answer
-        : "Chào bạn! Tôi đã rà soát không gian phòng và đối chiếu với tiêu chuẩn phòng ngừa té ngã y khoa WHO 2021 & CDC STEADI. Trong không gian này, cần lưu ý đặc biệt: đảm bảo thảm trải sàn có lớp đệm chống trượt cố định mép sàn, thu gom các đoạn dây điện khỏi luồng di chuyển, và duy trì độ rọi ban đêm tối thiểu 50 Lux với đèn cảm ứng để phòng ngừa trượt ngã.";
+        : "Chưa nhận được câu trả lời từ trợ lý. Vui lòng thử lại.";
     const chunkSize = 20;
 
     const stream = new ReadableStream({

@@ -361,6 +361,10 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
   const handleNavigateTo3D = (toolRes: ToolExecutionResult) => {
     if (toolRes.clientAction) {
       const { type, payload } = toolRes.clientAction;
+      if (type === "NAVIGATE") {
+        router.push(payload.route);
+        return;
+      }
       let bridgeAction: Copilot3DAction | null = null;
 
       if (type === "FOCUS_3D_OBJECT") {
@@ -386,6 +390,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
         bridgeAction = {
           action: "HIGHLIGHT_RISK",
           targetId: payload.findingId,
+          roomId: payload.roomId,
           timestamp: Date.now(),
         };
       }
@@ -448,6 +453,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
           message: userMessageText,
           conversationId: currentConversationId,
           roomId: room.id,
+          roomState: room,
           attachedImage: currentAttached?.dataUrl,
         }),
       });
@@ -478,12 +484,14 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
 
       if (reader) {
         let done = false;
+        let pendingLine = "";
         while (!done) {
           const { value, done: isDone } = await reader.read();
           done = isDone;
           if (value) {
-            const rawChunk = decoder.decode(value, { stream: true });
-            const lines = rawChunk.split("\n");
+            pendingLine += decoder.decode(value, { stream: true });
+            const lines = pendingLine.split("\n");
+            pendingLine = lines.pop() || "";
 
             for (const line of lines) {
               if (line.startsWith("data: ")) {
@@ -521,20 +529,26 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
           const fbRes = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
             body: JSON.stringify({
               message: userMessageText,
               conversationId: currentConversationId,
               roomId: room.id,
+              roomState: room,
             }),
           });
           const fbData = await fbRes.json();
-          if (fbData.success && fbData.data?.answer) {
-            finalText = fbData.data.answer;
-            if (fbData.data.citations?.length) streamedCitations = fbData.data.citations;
-            if (fbData.data.suggestedFollowUps?.length) streamedFollowUps = fbData.data.suggestedFollowUps;
-          }
+          if (!fbRes.ok || !fbData.answer) throw new Error("Không nhận được phản hồi");
+          finalText = fbData.answer;
+          streamedEvidenceStatus = fbData.evidence_status;
+          streamedResponseMode = fbData.response_mode;
+          streamedCitations = fbData.citations || [];
+          streamedFollowUps = fbData.suggested_follow_ups || [];
+          streamedToolInvocations = fbData.tool_invocations || [];
         } catch (fbErr) {
-          finalText = "Dựa trên đối chiếu y khoa WHO 2021 & CDC STEADI, phòng ngủ của người cao tuổi cần chú ý 3 nguy cơ té ngã phổ biến: mép thảm không cố định gây vấp trượt chân, thiếu thanh vịn chịu lực hỗ trợ khi thức dậy, và lối đi đêm thiếu ánh sáng đèn cảm biến tự động.";
+          finalText = "Chưa thể kết nối với trợ lý. Vui lòng thử gửi lại tin nhắn.";
+          streamedEvidenceStatus = "INSUFFICIENT_EVIDENCE";
+          streamedResponseMode = "REFUSAL_INSUFFICIENT";
         }
       }
 
@@ -569,13 +583,16 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
           const fallbackRes = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
             body: JSON.stringify({
               message: userMessageText,
               conversationId: currentConversationId,
               roomId: room.id,
+              roomState: room,
             }),
           });
           const data = await fallbackRes.json();
+          if (!fallbackRes.ok || !data.answer) throw new Error("Không nhận được phản hồi");
           setMessages((prev) => [
             ...prev,
             {
@@ -726,7 +743,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                 </div>
               )}
               <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                <span>SafeHome Copilot 2.0</span>
+                <span>SafeHome AI Agent</span>
                 <span>•</span>
                 <span className="text-teal-600 font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -868,7 +885,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                                     onClick={() => handleNavigateTo3D(t)}
                                     className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] rounded-lg shadow-xs flex items-center gap-1 transition shrink-0"
                                   >
-                                    <span>Mở trên 3D</span>
+                                    <span>{t.clientAction.type === "NAVIGATE" ? "Mở phân hệ" : "Mở trên 3D"}</span>
                                     <ArrowRight className="h-3 w-3" />
                                   </button>
                                 )}

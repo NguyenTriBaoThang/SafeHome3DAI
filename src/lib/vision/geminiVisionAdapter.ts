@@ -88,6 +88,7 @@ export interface AnalyzeRoomPhotoOptions {
   viewpoint?: ViewpointType;
   imageId?: string;
   analysisId?: string;
+  isCustom?: boolean;
 }
 
 export interface GeminiAnalysisResult {
@@ -200,6 +201,16 @@ Với mỗi vật thể, trích xuất:
   }
 
   if (!rawText) {
+    const isCustom = options.isCustom || options.imageId?.startsWith("img-user-");
+    if (isCustom) {
+      return {
+        detections: [],
+        observations: [],
+        floorMaterial: "WOOD",
+        detectedRoomType: options.roomType || "BEDROOM",
+        modelUsed: "",
+      };
+    }
     const fb = getFallbackRoomDetections(options.roomType || "BEDROOM");
     return {
       detections: fb.detections,
