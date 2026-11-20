@@ -1,4 +1,5 @@
 import { GitPullRequest, Search, FileCheck, CheckCircle2, BookOpen } from 'lucide-react'
+import { VisualGallery } from '../components/VisualGallery'
 
 export default function XAI() {
   return (
@@ -102,6 +103,16 @@ export default function XAI() {
             </p>
           </div>
         </div>
+      </section>
+
+      <section style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--cyan)' }}>■</span> Ảnh Chụp Thực Tế Giải Trình AI & Trợ Lý RAG
+        </h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: '1rem' }}>
+          Đồ thị quyết định ReactFlow minh bạch không hộp đen và giao diện hỏi đáp có dẫn nguồn tài liệu WHO/CDC/BYT:
+        </p>
+        <VisualGallery />
       </section>
     </div>
   )

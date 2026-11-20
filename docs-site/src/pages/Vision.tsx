@@ -1,4 +1,5 @@
 import { ShieldCheck, Camera, Scan, AlertCircle, Sparkles, MapPin } from 'lucide-react'
+import { VisualGallery } from '../components/VisualGallery'
 
 export default function Vision() {
   return (
@@ -155,6 +156,16 @@ export default function Vision() {
           <li>Người dùng có quyền <strong>Xác nhận</strong>, <strong>Điều chỉnh vị trí</strong>, hoặc <strong>Loại bỏ</strong> các phát hiện không chính xác trước khi đưa vào hồ sơ đánh giá rủi ro.</li>
           <li>Ngăn chặn hoàn toàn sai sót nhận diện lan truyền vào mô hình 3D và báo cáo y tế chính thức.</li>
         </ul>
+      </section>
+
+      <section style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--cyan)' }}>■</span> Ảnh Chụp Thực Tế Phân Hệ Thị Giác & Thẩm Định Vật Dụng
+        </h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: '1rem' }}>
+          Ảnh chụp trực tiếp từ Vision Intelligence Studio và Modal Thẩm định rủi ro vật thể qua ảnh theo chuẩn CDC STEADI:
+        </p>
+        <VisualGallery filterCategory="vision" />
       </section>
     </div>
   )

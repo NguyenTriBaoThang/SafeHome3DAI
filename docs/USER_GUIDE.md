@@ -33,6 +33,11 @@ flowchart LR
   - **Biểu đồ phân loại nguy cơ:** Thảm trượt, Dây điện chắn lối, Thiếu ánh sáng, Vật cản lối đi, Đồ đạc bừa bộn.
   - **Mật độ nguy cơ theo từng phòng:** So sánh mức độ rủi ro giữa phòng ngủ, phòng tắm và phòng khách.
 
+<p align="center">
+  <img src="../assets/images/screenshots/demo_01_dashboard.jpg" alt="Bảng Điều Khiển Tổng Quan An Toàn SafeHome 3D AI" width="90%"/>
+  <br/><em>Giao diện Bảng điều khiển tổng quan: Điểm an toàn 28/100, biểu đồ rủi ro Donut Chart và 3D viewport thu nhỏ.</em>
+</p>
+
 ---
 
 ### 2.2. Phân Hệ Thị Giác AI & Quét Phòng (`/ai-vision`)
@@ -45,6 +50,11 @@ flowchart LR
   5. Sử dụng thanh công cụ để phóng to/thu nhỏ, bật/tắt **"Khung bao"** và **"Nhãn tên"**.
   6. Tại bảng danh sách vật thể bên phải: Bấm xác nhận (`✓`), sửa nhãn (`✎`) hoặc loại bỏ (`✕`).
   7. Bấm **"Mở Bảng Đánh Giá Nguy Cơ"** để liên kết sang bước tiếp theo.
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_03_ai_vision_studio.jpg" alt="SafeHome Vision Intelligence Studio" width="90%"/>
+  <br/><em>Giao diện Thị giác AI (AI Vision): Quét nhận diện vật thể nội thất, khung bao sắc nét chống phóng đại chữ Chromium và nhãn độ tin cậy.</em>
+</p>
 
 ---
 
@@ -60,6 +70,16 @@ flowchart LR
 - **Hành động tiếp theo:**
   - Bấm **"Đưa kết quả vào cuộc trò chuyện AI"** để thảo luận chuyên sâu với SafeHome Copilot.
   - Bấm **"Quét toàn cảnh phòng (AI Vision)"** để chuyển tiếp sang mô phỏng không gian phòng tổng thể.
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_04_item_hazard_assessment.jpg" alt="Thẩm Định Rủi Ro Vật Dụng Qua Ảnh CDC STEADI" width="90%"/>
+  <br/><em>Giao diện Thẩm định rủi ro vật dụng qua ảnh (CDC STEADI): Điểm nguy cơ 68/100, hotspots H1..H3 và cơ chế y khoa.</em>
+</p>
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_05_item_hotspot_detail.jpg" alt="Chi Tiết Điểm Rủi Ro H1" width="90%"/>
+  <br/><em>Chi tiết điểm nguy cơ H1: Cơ chế Focal Blunt Impact tại góc nhọn 90° và tính năng kéo thả căn chỉnh tọa độ ghim.</em>
+</p>
 
 ---
 
@@ -83,6 +103,11 @@ flowchart LR
   - **Fit:** Tự động căn chỉnh mô hình vừa vặn khung hình.
   - **Chụp:** Xuất ảnh chụp màn hình 3D chất lượng cao.
 - **Thuật toán gom cụm nhãn (<0.95m):** Khi có nhiều nguy cơ nằm sát nhau, hệ thống tự động gộp thành thẻ cụm `🔴 +3 Nguy cơ`, bấm vào để mở rộng danh sách chi tiết mà không lo bị đè chữ.
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_02_digital_twin_dollhouse.jpg" alt="Photorealistic Dollhouse Digital Twin" width="90%"/>
+  <br/><em>Bản sao số 3D Photorealistic Dollhouse: Mô phỏng không gian phòng ngủ và nhà vệ sinh khép kín với ánh sáng Studio 320 Lux.</em>
+</p>
 
 ---
 
@@ -124,6 +149,11 @@ flowchart LR
   - Nhấp vào từng nút để xem nguyên văn tài liệu căn cứ của WHO, CDC STEADI và Bộ Y Tế.
 - **Nhật ký truy vết (Audit Trail):** Ghi nhận lịch sử chi tiết thời gian, đối tượng và người can thiệp.
 
+<p align="center">
+  <img src="../assets/images/screenshots/demo_08_xai_decision_graph.jpg" alt="Sơ Đồ Giải Trình AI XAI Decision Graph" width="90%"/>
+  <br/><em>Cây phả hệ suy luận ReactFlow minh bạch 100%: Từ vật thể nhận diện đến điều khoản quy chuẩn y tế và can thiệp cải tạo.</em>
+</p>
+
 ---
 
 ### 2.9. Trợ Lý AI RAG & Ngăn Tra Cứu Bằng Chứng (`/ai-assistant`)
@@ -137,6 +167,16 @@ flowchart LR
     3. **Kho nguồn:** Danh mục các tổ chức y tế uy tín được kiểm duyệt.
     4. **Thẩm định RAG:** Chạy kiểm tra trực tiếp 8 tiêu chí chất lượng câu trả lời.
   - Phím tắt chuyển nhanh: Nút **"Thị giác AI (Vision)"** trên header và composer giúp chuyển tiếp sang quét phòng bất cứ lúc nào.
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_06_ai_chat_assistant.jpg" alt="Trợ Lý AI SafeHome Copilot" width="90%"/>
+  <br/><em>Hội thoại thông minh SafeHome Copilot: Tự động đối chiếu thông số phòng 3D và dẫn nguồn y khoa [1] WHO, [2] NCOA, [3] BYT, [4] CDC.</em>
+</p>
+
+<p align="center">
+  <img src="../assets/images/screenshots/demo_07_rag_evidence_drawer.jpg" alt="Ngăn Kéo Bằng Chứng Y Khoa RAG" width="90%"/>
+  <br/><em>Ngăn tra cứu bằng chứng RAG 4 Tab: Trích xuất nguyên văn văn bản y khoa chính thống và liên kết kiểm chứng trực tuyến.</em>
+</p>
 
 ---
 

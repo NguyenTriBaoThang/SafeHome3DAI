@@ -92,7 +92,44 @@ Hệ thống kết hợp:
 
 ---
 
-## 🧭 2. Hành Trình 7 Bước Khép Kín (7-Step Unified Flow)
+## 📸 2. Giao Diện & Hình Ảnh Thực Nghiệm (Visual Showcase & Live System)
+
+Hệ sinh thái **SafeHome 3D AI** được triển khai trực tiếp với các phân hệ đồ họa WebGL 3D, thị giác máy tính và trợ lý y khoa:
+
+### 2.1. Bảng Điều Khiển Tổng Quan & Bản Sao Số 3D (Overview & Digital Twin)
+
+| Bảng Điều Khiển Tổng Quan An Toàn (`/`) | Bản Sao Số 3D Photorealistic Dollhouse (`/digital-twin`) |
+| :---: | :---: |
+| <img src="./assets/images/screenshots/demo_01_dashboard.jpg" alt="Tổng quan An toàn Môi trường" width="100%"/> | <img src="./assets/images/screenshots/demo_02_digital_twin_dollhouse.jpg" alt="Bản sao số 3D Dollhouse Photorealistic" width="100%"/> |
+| **Tổng quan An toàn Môi trường**: Điểm an toàn 28/100, biểu đồ Donut phân loại nguy cơ và khung nhìn 3D thu nhỏ tương tác. | **Photorealistic Dollhouse**: Phòng ngủ & toilet khép kín, studio ánh sáng 4 chế độ (Nắng sớm, Ban ngày, Đêm 40 Lux, Studio 320 Lux) và mô phỏng sàn chống trượt. |
+
+### 2.2. Thị Giác AI Đa Tầng & Thẩm Định Nguy Cơ Đồ Vật Theo Chuẩn CDC STEADI
+
+| SafeHome Vision Intelligence Studio (`/ai-vision`) | Thẩm Định Rủi Ro Vật Dụng Qua Ảnh (`ItemAssessmentModal`) |
+| :---: | :---: |
+| <img src="./assets/images/screenshots/demo_03_ai_vision_studio.jpg" alt="SafeHome Vision Intelligence Studio" width="100%"/> | <img src="./assets/images/screenshots/demo_04_item_hazard_assessment.jpg" alt="Thẩm Định Rủi Ro Vật Dụng Qua Ảnh" width="100%"/> |
+| **Thị giác AI nhận diện hiện trường**: Quét nhận diện 18 lớp nội thất & vật cản, gán nhãn khung bao sắc nét chống phóng đại chữ Chromium và tỷ lệ tin cậy. | **Thẩm định vật dụng CDC STEADI**: Đánh giá đồ vật qua ảnh chụp gần, tính điểm nguy cơ (68/100) và định vị các điểm rủi ro chỉ định H1, H2, H3. |
+
+| Chi Tiết Điểm Rủi Ro H1 (`Hotspot Mechanism`) | Căn Chỉnh Vị Trí Ghim Tương Tác (Click-to-Reposition) |
+| :---: | :---: |
+| <img src="./assets/images/screenshots/demo_05_item_hotspot_detail.jpg" alt="Chi Tiết Điểm Rủi Ro H1" width="100%"/> | <img src="./assets/images/screenshots/demo_04_item_hazard_assessment.jpg" alt="Định vị điểm ghim nguy cơ H1 H2 H3" width="100%"/> |
+| **Cơ chế chấn thương lâm sàng**: Phân tích lực va đập tập trung tại góc nhọn (Focal Blunt Impact) và lộ trình khắc phục chi phí thấp (~25.000đ). | **Tương tác trực quan**: Bấm trực tiếp lên ảnh để căn chỉnh vị trí ghim rủi ro, chuyển tiếp 1 chạm sang quét toàn bộ phòng hoặc hỏi trợ lý AI. |
+
+### 2.3. Trợ Lý AI SafeHome Copilot & Giải Trình Quyết Định Minh Bạch (XAI)
+
+| Trợ Lý AI SafeHome Copilot (`/ai-assistant`) | Ngăn Tra Cứu Bằng Chứng 4 Tab (`Evidence Drawer`) |
+| :---: | :---: |
+| <img src="./assets/images/screenshots/demo_06_ai_chat_assistant.jpg" alt="Trợ Lý AI SafeHome Copilot" width="100%"/> | <img src="./assets/images/screenshots/demo_07_rag_evidence_drawer.jpg" alt="Ngăn Tra Cứu Bằng Chứng Y Khoa" width="100%"/> |
+| **Hội thoại y học có dẫn chứng**: Tự động liên kết không gian 3D đang khảo sát, định dạng SafeHomeMarkdown và trích dẫn chuẩn [1] WHO, [2] NCOA, [3] BYT, [4] CDC. | **Tra cứu tài liệu gốc**: Hiển thị nguyên văn trích dẫn kiểm chứng từ WHO và Viện Lão khoa Quốc gia, điều khoản/số trang và đường dẫn cổng chính thức. |
+
+| Giải Trình AI & Nguồn Gốc Quyết Định (`/explainability`) |
+| :---: |
+| <img src="./assets/images/screenshots/demo_08_xai_decision_graph.jpg" alt="Giải Trình AI & Cây Quyết Định XAI" width="100%"/> |
+| **Cây suy luận nhân quả ReactFlow minh bạch 100%**: Trực quan hóa toàn bộ chuỗi quyết định từ Vật thể 3D $\rightarrow$ Đo đạc không gian $\rightarrow$ Quy chuẩn y tế $\rightarrow$ Nguy cơ $\rightarrow$ Giải pháp can thiệp. |
+
+---
+
+## 🧭 3. Hành Trình 7 Bước Khép Kín (7-Step Unified Flow)
 
 Tất cả các phân hệ được xâu chuỗi liền mạch trong phân hệ điều phối `/workflow`, tự động truyền dẫn dữ liệu theo máy trạng thái y tế:
 
@@ -108,7 +145,7 @@ Tất cả các phân hệ được xâu chuỗi liền mạch trong phân hệ 
 
 ---
 
-## 🌟 3. Các Phân Hệ & Tính Năng Nổi Bật (Key Capabilities)
+## 🌟 4. Các Phân Hệ & Tính Năng Nổi Bật (Key Capabilities)
 
 ### 3.1. Thẩm Định Rủi Ro Vật Dụng Qua Ảnh (Item Fall Hazard Assessment Engine)
 Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC STEADI & WHO**, trả lời đầy đủ 3 câu hỏi lâm sàng cốt lõi:
@@ -157,7 +194,7 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
 
 ---
 
-## 🏛️ 4. Sơ Đồ Kiến Trúc Hệ Thống (System Architecture)
+## 🏛️ 5. Sơ Đồ Kiến Trúc Hệ Thống (System Architecture)
 
 ```mermaid
 flowchart TB
@@ -201,7 +238,7 @@ flowchart TB
 
 ---
 
-## 📊 5. Đảm Bảo Chất Lượng & Kết Quả Kiểm Thử (QA & Tests)
+## 📊 6. Đảm Bảo Chất Lượng & Kết Quả Kiểm Thử (QA & Tests)
 
 SafeHome 3D AI duy trì chất lượng kiểm thử nghiêm ngặt với **100% tỷ lệ vượt qua trên toàn bộ 20 bộ kiểm thử tự động (109/109 tests passed)**:
 
@@ -234,7 +271,7 @@ Test Files  20 passed (20)
 
 ---
 
-## 🚀 6. GitHub Actions CI/CD & Cổng Tài Liệu Kỹ Thuật
+## 🚀 7. GitHub Actions CI/CD & Cổng Tài Liệu Kỹ Thuật
 
 Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD với 3 workflows:
 
@@ -252,7 +289,7 @@ Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD v�
 
 ---
 
-## 💻 7. Hướng Dẫn Cài Đặt & Chạy Local (Quickstart)
+## 💻 8. Hướng Dẫn Cài Đặt & Chạy Local (Quickstart)
 
 ### Yêu Cầu Môi Trường
 - **Node.js**: Phiên bản 18.x trở lên (khuyên dùng Node.js 20 LTS).
@@ -299,7 +336,7 @@ Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD v�
 
 ---
 
-## 📚 8. Chỉ Mục Tài Liệu Kỹ Thuật (Documentation Index)
+## 📚 9. Chỉ Mục Tài Liệu Kỹ Thuật (Documentation Index)
 
 Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` và xuất bản tại cổng tài liệu trực tuyến:
 
@@ -316,7 +353,7 @@ Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` v
 
 ---
 
-## ⚖️ 9. Bản Quyền & Tuyên Bố Miễn Trừ Trách Nhiệm
+## ⚖️ 10. Bản Quyền & Tuyên Bố Miễn Trừ Trách Nhiệm
 
 - **Bản quyền**: Phát hành theo giấy phép [MIT License](./LICENSE). Copyright © 2026 **Nguyễn Trí Bảo Thắng**.
 - **Tuyên bố y tế**: *SafeHome 3D AI là công cụ hỗ trợ giáo dục cộng đồng, tầm soát nguy cơ môi trường và hỗ trợ hoạch định cải tạo không gian sống an toàn cho người cao tuổi. Ứng dụng không thay thế cho chẩn đoán y khoa, thẩm định xây dựng thực tế hoặc ý kiến của bác sĩ chuyên khoa.*

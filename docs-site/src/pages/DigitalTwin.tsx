@@ -1,4 +1,5 @@
 import { Box, Layers, Sun, FolderHeart, Home } from 'lucide-react'
+import { VisualGallery } from '../components/VisualGallery'
 
 export default function DigitalTwin() {
   return (
@@ -89,6 +90,16 @@ const CLUSTER_DISTANCE_THRESHOLD = 0.95; // Bán kính 0.95 mét
           <li>Xem lại danh sách tất cả các phòng đã tạo trong kho mô phỏng tập trung.</li>
           <li>Tải lại cấu hình vào Digital Twin chỉ với 1 cú nhấp chuột.</li>
         </ul>
+      </section>
+
+      <section style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--cyan)' }}>■</span> Ảnh Chụp Thực Tế Bản Sao Số 3D & Không Gian Dollhouse
+        </h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: '1rem' }}>
+          Mô hình Dollhouse phòng ngủ & nhà vệ sinh photorealistic với ánh sáng Studio 320 Lux và sàn chống trượt:
+        </p>
+        <VisualGallery filterCategory="twin" />
       </section>
     </div>
   )

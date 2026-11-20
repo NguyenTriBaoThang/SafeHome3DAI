@@ -1,6 +1,7 @@
 import { ArrowRight, Github, CheckCircle2, ShieldCheck, Database, Cpu, Layers, Activity, Eye, Box, FileText, Sliders, BarChart3, AlertTriangle } from 'lucide-react'
 import { REPO_URL, LIVE_URL, SRC } from '../data/site'
 import { Callout, Src } from '../components/ui'
+import { VisualGallery } from '../components/VisualGallery'
 
 function HeroViz() {
   // Pathway from bed, through bedroom door, into bathroom, turning to toilet
@@ -224,6 +225,17 @@ export default function Overview() {
             <dd>Bản sao số 3D tỷ lệ 1:1, xuất báo cáo danh mục vật tư cần chuẩn bị và hướng dẫn thi công đạt chuẩn công thái học.</dd>
           </div>
         </div>
+      </section>
+
+      {/* Visual System Walkthrough (Screenshots Gallery) */}
+      <section className="page">
+        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ color: 'var(--cyan)' }}>■</span> Hình Ảnh & Giao Diện Thực Nghiệm (Visual System Walkthrough)
+        </h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: '1.2rem' }}>
+          Khám phá hệ sinh thái SafeHome 3D AI qua ảnh chụp thực tế từ các phân hệ đang vận hành: Bảng điều khiển môi trường, Bản sao 3D Photorealistic Dollhouse, Thị giác AI, Thẩm định rủi ro vật dụng CDC STEADI và Cây phả hệ quyết định XAI. Bấm vào từng ảnh để phóng to.
+        </p>
+        <VisualGallery />
       </section>
 
       {/* 5. 7-Step Unified Flow Capability Cards */}
