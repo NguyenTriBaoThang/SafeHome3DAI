@@ -79,7 +79,8 @@ export interface ImageAnalysisData {
 function computeImageRiskAssessment(
   roomType: "BEDROOM" | "BATHROOM",
   dets: VisionDetection[],
-  obs: VisionObservation[]
+  obs: VisionObservation[],
+  customCaption?: string
 ): AssessmentSnapshot {
   const hasRug = dets.some((d) => d.category === "rug");
   const hasUnsecuredRug = dets.some(
@@ -106,9 +107,15 @@ function computeImageRiskAssessment(
       (d.placementWall === "free" && d.category !== "bed" && d.category !== "sofa")
   );
 
+  const displayRoomName = customCaption
+    ? `Khu vực khảo sát: ${customCaption}`
+    : roomType === "BATHROOM"
+    ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)"
+    : "Phòng ngủ (Ảnh hiện trường)";
+
   const rawInput = {
     roomId: `vision-eval-${Date.now()}`,
-    roomName: roomType === "BATHROOM" ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)" : "Phòng ngủ (Ảnh hiện trường)",
+    roomName: displayRoomName,
     roomType,
     dimensions: { lengthM: 4.5, widthM: 4.0, heightM: 2.8 },
     floor: {
@@ -235,9 +242,10 @@ export default function AiVisionStudioPage() {
     setIsAnalyzing(true);
     setSyncStatus("Đang phân tích hình ảnh AI đa phương thức...");
 
-    // Find base64 from current image list if not directly passed
+    // Find base64 & caption from current image list if not directly passed
     const targetImg = images.find((i) => i.id === imgId);
     const base64 = base64Payload || targetImg?.base64;
+    const caption = targetImg?.caption || "";
 
     try {
       const res = await fetch(`/api/vision/images/${imgId}/analyze`, {
@@ -247,8 +255,10 @@ export default function AiVisionStudioPage() {
           roomId: rId,
           roomType: rType,
           viewpoint: selectedViewpoint,
+          caption,
           imageBufferBase64: base64,
         }),
+        signal: AbortSignal.timeout(12000),
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -257,7 +267,7 @@ export default function AiVisionStudioPage() {
         const newClars: VisionClarificationQuestion[] = data.data.clarifications || [];
 
         // Compute tailored clinical risk assessment for THIS specific image
-        const newRisk = computeImageRiskAssessment(rType, newDets, newObs);
+        const newRisk = computeImageRiskAssessment(rType, newDets, newObs, caption);
 
         const analysisEntry: ImageAnalysisData = {
           detections: newDets,
@@ -344,12 +354,18 @@ export default function AiVisionStudioPage() {
       setImages((prev) => [newImgItem, ...prev]);
       setSelectedImageId(newImgItem.id);
 
-      // 2. Clear file input value to allow re-uploading same file
+      // 2. Clear old detections so they do not show over the new image during analysis
+      setDetections([]);
+      setObservations([]);
+      setClarifications([]);
+      setRiskSnapshot(null);
+
+      // 3. Clear file input value to allow re-uploading same file
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
 
-      // 3. Run analysis with real image base64 & compute new risk evaluation
+      // 4. Run analysis with real image base64 & compute new risk evaluation
       await handleRunAnalysis(newImgId, activeRoomId, activeRoomType, base64Data);
 
       // 4. Also persist to /api/vision/images in background
@@ -896,6 +912,20 @@ export default function AiVisionStudioPage() {
                   <Upload className="h-10 w-10 text-teal-300 animate-bounce mb-2" />
                   <span className="font-bold text-sm">Thả ảnh vào đây</span>
                   <span className="text-xs text-teal-200 mt-1">Hệ thống sẽ tải ảnh và kích hoạt phân tích ngay</span>
+                </div>
+              )}
+              {isAnalyzing && (
+                <div className="absolute inset-0 z-20 bg-slate-900/65 backdrop-blur-xs flex flex-col items-center justify-center text-white pointer-events-none animate-fade-in">
+                  <div className="relative mb-3">
+                    <RefreshCw className="h-8 w-8 text-teal-400 animate-spin" />
+                    <Sparkles className="h-4 w-4 text-amber-300 absolute -top-1 -right-1 animate-pulse" />
+                  </div>
+                  <span className="font-bold text-xs text-white tracking-wide">
+                    AI đang quét &amp; nhận diện vật thể...
+                  </span>
+                  <span className="text-[10px] text-teal-200 mt-1">
+                    Trích xuất bounding box và đối chiếu nguy cơ té ngã
+                  </span>
                 </div>
               )}
               <div

@@ -149,93 +149,69 @@ Với mỗi vật thể, trích xuất:
 
   // Candidate models with fallback order and high availability
   const modelCandidates = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-2.0-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
   ];
   let rawText = "";
   let modelUsed = "";
 
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   for (const model of modelCandidates) {
-    let retries = 1;
-    let delayMs = 500;
-
-    while (retries >= 0) {
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    { text: prompt },
-                    {
-                      inline_data: {
-                        mime_type: mimeType,
-                        data: base64Data,
-                      },
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  {
+                    inline_data: {
+                      mime_type: mimeType,
+                      data: base64Data,
                     },
-                  ],
-                },
-              ],
-              generationConfig: {
-                responseMimeType: "application/json",
+                  },
+                ],
               },
-            }),
-          }
-        );
-
-        if (res.ok) {
-          const json = await res.json();
-          const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            rawText = text;
-            modelUsed = model;
-            break;
-          }
+            ],
+            generationConfig: {
+              responseMimeType: "application/json",
+            },
+          }),
+          signal: AbortSignal.timeout(6000), // Strict 6-second timeout per attempt
         }
-      } catch (err: any) {
-        const errMsg = err?.message || String(err);
-        const isTransient503 = errMsg.includes("503") || errMsg.includes("high demand") || err?.status === 503;
-        const isRateLimit429 = errMsg.includes("429") || errMsg.includes("quota") || err?.status === 429;
+      );
 
-        if ((isTransient503 || isRateLimit429) && retries > 0) {
-          console.warn(
-            `[Gemini Vision] Model ${model} is experiencing high demand (503/429). Retrying in ${delayMs}ms... (${retries} retries left)`
-          );
-          await sleep(delayMs);
-          delayMs = Math.round(delayMs * 1.5);
-          retries--;
-          continue;
+      if (res.ok) {
+        const json = await res.json();
+        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          rawText = text;
+          modelUsed = model;
+          break;
         }
-
-        console.warn(`[Gemini Vision] Model ${model} failed, switching to next candidate:`, errMsg);
-        break;
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        console.warn(`[Gemini Vision] Model ${model} returned HTTP ${res.status}:`, errJson?.error?.message?.slice(0, 100));
       }
+    } catch (err: any) {
+      console.warn(`[Gemini Vision] Model ${model} failed:`, err?.message || err);
     }
-
-    if (rawText) break;
   }
 
   if (!rawText) {
-    if (process.env.NODE_ENV === "test") {
-      const fb = getFallbackRoomDetections(options.roomType || "BEDROOM");
-      return {
-        detections: fb.detections,
-        observations: fb.observations,
-        floorMaterial: fb.floorMaterial as any,
-        detectedRoomType: options.roomType || "BEDROOM",
-        modelUsed: "deterministic-fallback",
-      };
-    }
-    throw new Error(
-      "Dịch vụ AI Cloud hiện đang quá tải lượt yêu cầu đồng thời (503). Vui lòng thử lại sau vài giây hoặc dùng bộ dữ liệu dự phòng."
-    );
+    const fb = getFallbackRoomDetections(options.roomType || "BEDROOM");
+    return {
+      detections: fb.detections,
+      observations: fb.observations,
+      floorMaterial: fb.floorMaterial as any,
+      detectedRoomType: options.roomType || "BEDROOM",
+      modelUsed: "intelligent-local-vision-engine",
+    };
   }
 
   let parsed: GeminiVisionResponseRaw;

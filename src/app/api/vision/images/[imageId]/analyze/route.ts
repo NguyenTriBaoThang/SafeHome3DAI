@@ -40,15 +40,31 @@ export async function POST(
     }
 
     // 1. Run inference/heuristic
+    const caption = body.caption || "";
     const analysisResult = await runVisionAnalysis(imageId, roomId, {
       mode,
       roomType,
       viewpoint: body.viewpoint,
+      caption,
       imageBufferBase64,
     });
 
     // 2. Persist analysis & detections in database
     try {
+      // Ensure parent roomImage exists if custom upload
+      const existingImg = await prisma.roomImage.findUnique({ where: { id: imageId } });
+      if (!existingImg) {
+        await prisma.roomImage.create({
+          data: {
+            id: imageId,
+            roomId,
+            storageKey: imageId,
+            viewpoint: body.viewpoint || "ENTRANCE",
+            caption: caption || "Ảnh hiện trường",
+          },
+        }).catch(() => {});
+      }
+
       const dbAnalysis = await prisma.visionAnalysis.create({
         data: {
           id: analysisResult.id,

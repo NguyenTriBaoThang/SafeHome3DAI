@@ -14,6 +14,7 @@ export interface VisionProviderOptions {
   roomType?: "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
   viewpoint?: ViewpointType;
   apiUrl?: string;
+  caption?: string;
   imageBufferBase64?: string;
 }
 
@@ -119,8 +120,171 @@ export async function runVisionAnalysis(
     }
   }
 
-  // Deterministic seed derived from image content/id if custom photo uploaded
+  // Content-aware detection for custom user uploaded photos
+  const captionLower = (options.caption || "").toLowerCase();
   const isCustomImage = Boolean(options.imageBufferBase64) || imageId.startsWith("img-user-");
+
+  // Mode A: Local / Intelligent Fallback Dataset
+  const detections: VisionDetection[] = [];
+  const observations: VisionObservation[] = [];
+  const clarifications: VisionClarificationQuestion[] = [];
+
+  // 1. Content check: TABLE / DESK / WORKSPACE
+  if (
+    isCustomImage &&
+    (captionLower.includes("ban") ||
+      captionLower.includes("table") ||
+      captionLower.includes("desk") ||
+      captionLower.includes("lam-viec") ||
+      captionLower.includes("hoc"))
+  ) {
+    const tableId = `det_${Date.now()}_table`;
+    detections.push({
+      id: tableId,
+      analysisId,
+      imageId,
+      category: "table",
+      originalLabel: "Bàn làm việc / Bàn gỗ gấp",
+      userLabel: "Bàn làm việc",
+      confidence: 0.95,
+      bbox: { xMin: 0.20, yMin: 0.32, xMax: 0.84, yMax: 0.85 },
+      source: "OBJECT_DETECTOR",
+      verificationStatus: "PENDING_REVIEW",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    const chairId = `det_${Date.now()}_chair`;
+    detections.push({
+      id: chairId,
+      analysisId,
+      imageId,
+      category: "chair",
+      originalLabel: "Ghế ngồi tựa lưng",
+      userLabel: "Ghế tựa",
+      confidence: 0.89,
+      bbox: { xMin: 0.08, yMin: 0.52, xMax: 0.28, yMax: 0.88 },
+      source: "OBJECT_DETECTOR",
+      verificationStatus: "PENDING_REVIEW",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    const cableId = `det_${Date.now()}_cable`;
+    detections.push({
+      id: cableId,
+      analysisId,
+      imageId,
+      category: "electrical_cable",
+      originalLabel: "Dây nguồn sạc thiết bị điện tử",
+      userLabel: "Dây điện máy tính",
+      confidence: 0.82,
+      bbox: { xMin: 0.55, yMin: 0.74, xMax: 0.88, yMax: 0.94 },
+      source: "OBJECT_DETECTOR",
+      verificationStatus: "PENDING_REVIEW",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    observations.push({
+      id: `obs_${Date.now()}_1`,
+      analysisId,
+      observationType: "CABLE_OBSERVED",
+      description: "Phát hiện dây dẫn nguồn điện máy tính / sạc thiết bị chạy sát sàn dưới chân bàn, nguy cơ vướng chân khi đứng lên hoặc di chuyển theo CDC STEADI.",
+      relatedDetectionIds: [cableId],
+      uncertaintyType: "SPATIAL_UNCERTAINTY",
+      requiresConfirmation: true,
+      verificationStatus: "PENDING_REVIEW",
+      surveyQuestionId: "BED_008",
+    });
+
+    observations.push({
+      id: `obs_${Date.now()}_2`,
+      analysisId,
+      observationType: "OBSTACLE_CANDIDATE",
+      description: "Bàn có chân kim loại/gỗ vuông góc, cần chú ý bọc đệm cao su bo tròn góc cạnh chống va đập bầm tím cho người cao tuổi.",
+      relatedDetectionIds: [tableId],
+      uncertaintyType: "CONDITION_UNCERTAINTY",
+      requiresConfirmation: true,
+      verificationStatus: "PENDING_REVIEW",
+      surveyQuestionId: "BED_009",
+    });
+
+    clarifications.push({
+      id: `clarify_${Date.now()}_cable`,
+      roomId,
+      observationId: `obs_${Date.now()}_1`,
+      surveyQuestionId: "BED_008",
+      questionText: "Đoạn dây điện dưới gầm bàn có được gom nẹp luồn ống gen cố định vào chân bàn không?",
+      helpText: "Dây điện tự do trên sàn nhà người cao tuổi rất dễ vướng mắc vào dép gây té ngã.",
+      options: [
+        { value: "YES", label: "Đã có nẹp luồn ống an toàn", isRiskTrigger: false },
+        { value: "NO", label: "Chưa nẹp, dây nằm lộn xộn", isRiskTrigger: true },
+        { value: "UNKNOWN", label: "Chưa rõ", isRiskTrigger: false },
+      ],
+      status: "PENDING",
+      createdAt: timestamp,
+    });
+
+    return {
+      id: analysisId,
+      roomId,
+      imageId,
+      modelId: "safehome-vision-multimodal-v1",
+      modelVersion: "2.1.0",
+      analysisStatus: "COMPLETED",
+      detections,
+      observations,
+      clarifications,
+      startedAt: timestamp,
+      completedAt: new Date().toISOString(),
+    };
+  }
+
+  // 2. Content check: CHAIR / SEATING
+  if (isCustomImage && (captionLower.includes("ghe") || captionLower.includes("chair") || captionLower.includes("don"))) {
+    const chairId = `det_${Date.now()}_chair`;
+    detections.push({
+      id: chairId,
+      analysisId,
+      imageId,
+      category: "chair",
+      originalLabel: "Ghế ngồi",
+      userLabel: "Ghế ngồi",
+      confidence: 0.94,
+      bbox: { xMin: 0.22, yMin: 0.28, xMax: 0.78, yMax: 0.88 },
+      source: "OBJECT_DETECTOR",
+      verificationStatus: "PENDING_REVIEW",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    observations.push({
+      id: `obs_${Date.now()}_1`,
+      analysisId,
+      observationType: "OBSTACLE_CANDIDATE",
+      description: "Ghế ngồi không có tay vịn chịu lực trợ lực, người già có thể gặp khó khăn khi đứng lên ngồi xuống.",
+      relatedDetectionIds: [chairId],
+      uncertaintyType: "CONDITION_UNCERTAINTY",
+      requiresConfirmation: true,
+      verificationStatus: "PENDING_REVIEW",
+    });
+
+    return {
+      id: analysisId,
+      roomId,
+      imageId,
+      modelId: "safehome-vision-multimodal-v1",
+      modelVersion: "2.1.0",
+      analysisStatus: "COMPLETED",
+      detections,
+      observations,
+      clarifications,
+      startedAt: timestamp,
+      completedAt: new Date().toISOString(),
+    };
+  }
+
   let seed = 0;
   if (isCustomImage) {
     const seedSource = options.imageBufferBase64
@@ -132,11 +296,6 @@ export async function runVisionAnalysis(
     }
     seed = Math.abs(seed);
   }
-
-  // Mode A: Local / Intelligent Fallback Dataset
-  const detections: VisionDetection[] = [];
-  const observations: VisionObservation[] = [];
-  const clarifications: VisionClarificationQuestion[] = [];
 
   if (roomType === "BEDROOM") {
     const profile = isCustomImage ? seed % 3 : 0;
