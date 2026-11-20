@@ -721,10 +721,161 @@ pre {
 }
 .lightbox-close:hover { border-color: var(--cyan); color: var(--cyan); }
 
+/* Filter Chips (LocalExplorerAI Cyber Dark Pills) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #091322;
+  border: 1px solid #1c2b45;
+  color: #93a4bd;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.chip:hover {
+  background: #0e1c33;
+  border-color: #22d3ee;
+  color: #fff;
+}
+.chip.on {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+}
+.chip-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 /* Interactive System Knowledge Tree */
 .knowledge-tree-container {
   margin: 1.5rem 0;
 }
+
+/* Live Running Data Stream HUD Banner */
+.stream-hud-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #070e1a;
+  border: 1px solid #1c2b45;
+  border-left: 3px solid #22d3ee;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+.hud-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.hud-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pulse-radar-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 10px #22d3ee;
+  position: relative;
+}
+.pulse-radar-dot.live::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid #22d3ee;
+  animation: radarPulse 1.8s ease-out infinite;
+}
+.pulse-radar-dot.paused {
+  background: #f59e0b;
+  box-shadow: none;
+}
+@keyframes radarPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.hud-status-text {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #22d3ee;
+  letter-spacing: 0.05em;
+}
+.hud-stream-ticker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #7084a3;
+  overflow-x: auto;
+}
+.ticker-step {
+  color: #c5d0e2;
+  white-space: nowrap;
+}
+.ticker-arrow {
+  color: #22d3ee;
+  opacity: 0.8;
+}
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hud-metric {
+  font-size: 0.74rem;
+  color: #7084a3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.metric-val {
+  color: #fff;
+}
+.text-green { color: #34d399 !important; }
+.hud-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #0f1c31;
+  border: 1px solid #1c2b45;
+  color: #22d3ee;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.hud-play-btn:hover {
+  background: #162744;
+  border-color: #22d3ee;
+}
+
+/* Tree Workspace */
 .tree-workspace {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -735,38 +886,44 @@ pre {
   background: #050a12;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 18px;
+  padding: 18px 12px;
   overflow-x: auto;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
 }
 .tree-canvas {
   display: flex;
-  gap: 16px;
-  min-width: 780px;
+  align-items: stretch;
+  gap: 0;
+  min-width: 1100px;
 }
 .tree-tier-column {
   flex: 1;
-  min-width: 190px;
+  min-width: 180px;
+  max-width: 210px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 .tier-header {
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-left: 3px solid;
   background: var(--panel2);
   border-radius: 0 6px 6px 0;
   border: 1px solid var(--line);
   border-left-width: 3px;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .tier-tag {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
   display: block;
   margin-bottom: 2px;
 }
 .tier-title {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #fff;
   display: block;
   white-space: nowrap;
@@ -774,21 +931,36 @@ pre {
   text-overflow: ellipsis;
   font-weight: 600;
 }
+
+/* Fixed-Height Node Column Lists for Precise SVG Conduit Alignment */
 .tier-nodes-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  height: 440px;
+  position: relative;
 }
+.fixed-height-4 {
+  justify-content: space-between;
+}
+.fixed-height-3 {
+  justify-content: space-around;
+}
+.fixed-height-2 {
+  justify-content: space-around;
+}
+
+/* Node Cards */
 .tree-node-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 84px;
 }
 .tree-node-card:hover {
   transform: translateY(-2px);
@@ -797,13 +969,17 @@ pre {
 }
 .tree-node-card.selected {
   background: #091322;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+}
+.node-dimmed {
+  opacity: 0.28;
+  filter: grayscale(60%);
 }
 .node-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  padding-right: 18px;
+  gap: 7px;
+  margin-bottom: 3px;
 }
 .node-dot {
   width: 7px;
@@ -812,39 +988,76 @@ pre {
   flex-shrink: 0;
 }
 .node-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #fff;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 .node-sub {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--muted);
-  margin: 0 0 8px;
-  line-height: 1.35;
+  margin: 0 0 6px;
+  line-height: 1.3;
 }
 .node-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
+  margin-top: auto;
 }
 .node-tag {
-  font-size: 0.65rem;
-  padding: 1px 6px;
+  font-size: 0.62rem;
+  padding: 1px 5px;
   border-radius: 4px;
   background: #03070f;
   border: 1px solid var(--line);
   color: var(--muted);
 }
-.node-connector-arrow {
+
+/* Ports on Nodes */
+.node-port {
   position: absolute;
-  right: 8px;
-  top: 12px;
-  opacity: 0.5;
-  transition: opacity 0.15s ease;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #060b14;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  transition: all 0.2s ease;
 }
-.tree-node-card:hover .node-connector-arrow,
-.tree-node-card.selected .node-connector-arrow {
+.port-out { right: -4px; }
+.port-in { left: -4px; }
+
+/* SVG Inter-Tier Conduits & Flowing Particles ("Chạy Dữ Liệu") */
+.tree-conduit-col {
+  width: 54px;
+  min-width: 54px;
+  max-width: 54px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 60px; /* offset for tier header */
+  pointer-events: none;
+}
+.conduit-svg {
+  width: 100%;
+  height: 440px;
+  overflow: visible;
+}
+.flowing-conduit {
+  animation: flowConduit 1.6s linear infinite;
+}
+@keyframes flowConduit {
+  from { stroke-dashoffset: 22; }
+  to { stroke-dashoffset: 0; }
+}
+.data-pulse-dot {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+.conduit-group.dim {
+  opacity: 0.18;
+}
+.conduit-group.active {
   opacity: 1;
 }
 
