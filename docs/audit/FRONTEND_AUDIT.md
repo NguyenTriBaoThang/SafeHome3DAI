@@ -15,7 +15,8 @@
 | `/ai-guided-survey` | Khảo sát thích ứng DAG, tỉa nhánh câu hỏi | Tự động ẩn câu hỏi con | Phông chữ 18px, hỗ trợ nhập số đo dân dã | **PASS** |
 | `/ai-vision` | Quét ảnh hiện trường, nhận diện 18 lớp | Bounding box HTML overlay chuẩn | Tỷ lệ tin cậy rõ ràng, nút bấm xác nhận to | **PASS** |
 | `/vision` | Thẩm định vật dụng CDC STEADI | Ghim hotspot H1..H4 trực tiếp trên ảnh | Bấm điểm nguy hiểm có giải thích y khoa | **PASS** |
-| `/digital-twin` | Mô phỏng 3D Dollhouse, 4 chế độ ánh sáng | WebGL mượt mà $\approx 60$ FPS | Chuyển đổi ánh sáng 40 Lux ban đêm $\rightarrow$ 320 Lux | **PASS** |
+| `/digital-twin` | Mô phỏng 3D Dollhouse, 4 chế độ ánh sáng, 6 góc nhìn | WebGL mượt mà $\approx 60$ FPS | Chuyển đổi ánh sáng 40 Lux ban đêm $\rightarrow$ 320 Lux, nút Scene 1-3 | **PASS** |
+| `/experience` | Phân hệ Flagship Cinematic Storytelling (6 chương) | Giao diện toàn màn hình, camera lerp mượt mà | Phím tắt lớn ($\leftarrow$, $\rightarrow$, Space), thanh tiến trình, Before/After | **PASS** |
 | `/risk-assessment` | Đánh giá 8 quy tắc, tính điểm tất định | Minh bạch từng khoản phạt (Penalties) | Bảng màu tương phản chuẩn WCAG 2.2 AA | **PASS** |
 | `/scenario-simulator` | Thử nghiệm cải tạo What-If, phục hồi điểm số | Tương tác tức thì, có Undo/Redo | Thanh gạt trượt rõ ràng, số điểm nhảy động | **PASS** |
 | `/analytics` | Biểu đồ Before/After, mật độ nguy cơ | Recharts responsive không bị cắt | Trục số rõ ràng, chú giải trực quan | **PASS** |

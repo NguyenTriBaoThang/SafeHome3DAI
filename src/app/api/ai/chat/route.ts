@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { analyzeUserQuery } from "@/lib/rag/queryAnalysis";
-import { retrieveEvidenceChunks } from "@/lib/rag/retrieval";
-import { evaluateEvidenceSufficiency } from "@/lib/rag/evidenceSufficiency";
-import { generateGroundedAnswer } from "@/lib/rag/groundedGenerator";
+import { processCopilotChat } from "@/lib/ai/geminiChatService";
 import {
   saveUserMessage,
   saveAssistantMessage,
@@ -11,8 +8,9 @@ import {
 } from "@/lib/ai/conversationManager";
 
 const ChatRequestSchema = z.object({
-  message: z.string().min(1, "Tin nhắn không được để trống").max(2000, "Tin nhắn quá dài"),
+  message: z.string().min(1, "Tin nhắn không được để trống").max(3000, "Tin nhắn quá dài"),
   conversationId: z.string().optional(),
+  roomId: z.string().optional(),
   roomContext: z
     .object({
       roomName: z.string(),
@@ -35,66 +33,56 @@ export async function POST(request: Request) {
       );
     }
 
-    const { message, conversationId = `conv-${Date.now()}`, roomContext } = parseResult.data;
+    const { message, conversationId = `conv-${Date.now()}`, roomId } = parseResult.data;
 
     // 1. Retrieve recent history for conversational memory
-    const history = await getRecentConversationTurns(conversationId, 4);
+    const history = await getRecentConversationTurns(conversationId, 6);
 
-    // 2. Query Analysis & Rewriting for follow-up resolution
-    const analysis = analyzeUserQuery(message, history);
-
-    // 3. Hybrid Knowledge Retrieval
-    const retrievedChunks = retrieveEvidenceChunks(analysis.rewrittenQuery, {
-      topK: 4,
-      minScoreThreshold: 1.2,
-      approvalOnly: true,
+    // 2. Process Copilot Chat (Live Gemini / Grounded RAG with Tool Registry)
+    const copilotResult = await processCopilotChat({
+      message,
+      history,
+      roomId,
+      conversationId,
     });
 
-    // 4. Evidence Sufficiency Evaluation
-    const evaluation = evaluateEvidenceSufficiency(
-      analysis.rewrittenQuery,
-      analysis.intent,
-      retrievedChunks
-    );
-
-    // 5. Grounded Answer Generation
-    const generationResult = await generateGroundedAnswer({
-      query: message,
-      rewrittenQuery: analysis.rewrittenQuery,
-      intent: analysis.intent,
-      evaluation,
-      retrievedChunks,
-      roomContext,
-    });
-
-    // 6. Persist to Database
+    // 3. Persist to Database
     try {
       await saveUserMessage(conversationId, message);
-      await saveAssistantMessage(conversationId, generationResult);
+      await saveAssistantMessage(conversationId, {
+        answer: copilotResult.answer,
+        evidenceStatus: copilotResult.evidenceStatus as any,
+        responseMode: copilotResult.responseMode as any,
+        citations: copilotResult.citations,
+        retrievedChunkIds: copilotResult.citations.map((c) => c.chunkId),
+        modelProvider: copilotResult.modelProvider,
+        modelName: copilotResult.modelName,
+        suggestedFollowUps: copilotResult.suggestedFollowUps,
+        warnings: copilotResult.warnings || [],
+      });
     } catch (dbErr) {
-      console.warn("DB persistence warning (running in memory fallback):", dbErr);
+      console.warn("DB persistence warning:", dbErr);
     }
 
-    // 7. Structured Response Contract
+    // 4. Return Structured Response
     return NextResponse.json({
       conversation_id: conversationId,
-      answer: generationResult.answer,
-      evidence_status: generationResult.evidenceStatus,
-      response_mode: generationResult.responseMode,
-      citations: generationResult.citations,
-      retrieved_source_ids: generationResult.retrievedChunkIds,
-      model_provider: generationResult.modelProvider,
-      model_name: generationResult.modelName,
-      suggested_follow_ups: generationResult.suggestedFollowUps,
-      warnings: generationResult.warnings,
+      answer: copilotResult.answer,
+      evidence_status: copilotResult.evidenceStatus,
+      response_mode: copilotResult.responseMode,
+      citations: copilotResult.citations,
+      model_provider: copilotResult.modelProvider,
+      model_name: copilotResult.modelName,
+      suggested_follow_ups: copilotResult.suggestedFollowUps,
+      tool_invocations: copilotResult.toolInvocations,
+      warnings: copilotResult.warnings,
       created_at: new Date().toISOString(),
     });
   } catch (error: any) {
     console.error("Lỗi xử lý AI Chat:", error);
     return NextResponse.json(
-      { error: "Lỗi nội bộ khi xử lý hội thoại RAG", details: error.message },
+      { error: "Lỗi nội bộ khi xử lý hội thoại SafeHome Copilot 2.0", details: error.message },
       { status: 500 }
     );
   }
 }
-

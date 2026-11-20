@@ -12,9 +12,14 @@
 | **A01: Broken Access Control** | Người dùng xem dữ liệu phòng của người khác | Ràng buộc quyền truy cập theo `homeId`/`roomId` sở hữu | **PASS** |
 | **A02: Cryptographic Failures** | Lộ API Key hoặc token nhạy cảm | API Key Gemini lưu trong biến môi trường server-side | **PASS** |
 | **A03: Injection** | SQL Injection hoặc Prompt Injection | Prisma ORM tham số hóa 100%; Sanitized Prompting | **PASS** |
-| **A04: Insecure Design** | Tin tưởng tuyệt đối dữ liệu đầu vào | Schema Validation bằng Zod v3.23 trên mọi endpoint | **PASS** |
+| **A04: Insecure Design** | Tin tưởng tuyệt đối dữ liệu đầu vào | Schema Validation bằng Zod v3. **Báo cáo kiểm toán Dependencies (`npm audit`)**:
+   - Kết quả quét: 10 advisories (2 moderate, 5 high, 3 critical) nằm tại các gói công cụ build dev & upstream frameworks (`next`, `esbuild`/`tinypool` trong vitest, `postcss`, `sharp`/`transformers`).
+   - Phân tích rủi ro môi trường thực tế:
+     - Ứng dụng hiện tại không cấu hình `remotePatterns` mở cho bất kỳ domain lạ nào trong Image Optimization.
+     - Xác thực nhị phân Magic Bytes ngăn chặn file payload giả mạo ở tầng gateway trước khi qua bất kỳ pipeline nào.
+   - Khuyến nghị nâng cấp tương thích: Thực hiện kiểm định chu kỳ cập nhật Next.js lên `14.2.35` và Zod khi phát hành bản tương thích ngược để bảo toàn hợp đồng API hiện hành mà không gây breaking changes.23 trên mọi endpoint | **PASS** |
 | **A05: Security Misconfiguration** | CORS mở rộng hoặc lộ stack trace | CORS chặt chẽ, ẩn lỗi chi tiết ở môi trường production | **PASS** |
-| **A06: Vulnerable Components** | Dependencies lỗi thời | Kiểm toán qua `npm audit`, không có lỗ hổng mức Critical | **PASS** |
+| **A06: Vulnerable Components** | Dependencies lỗi thời | Đã kiểm toán qua `npm audit`, xác định các khuyến nghị nâng cấp upstream cho Next/Vite | **PARTIAL** |
 | **A07: Identification & Auth** | Giả mạo phiên làm việc | Phiên làm việc được định danh bằng UUID v4 bất biến | **PASS** |
 | **A08: Software & Data Integrity**| Dữ liệu rác làm sai lệch điểm an toàn | Stale Dependency Purger cascade xóa sạch vi phạm lỗi thời | **PASS** |
 | **A09: Logging & Monitoring** | Lộ thông tin cá nhân trong log | Loại bỏ mật khẩu, số điện thoại và tọa độ GPS khỏi logs | **PASS** |

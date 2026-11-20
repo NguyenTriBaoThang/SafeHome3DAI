@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bot,
   Send,
@@ -35,14 +36,23 @@ import {
   ArrowRight,
   Eye,
   Compass,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  StopCircle,
+  Paperclip,
+  CheckCheck,
+  Box,
 } from "lucide-react";
-import { useSimulationStore } from "@/stores/useSimulationStore";
-import { StructuredCitation, EvidenceStatus } from "@/lib/rag/types";
+import { useSimulationStore, Copilot3DAction } from "@/stores/useSimulationStore";
+import { StructuredCitation } from "@/lib/rag/types";
 import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
 import { SafeHomeMarkdown } from "@/components/chat/SafeHomeMarkdown";
 import { ItemHazardCard } from "@/components/chat/ItemHazardCard";
 import { ItemAssessmentModal } from "@/components/chat/ItemAssessmentModal";
 import type { ItemHazardAssessment } from "@/lib/vision/itemHazardTypes";
+import type { ToolExecutionResult } from "@/lib/ai/copilotToolRegistry";
 
 interface ChatMessageItem {
   id: string;
@@ -52,9 +62,11 @@ interface ChatMessageItem {
   responseMode?: string;
   citations?: StructuredCitation[];
   suggestedFollowUps?: string[];
+  toolInvocations?: ToolExecutionResult[];
+  itemAssessment?: ItemHazardAssessment;
+  attachedImageUrl?: string;
   timestamp: string;
   isStreaming?: boolean;
-  itemAssessment?: ItemHazardAssessment;
 }
 
 interface ConversationItem {
@@ -72,7 +84,16 @@ const PRESET_WELCOME_PROMPTS = [
 ];
 
 export default function AIAssistantPage() {
-  const { getCurrentRoom, currentAssessment } = useSimulationStore();
+  const router = useRouter();
+  const {
+    rooms,
+    currentRoomId,
+    switchRoom,
+    getCurrentRoom,
+    currentAssessment,
+    setCopilotPendingAction,
+  } = useSimulationStore();
+
   const room = getCurrentRoom();
   const findings = currentAssessment?.findings || [];
 
@@ -88,20 +109,31 @@ export default function AIAssistantPage() {
   const [inputQuery, setInputQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+
+  // Attached image state for Multimodal Chat
+  const [attachedImage, setAttachedImage] = useState<{
+    dataUrl: string;
+    name: string;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Voice Speech-to-Text state
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // Abort controller for Stop Generation
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Right Inspector state
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
-  const [activeRightTab, setActiveRightTab] = useState<"evidence" | "sources" | "eval" | "items">("evidence");
+  const [activeRightTab, setActiveRightTab] = useState<"evidence" | "objects" | "sources" | "eval">("evidence");
   const [selectedCitation, setSelectedCitation] = useState<StructuredCitation | null>(null);
 
   // Item Hazard Assessment state
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [recentItemAssessments, setRecentItemAssessments] = useState<ItemHazardAssessment[]>([]);
   const [selectedItemAssessment, setSelectedItemAssessment] = useState<ItemHazardAssessment | null>(null);
-
-  // RAG Evaluation live report state
-  const [evalReport, setEvalReport] = useState<any>(null);
-  const [evalLoading, setEvalLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -135,7 +167,6 @@ export default function AIAssistantPage() {
             setActiveTitle(data[0].title);
           }
         } else {
-          // Initialize a first session
           createNewConversation();
         }
       }
@@ -161,7 +192,6 @@ export default function AIAssistantPage() {
             timestamp: m.createdAt,
           }));
           setMessages(mapped);
-          // Set first citation if exists
           const lastAssistant = [...mapped].reverse().find((m) => m.role === "assistant" && m.citations && m.citations.length > 0);
           if (lastAssistant && lastAssistant.citations && lastAssistant.citations.length > 0) {
             setSelectedCitation(lastAssistant.citations[0]);
@@ -182,18 +212,23 @@ export default function AIAssistantPage() {
       {
         id: "msg-welcome",
         role: "assistant",
-        content: `Xin chào! Tôi là **SafeHome Copilot** — trợ lý an toàn không gian sống và phòng ngừa té ngã cho người cao tuổi.
+        content: `Xin chào! Tôi là **SafeHome AI Copilot 2.0** — trợ lý an toàn không gian sống và phòng ngừa té ngã cho người cao tuổi.
 
-Tôi được trang bị hệ thống tri thức đã qua thẩm định từ **Tổ chức Y tế Thế giới (WHO)**, **CDC Hoa Kỳ (Chương trình STEADI)** và **Bộ Y tế Việt Nam**.
+Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri thức y học chứng cứ đã qua thẩm định từ **WHO 2021**, **CDC STEADI Hoa Kỳ** và **Bộ Y tế Việt Nam**.
 
-Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang chính thống, minh bạch và có thể kiểm chứng độc lập.`,
+**Bạn có thể yêu cầu tôi:**
+- 🔍 *Kiểm tra các mối nguy té ngã trong phòng ngủ hoặc nhà vệ sinh.*
+- 🎯 *Định vị và phóng to các vật thể nguy hiểm trực tiếp trên mô hình 3D.*
+- 📷 *Gửi ảnh vật dụng thực tế để tôi phân tích điểm rủi ro CDC STEADI.*
+- 🎙️ *Trò chuyện bằng giọng nói tiếng Việt tự nhiên.*`,
         evidenceStatus: "SUPPORTED",
         responseMode: "LOCAL_GROUNDED",
         timestamp: new Date().toISOString(),
         suggestedFollowUps: [
-          "Những yếu tố nào có thể gây té ngã trong phòng ngủ?",
-          "Nhà vệ sinh cần trang bị thanh vịn ở những vị trí nào?",
-          "Tôi cần chú ý gì với thảm trải sàn và dây điện?",
+          "Phòng ngủ của tôi có những nguy cơ té ngã nào?",
+          "Hãy cho tôi xem thảm chân và dây điện trên 3D.",
+          "Vị trí lắp đặt thanh vịn nhà tắm theo chuẩn CDC STEADI?",
+          "Điểm an toàn môi trường hiện tại được tính như thế nào?",
         ],
       },
     ]);
@@ -254,41 +289,170 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
     } catch (e) {}
   };
 
+  // Voice Speech-to-Text (STT) handler
+  const handleToggleVoice = () => {
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    if (typeof window === "undefined") return;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Trình duyệt không hỗ trợ nhận diện giọng nói Web Speech API. Vui lòng sử dụng Google Chrome hoặc Microsoft Edge.");
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "vi-VN";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onresult = (e: any) => {
+        const transcript = Array.from(e.results)
+          .map((r: any) => r[0].transcript)
+          .join("");
+        setInputQuery(transcript);
+      };
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (e) {
+      setIsListening(false);
+    }
+  };
+
+  // Voice Text-to-Speech (TTS) handler
+  const handleSpeakAnswer = (msgId: string, text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*_#`>\[\]]/g, "").replace(/\n+/g, ". ");
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "vi-VN";
+    utterance.rate = 1.05;
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Stop Generation handler
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+  };
+
+  // 3D Bridge Navigation Action
+  const handleNavigateTo3D = (toolRes: ToolExecutionResult) => {
+    if (toolRes.clientAction) {
+      const { type, payload } = toolRes.clientAction;
+      let bridgeAction: Copilot3DAction | null = null;
+
+      if (type === "FOCUS_3D_OBJECT") {
+        bridgeAction = {
+          action: "FOCUS_OBJECT",
+          targetId: payload.objectId,
+          roomId: payload.roomId,
+          timestamp: Date.now(),
+        };
+      } else if (type === "FOCUS_3D_ROOM") {
+        bridgeAction = {
+          action: "FOCUS_ROOM",
+          roomId: payload.roomId,
+          timestamp: Date.now(),
+        };
+      } else if (type === "SET_CAMERA_MODE") {
+        bridgeAction = {
+          action: "SET_CAMERA_MODE",
+          mode: payload.mode,
+          timestamp: Date.now(),
+        };
+      } else if (type === "HIGHLIGHT_RISK") {
+        bridgeAction = {
+          action: "HIGHLIGHT_RISK",
+          targetId: payload.findingId,
+          timestamp: Date.now(),
+        };
+      }
+
+      if (bridgeAction) {
+        setCopilotPendingAction(bridgeAction);
+      }
+    }
+    router.push("/digital-twin");
+  };
+
+  // Image Selection Handler
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Dung lượng ảnh tối đa là 10MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAttachedImage({
+        dataUrl: reader.result as string,
+        name: file.name,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Send Message Handler
   const handleSendMessage = async (queryText?: string) => {
     const text = queryText || inputQuery;
-    if (!text.trim() || isLoading) return;
+    const hasImage = Boolean(attachedImage);
+    if ((!text.trim() && !hasImage) || isLoading) return;
 
+    const userMessageText = text.trim() || (hasImage ? "Phân tích nguy cơ vật dụng từ ảnh này" : "");
     const userMsg: ChatMessageItem = {
       id: `user-${Date.now()}`,
       role: "user",
-      content: text.trim(),
+      content: userMessageText,
+      attachedImageUrl: attachedImage?.dataUrl,
       timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInputQuery("");
+    const currentAttached = attachedImage;
+    setAttachedImage(null);
     setIsLoading(true);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      // Stream assistant response
       const res = await fetch("/api/ai/chat/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
-          message: text.trim(),
+          message: userMessageText,
           conversationId: currentConversationId,
-          roomContext: {
-            roomName: room.name,
-            hazardCount: findings.length,
-            hazardTitles: findings.map((f) => f.title),
-            lightingLux: room.lightingLevel,
-          },
+          roomId: room.id,
+          attachedImage: currentAttached?.dataUrl,
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Lỗi kết nối máy chủ");
-      }
+      if (!res.ok) throw new Error("Lỗi kết nối máy chủ");
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -296,11 +460,11 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
       const assistantMsgId = `asst-${Date.now()}`;
       let accumulatedText = "";
       let streamedEvidenceStatus = "SUPPORTED";
-      let streamedResponseMode = "LOCAL_GROUNDED";
+      let streamedResponseMode = "LLM_GENERATED";
       let streamedCitations: StructuredCitation[] = [];
       let streamedFollowUps: string[] = [];
+      let streamedToolInvocations: ToolExecutionResult[] = [];
 
-      // Add placeholder assistant message
       setMessages((prev) => [
         ...prev,
         {
@@ -328,6 +492,8 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
                   if (data.type === "meta") {
                     streamedEvidenceStatus = data.evidence_status;
                     streamedResponseMode = data.response_mode;
+                  } else if (data.type === "tools") {
+                    streamedToolInvocations = data.tool_invocations || [];
                   } else if (data.type === "chunk") {
                     accumulatedText += data.content;
                     setMessages((prev) =>
@@ -338,6 +504,9 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
                   } else if (data.type === "done") {
                     streamedCitations = data.citations || [];
                     streamedFollowUps = data.suggested_follow_ups || [];
+                    if (data.tool_invocations) {
+                      streamedToolInvocations = data.tool_invocations;
+                    }
                   }
                 } catch (e) {}
               }
@@ -346,7 +515,6 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
         }
       }
 
-      // Finalize assistant message
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMsgId
@@ -357,230 +525,63 @@ Mọi khuyến nghị đều có trích dẫn trực tiếp từ các cẩm nang
                 responseMode: streamedResponseMode,
                 citations: streamedCitations,
                 suggestedFollowUps: streamedFollowUps,
+                toolInvocations: streamedToolInvocations,
                 isStreaming: false,
               }
             : m
         )
       );
 
-      // Focus first citation in right inspector if available
       if (streamedCitations.length > 0) {
         setSelectedCitation(streamedCitations[0]);
-        setRightPanelOpen(true);
       }
 
-      // Refresh conversation list to update message count & timestamp
       loadConversations();
     } catch (err: any) {
-      console.warn("Streaming error, falling back to standard API:", err);
-      // Fallback to standard /api/ai/chat
-      try {
-        const fallbackRes = await fetch("/api/ai/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: text.trim(),
-            conversationId: currentConversationId,
-          }),
-        });
-        const data = await fallbackRes.json();
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `asst-fb-${Date.now()}`,
-            role: "assistant",
-            content: data.answer,
-            evidenceStatus: data.evidence_status,
-            responseMode: data.response_mode,
-            citations: data.citations || [],
-            suggestedFollowUps: data.suggested_follow_ups || [],
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-        if (data.citations && data.citations.length > 0) {
-          setSelectedCitation(data.citations[0]);
-        }
-      } catch (fErr) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `err-${Date.now()}`,
-            role: "assistant",
-            content:
-              "Không thể kết nối đến dịch vụ AI. Vui lòng kiểm tra lại mạng hoặc máy chủ cục bộ.",
-            evidenceStatus: "INSUFFICIENT_EVIDENCE",
-            timestamp: new Date().toISOString(),
-          },
-        ]);
+      if (err.name === "AbortError") {
+        console.log("Stream aborted by user");
+      } else {
+        console.warn("Streaming error, falling back to standard API:", err);
+        try {
+          const fallbackRes = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: userMessageText,
+              conversationId: currentConversationId,
+              roomId: room.id,
+            }),
+          });
+          const data = await fallbackRes.json();
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `asst-fb-${Date.now()}`,
+              role: "assistant",
+              content: data.answer,
+              evidenceStatus: data.evidence_status,
+              responseMode: data.response_mode,
+              citations: data.citations || [],
+              suggestedFollowUps: data.suggested_follow_ups || [],
+              toolInvocations: data.tool_invocations || [],
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+          if (data.citations && data.citations.length > 0) {
+            setSelectedCitation(data.citations[0]);
+          }
+        } catch (e) {}
       }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
-  const handleCopyMessage = (content: string, id: string) => {
-    navigator.clipboard.writeText(content);
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const handleRunEvaluation = async () => {
-    setEvalLoading(true);
-    setActiveRightTab("eval");
-    setRightPanelOpen(true);
-    try {
-      const res = await fetch("/api/rag/eval");
-      if (res.ok) {
-        const data = await res.json();
-        setEvalReport(data);
-      }
-    } catch (e) {
-      console.warn("Lỗi chạy kiểm thử RAG:", e);
-    } finally {
-      setEvalLoading(false);
-    }
-  };
-
-  const handleSendItemToChat = (assessment: ItemHazardAssessment) => {
-    setRecentItemAssessments((prev) => [
-      assessment,
-      ...prev.filter((a) => a.id !== assessment.id),
-    ]);
-    setSelectedItemAssessment(assessment);
-
-    const userMessage: ChatMessageItem = {
-      id: `user-item-${Date.now()}`,
-      role: "user",
-      content: `🔍 Yêu cầu thẩm định nguy cơ té ngã cho vật dụng: **${assessment.itemName}**`,
-      timestamp: new Date().toISOString(),
-    };
-
-    const assistantMessage: ChatMessageItem = {
-      id: `asst-item-${Date.now()}`,
-      role: "assistant",
-      content: `Tôi đã hoàn thành **Thẩm định an toàn té ngã theo tiêu chuẩn CDC STEADI & WHO** cho vật dụng: **${assessment.itemName}**.
-
-### 1. Mức độ nguy hiểm: **${assessment.severityLabel}**
-- Điểm đánh giá rủi ro: **${assessment.riskScore}/100**
-- Mức độ ưu tiên xử lý: **${assessment.urgencyLevel}**
-
-### 2. Tại sao nguy hiểm đối với người cao tuổi?
-${assessment.whyDangerous.summary}
-- **Cơ chế sinh cơ học:** ${assessment.whyDangerous.biomechanicalRationale}
-- **Nguy cơ chấn thương:** ${assessment.whyDangerous.consequenceRisk}
-
-### 3. Nguy hiểm ở chỗ nào?
-Hệ thống phát hiện **${assessment.whereDangerous.length} điểm nguy cơ** cụ thể trên bức ảnh (H1 - H${assessment.whereDangerous.length}):
-${assessment.whereDangerous.map((s) => `- **H${s.number} - ${s.title}:** ${s.description} *(Cơ chế: ${s.mechanism})*`).join("\n")}
-
-### 4. Đề xuất khắc phục tức thì:
-${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư: *${r.materialsNeeded}*\n   - Chi phí: **${r.costEstimate}** (Thời gian: ${r.timeEstimate})`).join("\n")}
-
----
-* ⚠️ Tuyên bố an toàn: Đánh giá này tuân thủ danh mục kiểm định nguy cơ môi trường CDC STEADI và WHO. Hãy ưu tiên xử lý các điểm nguy cơ mức độ CRITICAL và HIGH trong vòng 24 giờ để ngăn ngừa té ngã tái diễn.*`,
-      evidenceStatus: assessment.riskScore >= 75 ? "SUPPORTED" : "PARTIALLY_SUPPORTED",
-      responseMode: "LOCAL_GROUNDED",
-      citations: assessment.citations,
-      itemAssessment: assessment,
-      suggestedFollowUps: [
-        `Cách cố định mép ${assessment.itemName} an toàn nhất?`,
-        `Cần lưu ý gì khi mua vật tư thay thế cho ${assessment.itemName}?`,
-        `Tiêu chuẩn thông thủy lối đi phòng ngừa vấp ngã theo CDC là bao nhiêu?`,
-      ],
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage, assistantMessage]);
-    if (assessment.citations && assessment.citations.length > 0) {
-      setSelectedCitation(assessment.citations[0]);
-    }
-  };
-
-  // Render clickable inline citations [1], [2]
-  const renderMessageContent = (content: string, citations?: StructuredCitation[]) => {
-    const parts = content.split(/(\[\d+(?:,\s*\d+)*\])/g);
-
-    return (
-      <div className="whitespace-pre-line leading-relaxed">
-        {parts.map((part, i) => {
-          const match = part.match(/^\[(\d+(?:,\s*\d+)*)\]$/);
-          if (match) {
-            const numbers = match[1].split(",").map((s) => parseInt(s.trim(), 10));
-            return (
-              <span key={i} className="inline-flex gap-0.5 mx-1">
-                {numbers.map((num) => {
-                  const citationObj = citations?.find((c) => c.citationNumber === num);
-                  return (
-                    <button
-                      key={num}
-                      onClick={() => {
-                        if (citationObj) {
-                          setSelectedCitation(citationObj);
-                          setActiveRightTab("evidence");
-                          setRightPanelOpen(true);
-                        }
-                      }}
-                      className="inline-flex items-center px-1.5 py-0.2 rounded-md bg-teal-100 hover:bg-teal-200 text-teal-900 font-mono text-[10px] font-bold transition shadow-xs border border-teal-300"
-                      title={citationObj ? `${citationObj.publisher}: ${citationObj.sectionTitle}` : `Trích dẫn [${num}]`}
-                    >
-                      [{num}]
-                    </button>
-                  );
-                })}
-              </span>
-            );
-          }
-          return <span key={i}>{part}</span>;
-        })}
-      </div>
-    );
-  };
-
-  const renderStatusBadge = (status?: string) => {
-    switch (status) {
-      case "SUPPORTED":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-            Có bằng chứng hỗ trợ
-          </span>
-        );
-      case "PARTIALLY_SUPPORTED":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-            <AlertTriangle className="h-3 w-3 text-amber-600" />
-            Bằng chứng hỗ trợ một phần
-          </span>
-        );
-      case "INSUFFICIENT_EVIDENCE":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
-            <AlertCircle className="h-3 w-3 text-orange-600" />
-            Chưa đủ bằng chứng
-          </span>
-        );
-      case "OUT_OF_SCOPE":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
-            <HelpCircle className="h-3 w-3 text-slate-500" />
-            Ngoài phạm vi hỗ trợ
-          </span>
-        );
-      case "EMERGENCY":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">
-            <Flame className="h-3 w-3 text-rose-600" />
-            Tình huống khẩn cấp
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
-            <ShieldCheck className="h-3 w-3 text-teal-600" />
-            Đã kiểm chứng
-          </span>
-        );
-    }
   };
 
   const filteredConversations = conversations.filter((c) =>
@@ -589,304 +590,338 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
 
   return (
     <div className="h-[calc(100vh-4rem)] flex overflow-hidden bg-slate-100 font-sans">
-      {/* ========================================================= */}
-      {/* 1. LEFT PANEL: Conversations & Knowledge Status */}
-      {/* ========================================================= */}
-      <aside className="w-72 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden md:flex">
-        {/* Top: New Chat & Search */}
-        <div className="p-3.5 space-y-3">
+      {/* =================================================================== */}
+      {/* 1. LEFT SIDEBAR: CONVERSATION SESSIONS & HISTORY */}
+      {/* =================================================================== */}
+      <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shrink-0">
+        {/* New Chat Button */}
+        <div className="p-3 border-b border-slate-100">
           <button
             onClick={createNewConversation}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center justify-center gap-2 transition active:scale-95"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold rounded-xl text-xs shadow-sm transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Cuộc trò chuyện mới</span>
           </button>
+        </div>
 
-          {/* Search Bar */}
+        {/* Search Input */}
+        <div className="p-3 pb-1">
           <div className="relative">
             <Search className="h-3.5 w-3.5 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
+              placeholder="Tìm kiếm hội thoại..."
               value={searchConvQuery}
               onChange={(e) => setSearchConvQuery(e.target.value)}
-              placeholder="Tìm kiếm lịch sử chat..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
           </div>
         </div>
 
-        {/* Middle: Conversation Sessions List */}
-        <div className="flex-1 overflow-y-auto px-3 space-y-1">
-          <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        {/* Conversation Sessions List */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             Lịch sử tư vấn ({filteredConversations.length})
           </div>
-
-          {filteredConversations.map((conv) => {
-            const isActive = conv.id === currentConversationId;
+          {filteredConversations.map((c) => {
+            const isActive = c.id === currentConversationId;
             return (
               <div
-                key={conv.id}
-                onClick={() => setCurrentConversationId(conv.id)}
-                className={`group flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
+                key={c.id}
+                onClick={() => setCurrentConversationId(c.id)}
+                className={`group flex items-center justify-between p-2 rounded-xl text-xs transition cursor-pointer ${
                   isActive
-                    ? "bg-teal-50 text-teal-900 border border-teal-200/80 font-bold shadow-xs"
+                    ? "bg-teal-50 text-teal-900 font-bold border border-teal-200/80 shadow-xs"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
-                  <MessageSquare
-                    className={`h-4 w-4 shrink-0 ${isActive ? "text-teal-600" : "text-slate-400"}`}
-                  />
-                  <span className="truncate">{conv.title}</span>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <MessageSquare className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-teal-600" : "text-slate-400"}`} />
+                  <span className="truncate">{c.title}</span>
                 </div>
-
                 <button
-                  onClick={(e) => handleDeleteConversation(conv.id, e)}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-600 rounded transition"
-                  title="Xóa cuộc trò chuyện"
+                  onClick={(e) => handleDeleteConversation(c.id, e)}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-600 transition shrink-0"
+                  title="Xóa hội thoại"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3 w-3" />
                 </button>
               </div>
             );
           })}
         </div>
 
-        {/* Bottom: Knowledge Status & Live Evaluation trigger */}
-        <div className="p-3.5 border-t border-slate-100 space-y-2.5 bg-slate-50/70">
-          <div className="p-3 rounded-2xl bg-white border border-slate-200 text-[11px] space-y-1.5 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-medium">Kho tri thức chuẩn:</span>
-              <span className="font-bold text-teal-700">4 nguồn WHO/CDC</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-medium">Đoạn trích thẩm định:</span>
-              <span className="font-bold text-slate-800">10 chunks</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-medium">Chế độ AI:</span>
-              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded text-[10px]">
-                Evidence Fallback Active
-              </span>
-            </div>
+        {/* System Capabilities Footer */}
+        <div className="p-3 border-t border-slate-100 bg-slate-50 text-[11px] text-slate-500 space-y-1">
+          <div className="flex items-center gap-1.5 font-semibold text-slate-700">
+            <ShieldCheck className="h-3.5 w-3.5 text-teal-600" />
+            <span>Chuẩn Y Khoa: WHO & CDC</span>
           </div>
-
-          <button
-            onClick={handleRunEvaluation}
-            disabled={evalLoading}
-            className="w-full py-2 px-3 rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-800 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs"
-          >
-            {evalLoading ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-600" />
-                <span>Đang thẩm định RAG...</span>
-              </>
-            ) : (
-              <>
-                <Activity className="h-3.5 w-3.5 text-teal-600" />
-                <span>Chạy Thẩm Định RAG (8 tiêu chí)</span>
-              </>
-            )}
-          </button>
+          <p className="text-[10px] text-slate-400 leading-tight">
+            Tất cả khuyến nghị đều được đối chiếu từ cẩm nang y tế chính thống.
+          </p>
         </div>
       </aside>
 
-      {/* ========================================================= */}
-      {/* 2. CENTER PANEL: Chat Interface */}
-      {/* ========================================================= */}
-      <main className="flex-1 flex flex-col bg-white border-r border-slate-200 overflow-hidden">
-        {/* Header */}
-        <div className="h-16 px-4 sm:px-6 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-teal-600 to-sky-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
-              <Bot className="h-6 w-6" />
+      {/* =================================================================== */}
+      {/* 2. MAIN CHAT AREA */}
+      {/* =================================================================== */}
+      <main className="flex-1 flex flex-col overflow-hidden bg-white">
+        {/* Header Bar */}
+        <header className="px-4 py-2.5 border-b border-slate-200 bg-white/90 backdrop-blur-md flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 rounded-xl bg-teal-50 text-teal-600 border border-teal-200">
+              <Bot className="h-4 w-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                {isEditingTitle ? (
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="text"
-                      value={activeTitle}
-                      onChange={(e) => setActiveTitle(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSaveRename()}
-                      className="px-2 py-0.5 text-xs font-bold border border-teal-300 rounded focus:outline-none"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleSaveRename}
-                      className="p-1 text-teal-600 hover:text-teal-800"
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <h1 className="text-sm font-bold text-slate-900 tracking-tight">
-                      {activeTitle}
-                    </h1>
-                    <button
-                      onClick={() => setIsEditingTitle(true)}
-                      className="text-slate-400 hover:text-slate-600 p-0.5 rounded"
-                      title="Đổi tên cuộc trò chuyện"
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
-                <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold text-teal-800 hidden sm:inline">
-                  SafeHome Copilot
+
+            <div className="min-w-0">
+              {isEditingTitle ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={activeTitle}
+                    onChange={(e) => setActiveTitle(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveRename()}
+                    className="text-xs font-bold px-2 py-0.5 border border-teal-300 rounded focus:outline-none"
+                    autoFocus
+                  />
+                  <button onClick={handleSaveRename} className="p-1 hover:text-teal-600">
+                    <Check className="h-3.5 w-3.5 text-teal-600" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-xs font-bold text-slate-800 truncate">{activeTitle}</h2>
+                  <button
+                    onClick={() => setIsEditingTitle(true)}
+                    className="p-1 text-slate-400 hover:text-slate-600"
+                    title="Đổi tên hội thoại"
+                  >
+                    <Edit2 className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+              <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                <span>SafeHome Copilot 2.0</span>
+                <span>•</span>
+                <span className="text-teal-600 font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Đang đồng bộ 3D ({room.name.split("(")[0].trim()})
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500">
-                Đối chiếu tri thức y tế chuẩn &amp; Liên kết không gian 3D {room.name.split("(")[0]}
-              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Direct Link to AI Vision */}
-            <Link
-              href="/ai-vision"
-              className="px-3 py-1.5 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs active:scale-95"
-              title="Chuyển đến phân hệ Thị giác AI: Quét toàn bộ căn phòng & tạo Bản sao số 3D"
+          {/* Quick Actions & 3D Connection Indicator */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Room Selector */}
+            <select
+              value={currentRoomId}
+              onChange={(e) => switchRoom(e.target.value)}
+              className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500"
             >
-              <Camera className="h-3.5 w-3.5 text-sky-600" />
-              <span>Thị giác AI (Vision)</span>
+              {rooms.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name.split("(")[0].trim()}
+                </option>
+              ))}
+            </select>
+
+            {/* Direct Digital Twin Shortcut */}
+            <Link
+              href="/digital-twin"
+              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1 transition"
+              title="Mở Bản sao số 3D"
+            >
+              <Box className="h-3.5 w-3.5 text-teal-600" />
+              <span className="hidden sm:inline">Mở 3D</span>
             </Link>
 
-            {/* Quick Item Assessment Trigger */}
+            {/* Toggle Right Inspector */}
             <button
-              onClick={() => setIsItemModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs active:scale-95"
-              title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-teal-700" />
-              <span className="hidden sm:inline">Thẩm định ảnh vật dụng</span>
-            </button>
-
-            {/* Toggle Inspector Drawer */}
-            <button
-              onClick={() => setRightPanelOpen(!rightPanelOpen)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
+              onClick={() => setRightPanelOpen((prev) => !prev)}
+              className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
                 rightPanelOpen
-                  ? "bg-teal-50 text-teal-800 border-teal-200"
+                  ? "bg-teal-50 text-teal-700 border-teal-200"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               }`}
+              title="Bật/Tắt bảng thông tin tra cứu y khoa"
             >
-              <BookOpen className="h-3.5 w-3.5 text-teal-600" />
-              <span className="hidden sm:inline">Bằng chứng &amp; Nguồn dẫn</span>
-              {rightPanelOpen ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+              <BookOpen className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Bằng chứng ({selectedCitation ? "1" : "0"})</span>
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Message Stream */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-5 bg-slate-50/50">
+        {/* Chat Feed */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg) => {
             const isUser = msg.role === "user";
-
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 max-w-3xl ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}
+                className={`flex gap-3 max-w-3xl ${isUser ? "ml-auto justify-end" : "mr-auto justify-start"}`}
               >
                 {!isUser && (
-                  <div className="h-8 w-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <Sparkles className="h-4 w-4" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-sky-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                    <Bot className="h-4 w-4" />
                   </div>
                 )}
 
-                <div className="space-y-2 max-w-2xl">
-                  {/* Message bubble */}
+                <div className={`space-y-2 max-w-2xl ${isUser ? "items-end" : "items-start"}`}>
+                  {/* User Uploaded Image Preview */}
+                  {msg.attachedImageUrl && (
+                    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm max-w-xs mb-1">
+                      <img
+                        src={msg.attachedImageUrl}
+                        alt="Ảnh đính kèm"
+                        className="max-h-48 object-cover w-full"
+                      />
+                    </div>
+                  )}
+
+                  {/* Message Bubble */}
                   <div
-                    className={`p-4 sm:p-5 rounded-3xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                    className={`p-3.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
                       isUser
-                        ? "bg-teal-600 text-white rounded-tr-xs"
-                        : "bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs"
+                        ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white rounded-tr-none font-medium"
+                        : "bg-slate-50 text-slate-800 border border-slate-200/80 rounded-tl-none space-y-2"
                     }`}
                   >
-                    {/* Header badge on assistant message */}
-                    {!isUser && (
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-100 text-xs">
-                        {renderStatusBadge(msg.evidenceStatus)}
+                    {isUser ? (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    ) : (
+                      <>
+                        <SafeHomeMarkdown content={msg.content} />
 
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          <button
-                            onClick={() => handleCopyMessage(msg.content, msg.id)}
-                            className="p-1 hover:text-slate-700 rounded transition"
-                            title="Sao chép câu trả lời"
-                          >
-                            {copiedId === msg.id ? (
-                              <Check className="h-3.5 w-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                        {/* Interactive Citations Bar */}
+                        {msg.citations && msg.citations.length > 0 && (
+                          <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center gap-1.5">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Nguồn kiểm chứng:
+                            </span>
+                            {msg.citations.map((c) => (
+                              <button
+                                key={c.citationId}
+                                onClick={() => {
+                                  setSelectedCitation(c);
+                                  setRightPanelOpen(true);
+                                  setActiveRightTab("evidence");
+                                }}
+                                className="px-2 py-0.5 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-md text-[10px] font-bold text-teal-700 flex items-center gap-1 transition shadow-2xs"
+                                title={`${c.publisher}: ${c.documentTitle}`}
+                              >
+                                <span>[{c.citationNumber}] {c.publisher}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                    {/* Rich Item Hazard Assessment Card if present */}
-                    {msg.itemAssessment && (
-                      <div className="mb-4">
-                        <ItemHazardCard
-                          assessment={msg.itemAssessment}
-                          onAskCopilot={(q) => handleSendMessage(q)}
-                        />
-                      </div>
-                    )}
+                        {/* Tool Invocations Action Cards (e.g. Focus 3D Object) */}
+                        {msg.toolInvocations && msg.toolInvocations.length > 0 && (
+                          <div className="mt-2 space-y-1.5">
+                            {msg.toolInvocations.map((t, idx) => (
+                              <div
+                                key={idx}
+                                className="bg-white border border-teal-200 rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-xs"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className="p-1.5 rounded-lg bg-teal-50 text-teal-600">
+                                    <Box className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-[11px] font-bold text-slate-800 truncate">
+                                      {t.message}
+                                    </div>
+                                    <div className="text-[10px] text-teal-600 font-medium">
+                                      Công cụ hệ thống: {t.tool}
+                                    </div>
+                                  </div>
+                                </div>
 
-                    {/* Rich Markdown & Typography Formatter with interactive citations */}
-                    <SafeHomeMarkdown
-                      content={msg.content}
-                      citations={msg.citations}
-                      onCitationClick={(citation) => {
-                        setSelectedCitation(citation);
-                        setActiveRightTab("evidence");
-                        setRightPanelOpen(true);
-                      }}
-                      isUser={isUser}
-                    />
-
-                    {/* Citations Preview strip inside assistant message */}
-                    {!isUser && msg.citations && msg.citations.length > 0 && (
-                      <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-[11px]">
-                        <div className="font-bold text-slate-500 flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5 text-teal-600" />
-                          <span>Tài liệu đã dẫn xuất ({msg.citations.length}):</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {msg.citations.map((c) => (
-                            <button
-                              key={c.citationId}
-                              onClick={() => {
-                                setSelectedCitation(c);
-                                setActiveRightTab("evidence");
-                                setRightPanelOpen(true);
-                              }}
-                              className="px-2 py-1 rounded-lg bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 text-left transition text-[10px] flex items-center gap-1"
-                            >
-                              <span className="font-bold text-teal-700">[{c.citationNumber}]</span>
-                              <span className="truncate max-w-[180px]">{c.publisher}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                                {t.clientAction && (
+                                  <button
+                                    onClick={() => handleNavigateTo3D(t)}
+                                    className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] rounded-lg shadow-xs flex items-center gap-1 transition shrink-0"
+                                  >
+                                    <span>Mở trên 3D</span>
+                                    <ArrowRight className="h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
 
-                  {/* Contextual Suggested Follow-ups */}
+                  {/* Message Action Footer (for Assistant) */}
+                  {!isUser && !msg.isStreaming && (
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400 px-1">
+                      <button
+                        onClick={() => handleCopy(msg.id, msg.content)}
+                        className="hover:text-slate-600 flex items-center gap-1 transition"
+                      >
+                        {copiedId === msg.id ? (
+                          <>
+                            <CheckCheck className="h-3 w-3 text-emerald-600" />
+                            <span className="text-emerald-600 font-bold">Đã sao chép</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" />
+                            <span>Sao chép</span>
+                          </>
+                        )}
+                      </button>
+
+                      <span>•</span>
+
+                      <button
+                        onClick={() => handleSpeakAnswer(msg.id, msg.content)}
+                        className={`hover:text-slate-600 flex items-center gap-1 transition ${
+                          speakingMsgId === msg.id ? "text-teal-600 font-bold" : ""
+                        }`}
+                        title="Đọc to câu trả lời bằng giọng nói tiếng Việt"
+                      >
+                        {speakingMsgId === msg.id ? (
+                          <>
+                            <VolumeX className="h-3 w-3 text-teal-600 animate-pulse" />
+                            <span>Dừng đọc</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="h-3 w-3" />
+                            <span>Đọc to</span>
+                          </>
+                        )}
+                      </button>
+
+                      <span>•</span>
+
+                      <button
+                        onClick={() => handleSendMessage(messages[messages.length - 2]?.content)}
+                        className="hover:text-slate-600 flex items-center gap-1 transition"
+                        title="Tạo lại câu trả lời"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        <span>Tạo lại</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Suggested Follow-Ups */}
                   {!isUser && msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pl-1">
-                      {msg.suggestedFollowUps.map((q, idx) => (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {msg.suggestedFollowUps.map((prompt, pIdx) => (
                         <button
-                          key={idx}
-                          onClick={() => handleSendMessage(q)}
-                          className="px-3 py-1 rounded-full bg-white hover:bg-teal-50 hover:text-teal-800 text-slate-600 text-[11px] font-medium border border-slate-200 transition shadow-2xs text-left"
+                          key={pIdx}
+                          onClick={() => handleSendMessage(prompt)}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300 text-slate-600 rounded-full text-[11px] font-medium border border-slate-200/80 transition shadow-2xs"
                         >
-                          {q}
+                          {prompt}
                         </button>
                       ))}
                     </div>
@@ -896,53 +931,82 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
             );
           })}
 
+          {/* Loading / Streaming Skeleton */}
           {isLoading && (
-            <div className="flex items-center gap-2.5 p-3.5 bg-white rounded-2xl border border-slate-200 text-xs text-slate-600 w-fit shadow-xs">
-              <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-              <span>Đang đối chiếu tài liệu WHO/CDC và thẩm định độ đủ bằng chứng...</span>
+            <div className="flex gap-3 max-w-xl mr-auto items-start animate-fade-in">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-sky-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-none space-y-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 font-medium text-teal-600">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Đang suy luận từ dữ liệu không gian 3D & tài liệu y khoa...</span>
+                </div>
+              </div>
             </div>
           )}
 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Preset suggestions when conversation is fresh */}
-        {messages.length <= 1 && (
-          <div className="p-3 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto">
-            <span className="text-[10px] font-bold text-slate-400 uppercase shrink-0">Gợi ý:</span>
-            {PRESET_WELCOME_PROMPTS.map((prompt, i) => (
+        {/* Input Bar */}
+        <div className="p-3 border-t border-slate-200 bg-white space-y-2">
+          {/* Attached Image Preview */}
+          {attachedImage && (
+            <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200 w-fit">
+              <img
+                src={attachedImage.dataUrl}
+                alt="Preview"
+                className="w-10 h-10 object-cover rounded-lg"
+              />
+              <div className="text-[11px] font-medium text-slate-700 truncate max-w-xs">
+                {attachedImage.name}
+              </div>
               <button
-                key={i}
-                onClick={() => handleSendMessage(prompt)}
-                className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 text-[11px] font-medium whitespace-nowrap transition border border-slate-200/80 shrink-0"
+                onClick={() => setAttachedImage(null)}
+                className="p-1 hover:text-rose-600 transition"
               >
-                {prompt}
+                <X className="h-3.5 w-3.5" />
               </button>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Composer */}
-        <div className="p-4 bg-white border-t border-slate-200 space-y-2">
-          <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-teal-500 focus-within:bg-white transition">
+          <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500 rounded-2xl p-2 transition">
+            {/* File Upload Hidden Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              accept="image/*"
+              className="hidden"
+            />
+
+            {/* Attach Image Button */}
             <button
-              type="button"
-              onClick={() => setIsItemModalOpen(true)}
-              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-teal-50 text-teal-700 transition shadow-2xs self-end shrink-0"
-              title="Tải ảnh vật dụng thẩm định mức độ nguy hiểm & vị trí nguy cơ (CDC STEADI)"
-            >
-              <Sparkles className="h-4 w-4" />
-            </button>
-            <Link
-              href="/ai-vision"
-              className="p-2.5 rounded-xl border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-700 transition shadow-2xs self-end shrink-0"
-              title="Quét toàn cảnh căn phòng bằng Thị giác AI (AI Vision)"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 text-slate-400 hover:text-teal-600 hover:bg-slate-200/60 rounded-xl transition"
+              title="Đính kèm ảnh đồ vật hoặc căn phòng để AI phân tích"
             >
               <Camera className="h-4 w-4" />
-            </Link>
+            </button>
+
+            {/* Voice Input Button */}
+            <button
+              onClick={handleToggleVoice}
+              className={`p-2 rounded-xl transition ${
+                isListening
+                  ? "bg-rose-600 text-white animate-pulse"
+                  : "text-slate-400 hover:text-teal-600 hover:bg-slate-200/60"
+              }`}
+              title={isListening ? "Đang ghi âm giọng nói..." : "Nói bằng giọng nói tiếng Việt"}
+            >
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </button>
+
+            {/* Main Textarea */}
             <textarea
               ref={textareaRef}
-              rows={2}
+              rows={1}
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -951,17 +1015,33 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
                   handleSendMessage();
                 }
               }}
-              placeholder="Hỏi về an toàn thảm, thanh vịn, độ sáng phòng ngủ, hoặc nguy cơ trong phòng 3D..."
-              className="flex-1 bg-transparent resize-none text-xs focus:outline-none p-1.5 text-slate-800"
+              placeholder={
+                isListening
+                  ? "Đang lắng nghe giọng nói..."
+                  : "Hỏi về an toàn thảm, thanh vịn, độ sáng phòng ngủ, hoặc yêu cầu xem trên 3D..."
+              }
+              className="flex-1 bg-transparent border-0 resize-none text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none max-h-32 py-1.5"
             />
-            <button
-              onClick={() => handleSendMessage()}
-              disabled={!inputQuery.trim() || isLoading}
-              className="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-40 transition shadow-sm self-end"
-              title="Gửi câu hỏi"
-            >
-              <Send className="h-4 w-4" />
-            </button>
+
+            {/* Stop or Send Button */}
+            {isLoading ? (
+              <button
+                onClick={handleStopGeneration}
+                className="p-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-xs transition"
+                title="Dừng tạo câu trả lời"
+              >
+                <StopCircle className="h-4 w-4 text-rose-400" />
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSendMessage()}
+                disabled={!inputQuery.trim() && !attachedImage}
+                className="p-2 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 text-white rounded-xl shadow-xs transition disabled:cursor-not-allowed"
+                title="Gửi câu hỏi"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
@@ -971,375 +1051,169 @@ ${assessment.remediation.map((r, i) => `${i + 1}. **${r.step}**\n   - Vật tư:
         </div>
       </main>
 
-      {/* ========================================================= */}
-      {/* 3. RIGHT PANEL: Evidence Details, Sources & RAG Evaluation */}
-      {/* ========================================================= */}
+      {/* =================================================================== */}
+      {/* 3. RIGHT INSPECTOR PANEL: EVIDENCE, OBJECTS & RAG SOURCES */}
+      {/* =================================================================== */}
       {rightPanelOpen && (
-        <aside className="w-88 xl:w-96 border-l border-slate-200 bg-white flex flex-col shrink-0 overflow-hidden">
-          {/* Tabs Header */}
-          <div className="p-2 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-            <div className="flex items-center gap-1 overflow-x-auto">
+        <aside className="w-80 bg-slate-50 border-l border-slate-200 flex flex-col shrink-0 animate-fade-in">
+          {/* Header Tabs */}
+          <div className="p-2 border-b border-slate-200 bg-white flex items-center justify-between">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setActiveRightTab("evidence")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
                   activeRightTab === "evidence"
-                    ? "bg-white text-teal-800 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-teal-50 text-teal-700 border border-teal-200"
+                    : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 Bằng chứng
               </button>
               <button
-                onClick={() => setActiveRightTab("items")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-                  activeRightTab === "items"
-                    ? "bg-white text-teal-800 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
+                onClick={() => setActiveRightTab("objects")}
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                  activeRightTab === "objects"
+                    ? "bg-teal-50 text-teal-700 border border-teal-200"
+                    : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                Vật dụng ({recentItemAssessments.length})
+                Vật dụng ({room.objects.length})
               </button>
               <button
                 onClick={() => setActiveRightTab("sources")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
                   activeRightTab === "sources"
-                    ? "bg-white text-teal-800 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-teal-50 text-teal-700 border border-teal-200"
+                    : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 Kho nguồn
-              </button>
-              <button
-                onClick={() => setActiveRightTab("eval")}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-                  activeRightTab === "eval"
-                    ? "bg-white text-teal-800 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Thẩm định RAG
               </button>
             </div>
 
             <button
               onClick={() => setRightPanelOpen(false)}
-              className="p-1 hover:bg-slate-200 rounded-lg text-slate-400"
+              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          {/* Tab 1: Active Citation Inspector */}
-          {activeRightTab === "evidence" && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {selectedCitation ? (
-                <div className="space-y-3.5">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                    <span className="px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-900 font-mono text-xs font-bold">
-                      Trích dẫn [{selectedCitation.citationNumber}]
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      {selectedCitation.chunkId}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Tổ chức phát hành
-                    </span>
-                    <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5 mt-0.5">
-                      <Building className="h-3.5 w-3.5 text-teal-600" />
-                      <span>{selectedCitation.publisher}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Tài liệu gốc
-                    </span>
-                    <h4 className="text-xs font-bold text-slate-900 leading-snug mt-0.5">
-                      {selectedCitation.documentTitle}
-                    </h4>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Điều khoản / Đề mục
-                    </span>
-                    <div className="text-xs font-semibold text-teal-800 mt-0.5">
-                      {selectedCitation.sectionTitle}
-                      {selectedCitation.pageNumber && (
-                        <span className="text-slate-400 ml-1 font-normal">
-                          (Trang {selectedCitation.pageNumber})
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {activeRightTab === "evidence" && (
+              <>
+                {selectedCitation ? (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                          {selectedCitation.publisher}
                         </span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          Trích dẫn [{selectedCitation.citationNumber}]
+                        </span>
+                      </div>
+
+                      <h4 className="text-xs font-bold text-slate-800 leading-snug">
+                        {selectedCitation.documentTitle}
+                      </h4>
+
+                      <div className="text-[11px] text-slate-500 font-semibold">
+                        Mục: {selectedCitation.sectionTitle}
+                      </div>
+
+                      <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-700 italic leading-relaxed">
+                        "{selectedCitation.supportingExcerpt}"
+                      </div>
+
+                      {selectedCitation.officialUrl && (
+                        <a
+                          href={selectedCitation.officialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[11px] text-sky-600 hover:underline font-semibold pt-1"
+                        >
+                          <span>Xem toàn văn tài liệu chính thức</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
                       )}
                     </div>
                   </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Nguyên văn đoạn trích thẩm định
-                    </span>
-                    <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 leading-relaxed italic mt-1">
-                      &ldquo;{selectedCitation.supportingExcerpt}&rdquo;
-                    </div>
+                ) : (
+                  <div className="text-center py-8 text-xs text-slate-400 space-y-2">
+                    <BookOpen className="h-8 w-8 mx-auto text-slate-300" />
+                    <p>Nhấp vào bất kỳ nhãn trích dẫn [1], [2] trong câu trả lời để xem chi tiết bằng chứng y khoa.</p>
                   </div>
+                )}
+              </>
+            )}
 
-                  {selectedCitation.officialUrl && (
-                    <a
-                      href={selectedCitation.officialUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 pt-1"
-                    >
-                      <span>Xem toàn văn tại cổng thông tin chính thức</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  )}
+            {activeRightTab === "objects" && (
+              <div className="space-y-2">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Đồ nội thất trong {room.name.split("(")[0].trim()}
                 </div>
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-400 space-y-2">
-                  <BookOpen className="h-8 w-8 text-slate-300 mx-auto" />
-                  <p>Nhấp vào bất kỳ số trích dẫn [1], [2] trong câu trả lời để xem chi tiết bằng chứng gốc.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab 2: Curated Sources Registry */}
-          {activeRightTab === "sources" && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              <div className="text-xs text-slate-500 leading-normal">
-                Các tổ chức y tế và tài liệu chính thống nằm trong danh mục cho phép (Allowlist):
-              </div>
-
-              {CURATED_KNOWLEDGE_SOURCES.map((src) => (
-                <div
-                  key={src.id}
-                  className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-                      {src.publisher}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      Năm {src.publicationDate}
-                    </span>
-                  </div>
-
-                  <h4 className="text-xs font-bold text-slate-900 leading-snug">
-                    {src.title}
-                  </h4>
-
-                  <div className="text-[11px] text-slate-500">
-                    Số đoạn trích đã lập chỉ mục: <strong>{src.passages.length}</strong>
-                  </div>
-
-                  <a
-                    href={src.officialUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 hover:text-sky-700 pt-1"
-                  >
-                    <span>Cổng tra cứu chính thức</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Tab 4: Evaluated Items History & Inspector */}
-          {activeRightTab === "items" && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-800">
-                  Vật dụng đã thẩm định ({recentItemAssessments.length})
-                </span>
-                <button
-                  onClick={() => setIsItemModalOpen(true)}
-                  className="text-xs font-bold text-teal-600 hover:text-teal-800 flex items-center gap-1"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Tải ảnh mới</span>
-                </button>
-              </div>
-
-              {recentItemAssessments.length > 0 ? (
-                <div className="space-y-3">
-                  {recentItemAssessments.map((item) => (
+                {room.objects.map((obj) => {
+                  const hazard = findings.find((f) => f.targetObjectId === obj.id);
+                  return (
                     <div
-                      key={item.id}
-                      onClick={() => {
-                        setSelectedItemAssessment(item);
-                        setIsItemModalOpen(true);
-                      }}
-                      className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 cursor-pointer shadow-xs transition space-y-2 group"
+                      key={obj.id}
+                      onClick={() => handleSendMessage(`Cái ${obj.name} này có nguy hiểm không và tôi nên xử lý thế nào?`)}
+                      className="bg-white p-2.5 rounded-xl border border-slate-200 hover:border-teal-300 transition cursor-pointer space-y-1 shadow-2xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                          {item.itemCategory}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            item.riskScore >= 80
-                              ? "bg-rose-100 text-rose-800 border border-rose-200"
-                              : "bg-amber-100 text-amber-800 border border-amber-200"
-                          }`}
-                        >
-                          {item.riskScore}/100 — {item.severity}
-                        </span>
-                      </div>
-
-                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-teal-900 line-clamp-1">
-                        {item.itemName}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                        {item.whyDangerous.summary}
-                      </p>
-
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                        <span>{item.whereDangerous.length} điểm nguy cơ (H1..H{item.whereDangerous.length})</span>
-                        <span className="text-teal-600 font-bold group-hover:underline flex items-center gap-0.5">
-                          Xem chi tiết &rarr;
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-
-                  <Link
-                    href="/ai-vision"
-                    className="p-3 rounded-2xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold flex items-center justify-center gap-1.5 transition text-center"
-                  >
-                    <Camera className="h-3.5 w-3.5 text-sky-600" />
-                    <span>Quét toàn cảnh phòng (AI Vision) &rarr;</span>
-                  </Link>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-400 space-y-3">
-                  <Camera className="h-8 w-8 text-slate-300 mx-auto" />
-                  <p>Chưa có ảnh vật dụng nào được thẩm định.</p>
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => setIsItemModalOpen(true)}
-                      className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs"
-                    >
-                      Tải ảnh vật dụng ngay
-                    </button>
-                    <Link
-                      href="/ai-vision"
-                      className="px-4 py-2 rounded-xl border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs shadow-xs text-center"
-                    >
-                      Quét toàn cảnh phòng (AI Vision) &rarr;
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab 3: Live RAG Evaluation Benchmark */}
-          {activeRightTab === "eval" && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-800">
-                  Báo cáo Thẩm định RAG
-                </span>
-                <button
-                  onClick={handleRunEvaluation}
-                  disabled={evalLoading}
-                  className="text-[11px] font-bold text-teal-600 hover:text-teal-800 flex items-center gap-1"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  <span>Chạy lại</span>
-                </button>
-              </div>
-
-              {evalReport ? (
-                <div className="space-y-3.5 text-xs">
-                  {/* Summary Metric Cards */}
-                  <div className="grid grid-cols-2 gap-2 text-center">
-                    <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
-                      <div className="text-[10px] text-emerald-700">Tỷ lệ vượt qua</div>
-                      <div className="text-lg font-black text-emerald-800 font-mono">
-                        {evalReport.overallPassRatePercent}%
-                      </div>
-                    </div>
-                    <div className="p-2.5 bg-sky-50 rounded-xl border border-sky-200">
-                      <div className="text-[10px] text-sky-700">Recall@K</div>
-                      <div className="text-lg font-black text-sky-800 font-mono">
-                        {evalReport.retrievalRecallAtK * 100}%
-                      </div>
-                    </div>
-                    <div className="p-2.5 bg-teal-50 rounded-xl border border-teal-200">
-                      <div className="text-[10px] text-teal-700">Độ chuẩn xác từ chối</div>
-                      <div className="text-lg font-black text-teal-800 font-mono">
-                        {evalReport.refusalAccuracyPercent}%
-                      </div>
-                    </div>
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="text-[10px] text-slate-500">Độ trễ trung bình</div>
-                      <div className="text-lg font-black text-slate-800 font-mono">
-                        {evalReport.averageLatencyMs}ms
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Benchmark Items breakdown */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      8 Tiêu chí kiểm định khoa học:
-                    </div>
-                    {evalReport.results.map((r: any) => (
-                      <div
-                        key={r.id}
-                        className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
-                          r.passed
-                            ? "bg-emerald-50/50 border-emerald-200 text-slate-800"
-                            : "bg-rose-50/50 border-rose-200 text-rose-900"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between font-bold">
-                          <span className="truncate max-w-[200px]">{r.category}</span>
-                          <span className={r.passed ? "text-emerald-700" : "text-rose-700"}>
-                            {r.passed ? "ĐẠT" : "KHÔNG ĐẠT"}
+                        <span className="text-xs font-bold text-slate-800 truncate">{obj.name}</span>
+                        {hazard ? (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            Nguy cơ
                           </span>
-                        </div>
-                        <div className="text-slate-500 text-[10px] line-clamp-1 italic">
-                          &ldquo;{r.query}&rdquo;
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          {r.details} ({r.latencyMs}ms)
-                        </div>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700">
+                            An toàn
+                          </span>
+                        )}
                       </div>
-                    ))}
+                      <div className="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>Loại: {obj.modelType}</span>
+                        <span>Tọa độ: [{obj.position.join(", ")}]</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {activeRightTab === "sources" && (
+              <div className="space-y-2.5">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  4 Nguồn tài liệu đã được thẩm định
+                </div>
+                {CURATED_KNOWLEDGE_SOURCES.map((src) => (
+                  <div key={src.id} className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs space-y-1 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-teal-700 text-[11px]">{src.organization}</span>
+                      <span className="text-[9px] text-slate-400">{src.publicationDate}</span>
+                    </div>
+                    <div className="font-semibold text-slate-800 text-[11px] leading-tight">
+                      {src.title}
+                    </div>
+                    <a
+                      href={src.officialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-sky-600 hover:underline flex items-center gap-1 pt-1"
+                    >
+                      <span>Cổng thông tin gốc</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-400 space-y-3">
-                  <Activity className="h-8 w-8 text-teal-500 mx-auto" />
-                  <p>Bấm nút &quot;Chạy Thẩm Định RAG&quot; để thực thi bộ kiểm chuẩn tự động gồm 8 tình huống lâm sàng và kỹ thuật.</p>
-                  <button
-                    onClick={handleRunEvaluation}
-                    disabled={evalLoading}
-                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs"
-                  >
-                    Bắt đầu thẩm định ngay
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </aside>
       )}
-
-      {/* Item Hazard Assessment Modal */}
-      <ItemAssessmentModal
-        isOpen={isItemModalOpen}
-        onClose={() => setIsItemModalOpen(false)}
-        onSendToChat={handleSendItemToChat}
-      />
     </div>
   );
 }

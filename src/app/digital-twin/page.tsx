@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Box,
@@ -22,6 +22,7 @@ import {
   Info,
   Sliders,
   Check,
+  Bot,
 } from "lucide-react";
 import { RoomViewer } from "@/components/three/RoomViewer";
 import { ObjectInspector } from "@/components/simulator/ObjectInspector";
@@ -42,6 +43,9 @@ export default function DigitalTwinPage() {
     toggleHazardOverlay,
     showHazardOverlay,
     currentAssessment,
+    copilotPendingAction,
+    executeCopilotAction,
+    clearCopilotPendingAction,
   } = useSimulationStore();
 
   const [savedNotification, setSavedNotification] = useState(false);
@@ -49,6 +53,20 @@ export default function DigitalTwinPage() {
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [showRevealIntro, setShowRevealIntro] = useState(true);
   const [activeZoneId, setActiveZoneId] = useState<string | null>(null);
+  const [copilotToast, setCopilotToast] = useState<string | null>(null);
+
+  // Handle Copilot 3D Bridge pending actions
+  useEffect(() => {
+    if (copilotPendingAction) {
+      const res = executeCopilotAction(copilotPendingAction);
+      if (res.success) {
+        setCopilotToast(res.message);
+        setShowRevealIntro(false);
+        setTimeout(() => setCopilotToast(null), 4500);
+      }
+      clearCopilotPendingAction();
+    }
+  }, [copilotPendingAction, executeCopilotAction, clearCopilotPendingAction]);
 
   const handleSave = () => {
     saveCurrentScenario(
@@ -252,6 +270,14 @@ export default function DigitalTwinPage() {
           {/* 3D Canvas Container */}
           <div className="flex-1 relative rounded-2xl overflow-hidden">
             <RoomViewer />
+
+            {/* Copilot 3D Bridge Toast Notification */}
+            {copilotToast && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-teal-950/90 backdrop-blur-md text-white text-xs font-bold px-4 py-2.5 rounded-2xl border border-teal-400 shadow-2xl flex items-center gap-2 animate-bounce">
+                <Bot className="h-4 w-4 text-amber-300 shrink-0 animate-pulse" />
+                <span>{copilotToast}</span>
+              </div>
+            )}
 
             {/* Scene 1 — The Home Reveal Banner / Modal (Dismissible, with 3 Hero Actions) */}
             {showRevealIntro && (

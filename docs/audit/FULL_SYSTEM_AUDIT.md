@@ -14,7 +14,7 @@
 | :--- | :--- | :--- | :--- |
 | **Static Type Checking** | 0 TypeScript Error (`tsc --noEmit`) | Hoàn thành với 0 lỗi trên toàn bộ dự án | **PASS** |
 | **Unit & Integration Tests** | 100% Passed trên Vitest | 20 test files, 109/109 tests passed (100%) | **PASS** |
-| **Next.js Production Build** | Compile thành công toàn bộ App Routes & API | 38/38 static & dynamic routes compiled | **PASS** |
+| **Next.js Production Build** | Compile thành công toàn bộ App Routes & API | 39/39 static & dynamic routes compiled (bao gồm `/experience`) | **PASS** |
 | **Vite Docs-site Build** | Bundle đầy đủ tài nguyên ảnh & conduits | 1533 modules compiled, 8 ảnh hashed | **PASS** |
 | **Database Schema & CRUD** | 16 Models Prisma, Cascade & AuditEvent | Hoàn tất migration & seed trên `dev.db` | **PASS** |
 | **Deterministic Risk Engine** | $S = \max(0, 100 - \sum Penalties)$, 0% ảo giác | 8 quy tắc lâm sàng thực thi toán học thuần túy | **PASS** |
@@ -69,7 +69,7 @@ Test Files: 20 passed (20/20 files)
 Tests:      109 passed (109/109 tests - 100% pass rate)
 Duration:   27.60s
 TypeCheck:  0 errors (tsc --noEmit)
-Build:      Next.js 14 (38 routes) + Vite docs-site (1533 modules)
+Build:      Next.js 14 (39 routes) + Vite docs-site (1533 modules)
 ```
 
 Tất cả các tiêu chí của Master Prompt đã được xác minh trên mã nguồn thực tế và đối chiếu với dữ liệu kiểm thử tự động.

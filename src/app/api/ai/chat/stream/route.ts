@@ -1,7 +1,4 @@
-import { analyzeUserQuery } from "@/lib/rag/queryAnalysis";
-import { retrieveEvidenceChunks } from "@/lib/rag/retrieval";
-import { evaluateEvidenceSufficiency } from "@/lib/rag/evidenceSufficiency";
-import { generateGroundedAnswer } from "@/lib/rag/groundedGenerator";
+import { processCopilotChat } from "@/lib/ai/geminiChatService";
 import {
   saveUserMessage,
   saveAssistantMessage,
@@ -11,7 +8,7 @@ import {
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json();
-    const { message, conversationId = `conv-${Date.now()}`, roomContext } = rawBody;
+    const { message, conversationId = `conv-${Date.now()}`, roomId } = rawBody;
 
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "Tin nhắn không hợp lệ" }), {
@@ -21,47 +18,38 @@ export async function POST(request: Request) {
     }
 
     // 1. Retrieve recent history for conversational memory
-    const history = await getRecentConversationTurns(conversationId, 4);
+    const history = await getRecentConversationTurns(conversationId, 6);
 
-    // 2. Query Analysis & Rewriting for follow-ups
-    const analysis = analyzeUserQuery(message, history);
-
-    // 3. Hybrid Knowledge Retrieval
-    const retrievedChunks = retrieveEvidenceChunks(analysis.rewrittenQuery, {
-      topK: 4,
-      minScoreThreshold: 1.2,
-      approvalOnly: true,
+    // 2. Process Copilot Chat (Live Gemini / Grounded RAG with Tool Registry)
+    const copilotResult = await processCopilotChat({
+      message,
+      history,
+      roomId,
+      conversationId,
     });
 
-    // 4. Evidence Sufficiency Evaluation
-    const evaluation = evaluateEvidenceSufficiency(
-      analysis.rewrittenQuery,
-      analysis.intent,
-      retrievedChunks
-    );
-
-    // 5. Generate Grounded Answer
-    const generationResult = await generateGroundedAnswer({
-      query: message,
-      rewrittenQuery: analysis.rewrittenQuery,
-      intent: analysis.intent,
-      evaluation,
-      retrievedChunks,
-      roomContext,
-    });
-
-    // 6. Persist to DB
+    // 3. Persist to DB
     try {
       await saveUserMessage(conversationId, message);
-      await saveAssistantMessage(conversationId, generationResult);
+      await saveAssistantMessage(conversationId, {
+        answer: copilotResult.answer,
+        evidenceStatus: copilotResult.evidenceStatus as any,
+        responseMode: copilotResult.responseMode as any,
+        citations: copilotResult.citations,
+        retrievedChunkIds: copilotResult.citations.map((c) => c.chunkId),
+        modelProvider: copilotResult.modelProvider,
+        modelName: copilotResult.modelName,
+        suggestedFollowUps: copilotResult.suggestedFollowUps,
+        warnings: copilotResult.warnings || [],
+      });
     } catch (e) {
       console.warn("DB persistence warning:", e);
     }
 
-    // 7. Stream text chunks via Server-Sent Events (SSE)
+    // 4. Stream text chunks and tool events via Server-Sent Events (SSE)
     const encoder = new TextEncoder();
-    const fullText = generationResult.answer;
-    const chunkSize = 24; // Stream words/characters smoothly
+    const fullText = copilotResult.answer;
+    const chunkSize = 20;
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -70,12 +58,25 @@ export async function POST(request: Request) {
           encoder.encode(
             `data: ${JSON.stringify({
               type: "meta",
-              evidence_status: generationResult.evidenceStatus,
-              response_mode: generationResult.responseMode,
-              model_provider: generationResult.modelProvider,
+              evidence_status: copilotResult.evidenceStatus,
+              response_mode: copilotResult.responseMode,
+              model_provider: copilotResult.modelProvider,
+              model_name: copilotResult.modelName,
             })}\n\n`
           )
         );
+
+        // Send tool invocations if any
+        if (copilotResult.toolInvocations && copilotResult.toolInvocations.length > 0) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: "tools",
+                tool_invocations: copilotResult.toolInvocations,
+              })}\n\n`
+            )
+          );
+        }
 
         // Stream text chunks
         for (let i = 0; i < fullText.length; i += chunkSize) {
@@ -88,19 +89,20 @@ export async function POST(request: Request) {
               })}\n\n`
             )
           );
-          // Micro delay to simulate streaming cadence
-          await new Promise((r) => setTimeout(r, 20));
+          // Micro delay for realistic streaming cadence
+          await new Promise((r) => setTimeout(r, 16));
         }
 
-        // Send final verified payload with citations
+        // Send final verified payload with citations & follow-ups
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({
               type: "done",
               conversation_id: conversationId,
-              citations: generationResult.citations,
-              suggested_follow_ups: generationResult.suggestedFollowUps,
-              warnings: generationResult.warnings,
+              citations: copilotResult.citations,
+              suggested_follow_ups: copilotResult.suggestedFollowUps,
+              tool_invocations: copilotResult.toolInvocations,
+              warnings: copilotResult.warnings,
             })}\n\n`
           )
         );
@@ -118,9 +120,8 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: "Lỗi streaming", details: error.message }),
+      JSON.stringify({ error: "Lỗi kết nối streaming Copilot", details: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
-

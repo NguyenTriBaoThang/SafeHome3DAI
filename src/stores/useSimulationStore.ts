@@ -25,6 +25,15 @@ export interface ScenarioHistoryEntry {
   isBaseline: boolean;
 }
 
+export interface Copilot3DAction {
+  action: "FOCUS_OBJECT" | "FOCUS_ROOM" | "SET_CAMERA_MODE" | "HIGHLIGHT_RISK";
+  targetId?: string;
+  roomId?: string;
+  mode?: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY" | "COMPARISON";
+  label?: string;
+  timestamp: number;
+}
+
 interface SimulationStore {
   // Room and Objects
   rooms: RoomState[];
@@ -37,6 +46,12 @@ interface SimulationStore {
   cameraFocusPoint: [number, number, number] | null;
   transformMode: "translate" | "rotate" | null;
   lightingPreset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
+
+  // Copilot 3D Action Bridge
+  copilotPendingAction: Copilot3DAction | null;
+  setCopilotPendingAction: (action: Copilot3DAction | null) => void;
+  clearCopilotPendingAction: () => void;
+  executeCopilotAction: (action: Copilot3DAction) => { success: boolean; message: string };
 
   // View Options
   showLabels: boolean;
@@ -155,6 +170,73 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
       },
     ],
     comparison: null,
+
+    copilotPendingAction: null,
+    setCopilotPendingAction: (action) => set({ copilotPendingAction: action }),
+    clearCopilotPendingAction: () => set({ copilotPendingAction: null }),
+    executeCopilotAction: (action) => {
+      const state = get();
+      if (action.action === "FOCUS_OBJECT" && action.targetId) {
+        let foundObj: any = null;
+        let foundRoom: any = null;
+
+        for (const r of state.rooms) {
+          const o = r.objects.find((it) => it.id === action.targetId || it.modelType === action.targetId);
+          if (o) {
+            foundObj = o;
+            foundRoom = r;
+            break;
+          }
+        }
+
+        if (foundObj) {
+          if (foundRoom.id !== state.currentRoomId) {
+            state.switchRoom(foundRoom.id);
+          }
+          set({
+            selectedObjectId: foundObj.id,
+            cameraFocusPoint: foundObj.position,
+            cameraPreset: "INTERIOR",
+            showHazardOverlay: true,
+          });
+          return { success: true, message: `Đã định vị và tập trung máy quay vào ${foundObj.name}` };
+        }
+        return { success: false, message: `Không tìm thấy đồ vật ${action.targetId}` };
+      }
+
+      if (action.action === "FOCUS_ROOM" && action.roomId) {
+        state.switchRoom(action.roomId);
+        set({ cameraFocusPoint: null, cameraPreset: "ISOMETRIC" });
+        return { success: true, message: `Đã chuyển sang phòng ${action.roomId}` };
+      }
+
+      if (action.action === "SET_CAMERA_MODE" && action.mode) {
+        state.setCameraPreset(action.mode);
+        return { success: true, message: `Đã đổi góc nhìn sang ${action.mode}` };
+      }
+
+      if (action.action === "HIGHLIGHT_RISK" && action.targetId) {
+        const finding = state.currentAssessment?.findings.find(
+          (f) => f.id === action.targetId || f.detectionRuleId === action.targetId
+        );
+        if (finding && finding.targetObjectId) {
+          const obj = state.getCurrentRoom().objects.find((o) => o.id === finding.targetObjectId);
+          if (obj) {
+            set({
+              selectedObjectId: obj.id,
+              cameraFocusPoint: obj.position,
+              cameraPreset: "SAFETY",
+              showHazardOverlay: true,
+            });
+            return { success: true, message: `Đã kích hoạt cảnh báo [${finding.title}] trên 3D` };
+          }
+        }
+        set({ cameraPreset: "SAFETY", showHazardOverlay: true });
+        return { success: true, message: `Đã bật hiển thị cảnh báo rủi ro 3D` };
+      }
+
+      return { success: false, message: "Hành động không xác định" };
+    },
 
     switchRoom: (roomId: string) => {
       const room = get().rooms.find((r) => r.id === roomId);
