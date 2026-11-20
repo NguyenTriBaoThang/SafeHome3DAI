@@ -355,5 +355,5 @@ Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` v
 
 ## ⚖️ 10. Bản Quyền & Tuyên Bố Miễn Trừ Trách Nhiệm
 
-- **Bản quyền**: Phát hành theo giấy phép [MIT License](./LICENSE). Copyright © 2026 **Nguyễn Trí Bảo Thắng**.
+- **Bản quyền**: Phát hành theo giấy phép [MIT License](./LICENSE). Copyright © 2026 **Nguyễn Tri Bão Thắng**.
 - **Tuyên bố y tế**: *SafeHome 3D AI là công cụ hỗ trợ giáo dục cộng đồng, tầm soát nguy cơ môi trường và hỗ trợ hoạch định cải tạo không gian sống an toàn cho người cao tuổi. Ứng dụng không thay thế cho chẩn đoán y khoa, thẩm định xây dựng thực tế hoặc ý kiến của bác sĩ chuyên khoa.*
