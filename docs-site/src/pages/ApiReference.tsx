@@ -1,137 +1,135 @@
-import { Code, Send } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ChevronDown, Search } from 'lucide-react'
+import { API_GROUPS, type Endpoint } from '../data/api'
+import { CodeBlock } from '../components/CodeBlock'
+import { PageHeader, Callout, Src } from '../components/ui'
+
+const ACCESS: Record<string, string> = {
+  public: 'Public / Client Endpoint',
+  optional: 'Optional Patient Context',
+  session: 'Active Session / Survey',
+  clinician: 'Clinician / Geriatrician',
+  admin: 'System Administrator',
+}
+
+function Row({ e }: { e: Endpoint }) {
+  const [open, setOpen] = useState(false)
+  const expandable = Boolean(e.request || e.response)
+  return (
+    <li className="ep">
+      <button
+        type="button"
+        className="ep-head"
+        onClick={() => expandable && setOpen(!open)}
+        aria-expanded={expandable ? open : undefined}
+        disabled={!expandable}
+      >
+        <span className={`method m-${e.method}`}>{e.method}</span>
+        <code className="path">{e.path}</code>
+        {e.access && <span className="acc mono">{ACCESS[e.access]}</span>}
+        {expandable && (
+          <ChevronDown
+            size={16}
+            className={open ? 'rot' : ''}
+            style={{ marginLeft: 'auto', transition: 'transform 0.15s ease' }}
+            aria-hidden
+          />
+        )}
+      </button>
+      <p className="ep-sum">
+        {e.summary} <span className="mono dim" style={{ fontSize: '0.76rem', color: 'var(--muted)', marginLeft: 8 }}><Src path={e.source} /></span>
+      </p>
+      {open && (
+        <div className="ep-body">
+          {e.request && <CodeBlock label="Request Payload (JSON)" code={e.request} />}
+          {e.response && <CodeBlock label="Response Body (200 OK JSON)" code={e.response} />}
+        </div>
+      )}
+    </li>
+  )
+}
 
 export default function ApiReference() {
+  const [group, setGroup] = useState('all')
+  const [q, setQ] = useState('')
+
+  const groups = useMemo(() => {
+    return API_GROUPS.map((g) => ({
+      ...g,
+      endpoints: g.endpoints.filter(
+        (e) =>
+          (group === 'all' || group === g.id) &&
+          `${e.method} ${e.path} ${e.summary}`.toLowerCase().includes(q.toLowerCase())
+      ),
+    })).filter((g) => g.endpoints.length > 0)
+  }, [group, q])
+
+  const total = API_GROUPS.reduce((n, g) => n + g.endpoints.length, 0)
+
   return (
-    <div className="page">
-      <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Đặc Tả Giao Diện Lập Trình (API Reference)</h1>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Tài liệu kỹ thuật các điểm cuối API RESTful hỗ trợ tích hợp ngoại vi và giao tiếp giữa các phân hệ của SafeHome 3D AI.
-        </p>
+    <section className="page">
+      <PageHeader
+        eyebrow="RESTful API Specification"
+        title="SafeHome 3D AI API Reference"
+        lead={`${total} production endpoints powering Computer Vision, Item Hazard Assessment, Deterministic Risk Evaluation, Adaptive Surveying, and Clinical RAG Copilot.`}
+      />
+
+      <Callout tone="note" title="Production Standards & Type Safety">
+        Endpoints are implemented via Next.js App Router Route Handlers (<code>src/app/api/**/*.ts</code>). All incoming request bodies are validated against runtime Zod schemas with TypeScript type inference. Database mutations are managed through Prisma ORM across 16 relational models.
+      </Callout>
+
+      <div className="filters">
+        <div style={{ position: 'relative' }}>
+          <Search size={16} style={{ position: 'absolute', left: 14, top: 14, color: 'var(--muted)' }} />
+          <input
+            style={{ paddingLeft: 40 }}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Tìm kiếm endpoint theo đường dẫn, phương thức, hoặc chức năng (vd: assess-item, evaluate, chat)..."
+            aria-label="Filter endpoints"
+          />
+        </div>
+        <div className="chips" role="group" aria-label="Endpoint Groups">
+          <button
+            type="button"
+            className={group === 'all' ? 'chip on' : 'chip'}
+            aria-pressed={group === 'all'}
+            onClick={() => setGroup('all')}
+          >
+            Tất cả ({total})
+          </button>
+          {API_GROUPS.map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              className={group === g.id ? 'chip on' : 'chip'}
+              aria-pressed={group === g.id}
+              onClick={() => setGroup(g.id)}
+            >
+              {g.title.split('.')[1] || g.title} ({g.endpoints.length})
+            </button>
+          ))}
+        </div>
       </div>
 
-      <section>
-        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '1rem' }}>Danh Sách Các Endpoint Lõi (Core REST Endpoints)</h2>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Phương thức</th>
-                <th>Đường dẫn Endpoint</th>
-                <th>Phân hệ</th>
-                <th>Mô tả chức năng</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/survey/sessions</code></td>
-                <td>Khảo sát</td>
-                <td>Khởi tạo phiên khảo sát mới gắn với hồ sơ phòng</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/survey/answers</code></td>
-                <td>Khảo sát</td>
-                <td>Gửi câu trả lời, tính lại tiến độ và tự động tỉa nhánh câu hỏi</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/survey/nlp</code></td>
-                <td>NLP AI</td>
-                <td>Phân tích văn bản tiếng Việt tự do thành giá trị chuẩn hóa</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/vision/upload</code></td>
-                <td>Thị giác</td>
-                <td>Tải ảnh lên, kiểm tra Magic Bytes và cắt bỏ dữ liệu EXIF</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/vision/analyze</code></td>
-                <td>Thị giác</td>
-                <td>Quét nhận diện 18 lớp vật thể y tế trong ảnh</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-info">GET</span></td>
-                <td><code className="inline">/api/simulations</code></td>
-                <td>Bản sao 3D</td>
-                <td>Lấy danh sách tất cả các kịch bản 3D đã lưu trong kho</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/simulations</code></td>
-                <td>Bản sao 3D</td>
-                <td>Lưu cấu hình can thiệp mô phỏng 3D mới</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/risk-assessment</code></td>
-                <td>Nguy cơ y khoa</td>
-                <td>Thực thi 8 quy tắc lâm sàng tất định và trả về điểm số</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-success">POST</span></td>
-                <td><code className="inline">/api/chat</code></td>
-                <td>RAG Copilot</td>
-                <td>Truy vấn trợ lý AI có dẫn nguồn tài liệu WHO 2021 & CDC STEADI</td>
-              </tr>
-            </tbody>
-          </table>
+      {groups.map((g) => (
+        <div key={g.id} style={{ marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--cyan)' }}>■</span> {g.title}
+          </h2>
+          <ul className="eps">
+            {g.endpoints.map((e) => (
+              <Row key={e.method + e.path} e={e} />
+            ))}
+          </ul>
         </div>
-      </section>
+      ))}
 
-      <section className="grid-2">
-        <div className="card">
-          <div className="card-title">
-            <Send size={18} color="var(--primary-hover)" />
-            <span>Ví Dụ Yêu Cầu: Đánh Giá Nguy Cơ Lâm Sàng</span>
-          </div>
-          <pre>{`POST /api/risk-assessment
-Content-Type: application/json
-
-{
-  "roomId": "room_elderly_bed_01",
-  "surveyAnswers": {
-    "BED_001": 42,
-    "BED_006": "YES",
-    "BED_007": "NO",
-    "LIGHT_001": "NO"
-  },
-  "detectedObjects": [
-    { "type": "loose_rug", "confidence": 0.94 }
-  ]
-}`}</pre>
+      {!groups.length && (
+        <div className="card" style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
+          Không tìm thấy endpoint nào phù hợp với từ khóa "{q}".
         </div>
-
-        <div className="card">
-          <div className="card-title">
-            <Code size={18} color="var(--success)" />
-            <span>Ví Dụ Phản Hồi: Kết Quả & Kế Hoạch Can Thiệp</span>
-          </div>
-          <pre>{`{
-  "safetyScore": 45,
-  "riskLevel": "HIGH_RISK",
-  "findings": [
-    {
-      "ruleId": "RUG_NO_GRIP",
-      "severity": "HIGH",
-      "penalty": 20,
-      "message": "Thảm không chống trượt tại lối đi",
-      "citation": "CDC STEADI Environmental Checklist (p.2)"
-    },
-    {
-      "ruleId": "NIGHT_PATH_DARK",
-      "severity": "HIGH",
-      "penalty": 20,
-      "message": "Lối đi ban đêm không đủ ánh sáng <50 Lux",
-      "citation": "WHO Fall Prevention Guide (Sec 3.2)"
-    }
-  ]
-}`}</pre>
-        </div>
-      </section>
-    </div>
+      )}
+    </section>
   )
 }

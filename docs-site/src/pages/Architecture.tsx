@@ -1,14 +1,16 @@
-import { Layers, Lock, GitBranch } from 'lucide-react'
+import { Layers, Lock, GitBranch, Cpu, Database, Server } from 'lucide-react'
+import { PageHeader, Callout, Src } from '../components/ui'
+import { CodeBlock } from '../components/CodeBlock'
+import { SRC } from '../data/site'
 
 export default function Architecture() {
   return (
     <div className="page">
-      <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Kiến Trúc Hệ Thống (System Architecture)</h1>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Mô hình kiến trúc phân tầng, luồng xử lý dữ liệu và hệ thống lưu trữ đồng bộ cho nền tảng SafeHome 3D AI.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Tài Liệu Kỹ Thuật · Sơ Đồ Hệ Thống"
+        title="Kiến Trúc Hệ Thống (System Architecture)"
+        lead="Mô hình kiến trúc phân tầng, luồng xử lý dữ liệu và hệ sinh thái lưu trữ đồng bộ cho nền tảng SafeHome 3D AI."
+      />
 
       <section className="card">
         <div className="card-title">
@@ -20,12 +22,14 @@ export default function Architecture() {
 │   Next.js 14 App Router · React 18 · Tailwind CSS · Three.js · @xyflow │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐   │
 │  │ AI Survey    │ │ Vision Studio│ │ Digital Twin │ │ Risk & XAI   │   │
+│  │(/ai-guided-  │ │(/ai-vision & │ │(/digital-twin│ │(/explainabili│   │
+│  │ survey)      │ │ /vision)     │ │ & dollhouse) │ │ ty, /ai-asst)│   │
 │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘   │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │ HTTPS / JSON API
 ┌────────────────────────────────────▼───────────────────────────────────┐
 │                    TẦNG BẢO MẬT & XÁC THỰC ĐẦU VÀO                     │
-│  - Magic Bytes Check (FF D8 FF / 89 50 4E 47) · Chống giả mạo MIME     │
+│  - Magic Bytes Check (FF D8 FF / 89 50 4E 47 / 52 49 46 46)             │
 │  - EXIF / GPS Metadata Stripper · Bảo vệ tuyệt đối thông tin vị trí    │
 │  - Zod Runtime Gatekeeper · Kiểm tra kiểu dữ liệu & schema nghiêm ngặt  │
 └────────────────────────────────────┬───────────────────────────────────┘
@@ -38,9 +42,14 @@ export default function Architecture() {
 │  │  Pruning + NLP parsing)│  │  STEADI · 0% Hallucination)          │  │
 │  └───────────────────────┘  └───────────────────────────────────────┘  │
 │  ┌───────────────────────┐  ┌───────────────────────────────────────┐  │
-│  │ 3D Spatial Clustering │  │ Evidence-Grounded RAG Pipeline        │  │
-│  │ (<0.95m Euclidean tag │  │ (Vector embedding + Direct WHO/CDC    │  │
-│  │  clustering algorithm)│  │  guideline citation grounding)        │  │
+│  │ Item Hazard Analyzer  │  │ Evidence-Grounded RAG Pipeline        │  │
+│  │ (CDC STEADI Hotspots  │  │ (Vector search + SafeHomeMarkdown     │  │
+│  │  H1..H4 & Biomechanics│  │  + Whitelist citation grounding)      │  │
+│  └───────────────────────┘  └───────────────────────────────────────┘  │
+│  ┌───────────────────────┐  ┌───────────────────────────────────────┐  │
+│  │ 3D Spatial Clustering │  │ Spatial Validation Engine             │  │
+│  │ (<0.95m Euclidean tag │  │ (Boundary, Clearance, Collision       │  │
+│  │  clustering algorithm)│  │  detection & 3D mesh reconstruction)  │  │
 │  └───────────────────────┘  └───────────────────────────────────────┘  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │ Prisma ORM
@@ -51,6 +60,10 @@ export default function Architecture() {
 │  - RiskAssessment, RiskFinding, ActionPlan, Simulation, AuditEvent     │
 └────────────────────────────────────────────────────────────────────────┘`}</pre>
       </section>
+
+      <Callout title="Kiến Trúc Phân Ly Thị Giác & Bounding Box Mới">
+        Hệ thống phân tách dứt điểm giữa khung bao hình học SVG (<Src path="rx={0.8}" />) và nhãn tên <Src path="CSS HTML Overlay" /> trên phân hệ <Src path="src/app/ai-vision/page.tsx" />. Điều này khắc phục 100% lỗi phóng đại font chữ do ma trận tỉ lệ của Chromium khi dùng thẻ <code className="inline">&lt;foreignObject&gt;</code>.
+      </Callout>
 
       <section>
         <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '1rem' }}>Các Mô Hình Dữ Liệu Lõi (Prisma Database Schema)</h2>
@@ -69,7 +82,7 @@ export default function Architecture() {
                 <td><code className="inline">Room</code></td>
                 <td>Hồ sơ không gian phòng (phòng ngủ, vệ sinh, khách)</td>
                 <td>1:N Object3D, 1:N SurveySession, 1:N RiskAssessment</td>
-                <td>Lưu kích thước vật lý (dài, rộng, cao, cửa)</td>
+                <td>Lưu kích thước vật lý (dài, rộng, cao, cửa sổ/cửa đi)</td>
               </tr>
               <tr>
                 <td><code className="inline">Object3D</code></td>
@@ -154,6 +167,27 @@ export default function Architecture() {
             <li><strong>Audit Trail:</strong> Mọi biến động trạng thái y tế đều được ghi vết vĩnh viễn trong <code className="inline">AuditEvent</code>.</li>
           </ul>
         </div>
+      </section>
+
+      <section style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '0.8rem' }}>Ví Dụ Cấu Hình Mô Hình Dữ Liệu Prisma</h2>
+        <CodeBlock
+          label="prisma/schema.prisma"
+          code={`model Room {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // BEDROOM, BATHROOM, LIVING_ROOM
+  length      Float    // meters
+  width       Float    // meters
+  height      Float    // meters
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  objects     Object3D[]
+  surveys     SurveySession[]
+  assessments RiskAssessment[]
+}`}
+        />
       </section>
     </div>
   )
