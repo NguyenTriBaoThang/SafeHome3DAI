@@ -1,43 +1,44 @@
-import { Box, Layers, Sun, FolderHeart } from 'lucide-react'
+import { Box, Layers, Sun, FolderHeart, Home } from 'lucide-react'
 
 export default function DigitalTwin() {
   return (
     <div className="page">
       <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>3D Digital Twin & Spatial Clustering</h1>
+        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>3D Digital Twin & Photorealistic Dollhouse</h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Mô hình hóa không gian 3D tương tác thời gian thực, thuật toán gom cụm nhãn chống đè lấn và kho lưu trữ kịch bản mô phỏng.
+          Mô hình hóa không gian 3D tương tác thời gian thực, cảnh tham chiếu kiến trúc photorealistic dollhouse, điều khiển ánh sáng/mặt sàn và thuật toán gom cụm nhãn chống đè lấn.
         </p>
       </div>
 
       <div className="grid-2">
         <section className="card">
           <div className="card-title">
-            <Box size={18} color="var(--primary-hover)" />
-            <span>Không Gian Số Hóa 3D Thời Gian Thực (WebGL)</span>
+            <Home size={18} color="var(--primary-hover)" />
+            <span>Mô Hình Photorealistic Dollhouse (/digital-twin)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Xây dựng trên nền tảng Three.js và React Three Fiber, tái hiện chân thực không gian phòng với tỷ lệ 1:1:
+            Không gian kiến trúc tham chiếu mô phỏng chi tiết phòng ngủ và nhà vệ sinh khép kín của người cao tuổi:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Đa góc nhìn:</strong> Chuyển đổi linh hoạt giữa góc phối cảnh Isometric, Mặt bằng phẳng (Top 2D) và Chính diện (Front).</li>
-            <li><strong>Tương tác vật thể:</strong> Bấm chọn vật thể để kiểm tra thông số vật lý (chiều cao nệm, độ bám sàn, kích thước).</li>
-            <li><strong>Hành lang di chuyển an toàn:</strong> Vẽ luồng di chuyển từ giường ngủ ra cửa/nhà vệ sinh với cảnh báo vật cản.</li>
+            <li><strong>6 Chế độ góc nhìn:</strong> Dollhouse toàn cảnh, Tầm mắt người già, Mặt bằng 2D, Walkthrough đi dạo, Tự căn chỉnh (Fit) và Chụp ảnh màn hình (Snapshot).</li>
+            <li><strong>Tương tác vật thể:</strong> Bấm chọn bất kỳ đồ nội thất nào trong 3D để xem thông số kỹ thuật, chiều cao nệm, kiểm tra rủi ro.</li>
+            <li><strong>Hành lang di chuyển an toàn:</strong> Trực quan hóa luồng giao thông từ giường đến cửa ra vào và toilet.</li>
           </ul>
         </section>
 
         <section className="card">
           <div className="card-title">
             <Sun size={18} color="var(--warning)" />
-            <span>Mô Phỏng Môi Trường Động (Environmental Controls)</span>
+            <span>Studio Chiếu Sáng & Ma Sát Sàn Động</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Mô phỏng tức thì các điều kiện rủi ro cao vào ban đêm:
+            Mô phỏng tức thì các điều kiện rủi ro cao theo tiêu chuẩn y khoa:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Thanh trượt độ rọi (Lux):</strong> Giảm ánh sáng xuống mức đêm tối (50 Lux) hoặc tăng lên mức an toàn (150+ Lux).</li>
-            <li><strong>Mô phỏng mặt sàn trơn:</strong> Bật/tắt trạng thái sàn ướt để quan sát nguy cơ trượt té tức thì.</li>
-            <li><strong>Lớp chống trượt:</strong> Thêm lớp phủ ma sát cao để trực quan hóa hiệu quả can thiệp giảm chấn.</li>
+            <li><strong>Chế độ ánh sáng đặt trước:</strong> Hoàng hôn, Ban ngày (250 Lux), Ban đêm (40 Lux — ngưỡng nguy cơ ngã), Studio (320 Lux).</li>
+            <li><strong>Thanh trượt độ rọi (Lux):</strong> Điều chỉnh liên tục từ 0 đến 520 Lux.</li>
+            <li><strong>Mô phỏng mặt sàn trơn:</strong> Bật/tắt trạng thái Sàn khô ráo vs Sàn ướt.</li>
+            <li><strong>Bổ sung thiết bị chống ngã:</strong> Bật/tắt thanh vịn bồn cầu, thanh vịn vòi sen, thảm cao su chống trượt giác hút.</li>
           </ul>
         </section>
       </div>

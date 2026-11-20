@@ -8,7 +8,7 @@ Tài liệu này mô tả chi tiết kiến trúc xử lý từ đầu đến cu
 
 ```mermaid
 flowchart TD
-    User([Người dùng gửi câu hỏi tiếng Việt]) --> QA[Query Analysis & Intent Classifier]
+    User([Người dùng gửi câu hỏi tiếng Việt / Yêu cầu thẩm định]) --> QA[Query Analysis & Intent Classifier]
     
     QA --> CheckEmergency{Phát hiện cấp cứu?}
     CheckEmergency -- Có --> EmergencyResp[Emergency Escalation: Hướng dẫn gọi 115 & sơ cứu]
@@ -19,18 +19,18 @@ flowchart TD
     CheckScope -- Không --> QueryRewrite[Viết lại truy vấn & Lọc Stop Words tiếng Việt]
     QueryRewrite --> Retrieval[Hybrid Retrieval Engine: Field-Boosted TF-IDF]
     
-    KnowledgeBase[(Kho tri thức chuẩn hóa: WHO, CDC, Bộ Y tế)] --> Retrieval
+    KnowledgeBase[(Kho tri thức chuẩn hóa: WHO, CDC, Bộ Y tế, NCOA)] --> Retrieval
     
     Retrieval --> EvidenceEval[Evidence Sufficiency Evaluator]
     EvidenceEval --> EvalDecision{Đánh giá chứng cứ}
     
     EvalDecision -- Không đủ / Số liệu mạo nhận --> InsufficientResp[Từ chối khẳng định thiếu chứng cứ]
-    EvalDecision -- Đầy đủ / Một phần --> GenEngine[Grounded Generator: Local / LLM Provider]
+    EvalDecision -- Đầy đủ / Một phần --> GenEngine[Grounded Generator: Local / External LLM Provider]
     
     GenEngine --> CitationVerifier[Citation Verifier & Anti-Hallucination Filter]
-    CitationVerifier --> UIFormat[Đóng gói phản hồi: Markdown + Clickable [1][2] + Follow-up]
+    CitationVerifier --> UIFormat[Đóng gói phản hồi: SafeHomeMarkdown + Thẻ Trích Dẫn [1][2][3]]
     
-    EmergencyResp --> Out([Hiển thị trên giao diện 3-Panel & Lưu SQLite])
+    EmergencyResp --> Out([Giao diện 3-Panel: Lịch sử · Chat Stream · Ngăn Tra Cứu 4-Tab])
     ScopeRefusal --> Out
     InsufficientResp --> Out
     UIFormat --> Out
@@ -71,16 +71,28 @@ flowchart TD
   - `CONFLICTING_EVIDENCE`: Tài liệu có hướng dẫn khác nhau theo từng điều kiện cụ thể.
   - `OUT_OF_SCOPE`: Ngoài phạm vi an toàn không gian sống.
 
-### 2.4 Bộ Xác Thực Trích Dẫn Chống Bịa Đặt (`citationVerifier.ts`)
-- Quét toàn bộ văn bản phản hồi tìm các ký hiệu `[k]`.
-- Đối chiếu `k` với danh sách phân đoạn bằng chứng đã truy xuất.
-- **Loại bỏ tự động**: Mọi số trích dẫn không tồn tại trong danh sách bằng chứng thực tế sẽ bị bóc tách khỏi câu trả lời.
-- Gắn kèm metadata trích dẫn có cấu trúc: Tên văn bản, tổ chức công bố, số trang, offset đoạn văn bản và mã kiểm tra SHA-256.
+### 2.4 Trình Định Dạng Chuyên Biệt `SafeHomeMarkdown.tsx`
+- Tối ưu hóa hiển thị văn bản y khoa:
+  - Tiêu đề cấp 2, cấp 3 (`##`, `###`) với khoảng cách và typography sắc nét.
+  - In đậm và danh sách gạch đầu dòng rõ ràng.
+  - Hộp cảnh báo an toàn (`* ⚠️`) với nền vàng nhẹ, đường viền và biểu tượng nổi bật.
+  - Thẻ thông tin đối chiếu không gian 3D (`📌`) làm nổi bật phòng và số nguy cơ tiềm ẩn.
+  - Thẻ trích dẫn y khoa tương tác (`[1]`, `[2]`, `[3]`, `[4]`): Nhấp vào tự động mở ngăn tra cứu bên phải và cuộn đến đúng đoạn bằng chứng tương ứng.
 
-### 2.5 Bộ Sinh Lời Thoại Đối Chiếu (`groundedGenerator.ts`)
-- **Chế độ Ngoại biên (External LLM Provider)**: Hỗ trợ cấu hình Google Gemini (`gemini-1.5-pro`) hoặc OpenAI (`gpt-4o`) qua biến môi trường.
-- **Chế độ Cục bộ Chuẩn xác (Local Grounded Fallback)**: Hoạt động 100% offline, không phụ thuộc internet hay API key bên thứ ba, tổng hợp câu trả lời dựa trên chính xác các câu từ trong phân đoạn được duyệt.
-- Tự động bổ sung lời nhắc y tế tiêu chuẩn và 2-3 câu hỏi gợi ý liên quan theo ngữ cảnh.
+### 2.5 Ngăn Tra Cứu Bằng Chứng 4 Tab (Right Evidence Drawer)
+1. **Tab 1 — Bằng chứng (Evidence):**
+   - Tên tài liệu gốc, tổ chức phát hành (WHO, CDC STEADI, Bộ Y Tế, NCOA).
+   - Điều khoản, tiêu đề phân đoạn, số trang gốc.
+   - Nguyên văn đoạn trích thẩm định y khoa.
+   - Đường dẫn liên kết trực tiếp tới cổng thông tin chính thức của tổ chức.
+2. **Tab 2 — Vật dụng (Items Vault):**
+   - Danh sách và lịch sử các đồ vật đã thẩm định rủi ro qua ảnh.
+   - Thẻ tóm tắt mức độ nguy hiểm, số điểm nguy cơ H1..H4.
+   - Nút liên kết chuyển nhanh tới phân hệ **Thị giác AI (AI Vision)**.
+3. **Tab 3 — Kho nguồn (Sources Whitelist):**
+   - Danh bạ các tài liệu chuyên môn được cho phép lưu trữ trong cơ sở tri thức cục bộ.
+4. **Tab 4 — Thẩm định RAG (Live RAG Benchmark):**
+   - Bảng đánh giá chất lượng câu trả lời theo 8 tiêu chí kiểm thử tự động.
 
 ---
 
@@ -90,6 +102,7 @@ flowchart TD
 erDiagram
     ConversationSession ||--o{ ConversationMessage : "chứa"
     ConversationMessage ||--o{ AnswerCitation : "có trích dẫn"
+    ConversationMessage ||--o| ItemHazardAssessment : "chứa thẩm định vật dụng"
     KnowledgeSource ||--o{ KnowledgePassage : "chia thành"
     KnowledgePassage ||--o{ AnswerCitation : "nguồn gốc"
 
@@ -102,24 +115,22 @@ erDiagram
 
     ConversationMessage {
         string id PK
-        string sessionId FK
+        string conversationId FK
         string role
         string content
         string evidenceStatus
         string responseMode
-        float confidenceScore
-        datetime createdAt
+        datetime timestamp
     }
 
-    AnswerCitation {
+    ItemHazardAssessment {
         string id PK
-        string messageId FK
-        string passageId FK
-        int citationIndex
-        string sourceTitle
-        string publisher
-        string passageExcerpt
-        string pageNumber
+        string itemName
+        int riskScore
+        string severity
+        string urgencyLevel
+        string whyDangerous
+        json whereDangerousHotspots
+        json remediation
     }
 ```
-

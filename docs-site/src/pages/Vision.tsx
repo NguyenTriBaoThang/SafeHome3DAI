@@ -1,12 +1,12 @@
-import { ShieldCheck, Camera, Scan, AlertCircle } from 'lucide-react'
+import { ShieldCheck, Camera, Scan, AlertCircle, Sparkles, MapPin } from 'lucide-react'
 
 export default function Vision() {
   return (
     <div className="page">
       <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Multimodal AI Vision Studio</h1>
+        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Multimodal AI Vision Studio & Item Hazard Assessment</h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Phân tích hình ảnh hiện trạng không gian sống, nhận diện vật thể tiềm ẩn nguy cơ ngã và bảo mật ảnh gia đình.
+          Phân tích hình ảnh hiện trạng không gian sống, quét toàn cảnh phòng dựng 3D và thẩm định chuyên sâu nguy cơ từng vật dụng theo chuẩn y khoa CDC STEADI & WHO 2021.
         </p>
       </div>
 
@@ -42,13 +42,45 @@ export default function Vision() {
         </section>
       </div>
 
+      <section className="card" style={{ borderLeft: '4px solid var(--accent)' }}>
+        <div className="card-title">
+          <Sparkles size={18} color="var(--accent)" />
+          <span>Thẩm Định Nguy Cơ Vật Dụng Đơn Lẻ Qua Ảnh (CDC STEADI Standard)</span>
+        </div>
+        <p style={{ color: 'var(--text-muted)' }}>
+          Phân hệ chuyên biệt thẩm định khi người dùng tải ảnh một vật dụng cụ thể, trả lời 3 câu hỏi lâm sàng cốt lõi:
+        </p>
+        <div className="grid-2" style={{ marginTop: '0.75rem' }}>
+          <div>
+            <h4 style={{ color: '#fff', fontSize: '1rem', marginBottom: '0.3rem' }}>1. Mức Độ Nguy Hiểm Bao Nhiêu?</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Chấm điểm rủi ro khách quan (0-100), phân tầng ưu tiên (KHẨN CẤP, ƯU TIÊN CAO, TRUNG BÌNH, THẤP) và mức độ nghiêm trọng (CRITICAL, HIGH, MEDIUM, LOW).
+            </p>
+            <h4 style={{ color: '#fff', fontSize: '1rem', marginTop: '0.75rem', marginBottom: '0.3rem' }}>2. Tại Sao Nguy Hiểm?</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Phân tích cơ chế sinh cơ học: Lực va đập góc nhọn (Focal Impact), hệ số ma sát trượt thấp (&mu; &lt; 0.4), ảo giác chiều sâu mặt kính, thu hẹp khoảng thông thủy lối đi (&lt;90cm).
+            </p>
+          </div>
+          <div>
+            <h4 style={{ color: '#fff', fontSize: '1rem', marginBottom: '0.3rem' }}>3. Nguy Hiểm Ở Chỗ Nào? (Hotspots H1..H4)</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Gắn điểm ghim nguy cơ tương tác (H1, H2, H3, H4) trực tiếp trên ảnh kèm tính năng nhấp để điều chỉnh vị trí ghim (Click-to-reposition).
+            </p>
+            <h4 style={{ color: '#fff', fontSize: '1rem', marginTop: '0.75rem', marginBottom: '0.3rem' }}>4. Biện Pháp Cải Thiện & Dự Toán</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Lộ trình khắc phục từng bước, vật tư cần chuẩn bị, chi phí ước tính (VND) và thời gian thi công.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <div className="card-title">
           <Scan size={18} color="var(--primary-hover)" />
-          <span>Quy Trình Nhận Diện Vật Thể & Lưới Phân Loại (Taxonomy)</span>
+          <span>Quy Trình Nhận Diện Vật Thể & Lưới Phân Loại (Taxonomy 18 Lớp)</span>
         </div>
         <p style={{ color: 'var(--text-muted)' }}>
-          Hệ thống ánh xạ trực tiếp các vật thể nhận diện được từ mô hình thị giác (YOLOv8 / ViT) thành 18 phân lớp đối tượng liên quan trực tiếp đến an toàn ngã:
+          Hệ thống ánh xạ trực tiếp các vật thể nhận diện được từ mô hình thị giác thành 18 phân lớp đối tượng liên quan trực tiếp đến an toàn ngã:
         </p>
 
         <div className="table-wrap" style={{ marginTop: '0.75rem' }}>
@@ -87,6 +119,12 @@ export default function Vision() {
                 <td>Dọn dẹp vật cản trên hành lang di chuyển ban đêm</td>
               </tr>
               <tr>
+                <td><code className="inline">table / sharp_corners</code></td>
+                <td><span className="badge badge-danger">High Risk</span></td>
+                <td><code className="inline">PATH_OBSTRUCTION</code></td>
+                <td>Bọc đệm silicon bo tròn góc nhọn, dịch chuyển sát tường</td>
+              </tr>
+              <tr>
                 <td><code className="inline">grab_bar / rail</code></td>
                 <td><span className="badge badge-success">Protective</span></td>
                 <td><code className="inline">NO_BATH_GRAB_BAR (Phủ định)</code></td>
@@ -113,6 +151,7 @@ export default function Vision() {
         </p>
         <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           <li>Mỗi vật thể phát hiện được hiển thị kèm theo khung nhận diện (Bounding Box) và hệ số tin cậy (Confidence Score).</li>
+          <li>Khung bao SVG kết hợp lớp phủ nhãn CSS HTML Overlay loại bỏ triệt để hiện tượng phóng đại cỡ chữ trong trình duyệt Chromium.</li>
           <li>Người dùng có quyền <strong>Xác nhận</strong>, <strong>Điều chỉnh vị trí</strong>, hoặc <strong>Loại bỏ</strong> các phát hiện không chính xác trước khi đưa vào hồ sơ đánh giá rủi ro.</li>
           <li>Ngăn chặn hoàn toàn sai sót nhận diện lan truyền vào mô hình 3D và báo cáo y tế chính thức.</li>
         </ul>

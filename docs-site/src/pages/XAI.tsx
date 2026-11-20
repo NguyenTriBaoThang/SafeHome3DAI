@@ -1,12 +1,12 @@
-import { GitPullRequest, Search, FileCheck, CheckCircle2 } from 'lucide-react'
+import { GitPullRequest, Search, FileCheck, CheckCircle2, BookOpen } from 'lucide-react'
 
 export default function XAI() {
   return (
     <div className="page">
       <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Explainable AI (XAI) & RAG Copilot</h1>
+        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Explainable AI (XAI) & SafeHome Copilot</h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Hệ thống giải trình quyết định AI minh bạch qua đồ thị quyết định và trợ lý hỏi đáp có căn cứ y khoa (Grounded RAG).
+          Hệ thống giải trình quyết định AI minh bạch qua đồ thị ReactFlow và trợ lý hỏi đáp có căn cứ y khoa (Grounded RAG) kèm ngăn tra cứu bằng chứng 4 tab.
         </p>
       </div>
 
@@ -14,40 +14,50 @@ export default function XAI() {
         <section className="card">
           <div className="card-title">
             <GitPullRequest size={18} color="var(--primary-hover)" />
-            <span>Sơ Đồ Giải Trình Quyết Định (XAI Decision Graph)</span>
+            <span>Sơ Đồ Giải Trình Quyết Định (/explainability)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
             Ứng dụng công nghệ React Flow (@xyflow/react), hệ thống vẽ sơ đồ trực quan từng bước suy luận dẫn đến cảnh báo nguy cơ:
           </p>
-          <pre>{`[Dữ liệu gốc]
-  ├─ Câu hỏi BED_006: "Có thảm"
-  └─ Câu hỏi BED_007: "Chưa dán cố định"
+          <pre>{`[Không gian phòng]
+  └─ Phòng ngủ / Toilet
          │
          ▼
-[Động cơ quy tắc]
-  └─ Quy tắc RUG_NO_GRIP vi phạm (-20 điểm)
+[Vật thể 3D nhận diện]
+  └─ Bàn trà góc nhọn / Dây điện / Thảm
          │
          ▼
-[Căn cứ khoa học]
-  └─ CDC STEADI Checklist: "Loose throw rugs"
+[Số đo không gian]
+  └─ Khoảng cách lối đi < 90cm / Độ rọi < 50 Lux
          │
          ▼
-[Hành động can thiệp]
-  └─ Dán băng dính 2 mặt hoặc đổi thảm chống trượt`}</pre>
+[Quy chuẩn y tế vi phạm]
+  └─ WHO 2021 & CDC STEADI Checklist
+         │
+         ▼
+[Nguy cơ cảnh báo & Can thiệp]
+  └─ Đề xuất vật tư, chi phí dự toán & hướng dẫn thi công`}</pre>
         </section>
 
         <section className="card">
           <div className="card-title">
             <Search size={18} color="var(--success)" />
-            <span>Trợ Lý Tra Cứu Y Khoa Có Căn Cứ (RAG Copilot)</span>
+            <span>Trợ Lý Tra Cứu Y Khoa Có Căn Cứ (/ai-assistant)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Trợ lý AI tích hợp kho tri thức y học chứng cứ đã được lập chỉ mục vector:
+            Trợ lý AI tích hợp kho tri thức y học chứng cứ đã được lập chỉ mục vector và ngăn tra cứu 4 tab:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Truy xuất chuẩn xác (Dense Retrieval):</strong> Tìm kiếm ngữ nghĩa trong cẩm nang WHO 2021 và CDC STEADI.</li>
-            <li><strong>Dẫn nguồn trích dẫn:</strong> Mỗi câu trả lời của AI Copilot bắt buộc phải đính kèm liên kết trích dẫn rõ ràng.</li>
-            <li><strong>Tuyên bố miễn trừ trách nhiệm y tế:</strong> Hệ thống tự động kèm khuyến cáo rằng AI chỉ mang tính chất hỗ trợ tầm soát, không thay thế chẩn đoán y khoa chính thức.</li>
+            <li><strong>SafeHomeMarkdown:</strong> Định dạng tiêu đề y khoa, thẻ bài học, hộp cảnh báo an toàn và các số trích dẫn tương tác <code className="inline">[1]</code>, <code className="inline">[2]</code>.</li>
+            <li><strong>Ngăn tra cứu bằng chứng 4 Tab:</strong>
+              <ul style={{ paddingLeft: '1rem', marginTop: '0.2rem' }}>
+                <li><em>Bằng chứng:</em> Xem nguyên văn đoạn trích, số trang và link cổng thông tin chính thức.</li>
+                <li><em>Vật dụng:</em> Quản lý lịch sử các vật dụng đã thẩm định qua ảnh.</li>
+                <li><em>Kho nguồn:</em> Danh mục các nguồn tài liệu y tế chuẩn mực được kiểm duyệt.</li>
+                <li><em>Thẩm định RAG:</em> Báo cáo đánh giá chất lượng câu trả lời theo 8 tiêu chí.</li>
+              </ul>
+            </li>
+            <li><strong>Phòng chống ảo giác (Evidence Fallback Active):</strong> Tự động kích hoạt chế độ fallback an toàn khi thiếu tài liệu kiểm chứng, không bao giờ tự bịa số liệu.</li>
           </ul>
         </section>
       </div>
@@ -96,4 +106,3 @@ export default function XAI() {
     </div>
   )
 }
-
