@@ -1,0 +1,222 @@
+<View>
+  <Header value="Duyệt nhãn ảnh $image_id · tập $split. Tiền gán không phải sự thật đã xác nhận." />
+  <Image name="image" value="$image" />
+  <RectangleLabels name="objects" toName="image" canRotate="false">
+    <Label value="bed — Giường ngủ" />
+    <Label value="chair — Ghế ngồi / Ghế đẩu" />
+    <Label value="table — Bàn / Bàn trà" />
+    <Label value="cabinet — Tủ quần áo / Tủ đồ" />
+    <Label value="nightstand — Tab đầu giường" />
+    <Label value="door — Cửa ra vào / Cửa phòng" />
+    <Label value="toilet — Bồn cầu vệ sinh" />
+    <Label value="sink — Chậu rửa mặt / Lavabo" />
+    <Label value="bathtub — Bồn tắm / Sen tắm" />
+    <Label value="sofa — Ghế Sofa" />
+    <Label value="rug — Thảm trải sàn" />
+    <Label value="electrical_cable — Dây điện / Dây sạc" />
+    <Label value="grab_bar — Thanh tay vịn an toàn" />
+    <Label value="obstacle_route — Vật cản lối đi" />
+    <Label value="threshold_step — Gờ bậc cửa" />
+    <Label value="lamp — Đèn chiếu sáng" />
+    <Label value="light_switch — Công tắc đèn" />
+    <Label value="other — Vật thể khác" />
+  </RectangleLabels>
+  <Header value="Chỉ chọn Không khi đủ bằng chứng. Thiếu dữ liệu: Chưa rõ. Không suy lux, ma sát, mét/cm hoặc tầm với từ ảnh đơn." />
+  <Header value="RISK-001 — Thảm trải sàn lỏng lẻo, quăn mép hoặc dễ trượt" />
+  <Header value="Dấu hiệu: Thảm, mép cuộn, vị trí trên đường đi. Lưu ý: Cố định đáy thảm có thể không quan sát được từ ảnh" size="5" />
+  <Choices name="present_RISK_001" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_001" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_001" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_001" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_001" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-002 — Dây điện/cáp băng ngang lối đi không có nẹp bảo vệ" />
+  <Header value="Dấu hiệu: Dây, ổ cắm, tuyến đi qua. Lưu ý: Góc chụp có thể bỏ sót dây điện" size="5" />
+  <Choices name="present_RISK_002" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_002" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_002" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_002" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_002" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-003 — Vật cản lấn chiếm lối đi; thông thủy hẹp" />
+  <Header value="Dấu hiệu: Vật cản, hành lang, đồ bừa bộn. Lưu ý: Đo chính xác bề rộng lối đi cần thước hoặc dữ liệu chiều sâu" size="5" />
+  <Choices name="present_RISK_003" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_003" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_003" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_003" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_003" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-004 — Độ chiếu sáng ban đêm không đủ hoặc thiếu đèn dẫn đường" />
+  <Header value="Dấu hiệu: Đèn, ảnh ánh sáng ban đêm. Lưu ý: Không thể suy ra chỉ số lux chính xác bằng ảnh đơn" size="5" />
+  <Choices name="present_RISK_004" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_004" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_004" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_004" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_004" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-005 — Sàn nhà tắm ướt và có nguy cơ trơn trượt" />
+  <Header value="Dấu hiệu: Sàn ướt hoặc vũng nước, thảm chống trượt. Lưu ý: Hệ số ma sát cần đo hoặc xác nhận vật liệu" size="5" />
+  <Choices name="present_RISK_005" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_005" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_005" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_005" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_005" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-006 — Thiếu tay vịn an toàn tại bồn cầu / vòi sen" />
+  <Header value="Dấu hiệu: Vị trí tay vịn trong vùng bồn cầu, vòi sen. Lưu ý: Phải nhìn rõ khu vực và xác nhận bố trí thực tế" size="5" />
+  <Choices name="present_RISK_006" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_006" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_006" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_006" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_006" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-007 — Gờ cửa / bậc chênh cao không có vát dốc" />
+  <Header value="Dấu hiệu: Gờ cửa và đường tiếp cận. Lưu ý: Cần vật chuẩn hoặc đo cao độ (cm)" size="5" />
+  <Choices name="present_RISK_007" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_007" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_007" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_007" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_007" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="RISK-008 — Công tắc / vật thiết yếu ngoài tầm với từ giường" />
+  <Header value="Dấu hiệu: Giường, công tắc đèn, tab đầu giường. Lưu ý: Cần kiểm tra khả năng với và khoảng cách thực tế" size="5" />
+  <Choices name="present_RISK_008" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Có" />
+    <Choice value="Không" />
+    <Choice value="Chưa rõ" />
+    <Choice value="Không áp dụng" />
+  </Choices>
+  <Choices name="visible_RISK_008" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Nhìn rõ" />
+    <Choice value="Không nhìn rõ" />
+    <Choice value="Chưa rõ khả năng quan sát" />
+  </Choices>
+  <Choices name="severity_RISK_008" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="HIGH" />
+    <Choice value="MEDIUM" />
+    <Choice value="LOW" />
+    <Choice value="UNKNOWN" />
+  </Choices>
+  <Choices name="evidence_source_RISK_008" toName="image" choice="single-radio" required="true" showInline="true">
+    <Choice value="Chỉ ảnh" />
+    <Choice value="Đo/khảo sát thực tế" />
+  </Choices>
+  <TextArea name="evidence_RISK_008" toName="image" rows="2" required="true" placeholder="Bằng chứng nhìn thấy; lý do unknown; nguồn đo/khảo sát nếu có" />
+  <Header value="Xác nhận thủ công: kiểm tra mọi bbox và cả tám nguy cơ trước khi gửi." />
+  <TextArea name="reviewer" toName="image" required="true" placeholder="Tên người duyệt" />
+  <Choices name="human_review" toName="image" choice="single-radio" required="true">
+    <Choice value="Tôi đã kiểm tra và sửa nhãn; giữ Chưa rõ khi thiếu bằng chứng" />
+  </Choices>
+</View>

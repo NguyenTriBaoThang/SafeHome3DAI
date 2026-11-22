@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "bed",
+    "vietnamese_name": "Giường ngủ",
+    "definition": "Khu vực nghỉ ngơi chính, tâm điểm đánh giá tiếp cận ban đêm"
+  },
+  {
+    "id": 2,
+    "name": "chair",
+    "vietnamese_name": "Ghế ngồi / Ghế đẩu",
+    "definition": "Ghế sinh hoạt; nếu nằm trên luồng di chuyển có thể là vật cản"
+  },
+  {
+    "id": 3,
+    "name": "table",
+    "vietnamese_name": "Bàn / Bàn trà",
+    "definition": "Bàn sinh hoạt hoặc bàn trà cạnh giường có góc nhọn"
+  },
+  {
+    "id": 4,
+    "name": "cabinet",
+    "vietnamese_name": "Tủ quần áo / Tủ đồ",
+    "definition": "Tủ lưu trữ đồ đạc lớn"
+  },
+  {
+    "id": 5,
+    "name": "nightstand",
+    "vietnamese_name": "Tab đầu giường",
+    "definition": "Tủ tab cạnh giường chứa đèn ngủ và vật dụng thiết yếu"
+  },
+  {
+    "id": 6,
+    "name": "door",
+    "vietnamese_name": "Cửa ra vào / Cửa phòng",
+    "definition": "Vị trí giao cắt và bắt đầu tuyến di chuyển chính"
+  },
+  {
+    "id": 7,
+    "name": "toilet",
+    "vietnamese_name": "Bồn cầu vệ sinh",
+    "definition": "Khu vực trọng yếu cần thanh tay vịn trợ lực đứng - ngồi"
+  },
+  {
+    "id": 8,
+    "name": "sink",
+    "vietnamese_name": "Chậu rửa mặt / Lavabo",
+    "definition": "Khu vực vệ sinh cá nhân, bề mặt sứ dễ gây chấn thương nếu va đập"
+  },
+  {
+    "id": 9,
+    "name": "bathtub",
+    "vietnamese_name": "Bồn tắm / Sen tắm",
+    "definition": "Vùng ẩm ướt trơn trượt có nguy cơ té ngã gãy xương cao nhất"
+  },
+  {
+    "id": 10,
+    "name": "sofa",
+    "vietnamese_name": "Ghế Sofa",
+    "definition": "Nội thất phòng khách"
+  },
+  {
+    "id": 11,
+    "name": "rug",
+    "vietnamese_name": "Thảm trải sàn",
+    "definition": "Thảm trang trí hoặc thảm lau chân có nguy cơ trượt xô lệch (RISK-001)"
+  },
+  {
+    "id": 12,
+    "name": "electrical_cable",
+    "vietnamese_name": "Dây điện / Dây sạc",
+    "definition": "Dây dẫn nguồn vắt ngang mặt sàn tạo bẫy vấp ngón chân (RISK-002)"
+  },
+  {
+    "id": 13,
+    "name": "grab_bar",
+    "vietnamese_name": "Thanh tay vịn an toàn",
+    "definition": "Thiết bị trợ lực chống ngã gắn tường nhà vệ sinh (RISK-006)"
+  },
+  {
+    "id": 14,
+    "name": "obstacle_route",
+    "vietnamese_name": "Vật cản lối đi",
+    "definition": "Đồ đạc làm hẹp hành lang thông thủy dưới 0.85m (RISK-003)"
+  },
+  {
+    "id": 15,
+    "name": "threshold_step",
+    "vietnamese_name": "Gờ bậc cửa",
+    "definition": "Độ chênh cốt nền tại lối ra vào nhà tắm hoặc phòng (RISK-007)"
+  },
+  {
+    "id": 16,
+    "name": "lamp",
+    "vietnamese_name": "Đèn chiếu sáng",
+    "definition": "Bộ đèn bàn, đèn ngủ, đèn đứng, đèn tường hoặc đèn trần nhìn thấy được; không gồm cửa sổ hay phản chiếu. Không suy ra lux hoặc tình trạng chiếu sáng ban đêm từ sự hiện diện của đèn (RISK-004)."
+  },
+  {
+    "id": 17,
+    "name": "light_switch",
+    "vietnamese_name": "Công tắc đèn",
+    "definition": "Mặt công tắc điều khiển đèn gắn tường nhìn thấy rõ; không gồm ổ cắm, phích cắm, aptomat hoặc điều khiển từ xa. Không suy ra khả năng với tới từ giường khi thiếu đo đạc hoặc xác nhận (RISK-008)."
+  },
+  {
+    "id": 18,
+    "name": "other",
+    "vietnamese_name": "Vật thể khác",
+    "definition": "Đồ dùng hoặc vật dụng gia đình khác"
+  }
+]

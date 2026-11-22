@@ -92,16 +92,22 @@ describe("SafeHome Vision Intelligence — Unit Tests", () => {
       expect(grabBar.vietnameseName).toContain("tay vịn");
     });
 
-    it("verifies taxonomy covers all 15 core categories", () => {
-      expect(Object.keys(CATEGORY_TAXONOMY).length).toBeGreaterThanOrEqual(15);
+    it("covers 18 categories including lighting objects without claiming measured risks", () => {
+      expect(Object.keys(CATEGORY_TAXONOMY).length).toBe(18);
       expect(CATEGORY_TAXONOMY.rug.vietnameseName).toBeDefined();
       expect(CATEGORY_TAXONOMY.grab_bar.vietnameseName).toBeDefined();
+      expect(normalizePredictedLabel("bedside lamp").category).toBe("lamp");
+      expect(normalizePredictedLabel("công tắc đèn").category).toBe("light_switch");
+      expect(normalizePredictedLabel("light_switch").category).toBe("light_switch");
+      expect(CATEGORY_TAXONOMY.lamp.description).toContain("Không suy ra lux");
+      expect(CATEGORY_TAXONOMY.light_switch.description).toContain("thiếu đo đạc");
     });
   });
 
   describe("Vision Provider Inference & Observations", () => {
     it("generates structured detections and observations for BEDROOM", async () => {
       const analysis = await runVisionAnalysis("img-1", "room-bedroom-1", {
+        demo: true,
         roomType: "BEDROOM",
         viewpoint: "ENTRANCE",
       });
@@ -130,6 +136,7 @@ describe("SafeHome Vision Intelligence — Unit Tests", () => {
 
     it("generates structured detections and observations for BATHROOM", async () => {
       const analysis = await runVisionAnalysis("img-2", "room-bathroom-1", {
+        demo: true,
         roomType: "BATHROOM",
         viewpoint: "ENTRANCE",
       });
@@ -170,7 +177,7 @@ describe("SafeHome Vision Intelligence — Unit Tests", () => {
 
     it("maps BATH_005 NONE to grabBars.present = false, grabBars.count = 0", () => {
       const facts = mapClarificationToRoomFacts("room-bath", "BATH_005", "NONE", "ref-3");
-      expect(facts.length).toBe(2);
+      expect(facts.find(f => f.fieldPath === "grabBars.locations")?.confirmedValue).toEqual([]);
       expect(facts.find((f) => f.fieldPath === "grabBars.present")?.confirmedValue).toBe(false);
       expect(facts.find((f) => f.fieldPath === "grabBars.count")?.confirmedValue).toBe(0);
     });

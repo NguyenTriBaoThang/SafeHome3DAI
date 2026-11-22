@@ -1,0 +1,21 @@
+{
+  "status": "blocked",
+  "generated_at": "2026-11-22T01:51:56.420454+00:00",
+  "blockers": [
+    "Chưa có ảnh human_scene_verified=true và đủ metadata giấy phép.",
+    "Chưa có snapshot chia tập theo nhóm đóng băng từ Giai đoạn 2.",
+    "Chưa có bundle nhãn verified nhập từ xác nhận thủ công trong Label Studio."
+  ],
+  "api_calls": 0,
+  "cache_hits": 0,
+  "splits": {},
+  "ml_metrics": "chưa đánh giá được",
+  "metric_implementation_sha256": "f023000734a41329a33197d6734028a67137135ef0c68d4095c84e6c1fb7a958",
+  "readiness": {
+    "raw_images": 500,
+    "eligible_images": 0,
+    "excluded": {
+      "scene_pending": 500
+    }
+  }
+}

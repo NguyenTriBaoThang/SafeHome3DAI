@@ -10,6 +10,7 @@ describe("SafeHome Vision Intelligence — Integration Tests", () => {
 
     // 1. Run AI Vision Analysis on Bedroom photo
     const analysis = await runVisionAnalysis("img-bedroom-1", roomId, {
+      demo: true,
       roomType: "BEDROOM",
       viewpoint: "ENTRANCE",
     });
@@ -73,6 +74,7 @@ describe("SafeHome Vision Intelligence — Integration Tests", () => {
 
     // 1. Run AI Vision Analysis on Bathroom photo
     const analysis = await runVisionAnalysis("img-bath-1", roomId, {
+      demo: true,
       roomType: "BATHROOM",
       viewpoint: "ENTRANCE",
     });

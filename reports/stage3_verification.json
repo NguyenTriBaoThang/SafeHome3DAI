@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-11-22T01:51:58.589126+00:00",
+  "status": "tooling_validated_actual_baseline_blocked",
+  "real_data": {
+    "raw_images": 500,
+    "eligible_images": 0,
+    "raw_files_checked": 506,
+    "raw_files_changed": [],
+    "risk_annotation_rows": 4000,
+    "risk_review_status": {
+      "unlabeled": 4000
+    },
+    "object_annotation_rows": 0,
+    "gemini_calls": 0,
+    "baseline_status": "blocked",
+    "ml_metrics": "chưa đánh giá được",
+    "frozen_exists": false,
+    "verified_bundle_exists": false
+  },
+  "validation": {
+    "python_tests_passed": 40,
+    "node_tests_passed": 6,
+    "vitest_tests_passed": 16,
+    "typescript_noemit": "passed",
+    "network": "mocked in tests; no Gemini image inference on real data",
+    "risk_helper_function_body_identical": true,
+    "versioned_risk_rules_unchanged": true,
+    "blocked_cli_exit_code": 2,
+    "python_syntax": "passed"
+  },
+  "review_ui": {
+    "http": 200,
+    "images": 500,
+    "revision": 0
+  },
+  "artifacts": [
+    "reports/baseline.md",
+    "reports/baseline.json",
+    "reports/baseline_confusion.csv",
+    "reports/baseline_errors.html",
+    "docs/ML_STAGE3.md"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-11-22T02:08:01.054516+00:00",
+  "status": "tooling_validated_actual_experiments_blocked",
+  "real_data": {
+    "raw_images": 500,
+    "eligible_images": 0,
+    "raw_files_checked": 506,
+    "raw_files_changed": [],
+    "zip_sha256": "f2dfe3c5d50abd85ff6634ea35cae0cb93a7fee4bee5ea988aa45cd9294d1656",
+    "manifest_sha256": "750ba47724261bd8cbb3b633c60032ea670d1d1709c9ca35db8bf0621d52c4ce",
+    "risk_annotation_rows": 4000,
+    "risk_review_status": {
+      "unlabeled": 4000
+    },
+    "object_annotation_rows": 0,
+    "experiments_completed": 0,
+    "planned_experiments": 8,
+    "gemini_calls": 0,
+    "detector_calls": 0,
+    "test_calls": 0,
+    "winner": null,
+    "ml_metrics": "chưa đánh giá được",
+    "frozen_exists": false,
+    "verified_bundle_exists": false,
+    "stage4_control_exists": false
+  },
+  "validation": {
+    "python_tests_passed": 50,
+    "node_tests_passed": 10,
+    "vitest_tests_passed": 16,
+    "typescript_noemit": "passed",
+    "network": "Mocked Gemini/detector transports in synthetic temporary fixtures; no real image inference",
+    "versioned_risk_rules_unchanged": true,
+    "blocked_cli_exit_code": 2,
+    "test_annotation_scope_isolation": "passed",
+    "train_only_multimodal_few_shot": "passed",
+    "sealed_winner_and_test_repetition_guard": "passed",
+    "git_diff_check": "passed",
+    "live_owlv2_inference": "not run; optional dependencies and weights not installed/downloaded",
+    "sources": [
+      "test_experiment_stage4.py",
+      "test_experiment_bridge.cjs",
+      "test_baseline.py",
+      "test_stage2.py",
+      "test_dataset.py"
+    ]
+  },
+  "review_ui": {
+    "url": "http://127.0.0.1:8765",
+    "http_status": 200,
+    "rows": 500,
+    "revision": 0
+  },
+  "blockers": [
+    "Chưa có ảnh scene-verified đủ giấy phép.",
+    "Chưa có split theo nhóm đóng băng.",
+    "Chưa có bundle nhãn human-verified."
+  ]
+}

@@ -1,0 +1,641 @@
+{
+  "status": "completed",
+  "config": {
+    "id": "structured",
+    "strategy": "combined",
+    "object_threshold": 0.5
+  },
+  "metrics": {
+    "images": 5,
+    "groups": 5,
+    "inference_failures": 0,
+    "detection": {
+      "map50": 0.7091584158415841,
+      "classes_with_ground_truth": 8,
+      "iou": 0.5,
+      "recall_grid_points": 101,
+      "confidence_threshold_for_pr": 0.5,
+      "classes": {
+        "bed": {
+          "gt_objects": 2,
+          "predicted_objects": 2,
+          "ap50": 1.0,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "positive_images": 2,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 912
+            },
+            "precision": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 912
+            },
+            "recall": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 912
+            }
+          }
+        },
+        "chair": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "table": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "cabinet": {
+          "gt_objects": 2,
+          "predicted_objects": 1,
+          "ap50": 0.504950495049505,
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1.0,
+          "recall": 0.5,
+          "positive_images": 2,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 921
+            },
+            "precision": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 699
+            },
+            "recall": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 921
+            }
+          }
+        },
+        "nightstand": {
+          "gt_objects": 1,
+          "predicted_objects": 1,
+          "ap50": 1.0,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "positive_images": 1,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 670
+            },
+            "precision": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 670
+            },
+            "recall": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 670
+            }
+          }
+        },
+        "door": {
+          "gt_objects": 2,
+          "predicted_objects": 3,
+          "ap50": 0.16831683168316833,
+          "tp": 1,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.3333333333333333,
+          "recall": 0.5,
+          "positive_images": 2,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 920
+            },
+            "precision": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 920
+            },
+            "recall": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 920
+            }
+          }
+        },
+        "toilet": {
+          "gt_objects": 1,
+          "predicted_objects": 1,
+          "ap50": 1.0,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "positive_images": 1,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 666
+            },
+            "precision": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 666
+            },
+            "recall": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 666
+            }
+          }
+        },
+        "sink": {
+          "gt_objects": 1,
+          "predicted_objects": 2,
+          "ap50": 0.0,
+          "tp": 0,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "positive_images": 1,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 0.0,
+              "upper": 0.0,
+              "valid_replicates": 699
+            },
+            "precision": {
+              "lower": 0.0,
+              "upper": 0.0,
+              "valid_replicates": 921
+            },
+            "recall": {
+              "lower": 0.0,
+              "upper": 0.0,
+              "valid_replicates": 699
+            }
+          }
+        },
+        "bathtub": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "sofa": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "rug": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "electrical_cable": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "grab_bar": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "obstacle_route": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "threshold_step": {
+          "gt_objects": 0,
+          "predicted_objects": 0,
+          "ap50": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": null,
+          "recall": null,
+          "positive_images": 0,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": null,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "lamp": {
+          "gt_objects": 1,
+          "predicted_objects": 2,
+          "ap50": 1.0,
+          "tp": 1,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.5,
+          "recall": 1.0,
+          "positive_images": 1,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 670
+            },
+            "precision": {
+              "lower": 0.0,
+              "upper": 1.0,
+              "valid_replicates": 930
+            },
+            "recall": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 670
+            }
+          }
+        },
+        "light_switch": {
+          "gt_objects": 2,
+          "predicted_objects": 2,
+          "ap50": 1.0,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "positive_images": 1,
+          "warning": "<20 positive objects",
+          "ci95": {
+            "ap50": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 684
+            },
+            "precision": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 684
+            },
+            "recall": {
+              "lower": 1.0,
+              "upper": 1.0,
+              "valid_replicates": 684
+            }
+          }
+        }
+      },
+      "map50_ci95": {
+        "lower": 0.4673267326732673,
+        "upper": 1.0,
+        "valid_replicates": 1000
+      }
+    },
+    "risk": {
+      "RISK-001": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 1,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 2,
+        "excluded_not_applicable": 2,
+        "positive": 0,
+        "negative": 1,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": 1.0,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-002": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 1,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 2,
+        "excluded_not_applicable": 2,
+        "positive": 0,
+        "negative": 1,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": 1.0,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-003": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 5,
+        "excluded_not_applicable": 0,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-004": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 5,
+        "excluded_not_applicable": 0,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-005": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 2,
+        "excluded_not_applicable": 3,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-006": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 2,
+        "excluded_not_applicable": 3,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-007": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 5,
+        "excluded_not_applicable": 0,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      },
+      "RISK-008": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "abstain_positive": 0,
+        "abstain_negative": 0,
+        "excluded_unknown": 2,
+        "excluded_not_applicable": 3,
+        "positive": 0,
+        "negative": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "prediction_coverage": null,
+        "high_positive": 0,
+        "high_recall": null,
+        "warning": "<20 positive verified images; uncertain estimate",
+        "ci95": {
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "high_recall": null
+        }
+      }
+    },
+    "bootstrap": {
+      "unit": "group",
+      "iterations": 1000,
+      "seed": 20261122,
+      "confidence": 0.95,
+      "warning": null
+    }
+  },
+  "summary": {
+    "high_recall": null,
+    "high_positive": 0,
+    "risk_recall": null,
+    "risk_precision": null,
+    "risk_f1": null,
+    "map50": 0.7091584158415841,
+    "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+  },
+  "new_gemini_invocations": 5,
+  "new_detector_invocations": 0,
+  "cache_hits": 0,
+  "cache_records_sha256": {
+    "bedroom_0118": "c2ed836b6cb15e32f0980f731a83739af607ad04b278ddd8fc803fdc91b59a87",
+    "bedroom_0121": "25968a879a98825ab1273a0b51cc88d480b43325f94502181bc6ab4e7f22869d",
+    "bathroom_0147": "ff3a2f5eaf27678d7740d8dd0b246e4c7c865062b8595893b90a480fc5e5c2b3",
+    "bathroom_0154": "0c904699bdd688c300fa1f247fc6ff5274384c4dcf772543da772492ea3396ee",
+    "hallway_0127": "e34aaec03d6caaf9935c96ceee4578187119fab56548d05b205338f54db463c7"
+  },
+  "content_sha256": "c0dabebad931d1948b2ef5ef7920d7382111fc440a662d1326a2dd7b447bb196"
+}

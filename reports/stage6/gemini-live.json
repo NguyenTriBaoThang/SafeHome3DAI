@@ -1,0 +1,22 @@
+{
+  "started_at": "2026-11-22T08:18:51.110338+00:00",
+  "status": "passed",
+  "image_id": "hallway_0001",
+  "image_sha256": "0aaca7dfacac0d68173bd12c69881fb0c034ee01e291b264181d803db4b07579",
+  "human_scene_verified": true,
+  "test_used": false,
+  "mode": "FUNCTIONAL_CHECK_ONLY",
+  "quality_metrics": null,
+  "max_api_attempts": 1,
+  "finished_at": "2026-11-22T08:19:11.678049+00:00",
+  "api_attempts": 1,
+  "model": "gemini-3.5-flash-lite",
+  "model_version": "gemini-3.5-flash-lite",
+  "recipe_sha256": "7223356342c2383ef101c3590973f8426242a92665e39232c2c1d697406573c4",
+  "latency_ms_single_request": 18852,
+  "objects_returned": 0,
+  "schema_valid": true,
+  "payload_sha256": "788b31ebb8b470fa09be74a3f3742c4eff69bf22438580d945bd8fd9f0672500",
+  "limitations": "Single network/schema check, not detection accuracy, risk recall, latency benchmark or a new test evaluation.",
+  "protected_test_group_checked": true
+}

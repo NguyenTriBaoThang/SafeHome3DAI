@@ -1,0 +1,23 @@
+{
+  "checked_date": "2026-11-22",
+  "stage5_weights_downloaded": false,
+  "stage5_optional_dependencies_installed": false,
+  "sources": [
+    {
+      "name": "PekingU/rtdetr_r18vd",
+      "revision": "ac77a11ff0170a41b771c03264987f8ce2b0d753",
+      "license": "Apache-2.0 declared by checkpoint model card",
+      "url": "https://huggingface.co/PekingU/rtdetr_r18vd/blob/ac77a11ff0170a41b771c03264987f8ce2b0d753/README.md",
+      "metadata_url": "https://huggingface.co/api/models/PekingU/rtdetr_r18vd",
+      "safetensors_available": true
+    },
+    {"name": "transformers", "version": "4.57.1", "license": "Apache-2.0", "url": "https://raw.githubusercontent.com/huggingface/transformers/v4.57.1/LICENSE"},
+    {"name": "torch", "version": "2.9.0", "license": "BSD-style", "url": "https://raw.githubusercontent.com/pytorch/pytorch/v2.9.0/LICENSE"},
+    {"name": "onnx", "version": "1.23.2", "license": "Apache-2.0", "url": "https://raw.githubusercontent.com/onnx/onnx/v1.23.2/LICENSE"},
+    {"name": "onnxruntime", "version": "1.32.0", "license": "MIT declared in maintainer package metadata", "url": "https://pypi.org/project/onnxruntime/1.32.0/", "metadata_url": "https://pypi.org/pypi/onnxruntime/1.32.0/json", "source_license_lookup": "GitHub LICENSE/ LICENSE.txt requests returned 404; package metadata used, not a claim of a retrieved source license file."},
+    {"name": "fastapi", "version": "0.165.0", "license": "MIT", "url": "https://raw.githubusercontent.com/fastapi/fastapi/0.165.0/LICENSE"},
+    {"name": "uvicorn", "version": "0.54.0", "license": "BSD-3-Clause", "url": "https://raw.githubusercontent.com/Kludex/uvicorn/0.54.0/LICENSE.md"}
+  ],
+  "inherited_runtime": "Pillow, NumPy, SciPy, safetensors from the existing Stage 4 environment; retain installed wheel/bundled-library notices. Model licenses do not replace image licenses/attribution.",
+  "redistribution_note": "Keep copyright/license notices when distributing dependencies or derived weights; no model weights, images or environments are committed. No Ultralytics/AGPL dependency added."
+}

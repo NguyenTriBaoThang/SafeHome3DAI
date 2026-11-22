@@ -1,0 +1,12 @@
+# Optional GPU notebook / separate Stage 5 environment. Do not upgrade Stage 4's
+# frozen environment in place. Model weights are downloaded only after data gates.
+torch==2.9.0
+transformers==4.57.1
+Pillow==13.0.0
+numpy==2.5.5
+scipy==1.18.1
+safetensors==0.8.0
+onnx==1.23.2
+onnxruntime==1.32.0
+fastapi==0.165.0
+uvicorn==0.54.0

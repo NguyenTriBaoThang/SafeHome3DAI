@@ -1,0 +1,157 @@
+{
+  "official_accuracy": false,
+  "runs": [
+    {
+      "split": "val",
+      "experiment": "baseline",
+      "images": 6,
+      "failures": 6,
+      "gemini_invocations": 6,
+      "detector_invocations": 0,
+      "seconds_p50": 6.223165600007633,
+      "seconds_max": 11.530273899959866,
+      "provider_reported_tokens_successful_responses": 0,
+      "model_versions": [],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "structured",
+      "images": 6,
+      "failures": 0,
+      "gemini_invocations": 6,
+      "detector_invocations": 0,
+      "seconds_p50": 6.950897000031546,
+      "seconds_max": 18.05031040002359,
+      "provider_reported_tokens_successful_responses": 25067,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "few_shot",
+      "images": 6,
+      "failures": 0,
+      "gemini_invocations": 6,
+      "detector_invocations": 0,
+      "seconds_p50": 9.370686049980577,
+      "seconds_max": 20.659091100038495,
+      "provider_reported_tokens_successful_responses": 104490,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "per_risk",
+      "images": 6,
+      "failures": 1,
+      "gemini_invocations": 46,
+      "detector_invocations": 0,
+      "seconds_p50": 37.029589750018204,
+      "seconds_max": 59.891635600011796,
+      "provider_reported_tokens_successful_responses": 87042,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "self_verify",
+      "images": 6,
+      "failures": 1,
+      "gemini_invocations": 11,
+      "detector_invocations": 0,
+      "seconds_p50": 9.47568579998915,
+      "seconds_max": 15.679971600009594,
+      "provider_reported_tokens_successful_responses": 46145,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "structured_recall",
+      "images": 6,
+      "failures": 0,
+      "gemini_invocations": 6,
+      "detector_invocations": 0,
+      "seconds_p50": 5.366060749976896,
+      "seconds_max": 8.877832900034264,
+      "provider_reported_tokens_successful_responses": 25067,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "owlv2",
+      "images": 6,
+      "failures": 0,
+      "gemini_invocations": 6,
+      "detector_invocations": 6,
+      "seconds_p50": 28.83844404996489,
+      "seconds_max": 71.79741439997451,
+      "provider_reported_tokens_successful_responses": 20230,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "val",
+      "experiment": "owlv2_recall",
+      "images": 6,
+      "failures": 0,
+      "gemini_invocations": 6,
+      "detector_invocations": 6,
+      "seconds_p50": 24.868038400018122,
+      "seconds_max": 27.902097700047307,
+      "provider_reported_tokens_successful_responses": 26936,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    },
+    {
+      "split": "test",
+      "experiment": "structured",
+      "images": 5,
+      "failures": 0,
+      "gemini_invocations": 5,
+      "detector_invocations": 0,
+      "seconds_p50": 6.7972305000294,
+      "seconds_max": 10.251555300026666,
+      "provider_reported_tokens_successful_responses": 20410,
+      "model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "note": "Wall time includes preprocessing and cold model load; not a controlled latency benchmark. Failed/unreturned responses can lack usage."
+    }
+  ],
+  "preflight": {
+    "recorded_at": "2026-11-22T04:30:04.008001+00:00",
+    "gemini_train_preflight_invocations": 5,
+    "model_metadata_get_requests": 1,
+    "train_image_id": "bedroom_0090",
+    "train_only": true,
+    "used_as_reference_labels": false,
+    "attempt_outcomes": [
+      "HTTP_400_schema_complexity",
+      "HTTP_400_schema_complexity",
+      "rejected_local_bbox_range",
+      "rejected_local_measured_risk_claim",
+      "strict_contract_valid"
+    ],
+    "notes": "Observed tool invocations; these preflight calls are separate from validation/test caches. No training or prompt changes after validation started.",
+    "owlv2_preprocessing_failed_attempts": 1,
+    "environment_resume": "Initial OWLv2 validation attempt stopped before model forward or Gemini call because optional scipy was absent; unchanged configuration resumed after installing image-processing dependency. Previous Gemini caches retained unchanged."
+  },
+  "content_sha256": "6da570cce2406aa6ef5bd2eb0eb1654bd58569528a5f90b91eb9040b0fdaa98e"
+}

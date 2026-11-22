@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-11-22T08:40:18.332Z",
+  "build_id": "5k7Q8Wbr8ZtJziJ2dl_dm",
+  "build_directory": ".scratch/cinematic-production",
+  "checks": [
+    {
+      "name": "built_photo_page",
+      "status": "passed"
+    },
+    {
+      "name": "offline_provider_returns_503_without_demo",
+      "status": "passed"
+    },
+    {
+      "name": "invalid_image_returns_400",
+      "status": "passed"
+    },
+    {
+      "name": "oversized_stream_returns_413",
+      "status": "passed"
+    },
+    {
+      "name": "analysis_failure_before_persistence",
+      "status": "passed"
+    }
+  ],
+  "paid_api_calls": 0,
+  "onnx_inferences": 0,
+  "scope": "Actual built Next server; local provider deliberately unreachable. No browser rendering or model inference."
+}

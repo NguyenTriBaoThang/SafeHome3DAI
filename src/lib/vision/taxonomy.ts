@@ -146,6 +146,24 @@ export const CATEGORY_TAXONOMY: Record<DetectionCategory, CategoryMetadata> = {
     colorHex: "#ca8a04", // yellow-600
     iconName: "ChevronUp",
   },
+  lamp: {
+    category: "lamp",
+    vietnameseName: "Đèn chiếu sáng",
+    description: "Bộ đèn bàn, đèn ngủ, đèn đứng, đèn tường hoặc đèn trần nhìn thấy được; không gồm cửa sổ hay phản chiếu. Không suy ra lux hoặc tình trạng chiếu sáng ban đêm từ sự hiện diện của đèn (RISK-004).",
+    isStandardCocoClass: false,
+    requiresSpecializedReview: true,
+    colorHex: "#eab308",
+    iconName: "Lamp",
+  },
+  light_switch: {
+    category: "light_switch",
+    vietnameseName: "Công tắc đèn",
+    description: "Mặt công tắc điều khiển đèn gắn tường nhìn thấy rõ; không gồm ổ cắm, phích cắm, aptomat hoặc điều khiển từ xa. Không suy ra khả năng với tới từ giường khi thiếu đo đạc hoặc xác nhận (RISK-008).",
+    isStandardCocoClass: false,
+    requiresSpecializedReview: true,
+    colorHex: "#a855f7",
+    iconName: "ToggleLeft",
+  },
   other: {
     category: "other",
     vietnameseName: "Vật thể khác",
@@ -166,6 +184,14 @@ export function normalizePredictedLabel(rawLabel: string): {
   isSpecializedFallback: boolean;
 } {
   const clean = rawLabel.toLowerCase().trim();
+
+  // Specific controls must precede broad furniture/room keywords.
+  if (clean === "light_switch" || clean.includes("light switch") || clean.includes("công tắc đèn")) {
+    return { category: "light_switch", vietnameseName: "Công tắc đèn", isSpecializedFallback: true };
+  }
+  if (clean === "lamp" || clean.includes(" lamp") || clean.startsWith("lamp ") || clean.includes("đèn ngủ") || clean.includes("đèn bàn") || clean.includes("đèn trần") || clean.includes("đèn đứng") || clean.includes("đèn tường")) {
+    return { category: "lamp", vietnameseName: "Đèn chiếu sáng", isSpecializedFallback: true };
+  }
 
   // 1. Bed
   if (clean.includes("bed") || clean.includes("giường") || clean.includes("nệm")) {

@@ -1,0 +1,4 @@
+# Complete runtime for the pinned OWLv2 image processor (SciPy is optional in
+# transformers packaging, but required by Owlv2ImageProcessor.resize).
+-r requirements-stage4-detector.txt
+scipy==1.18.1

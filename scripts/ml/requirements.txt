@@ -1,0 +1,3 @@
+# Pillow core: MIT-CMU. Bundled third-party codec notices are included in its wheel.
+# https://github.com/python-pillow/Pillow/blob/13.0.0/LICENSE
+Pillow==13.0.0

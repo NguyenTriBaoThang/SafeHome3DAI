@@ -1,0 +1,154 @@
+mode,split,experiment,class,gt_ai_objects,tp,fp,fn,ap50,precision,recall,ap50_ci95,positive_images
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,bed,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,chair,3,0,0,3,0.0,,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,table,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,cabinet,3,0,0,3,0.0,,0.0,"[0.0000, 0.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,door,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,toilet,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,sink,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,bathtub,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,rug,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,grab_bar,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,threshold_step,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,lamp,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,baseline,light_switch,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,bed,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,chair,3,3,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,table,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,cabinet,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,structured,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured,door,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,sink,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,bathtub,2,0,3,2,0.0,0.0,0.0,"[0.0000, 0.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured,grab_bar,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured,threshold_step,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured,light_switch,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,bed,2,1,1,1,0.504950495049505,0.5,0.5,"[0.0000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,chair,3,3,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,table,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,cabinet,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,door,1,1,1,0,0.5,0.5,1.0,"[0.2500, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,sink,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,bathtub,2,1,2,1,0.16831683168316833,0.3333333333333333,0.5,"[0.0000, 1.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,grab_bar,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,threshold_step,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,few_shot,light_switch,1,0,1,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,bed,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,chair,3,3,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,table,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,cabinet,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,door,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,sink,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,bathtub,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,rug,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,grab_bar,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,threshold_step,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,per_risk,light_switch,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,bed,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,chair,3,3,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,table,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,cabinet,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,door,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,sink,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,bathtub,2,0,2,2,0.0,0.0,0.0,"[0.0000, 0.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,grab_bar,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,threshold_step,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,self_verify,light_switch,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,bed,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,chair,3,3,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,table,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,cabinet,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,door,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,sink,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,bathtub,2,0,3,2,0.0,0.0,0.0,"[0.0000, 0.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,grab_bar,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,threshold_step,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,structured_recall,light_switch,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,bed,2,2,1,0,0.6666666666666666,0.6666666666666666,1.0,"[0.5000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,chair,3,2,0,1,0.6633663366336634,1.0,0.6666666666666666,"[0.5050, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,table,2,0,0,2,0.0,,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,cabinet,3,0,0,3,0.0,,0.0,"[0.0000, 0.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,nightstand,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,door,1,1,1,0,0.5,0.5,1.0,"[0.2500, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,toilet,1,0,1,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,sink,1,0,2,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,bathtub,2,1,2,1,0.16831683168316833,0.3333333333333333,0.5,"[0.0000, 0.5000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,grab_bar,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,threshold_step,1,0,0,1,0.0,,0.0,"[0.0000, 0.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,lamp,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2,light_switch,1,1,2,0,1.0,0.3333333333333333,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,bed,2,2,2,0,0.6666666666666666,0.5,1.0,"[0.5000, 1.0000] (B=911)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,chair,3,3,1,0,1.0,0.75,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,table,2,0,1,2,0.0,0.0,0.0,"[0.0000, 0.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,cabinet,3,2,2,1,0.5,0.5,0.6666666666666666,"[0.0000, 1.0000] (B=978)",3
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,nightstand,0,0,2,0,,0.0,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,door,1,1,7,0,0.5,0.125,1.0,"[0.2500, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,toilet,1,0,1,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,sink,1,0,5,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=663)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,bathtub,2,1,4,1,0.16831683168316833,0.2,0.5,"[0.0000, 0.5000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,rug,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,electrical_cable,0,0,1,0,,0.0,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,grab_bar,1,1,10,0,1.0,0.09090909090909091,1.0,"[1.0000, 1.0000] (B=681)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,threshold_step,1,1,10,0,0.5,0.09090909090909091,1.0,"[0.2500, 1.0000] (B=660)",1
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,lamp,2,2,2,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=906)",2
+AI_REFERENCE_NOT_OFFICIAL,val,owlv2_recall,light_switch,1,1,4,0,1.0,0.2,1.0,"[1.0000, 1.0000] (B=679)",1
+AI_REFERENCE_NOT_OFFICIAL,test,structured,bed,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=912)",2
+AI_REFERENCE_NOT_OFFICIAL,test,structured,chair,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,table,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,cabinet,2,1,0,1,0.504950495049505,1.0,0.5,"[0.0000, 1.0000] (B=921)",2
+AI_REFERENCE_NOT_OFFICIAL,test,structured,nightstand,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=670)",1
+AI_REFERENCE_NOT_OFFICIAL,test,structured,door,2,1,2,1,0.16831683168316833,0.3333333333333333,0.5,"[0.0000, 1.0000] (B=920)",2
+AI_REFERENCE_NOT_OFFICIAL,test,structured,toilet,1,1,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=666)",1
+AI_REFERENCE_NOT_OFFICIAL,test,structured,sink,1,0,2,1,0.0,0.0,0.0,"[0.0000, 0.0000] (B=699)",1
+AI_REFERENCE_NOT_OFFICIAL,test,structured,bathtub,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,sofa,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,rug,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,electrical_cable,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,grab_bar,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,obstacle_route,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,threshold_step,0,0,0,0,,,,—,0
+AI_REFERENCE_NOT_OFFICIAL,test,structured,lamp,1,1,1,0,1.0,0.5,1.0,"[1.0000, 1.0000] (B=670)",1
+AI_REFERENCE_NOT_OFFICIAL,test,structured,light_switch,2,2,0,0,1.0,1.0,1.0,"[1.0000, 1.0000] (B=684)",1

@@ -1,0 +1,13 @@
+{
+  "zip_entries_verified_byte_identical": 506,
+  "raw_mismatches": [],
+  "all_original_columns_in_working_manifest_preserved": true,
+  "real_review_decisions": 0,
+  "attribution_entries": 500,
+  "proposed_review_per_room": {
+    "bedroom": 69,
+    "bathroom": 36,
+    "hallway": 74
+  },
+  "browser_checks": 7
+}

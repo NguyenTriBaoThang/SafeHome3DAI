@@ -1,0 +1,6320 @@
+{
+  "status": "exploratory_complete",
+  "generated_at": "2026-11-22T04:32:31.042450+00:00",
+  "config": {
+    "mode": "AI_REFERENCE_EXPLORATORY",
+    "disclaimer": "NHAN AI - THAM DO; CHUA PHAI DO CHINH XAC CHINH THUC / AI-reference agreement, not human-verified accuracy",
+    "model": "gemini-3.5-flash-lite",
+    "plan": {
+      "version": 1,
+      "seed": 20261122,
+      "temperature": 0.1,
+      "bootstrap": 1000,
+      "selection": "lexicographic: pooled HIGH recall, pooled risk recall, pooled risk F1, mAP50, pooled risk precision; id breaks exact ties",
+      "experiments": [
+        {
+          "id": "baseline",
+          "strategy": "baseline",
+          "object_threshold": 0.5
+        },
+        {
+          "id": "structured",
+          "strategy": "combined",
+          "object_threshold": 0.5
+        },
+        {
+          "id": "few_shot",
+          "strategy": "few_shot",
+          "object_threshold": 0.5
+        },
+        {
+          "id": "per_risk",
+          "strategy": "per_risk",
+          "object_threshold": 0.5
+        },
+        {
+          "id": "self_verify",
+          "strategy": "self_verify",
+          "object_threshold": 0.5
+        },
+        {
+          "id": "structured_recall",
+          "strategy": "combined",
+          "object_threshold": 0.25
+        },
+        {
+          "id": "owlv2",
+          "strategy": "owlv2",
+          "object_threshold": 0.3
+        },
+        {
+          "id": "owlv2_recall",
+          "strategy": "owlv2",
+          "object_threshold": 0.15
+        }
+      ]
+    },
+    "selection_policy": "All eight predeclared experiments, same complete val membership; failures remain misses. Only zero-failure configurations eligible. If val has HIGH positives: HIGH recall, risk recall, risk F1, mAP50, risk precision. Otherwise: mAP50 only; HIGH/risk efficacy unassessed. Lexicographic ascending experiment id breaks exact ties. One locked winner on exploratory test once.",
+    "exemplars": [
+      "bedroom_0090",
+      "bathroom_0067",
+      "hallway_0142"
+    ],
+    "reference_source": "Codex_visual_review",
+    "candidate_manifest_sha256": "3fecee57cccb95dcdcae47a4b2bccbfd1f3785c3582a471085ac487ebbdc0679",
+    "candidate_plan_sha256": "d88640e5ec635af2f60424576af1e86c306537be52f25e736f8b1520f1c8e44c",
+    "visual_notes_sha256": "dbf90f245664e13a75347eab9626e78b59b81b2e8e8cb1e5551340b43cd53de2",
+    "reference_sha256": {
+      "train": "f6a837bad45c44a27e656aced9261f63de79903e2139f12e48538f740903993e",
+      "val": "9cfd5dd5026a76bc3598098fe326476ea28370e6ed567241862f4577a52be019",
+      "test": "934be7c99824ad089d3fa82b0cfe3c9c125b857c6e97483fd5230dccc9aef4ab"
+    },
+    "source_sha256": {
+      "scripts/ml/annotation_contract.py": "7a4517857381af887efba1526279c084608c96c1b7827fc7f9f5e4dde5602a31",
+      "scripts/ml/baseline_bridge.cjs": "afd14e572e917b91f375d457307b1e84fdffe6da30e35171c36135a889610dec",
+      "scripts/ml/baseline_metrics.py": "f023000734a41329a33197d6734028a67137135ef0c68d4095c84e6c1fb7a958",
+      "scripts/ml/baseline_report.py": "23f382bc8812068299d32816e5f3a9a21e25af6d4451f96b1efd4ca0feaa6f86",
+      "scripts/ml/dataset_common.py": "937111ee9473f0a935f5daf6548fbdb9494cd89be86b4f928a0411b4a95e409d",
+      "scripts/ml/eval_baseline.py": "a24c0348b8136ba6dff10dcdceb5b0b95cd5af1aee1658fc2b8dcbaac1d8d8e4",
+      "scripts/ml/experiment_bridge.cjs": "ea03cbd2a95d7c0b42d8e9351a3f1b55358fcae983c83a13f0daa0a99bd14207",
+      "scripts/ml/experiment_stage4.py": "3698970bb07ab950a0099d05406413e20db1c6f0162bb6390b52036c6e5aebf8",
+      "scripts/ml/explore_stage4.py": "6bc5af026a9e24ce670fd2cbdacacc4aa67f6bbe48e95f69d090fd5ffe56e583",
+      "scripts/ml/import_verified.py": "2713456436b406c10f3dd0d72411d0798d7fee8b673b7fe7dd5a81d79413109c",
+      "scripts/ml/owlv2_detector.py": "660e0e6b74865c0628c3f7c1efb1862922c0776cf80f30a0d7cca5115ae63724",
+      "scripts/ml/requirements-stage4-detector.txt": "5e0c003a0ca97a71a443c90ddb4fce4c6bafbb12338a315aaafffef82fd71f7b",
+      "scripts/ml/stage2_common.py": "3eae1ecbab33945ebbf721e04e247138c8fa376487af6fb39e705ee49ac8bda7",
+      "src/lib/risk/inputAdapter.ts": "e23c70bec069499bdf4e41f0f479a257aa9c7fea1af6a7fd5ed1df4f38c46ec9",
+      "src/lib/risk/riskRuleRegistry.ts": "d241e1d2be874b233b3ad5c4f88990f8219b6d86303bd76e1daa14c2ef97fea3",
+      "src/lib/risk/ruleEngine.ts": "c9487c2870d2c0ca110c4e0f7a8a561b6a3e37c2c4a1153dec0bca6bcb7892e8",
+      "src/lib/risk/types.ts": "3b1880536074ad90c2452d8259096401620041cc24c426be358e4dfb7d7a02a5",
+      "src/lib/vision/geminiVisionAdapter.ts": "78aa91be230019f6fe25ee4727a71f9dc6d449149bd05e81b2109c77e35ecaf2",
+      "src/lib/vision/imageRiskAssessment.ts": "ca8aaf1be5d7b43118381c1921cab58505053e875c529657a122dd4f337b56ec",
+      "src/lib/vision/taxonomy.ts": "2872c64f3db77c3a6b2064a218fcc1b149974090c6542d6d653fd0a76f797b8e",
+      "src/lib/vision/types.ts": "5c808666189c3dddae2cf29f02b1535bc50fba26a1dbf38fe011247af70c10e5"
+    },
+    "runtime": {
+      "torch": "2.9.0",
+      "transformers": "4.57.1",
+      "@google/genai": "3.4.0"
+    },
+    "detector": {
+      "model": "google/owlv2-base-patch16-ensemble",
+      "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d",
+      "device": "cpu",
+      "cpu_threads": 2
+    },
+    "scored_classes": [
+      "bed",
+      "chair",
+      "table",
+      "cabinet",
+      "nightstand",
+      "door",
+      "toilet",
+      "sink",
+      "bathtub",
+      "sofa",
+      "rug",
+      "electrical_cable",
+      "grab_bar",
+      "obstacle_route",
+      "threshold_step",
+      "lamp",
+      "light_switch"
+    ],
+    "unscored_classes": {
+      "other": "Open-ended class not exhaustively annotated; omitted, not a negative class"
+    },
+    "baseline_generation": "Unchanged adapter/provider-default sampling, unseeded, timeout 3500ms",
+    "raw_manifest_sha256": "750ba47724261bd8cbb3b633c60032ea670d1d1709c9ca35db8bf0621d52c4ce",
+    "human_decisions_sha256": "80c506c72161b4157bbe44503864e909f5d9a4fc8fc9a02d7e7bd5577b34680d",
+    "official_accuracy": false,
+    "human_verification_created": false
+  },
+  "config_id": "e60ba174df03959af5671faeef3aa780d15e4854b309a42a0ba020749646a9b7",
+  "official_accuracy": false,
+  "results": {
+    "baseline": {
+      "status": "incomplete",
+      "config": {
+        "id": "baseline",
+        "strategy": "baseline",
+        "object_threshold": 0.5
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 6,
+        "detection": {
+          "map50": 0.0,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.5,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 911
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 3,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 3,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 978
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.0,
+            "upper": 0.0,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 1,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 0.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.0,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "dad0138c5998060a497d339b9931b7d0d2de60e7d747d2c3ed1f943114195679",
+        "bedroom_0172": "d7443bf9871b61a2d5e7e59bd58c962e797f7e42b3f9747b58434f3e40dd2573",
+        "bathroom_0015": "4525fb609a75b71a3552928fbc3c17d22f8adc72e5f2815a04feb65949b7d110",
+        "bathroom_0081": "c0e6066963ac469b627ee6a04dae8df6177fc4dd4b7ecf9d14b6fe7cacd63c0d",
+        "bathroom_0144": "6eabeef4c9be45e43437a360e3c4bce4999bb7bc21816ca3b97cfa66f0a14018",
+        "hallway_0022": "623c6dd955b8be08b2be41cc61d58000a3c6a1a09a730c29e2526c7280a2258d"
+      }
+    },
+    "structured": {
+      "status": "completed",
+      "config": {
+        "id": "structured",
+        "strategy": "combined",
+        "object_threshold": 0.5
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 0,
+        "detection": {
+          "map50": 0.7821782178217821,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.5,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 3,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 3,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 988
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.5,
+            "upper": 0.9625962596259625,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 1,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 0.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.7821782178217821,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "7d4951731b28145c495497f27d84122b46842c02a01de98d349e773a8c550020",
+        "bedroom_0172": "b2608b3b7a14899eef1edef77c460b5dff8fbd5536fb895ac494d515e1ec4a4f",
+        "bathroom_0015": "2957b145ab09aeab96616cf266ad59905711e4cbff2772d06663f29c2803b2f0",
+        "bathroom_0081": "0dd2581fc863882db0c3e3b39a7a6a958806e43f3cf589f328e316bcfb0fe009",
+        "bathroom_0144": "f777d6777f4f842ea4913dc883aeae11eece298b02494df1eed0c12fce8e82cd",
+        "hallway_0022": "c3f89771dd8d945d3af50064f5fbd6190eb64af63d94d562d825b2bdafadc906"
+      }
+    },
+    "few_shot": {
+      "status": "completed",
+      "config": {
+        "id": "few_shot",
+        "strategy": "few_shot",
+        "object_threshold": 0.5
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 0,
+        "detection": {
+          "map50": 0.6416603198781416,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.5,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.5,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 0.5,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.25,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 3,
+              "ap50": 0.16831683168316833,
+              "tp": 1,
+              "fp": 2,
+              "fn": 1,
+              "precision": 0.3333333333333333,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 988
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.5623395672900623,
+            "upper": 0.7836674917491749,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 1,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 1.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.6416603198781416,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "bdc926a1163ca56d4ffcc35d793e9b8b7dc0769f5b43665f5d1ce9987a877230",
+        "bedroom_0172": "5af1ad1909ae822b72e2fa289a28bce271bdaf2976fb61da7d3781985d52cf9d",
+        "bathroom_0015": "22e75049e62883efce2966bb9706a93acf0ea1200371b4aee6aadd052d073c40",
+        "bathroom_0081": "fc22e50448efe60cd57bb44743fa34b2e272273b2976939e5cefc911680645df",
+        "bathroom_0144": "c7062388ec59146d5a8e24d09479880e93e15846bdf073c185e9826a123fc542",
+        "hallway_0022": "7d63482950040b2da895f7d8f375f29e0f7671156129dc9d3ab9fd94f17079fb"
+      }
+    },
+    "per_risk": {
+      "status": "incomplete",
+      "config": {
+        "id": "per_risk",
+        "strategy": "per_risk",
+        "object_threshold": 0.5
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 1,
+        "detection": {
+          "map50": 0.8210205635948211,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.5,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.7142857142857143,
+            "upper": 0.9,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 1,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 1.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.8210205635948211,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "e04f9f8e3941fee3306102dceb52565a2c5fdcffb153212e3da0939543e45e77",
+        "bedroom_0172": "9cc6f9b5a8b1f885ab36b44b1a3db0ee8927c1757088d0cb430ef56d64e50edc",
+        "bathroom_0015": "7a1789f3772de592f2cd2c6b2ade28439f332bc95e7820faab8e65b84ed4ae1d",
+        "bathroom_0081": "1744f9ed8912468eb015588aee335996837f861b0139bf62319fac76d8a7521b",
+        "bathroom_0144": "626cd3b191fb04410d4c1dc1b29e8d70eba877cbddf62d8e6a0647190e001d86",
+        "hallway_0022": "151e37d5898c9e76480b7365d1ff6100e845733aba8415258893edc7ca6b57e4"
+      }
+    },
+    "self_verify": {
+      "status": "incomplete",
+      "config": {
+        "id": "self_verify",
+        "strategy": "self_verify",
+        "object_threshold": 0.5
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 1,
+        "detection": {
+          "map50": 0.8591012947448591,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.5,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 2,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.6666666666666666,
+            "upper": 0.9625962596259625,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 1,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 0.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.8591012947448591,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "3ec897d72515010d7aab57238c3435c29d3fe46a1c0ed24d0072fb1eca88d8ed",
+        "bedroom_0172": "340de81b32d818d9b2ad9d089f0f14025b16fef8ded34c3051eeb7b0384d507c",
+        "bathroom_0015": "0b1953689e0383496dd0084171894a7f869596ebb7ff61cb68a1669ba575a97c",
+        "bathroom_0081": "c9561388fa1a5c4f02075a88c6c77bf52958faf415de75bbf6a6916c0dcd89f2",
+        "bathroom_0144": "3d1fc743d18e6dc57360f385f1ec292bc9b424dd5b77d58e4fac4a0b26367696",
+        "hallway_0022": "0f28b13d28cb753e45629a3c1ab0425cec1504829f585067d4bf7cd3aa07bc28"
+      }
+    },
+    "structured_recall": {
+      "status": "completed",
+      "config": {
+        "id": "structured_recall",
+        "strategy": "combined",
+        "object_threshold": 0.25
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 0,
+        "detection": {
+          "map50": 0.7821782178217821,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.25,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.504950495049505,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 3,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 3,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 988
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.5,
+            "upper": 0.9625962596259625,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 1,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 0.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.7821782178217821,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 0,
+      "new_detector_invocations": 0,
+      "cache_hits": 6,
+      "cache_records_sha256": {
+        "bedroom_0109": "0f2937b1ef917ff43bce18545624442daf8c0d692a044208ccec352451ba76be",
+        "bedroom_0172": "d2f432dc7dc0f976e03d2d4d95daa65bef6a8e99459b2232fc8ba310afeb1b2c",
+        "bathroom_0015": "406076c23a5f510853b278ca10aa17ae91d4bf91dfe6bd12b16f4bb9c207d144",
+        "bathroom_0081": "cf14055821aaa042835cfa1dd496e05f75776f27c8be93cf24cc52ea35ab1028",
+        "bathroom_0144": "c8ec9454a91999f86c2c5928718d8250eb0de3bbf04bd8c61179bfde83a44d03",
+        "hallway_0022": "bae3b88d4c820d88e52a0325bb416f3c19847120b79f0e2d21ceec1c2ec2926e"
+      }
+    },
+    "owlv2": {
+      "status": "completed",
+      "config": {
+        "id": "owlv2",
+        "strategy": "owlv2",
+        "object_threshold": 0.3
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 0,
+        "detection": {
+          "map50": 0.4614115257679614,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.3,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 3,
+              "ap50": 0.6666666666666666,
+              "tp": 2,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.6666666666666666,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.5,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 0.5,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 2,
+              "ap50": 0.6633663366336634,
+              "tp": 2,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.504950495049505,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 0.5,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 3,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 978
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 0.5,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.25,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 2,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 3,
+              "ap50": 0.16831683168316833,
+              "tp": 1,
+              "fp": 2,
+              "fn": 1,
+              "precision": 0.3333333333333333,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.5,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.5,
+                  "valid_replicates": 921
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 0.5,
+                  "upper": 0.5,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 0,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": null,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                },
+                "precision": null,
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 3,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.3333333333333333,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.5,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.3673267326732673,
+            "upper": 0.625,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 1,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 1.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.4614115257679614,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 6,
+      "new_detector_invocations": 6,
+      "cache_hits": 0,
+      "cache_records_sha256": {
+        "bedroom_0109": "af7ae65e7e9f66f8941e57ff68827858b50a73719bb939f3e3b2a47b444a4d52",
+        "bedroom_0172": "d38334048ca83bd98272fd5110e65300dc0d778d535211c4197432ed30a27f1a",
+        "bathroom_0015": "fe29854d37ac8775c726e108cd9dc261a329a14aa00947d694963de3efb38e7b",
+        "bathroom_0081": "57ee132e82c4b60dcdc8e406c3d4d79aae5cd4ef57af684279a1a756248aedb8",
+        "bathroom_0144": "71a2575c85ba3fc9e543bba6c388cd3a1d31a2972e76df6876f6bf70693434b4",
+        "hallway_0022": "c6d01c6ca79ad9acfdfda6771196f0684ff07efaa5dbef71bf83ec34035544e5"
+      }
+    },
+    "owlv2_recall": {
+      "status": "completed",
+      "config": {
+        "id": "owlv2_recall",
+        "strategy": "owlv2",
+        "object_threshold": 0.15
+      },
+      "metrics": {
+        "images": 6,
+        "groups": 6,
+        "inference_failures": 0,
+        "detection": {
+          "map50": 0.5642294998730641,
+          "classes_with_ground_truth": 13,
+          "iou": 0.5,
+          "recall_grid_points": 101,
+          "confidence_threshold_for_pr": 0.15,
+          "classes": {
+            "bed": {
+              "gt_objects": 2,
+              "predicted_objects": 4,
+              "ap50": 0.6666666666666666,
+              "tp": 2,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.5,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 987
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 911
+                }
+              }
+            },
+            "chair": {
+              "gt_objects": 3,
+              "predicted_objects": 4,
+              "ap50": 1.0,
+              "tp": 3,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 0.5,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "table": {
+              "gt_objects": 2,
+              "predicted_objects": 1,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 658
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "cabinet": {
+              "gt_objects": 3,
+              "predicted_objects": 4,
+              "ap50": 0.5,
+              "tp": 2,
+              "fp": 2,
+              "fn": 1,
+              "precision": 0.5,
+              "recall": 0.6666666666666666,
+              "positive_images": 3,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 978
+                }
+              }
+            },
+            "nightstand": {
+              "gt_objects": 0,
+              "predicted_objects": 2,
+              "ap50": null,
+              "tp": 0,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 906
+                },
+                "recall": null
+              }
+            },
+            "door": {
+              "gt_objects": 1,
+              "predicted_objects": 8,
+              "ap50": 0.5,
+              "tp": 1,
+              "fp": 7,
+              "fn": 0,
+              "precision": 0.125,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.25,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.2222222222222222,
+                  "valid_replicates": 997
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            },
+            "toilet": {
+              "gt_objects": 1,
+              "predicted_objects": 1,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "sink": {
+              "gt_objects": 1,
+              "predicted_objects": 5,
+              "ap50": 0.0,
+              "tp": 0,
+              "fp": 5,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 921
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 663
+                }
+              }
+            },
+            "bathtub": {
+              "gt_objects": 2,
+              "predicted_objects": 5,
+              "ap50": 0.16831683168316833,
+              "tp": 1,
+              "fp": 4,
+              "fn": 1,
+              "precision": 0.2,
+              "recall": 0.5,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.0,
+                  "upper": 0.5,
+                  "valid_replicates": 921
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.5,
+                  "valid_replicates": 991
+                },
+                "recall": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 921
+                }
+              }
+            },
+            "sofa": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "rug": {
+              "gt_objects": 2,
+              "predicted_objects": 2,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "electrical_cable": {
+              "gt_objects": 0,
+              "predicted_objects": 1,
+              "ap50": null,
+              "tp": 0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.0,
+                  "valid_replicates": 659
+                },
+                "recall": null
+              }
+            },
+            "grab_bar": {
+              "gt_objects": 1,
+              "predicted_objects": 11,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 10,
+              "fn": 0,
+              "precision": 0.09090909090909091,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.16666666666666666,
+                  "valid_replicates": 988
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 681
+                }
+              }
+            },
+            "obstacle_route": {
+              "gt_objects": 0,
+              "predicted_objects": 0,
+              "ap50": null,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": null,
+              "recall": null,
+              "positive_images": 0,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": null,
+                "precision": null,
+                "recall": null
+              }
+            },
+            "threshold_step": {
+              "gt_objects": 1,
+              "predicted_objects": 11,
+              "ap50": 0.5,
+              "tp": 1,
+              "fp": 10,
+              "fn": 0,
+              "precision": 0.09090909090909091,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 0.25,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.16666666666666666,
+                  "valid_replicates": 978
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 660
+                }
+              }
+            },
+            "lamp": {
+              "gt_objects": 2,
+              "predicted_objects": 4,
+              "ap50": 1.0,
+              "tp": 2,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "positive_images": 2,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 1.0,
+                  "valid_replicates": 1000
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 906
+                }
+              }
+            },
+            "light_switch": {
+              "gt_objects": 1,
+              "predicted_objects": 5,
+              "ap50": 1.0,
+              "tp": 1,
+              "fp": 4,
+              "fn": 0,
+              "precision": 0.2,
+              "recall": 1.0,
+              "positive_images": 1,
+              "warning": "<20 positive objects",
+              "ci95": {
+                "ap50": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                },
+                "precision": {
+                  "lower": 0.0,
+                  "upper": 0.3333333333333333,
+                  "valid_replicates": 978
+                },
+                "recall": {
+                  "lower": 1.0,
+                  "upper": 1.0,
+                  "valid_replicates": 679
+                }
+              }
+            }
+          },
+          "map50_ci95": {
+            "lower": 0.4450267730854718,
+            "upper": 0.7366808109382367,
+            "valid_replicates": 1000
+          }
+        },
+        "risk": {
+          "RISK-001": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 1,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 1,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": 0.0,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-002": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-003": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-004": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-005": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-006": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 3,
+            "excluded_not_applicable": 3,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-007": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 6,
+            "excluded_not_applicable": 0,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          },
+          "RISK-008": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0,
+            "abstain_positive": 0,
+            "abstain_negative": 0,
+            "excluded_unknown": 2,
+            "excluded_not_applicable": 4,
+            "positive": 0,
+            "negative": 0,
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "prediction_coverage": null,
+            "high_positive": 0,
+            "high_recall": null,
+            "warning": "<20 positive verified images; uncertain estimate",
+            "ci95": {
+              "precision": null,
+              "recall": null,
+              "f1": null,
+              "high_recall": null
+            }
+          }
+        },
+        "bootstrap": {
+          "unit": "group",
+          "iterations": 1000,
+          "seed": 20261122,
+          "confidence": 0.95,
+          "warning": null
+        }
+      },
+      "summary": {
+        "high_recall": null,
+        "high_positive": 0,
+        "risk_recall": null,
+        "risk_precision": null,
+        "risk_f1": null,
+        "map50": 0.5642294998730641,
+        "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+      },
+      "new_gemini_invocations": 6,
+      "new_detector_invocations": 6,
+      "cache_hits": 0,
+      "cache_records_sha256": {
+        "bedroom_0109": "0ec00559c5b9d0b7afcbdb49e004139ef4d47c6325ee057d9528bb7fe49fb345",
+        "bedroom_0172": "0a33f7b5467f1f0bc153caffe1043b0a83e14fed2ccf6dd58ce139435188f772",
+        "bathroom_0015": "9bab443f23ffc067a697007f39ee9cd117a9019f64160ec12de1b1c379da3733",
+        "bathroom_0081": "ca5b33f99fb36327778032c16b38a032117c50444963480d2d191eba11d7554f",
+        "bathroom_0144": "12de4aa5c832d366d1f4f63795c4b4b640c7d5ce2acb17f54dfb458d4891eec4",
+        "hallway_0022": "22cd88e6fa900b690f1b48adbec42fcf759faf00128315645726d86abd3f0527"
+      }
+    }
+  },
+  "winner": "structured",
+  "selection_basis": "objects_only_no_HIGH_positive_reference",
+  "total_gemini_invocations": 98,
+  "total_detector_invocations": 12,
+  "updated_at": "2026-11-22T04:40:33.352444+00:00",
+  "test": {
+    "status": "completed",
+    "config": {
+      "id": "structured",
+      "strategy": "combined",
+      "object_threshold": 0.5
+    },
+    "metrics": {
+      "images": 5,
+      "groups": 5,
+      "inference_failures": 0,
+      "detection": {
+        "map50": 0.7091584158415841,
+        "classes_with_ground_truth": 8,
+        "iou": 0.5,
+        "recall_grid_points": 101,
+        "confidence_threshold_for_pr": 0.5,
+        "classes": {
+          "bed": {
+            "gt_objects": 2,
+            "predicted_objects": 2,
+            "ap50": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "positive_images": 2,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 912
+              },
+              "precision": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 912
+              },
+              "recall": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 912
+              }
+            }
+          },
+          "chair": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "table": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "cabinet": {
+            "gt_objects": 2,
+            "predicted_objects": 1,
+            "ap50": 0.504950495049505,
+            "tp": 1,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.5,
+            "positive_images": 2,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 921
+              },
+              "precision": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 699
+              },
+              "recall": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 921
+              }
+            }
+          },
+          "nightstand": {
+            "gt_objects": 1,
+            "predicted_objects": 1,
+            "ap50": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "positive_images": 1,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 670
+              },
+              "precision": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 670
+              },
+              "recall": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 670
+              }
+            }
+          },
+          "door": {
+            "gt_objects": 2,
+            "predicted_objects": 3,
+            "ap50": 0.16831683168316833,
+            "tp": 1,
+            "fp": 2,
+            "fn": 1,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "positive_images": 2,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 920
+              },
+              "precision": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 920
+              },
+              "recall": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 920
+              }
+            }
+          },
+          "toilet": {
+            "gt_objects": 1,
+            "predicted_objects": 1,
+            "ap50": 1.0,
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "positive_images": 1,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 666
+              },
+              "precision": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 666
+              },
+              "recall": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 666
+              }
+            }
+          },
+          "sink": {
+            "gt_objects": 1,
+            "predicted_objects": 2,
+            "ap50": 0.0,
+            "tp": 0,
+            "fp": 2,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "positive_images": 1,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 0.0,
+                "upper": 0.0,
+                "valid_replicates": 699
+              },
+              "precision": {
+                "lower": 0.0,
+                "upper": 0.0,
+                "valid_replicates": 921
+              },
+              "recall": {
+                "lower": 0.0,
+                "upper": 0.0,
+                "valid_replicates": 699
+              }
+            }
+          },
+          "bathtub": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "sofa": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "rug": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "electrical_cable": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "grab_bar": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "obstacle_route": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "threshold_step": {
+            "gt_objects": 0,
+            "predicted_objects": 0,
+            "ap50": null,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "positive_images": 0,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": null,
+              "precision": null,
+              "recall": null
+            }
+          },
+          "lamp": {
+            "gt_objects": 1,
+            "predicted_objects": 2,
+            "ap50": 1.0,
+            "tp": 1,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "positive_images": 1,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 670
+              },
+              "precision": {
+                "lower": 0.0,
+                "upper": 1.0,
+                "valid_replicates": 930
+              },
+              "recall": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 670
+              }
+            }
+          },
+          "light_switch": {
+            "gt_objects": 2,
+            "predicted_objects": 2,
+            "ap50": 1.0,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "positive_images": 1,
+            "warning": "<20 positive objects",
+            "ci95": {
+              "ap50": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 684
+              },
+              "precision": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 684
+              },
+              "recall": {
+                "lower": 1.0,
+                "upper": 1.0,
+                "valid_replicates": 684
+              }
+            }
+          }
+        },
+        "map50_ci95": {
+          "lower": 0.4673267326732673,
+          "upper": 1.0,
+          "valid_replicates": 1000
+        }
+      },
+      "risk": {
+        "RISK-001": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 1,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 2,
+          "excluded_not_applicable": 2,
+          "positive": 0,
+          "negative": 1,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": 1.0,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-002": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 1,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 2,
+          "excluded_not_applicable": 2,
+          "positive": 0,
+          "negative": 1,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": 1.0,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-003": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 5,
+          "excluded_not_applicable": 0,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-004": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 5,
+          "excluded_not_applicable": 0,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-005": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 2,
+          "excluded_not_applicable": 3,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-006": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 2,
+          "excluded_not_applicable": 3,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-007": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 5,
+          "excluded_not_applicable": 0,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        },
+        "RISK-008": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "abstain_positive": 0,
+          "abstain_negative": 0,
+          "excluded_unknown": 2,
+          "excluded_not_applicable": 3,
+          "positive": 0,
+          "negative": 0,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "prediction_coverage": null,
+          "high_positive": 0,
+          "high_recall": null,
+          "warning": "<20 positive verified images; uncertain estimate",
+          "ci95": {
+            "precision": null,
+            "recall": null,
+            "f1": null,
+            "high_recall": null
+          }
+        }
+      },
+      "bootstrap": {
+        "unit": "group",
+        "iterations": 1000,
+        "seed": 20261122,
+        "confidence": 0.95,
+        "warning": null
+      }
+    },
+    "summary": {
+      "high_recall": null,
+      "high_positive": 0,
+      "risk_recall": null,
+      "risk_precision": null,
+      "risk_f1": null,
+      "map50": 0.7091584158415841,
+      "warning": "<20 HIGH positive image-risk pairs; exploratory selection"
+    },
+    "new_gemini_invocations": 5,
+    "new_detector_invocations": 0,
+    "cache_hits": 0,
+    "cache_records_sha256": {
+      "bedroom_0118": "c2ed836b6cb15e32f0980f731a83739af607ad04b278ddd8fc803fdc91b59a87",
+      "bedroom_0121": "25968a879a98825ab1273a0b51cc88d480b43325f94502181bc6ab4e7f22869d",
+      "bathroom_0147": "ff3a2f5eaf27678d7740d8dd0b246e4c7c865062b8595893b90a480fc5e5c2b3",
+      "bathroom_0154": "0c904699bdd688c300fa1f247fc6ff5274384c4dcf772543da772492ea3396ee",
+      "hallway_0127": "e34aaec03d6caaf9935c96ceee4578187119fab56548d05b205338f54db463c7"
+    }
+  },
+  "content_sha256": "1875ea9a01d62f0eb56e612201004bc5dda3785197d158c6314e57423521451b"
+}
