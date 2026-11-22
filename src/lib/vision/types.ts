@@ -25,6 +25,8 @@ export type DetectionCategory =
   | "obstacle_route"    // Vật cản chắn lối đi
   | "threshold_step"    // Gờ bậc cửa chênh lệch cao độ
   | "nightstand"        // Tủ tab đầu giường
+  | "lamp"              // Bộ đèn nhìn thấy được; không suy ra độ rọi ban đêm
+  | "light_switch"      // Công tắc đèn gắn tường; không bao gồm ổ cắm điện
   | "other";            // Vật thể khác
 
 export type DetectionSource =

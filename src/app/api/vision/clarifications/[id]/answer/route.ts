@@ -10,7 +10,7 @@ export async function POST(
     const body = await req.json();
     const { answer } = body;
 
-    if (!answer) {
+    if (typeof answer !== "string" || answer.length > 100) {
       return NextResponse.json(
         { success: false, error: "Vui lòng cung cấp câu trả lời." },
         { status: 400 }
@@ -18,7 +18,7 @@ export async function POST(
     }
 
     const result = await saveClarificationAnswer(id, answer);
-    return NextResponse.json(result);
+    return NextResponse.json(result, { status: result.success ? 200 : 400 });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message },

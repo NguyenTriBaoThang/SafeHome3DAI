@@ -45,8 +45,8 @@ import {
   NormalizedBoundingBox,
 } from "@/lib/vision/types";
 import { explainHazardFinding, FindingExplanation } from "@/lib/risk/explanationEngine";
-import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
-import { AssessmentSnapshot } from "@/lib/risk/types";
+import { createUnverifiedPhotoAssessment, type PhotoRiskAssessment } from "@/lib/vision/photoRiskAssessment";
+import type { AssessmentSnapshot } from "@/lib/risk/types";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { RoomState, SceneObjectState, ObjectCategory } from "@/types";
 
@@ -69,129 +69,10 @@ export interface ImageAnalysisData {
   detections: VisionDetection[];
   observations: VisionObservation[];
   clarifications: VisionClarificationQuestion[];
-  riskSnapshot: AssessmentSnapshot;
+  riskSnapshot: PhotoRiskAssessment | AssessmentSnapshot;
   analyzedAt: string;
 }
 
-/**
- * Computes deterministic clinical fall-risk assessment snapshot tailored directly to the detections in a photo
- */
-function computeImageRiskAssessment(
-  roomType: "BEDROOM" | "BATHROOM",
-  dets: VisionDetection[],
-  obs: VisionObservation[],
-  customCaption?: string
-): AssessmentSnapshot {
-  const hasRug = dets.some((d) => d.category === "rug");
-  const hasUnsecuredRug = dets.some(
-    (d) =>
-      d.category === "rug" &&
-      (d.userLabel?.toLowerCase().includes("trượt") ||
-        d.originalLabel?.toLowerCase().includes("trượt") ||
-        (d as any).isFallHazard)
-  );
-  const hasCable = dets.some(
-    (d) =>
-      d.category === "electrical_cable" ||
-      d.originalLabel?.toLowerCase().includes("dây") ||
-      d.userLabel?.toLowerCase().includes("dây") ||
-      (d as any).isFallHazard
-  );
-  const hasGrabBar = dets.some((d) => d.category === "grab_bar");
-  const hasWetFloor =
-    obs.some((o) => o.observationType === "WET_SURFACE_UNCERTAIN") ||
-    roomType === "BATHROOM";
-  const hasTable = dets.some((d) => d.category === "table");
-  const hasObstacle =
-    dets.some(
-      (d) =>
-        d.category === "obstacle_route" ||
-        d.category === "chair" ||
-        (d.placementWall === "free" && d.category !== "bed" && d.category !== "sofa")
-    ) || hasTable;
-
-  const displayRoomName = customCaption
-    ? `Khu vực: ${customCaption}`
-    : roomType === "BATHROOM"
-    ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)"
-    : "Phòng sinh hoạt (Ảnh hiện trường)";
-
-  const rawInput = {
-    roomId: `vision-eval-${Date.now()}`,
-    roomName: displayRoomName,
-    roomType,
-    dimensions: { lengthM: 4.5, widthM: 4.0, heightM: 2.8 },
-    floor: {
-      material: roomType === "BATHROOM" ? "Gạch men" : "Sàn gỗ",
-      isWet: hasWetFloor,
-      isSlipResistant: !hasWetFloor,
-      thresholdStepPresent: false,
-    },
-    lighting: {
-      daytimeLux: 200,
-      nighttimeLux: 40,
-      nightLightPresent: false,
-      adequateAtNight: false,
-    },
-    rugs: {
-      present: hasRug,
-      secured: !hasUnsecuredRug,
-      items: hasRug
-        ? [
-            {
-              id: "rug-eval-1",
-              name: "Thảm trải sàn",
-              location: "Gần vị trí sinh hoạt",
-              isSecured: !hasUnsecuredRug,
-              edgesCurled: hasUnsecuredRug,
-              inWalkway: true,
-            },
-          ]
-        : [],
-    },
-    cables: {
-      crossingWalkway: hasCable,
-      items: hasCable
-        ? [
-            {
-              id: "cable-eval-1",
-              name: "Dây điện / dây sạc thiết bị",
-              location: "Vắt ngang lối đi",
-              crossesWalkway: true,
-              hasCordCover: false,
-              hasSkirtingTrunking: false,
-            },
-          ]
-        : [],
-    },
-    obstacles: {
-      present: hasObstacle,
-      walkwayClearWidthM: hasObstacle ? 0.72 : 1.1,
-      items: hasObstacle
-        ? [
-            {
-              id: "obstacle-eval-1",
-              name: hasTable ? "Bàn sinh hoạt / Bàn làm việc" : "Vật cản lối đi",
-              location: "Lối đi chính",
-              obstructsWalkway: true,
-              clearanceWidthM: 0.72,
-            },
-          ]
-        : [],
-    },
-    grabBars: {
-      present: hasGrabBar,
-      count: hasGrabBar ? 1 : 0,
-      toiletPresent: hasGrabBar,
-      showerPresent: hasGrabBar,
-      toiletGrabBarPresent: hasGrabBar,
-      showerGrabBarPresent: hasGrabBar,
-      inspectedSecure: hasGrabBar,
-    },
-  };
-
-  return evaluateRoomHazards(rawInput);
-}
 
 export default function AiVisionStudioPage() {
   const router = useRouter();
@@ -249,17 +130,55 @@ export default function AiVisionStudioPage() {
   const [aiExplanation, setAiExplanation] = useState<FindingExplanation | null>(null);
 
   // Risk Reassessment State
-  const [riskSnapshot, setRiskSnapshot] = useState<AssessmentSnapshot | null>(null);
+  const [riskSnapshot, setRiskSnapshot] = useState<PhotoRiskAssessment | AssessmentSnapshot | null>(null);
 
   const selectedImage = images.find((img) => img.id === selectedImageId) || images[0];
 
-  // Run initial analysis on first load
+  // Restore saved photos without calling inference again on page reload.
   useEffect(() => {
-    handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType);
-  }, [activeRoomType]);
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const response = await fetch(`/api/vision/rooms/${activeRoomId}/images`);
+        const payload = await response.json();
+        if (cancelled) return;
+        if (response.ok && payload.success && payload.data?.length) {
+          const saved: StudioImageItem[] = payload.data.map((item: any) => ({ id: item.id, fileUrl: item.fileUrl,
+            viewpoint: item.viewpoint, caption: item.caption || "Ảnh đã lưu", isCustom: true }));
+          const cache: Record<string, ImageAnalysisData> = {};
+          for (const item of payload.data) if (item.latestAnalysis) cache[item.id] = {
+            detections: item.latestAnalysis.detections, observations: item.latestAnalysis.observations,
+            clarifications: item.latestAnalysis.clarifications,
+            riskSnapshot: createUnverifiedPhotoAssessment(activeRoomType, item.caption), analyzedAt: item.latestAnalysis.completedAt,
+          };
+          setImages(saved); setSelectedImageId(saved[0].id); setAnalysisByImage(cache);
+          const first = cache[saved[0].id];
+          setDetections(first?.detections || []); setObservations(first?.observations || []);
+          setClarifications(first?.clarifications || []); setRiskSnapshot(first?.riskSnapshot || null);
+          setSyncStatus("Đã khôi phục ảnh và kết quả đã lưu; không gọi lại AI.");
+          return;
+        }
+      } catch { if (cancelled) return; }
+      const id = activeRoomType === "BEDROOM" ? "img-demo-bedroom" : "img-demo-bathroom";
+      setImages([{ id, fileUrl: activeRoomType === "BEDROOM" ? DEFAULT_DEMO_BEDROOM : DEFAULT_DEMO_BATHROOM,
+        viewpoint: "ENTRANCE", caption: "Ảnh minh họa", isCustom: false }]);
+      setSelectedImageId(id);
+      handleRunAnalysis(id, activeRoomId, activeRoomType);
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [activeRoomId, activeRoomType]);
+
+  useEffect(() => {
+    if (!riskSnapshot) return;
+    setAnalysisByImage(previous => previous[selectedImageId] ? { ...previous, [selectedImageId]: {
+      ...previous[selectedImageId], detections, observations, clarifications, riskSnapshot,
+    } } : previous);
+  }, [detections, observations, clarifications, riskSnapshot, selectedImageId]);
 
   // Switch Room
   const handleSelectRoom = (roomId: string, type: "BEDROOM" | "BATHROOM") => {
+    setDetections([]); setObservations([]); setClarifications([]); setRiskSnapshot(null);
     setActiveRoomId(roomId);
     setActiveRoomType(type);
     const demoUrl = type === "BEDROOM" ? DEFAULT_DEMO_BEDROOM : DEFAULT_DEMO_BATHROOM;
@@ -286,6 +205,10 @@ export default function AiVisionStudioPage() {
     captionPayload?: string
   ) => {
     setIsAnalyzing(true);
+    setDetections([]);
+    setObservations([]);
+    setClarifications([]);
+    setRiskSnapshot(null);
     setSyncStatus("Đang phân tích hình ảnh AI đa phương thức...");
 
     // Find base64 & caption from current image list or explicit parameters
@@ -304,7 +227,7 @@ export default function AiVisionStudioPage() {
           caption,
           imageBufferBase64: base64,
         }),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(135000),
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -313,7 +236,7 @@ export default function AiVisionStudioPage() {
         const newClars: VisionClarificationQuestion[] = data.data.clarifications || [];
 
         // Compute tailored clinical risk assessment for THIS specific image
-        const newRisk = computeImageRiskAssessment(rType, newDets, newObs, caption);
+        const newRisk = createUnverifiedPhotoAssessment(rType, caption);
 
         const analysisEntry: ImageAnalysisData = {
           detections: newDets,
@@ -328,9 +251,11 @@ export default function AiVisionStudioPage() {
         setObservations(newObs);
         setClarifications(newClars);
         setRiskSnapshot(newRisk);
-        setSyncStatus(`Phân tích hoàn tất: ${newDets.length} vật thể, điểm an toàn ${newRisk.safetyScore}/100`);
+        if (data.persisted && data.image?.fileUrl) setImages(previous => previous.map(image => image.id === imgId ?
+          { ...image, fileUrl: data.image.fileUrl, base64: undefined } : image));
+        setSyncStatus(`${data.data.modelId === "mock-demo-fallback-dataset" ? "Dữ liệu minh họa" : "Phân tích hoàn tất"}: ${newDets.length} vật thể; ${newRisk.needsVerificationCount} nguy cơ cần kiểm tra.`);
       } else {
-        setSyncStatus("Không thể hoàn tất phân tích hình ảnh");
+        setSyncStatus(data.error || "Không thể hoàn tất phân tích hình ảnh");
       }
     } catch (err) {
       console.error(err);
@@ -376,8 +301,8 @@ export default function AiVisionStudioPage() {
       return;
     }
 
-    if (file.size > 15 * 1024 * 1024) {
-      alert("Dung lượng ảnh vượt quá 15MB. Vui lòng chọn ảnh nhỏ hơn.");
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Dung lượng ảnh vượt quá 10MB. Vui lòng chọn ảnh nhỏ hơn.");
       return;
     }
 
@@ -414,15 +339,7 @@ export default function AiVisionStudioPage() {
       // 4. Run analysis with real image base64 & explicit caption to avoid state async delay
       await handleRunAnalysis(newImgId, activeRoomId, activeRoomType, base64Data, newImgItem.caption);
 
-      // 4. Also persist to /api/vision/images in background
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("roomId", activeRoomId);
-        formData.append("viewpoint", selectedViewpoint);
-        formData.append("caption", newImgItem.caption || "");
-        fetch("/api/vision/images", { method: "POST", body: formData }).catch(() => {});
-      } catch {}
+
     };
 
     reader.readAsDataURL(file);
@@ -521,7 +438,7 @@ export default function AiVisionStudioPage() {
           length: 1.0,
           height: det.category === "rug" ? 0.02 : 0.8,
         },
-        verified: det.verificationStatus === "CONFIRMED",
+        verified: ["CONFIRMED", "CORRECTED"].includes(det.verificationStatus),
         isLoose: isHazard,
       };
     });
@@ -550,29 +467,30 @@ export default function AiVisionStudioPage() {
 
   // Verification Actions (Confirm, Correct, Reject)
   const handleConfirmDetection = async (detId: string) => {
-    setDetections((prev) =>
-      prev.map((d) => (d.id === detId ? { ...d, verificationStatus: "CONFIRMED" } : d))
-    );
     try {
-      await fetch(`/api/vision/detections/${detId}`, {
+      const response = await fetch(`/api/vision/detections/${detId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ verificationStatus: "CONFIRMED" }),
       });
-    } catch {}
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Không lưu được xác nhận.");
+      setDetections(previous => previous.map(d => d.id === detId ? { ...d, ...result.data } : d));
+      setSyncStatus("Đã lưu xác nhận vật thể.");
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không lưu được xác nhận."); }
   };
 
   const handleRejectDetection = async (detId: string) => {
-    setDetections((prev) =>
-      prev.map((d) => (d.id === detId ? { ...d, verificationStatus: "REJECTED" } : d))
-    );
     try {
-      await fetch(`/api/vision/detections/${detId}`, {
+      const response = await fetch(`/api/vision/detections/${detId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ verificationStatus: "REJECTED" }),
       });
-    } catch {}
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Không lưu được thay đổi.");
+      setDetections(previous => previous.map(d => d.id === detId ? { ...d, ...result.data } : d));
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không lưu được thay đổi."); }
   };
 
   const handleOpenEditLabel = (det: VisionDetection) => {
@@ -584,20 +502,8 @@ export default function AiVisionStudioPage() {
   const handleSaveEditLabel = async () => {
     if (!editModalDetection) return;
     const detId = editModalDetection.id;
-    setDetections((prev) =>
-      prev.map((d) =>
-        d.id === detId
-          ? {
-              ...d,
-              category: newCategorySelect,
-              userLabel: newLabelInput,
-              verificationStatus: "CORRECTED",
-            }
-          : d
-      )
-    );
     try {
-      await fetch(`/api/vision/detections/${detId}`, {
+      const response = await fetch(`/api/vision/detections/${detId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -606,34 +512,37 @@ export default function AiVisionStudioPage() {
           verificationStatus: "CORRECTED",
         }),
       });
-    } catch {}
-    setEditModalDetection(null);
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Không lưu được nhãn đã sửa.");
+      setDetections(previous => previous.map(d => d.id === detId ? { ...d, ...result.data } : d));
+      setEditModalDetection(null);
+      setSyncStatus("Đã lưu nhãn vật thể đã sửa.");
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không lưu được nhãn đã sửa."); }
   };
 
   // Answer Clarification Question
   const handleAnswerClarification = async (questionId: string, answerValue: string) => {
-    setClarifications((prev) =>
-      prev.map((q) => (q.id === questionId ? { ...q, status: "ANSWERED", userResponse: answerValue } : q))
-    );
-
     try {
-      await fetch(`/api/vision/clarifications/${questionId}/answer`, {
+      const response = await fetch(`/api/vision/clarifications/${questionId}/answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answer: answerValue }),
       });
-    } catch (e) {
-      console.error(e);
-    }
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Không lưu được câu trả lời.");
+      setClarifications(previous => previous.map(q => q.id === questionId ? { ...q, status: "ANSWERED", userResponse: answerValue } : q));
+      setRiskSnapshot(createUnverifiedPhotoAssessment(activeRoomType, selectedImage.caption));
+      setSyncStatus("Đã lưu câu trả lời và cập nhật hồ sơ; hãy đánh giá lại.");
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không lưu được câu trả lời."); }
   };
 
   // Sync to Survey and Re-assess Risk
   const handleSyncAndReassess = async () => {
     setSyncStatus("Đang đồng bộ hồ sơ phòng & chạy Động cơ Nguy cơ...");
     try {
-      await fetch(`/api/vision/rooms/${activeRoomId}/sync-survey`, { method: "POST" });
       const res = await fetch(`/api/vision/rooms/${activeRoomId}/reassess`, { method: "POST" });
       const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Không thể đánh giá lại hồ sơ.");
       if (data.success && data.data) {
         setRiskSnapshot(data.data);
         setActiveTab("RISK");
@@ -653,27 +562,7 @@ export default function AiVisionStudioPage() {
       setAiExplanation(explanation);
       setCopilotModalOpen(true);
     } else {
-      // Create explanation for current observations
-      const mockFinding = {
-        id: "vis-risk-001",
-        ruleId: activeRoomType === "BEDROOM" ? "RISK-001" : "RISK-005",
-        title: activeRoomType === "BEDROOM" ? "Thảm trải sàn chưa cố định mép" : "Sàn nhà vệ sinh trơn trượt",
-        hazardType: activeRoomType === "BEDROOM" ? "LOOSE_RUG" : "WET_FLOOR",
-        description: "Phát hiện qua hình ảnh AI Vision kết hợp xác nhận của gia đình.",
-        severityCategory: "HIGH" as any,
-        evidence: {
-          measuredValue: "Quan sát thị giác",
-          threshold: "Mặt sàn an toàn",
-          rationale: "Trượt ngã do bề mặt kém ma sát",
-          sourceFields: ["rugs.present"],
-        },
-        recommendationText: "Khắc phục cố định mép hoặc đặt thảm cao su giác hút.",
-        status: "ACTIVE" as any,
-        referenceIds: ["SRC_WHO_2021", "SRC_CDC_STEADI_2023"],
-        traceabilityTrail: [],
-      };
-      setAiExplanation(explainHazardFinding(mockFinding));
-      setCopilotModalOpen(true);
+      setSyncStatus("Chưa có nguy cơ được xác nhận để giải thích. Hãy bổ sung khảo sát và kiểm tra tại nhà.");
     }
   };
 
@@ -706,7 +595,7 @@ export default function AiVisionStudioPage() {
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 text-xs font-bold">
             <button
-              onClick={() => handleSelectRoom("room-bedroom-1", "BEDROOM")}
+              onClick={() => handleSelectRoom("room-bedroom-01", "BEDROOM")}
               className={`px-3 py-1.5 rounded-lg transition ${
                 activeRoomType === "BEDROOM"
                   ? "bg-white text-slate-900 shadow-sm"
@@ -716,7 +605,7 @@ export default function AiVisionStudioPage() {
               Phòng ngủ chính
             </button>
             <button
-              onClick={() => handleSelectRoom("room-bathroom-1", "BATHROOM")}
+              onClick={() => handleSelectRoom("room-bathroom-01", "BATHROOM")}
               className={`px-3 py-1.5 rounded-lg transition ${
                 activeRoomType === "BATHROOM"
                   ? "bg-white text-slate-900 shadow-sm"
@@ -993,7 +882,7 @@ export default function AiVisionStudioPage() {
                   >
                     {detections.map((det) => {
                       const isSelected = det.id === selectedDetectionId;
-                      const isConfirmed = det.verificationStatus === "CONFIRMED";
+                      const isConfirmed = ["CONFIRMED", "CORRECTED"].includes(det.verificationStatus);
                       const isRejected = det.verificationStatus === "REJECTED";
                       const isCorrected = det.verificationStatus === "CORRECTED";
 
@@ -1039,7 +928,7 @@ export default function AiVisionStudioPage() {
                   <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden select-none">
                     {detections.map((det) => {
                       const isSelected = det.id === selectedDetectionId;
-                      const isConfirmed = det.verificationStatus === "CONFIRMED";
+                      const isConfirmed = ["CONFIRMED", "CORRECTED"].includes(det.verificationStatus);
                       const isRejected = det.verificationStatus === "REJECTED";
                       const isCorrected = det.verificationStatus === "CORRECTED";
 
@@ -1216,12 +1105,13 @@ export default function AiVisionStudioPage() {
                   detections.map((det) => {
                     const isSelected = det.id === selectedDetectionId;
                     const tax = CATEGORY_TAXONOMY[det.category];
-                    const isConfirmed = det.verificationStatus === "CONFIRMED";
+                    const isConfirmed = ["CONFIRMED", "CORRECTED"].includes(det.verificationStatus);
                     const isRejected = det.verificationStatus === "REJECTED";
 
                     return (
                       <div
                         key={det.id}
+                        data-detection-id={det.id}
                         onClick={() => setSelectedDetectionId(det.id)}
                         className={`p-2.5 rounded-xl border text-xs cursor-pointer transition space-y-1.5 ${
                           isSelected
@@ -1248,7 +1138,7 @@ export default function AiVisionStudioPage() {
                                 : "text-amber-700"
                             }`}
                           >
-                            {isConfirmed
+                            {det.verificationStatus === "CORRECTED" ? "✓ Đã điều chỉnh" : isConfirmed
                               ? "✓ Đã xác nhận"
                               : isRejected
                               ? "✕ Đã từ chối"
@@ -1306,10 +1196,10 @@ export default function AiVisionStudioPage() {
                   <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 text-center space-y-2">
                     <CheckCircle2 className="h-7 w-7 text-emerald-600 mx-auto" />
                     <div className="font-bold text-xs text-emerald-900">
-                      Không phát hiện mối nguy té ngã trực tiếp
+                      Chưa có đề xuất nguy cơ từ ảnh
                     </div>
                     <p className="text-[11px] text-emerald-700 leading-relaxed">
-                      Vật thể và bề mặt sàn trong hình ảnh này đáp ứng tốt các tiêu chuẩn an toàn môi trường cơ bản của WHO &amp; CDC STEADI.
+                      Hãy bổ sung khảo sát và kiểm tra thực tế để xác định mức độ an toàn.
                     </p>
                   </div>
                 ) : (
@@ -1341,16 +1231,16 @@ export default function AiVisionStudioPage() {
                   <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 text-center space-y-2">
                     <ShieldCheck className="h-7 w-7 text-teal-600 mx-auto" />
                     <div className="font-bold text-xs text-slate-800">
-                      Thông tin hiện trường đã rõ ràng
+                      Chưa có câu hỏi xác nhận cho ảnh này
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">
-                      Không có chi tiết bị che khuất hoặc yếu tố bất định cần người dùng xác nhận thêm.
+                      Bạn có thể hoàn thành bảng khảo sát để bổ sung thông tin còn thiếu.
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="text-[11px] text-slate-500 font-medium">
-                      AI đặt câu hỏi làm rõ các chi tiết hình ảnh chưa thể khẳng định 100%:
+                      Hãy xác nhận những thông tin bạn đã kiểm tra tại nhà; chọn chưa rõ nếu chưa kiểm tra:
                     </div>
 
                     {clarifications.map((q) => {
@@ -1359,6 +1249,7 @@ export default function AiVisionStudioPage() {
                       return (
                         <div
                           key={q.id}
+                          data-question-id={q.surveyQuestionId}
                           className={`p-3 rounded-xl border text-xs space-y-2.5 transition ${
                             isAnswered
                               ? "bg-slate-50 border-slate-200 opacity-70"
@@ -1387,6 +1278,8 @@ export default function AiVisionStudioPage() {
                               return (
                                 <button
                                   key={opt.value}
+                                  data-answer-value={opt.value}
+                                  aria-pressed={isSelected}
                                   onClick={() => handleAnswerClarification(q.id, opt.value)}
                                   className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border flex items-center justify-between ${
                                     isSelected
@@ -1423,35 +1316,29 @@ export default function AiVisionStudioPage() {
                   <div className="space-y-3">
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
                       <div className="text-[10px] font-bold text-slate-400 uppercase">
-                        Điểm an toàn ({riskSnapshot.roomName})
+                        {riskSnapshot.safetyScore === null ? "Cần xác nhận hiện trường" : "Điểm từ hồ sơ khảo sát"} ({riskSnapshot.roomName})
                       </div>
                       <div
-                        className={`text-3xl font-black mt-1 ${
-                          riskSnapshot.safetyScore >= 80
-                            ? "text-emerald-600"
-                            : riskSnapshot.safetyScore >= 60
-                            ? "text-amber-600"
-                            : "text-rose-600"
-                        }`}
+                        className="text-lg font-bold mt-1 text-amber-700"
                       >
-                        {riskSnapshot.safetyScore}
-                        <span className="text-xs text-slate-400 font-normal"> / 100</span>
+                        {riskSnapshot.safetyScore === null ? "Chưa đủ dữ liệu để chấm điểm" : `${riskSnapshot.safetyScore} / 100`}
                       </div>
                       <div className="text-[10px] text-slate-500 mt-1">
-                        Phát hiện {riskSnapshot.detectedCount} yếu tố rủi ro kích hoạt
+                        {riskSnapshot.needsVerificationCount} nguy cơ cần bổ sung khảo sát
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       {riskSnapshot.findings.length === 0 ? (
-                        <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-1.5 text-center">
-                          <div className="flex items-center justify-center gap-1.5 font-bold text-emerald-900">
-                            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                            <span>Khu vực Đạt Tiêu Chuẩn An Toàn Lâm Sàng</span>
+                        <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs space-y-1.5 text-center">
+                          <div className="flex items-center justify-center gap-1.5 font-bold text-amber-900">
+                            <HelpCircle className="h-4 w-4 text-amber-600" />
+                            <span>Chưa xác định mức độ an toàn</span>
                           </div>
-                          <p className="text-[11px] text-emerald-700 leading-relaxed">
-                            Không phát hiện nguy cơ vấp ngã kích hoạt quy tắc WHO 2021 &amp; CDC STEADI. Khuyến nghị duy trì dọn dẹp lối đi thông thoáng &gt;80cm.
+                          <p className="text-[11px] text-amber-700 leading-relaxed">
+                            Ảnh đơn chưa xác nhận được độ rọi, ma sát, kích thước, độ chắc của tay vịn hay tình trạng cố định thảm. Hãy hoàn thành khảo sát và đo tại nhà trước khi đánh giá nguy cơ.
                           </p>
+                          <Link href="/ai-guided-survey" className="inline-block underline font-semibold text-amber-900">Hoàn thành khảo sát tại nhà</Link>
                         </div>
                       ) : (
                         riskSnapshot.findings.map((f) => (
@@ -1505,7 +1392,7 @@ export default function AiVisionStudioPage() {
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
           <span className="font-bold text-slate-700">Trạng thái xử lý:</span>
-          <span className="text-slate-500">{syncStatus}</span>
+          <span role="status" className="text-slate-500">{syncStatus}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -1640,6 +1527,7 @@ export default function AiVisionStudioPage() {
                 <label className="font-bold text-slate-600">Tên hiển thị tùy chỉnh:</label>
                 <input
                   type="text"
+                  aria-label="Tên hiển thị tùy chỉnh"
                   value={newLabelInput}
                   onChange={(e) => setNewLabelInput(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none font-medium"

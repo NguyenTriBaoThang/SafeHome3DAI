@@ -1,0 +1,138 @@
+[
+  {
+    "risk_id": "RISK-001",
+    "definition_from_project": "Thảm trải sàn lỏng lẻo, quăn mép hoặc dễ trượt",
+    "applies_to_rooms": "bedroom|hallway",
+    "observable_visual_cues": "Thảm, mép cuộn, vị trí trên đường đi",
+    "annotation_notes": "Cố định đáy thảm có thể không quan sát được từ ảnh",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bedroom",
+      "living_room",
+      "hallway"
+    ],
+    "csv_rooms": [
+      "bedroom",
+      "hallway"
+    ]
+  },
+  {
+    "risk_id": "RISK-002",
+    "definition_from_project": "Dây điện/cáp băng ngang lối đi không có nẹp bảo vệ",
+    "applies_to_rooms": "bedroom|bathroom|hallway",
+    "observable_visual_cues": "Dây, ổ cắm, tuyến đi qua",
+    "annotation_notes": "Góc chụp có thể bỏ sót dây điện",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bedroom",
+      "living_room",
+      "hallway",
+      "kitchen"
+    ],
+    "csv_rooms": [
+      "bedroom",
+      "bathroom",
+      "hallway"
+    ]
+  },
+  {
+    "risk_id": "RISK-003",
+    "definition_from_project": "Vật cản lấn chiếm lối đi; thông thủy hẹp",
+    "applies_to_rooms": "bedroom|bathroom|hallway",
+    "observable_visual_cues": "Vật cản, hành lang, đồ bừa bộn",
+    "annotation_notes": "Đo chính xác bề rộng lối đi cần thước hoặc dữ liệu chiều sâu",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bedroom",
+      "bathroom",
+      "living_room",
+      "hallway",
+      "kitchen"
+    ],
+    "csv_rooms": [
+      "bedroom",
+      "bathroom",
+      "hallway"
+    ]
+  },
+  {
+    "risk_id": "RISK-004",
+    "definition_from_project": "Độ chiếu sáng ban đêm không đủ hoặc thiếu đèn dẫn đường",
+    "applies_to_rooms": "bedroom|bathroom|hallway",
+    "observable_visual_cues": "Đèn, ảnh ánh sáng ban đêm",
+    "annotation_notes": "Không thể suy ra chỉ số lux chính xác bằng ảnh đơn",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bedroom",
+      "bathroom",
+      "hallway",
+      "living_room"
+    ],
+    "csv_rooms": [
+      "bedroom",
+      "bathroom",
+      "hallway"
+    ]
+  },
+  {
+    "risk_id": "RISK-005",
+    "definition_from_project": "Sàn nhà tắm ướt và có nguy cơ trơn trượt",
+    "applies_to_rooms": "bathroom",
+    "observable_visual_cues": "Sàn ướt hoặc vũng nước, thảm chống trượt",
+    "annotation_notes": "Hệ số ma sát cần đo hoặc xác nhận vật liệu",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bathroom"
+    ],
+    "csv_rooms": [
+      "bathroom"
+    ]
+  },
+  {
+    "risk_id": "RISK-006",
+    "definition_from_project": "Thiếu tay vịn an toàn tại bồn cầu / vòi sen",
+    "applies_to_rooms": "bathroom",
+    "observable_visual_cues": "Vị trí tay vịn trong vùng bồn cầu, vòi sen",
+    "annotation_notes": "Phải nhìn rõ khu vực và xác nhận bố trí thực tế",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bathroom"
+    ],
+    "csv_rooms": [
+      "bathroom"
+    ]
+  },
+  {
+    "risk_id": "RISK-007",
+    "definition_from_project": "Gờ cửa / bậc chênh cao không có vát dốc",
+    "applies_to_rooms": "bedroom|bathroom|hallway",
+    "observable_visual_cues": "Gờ cửa và đường tiếp cận",
+    "annotation_notes": "Cần vật chuẩn hoặc đo cao độ (cm)",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bathroom",
+      "bedroom",
+      "hallway"
+    ],
+    "csv_rooms": [
+      "bedroom",
+      "bathroom",
+      "hallway"
+    ]
+  },
+  {
+    "risk_id": "RISK-008",
+    "definition_from_project": "Công tắc / vật thiết yếu ngoài tầm với từ giường",
+    "applies_to_rooms": "bedroom",
+    "observable_visual_cues": "Giường, công tắc đèn, tab đầu giường",
+    "annotation_notes": "Cần kiểm tra khả năng với và khoảng cách thực tế",
+    "project_rule_registry": "https://github.com/NguyenTriBaoThang/SafeHome3DAI/blob/main/docs/RISK_RULE_REGISTRY.md",
+    "registry_rooms": [
+      "bedroom",
+      "living_room"
+    ],
+    "csv_rooms": [
+      "bedroom"
+    ]
+  }
+]

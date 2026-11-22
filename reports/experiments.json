@@ -1,0 +1,67 @@
+{
+  "status": "blocked",
+  "generated_at": "2026-11-22T03:28:45.081661+00:00",
+  "plan": {
+    "version": 1,
+    "seed": 20261122,
+    "temperature": 0.1,
+    "bootstrap": 1000,
+    "selection": "lexicographic: pooled HIGH recall, pooled risk recall, pooled risk F1, mAP50, pooled risk precision; id breaks exact ties",
+    "experiments": [
+      {
+        "id": "baseline",
+        "strategy": "baseline",
+        "object_threshold": 0.5
+      },
+      {
+        "id": "structured",
+        "strategy": "combined",
+        "object_threshold": 0.5
+      },
+      {
+        "id": "few_shot",
+        "strategy": "few_shot",
+        "object_threshold": 0.5
+      },
+      {
+        "id": "per_risk",
+        "strategy": "per_risk",
+        "object_threshold": 0.5
+      },
+      {
+        "id": "self_verify",
+        "strategy": "self_verify",
+        "object_threshold": 0.5
+      },
+      {
+        "id": "structured_recall",
+        "strategy": "combined",
+        "object_threshold": 0.25
+      },
+      {
+        "id": "owlv2",
+        "strategy": "owlv2",
+        "object_threshold": 0.3
+      },
+      {
+        "id": "owlv2_recall",
+        "strategy": "owlv2",
+        "object_threshold": 0.15
+      }
+    ]
+  },
+  "blockers": [
+    "Chưa có split theo nhóm đóng băng.",
+    "Chưa có bundle nhãn human-verified."
+  ],
+  "results": {},
+  "winner": null,
+  "api_calls": 0,
+  "test_calls": 0,
+  "ml_metrics": "chưa đánh giá được",
+  "readiness": {
+    "raw_images": 500,
+    "eligible_images": 1
+  },
+  "content_sha256": "5b9e215be251c14bbdc8ea99b1072aae41424bdc86302d3627c9face4dc0f0ac"
+}

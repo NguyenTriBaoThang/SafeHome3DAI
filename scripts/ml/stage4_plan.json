@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "seed": 20261122,
+  "temperature": 0.1,
+  "bootstrap": 1000,
+  "selection": "lexicographic: pooled HIGH recall, pooled risk recall, pooled risk F1, mAP50, pooled risk precision; id breaks exact ties",
+  "experiments": [
+    {"id": "baseline", "strategy": "baseline", "object_threshold": 0.5},
+    {"id": "structured", "strategy": "combined", "object_threshold": 0.5},
+    {"id": "few_shot", "strategy": "few_shot", "object_threshold": 0.5},
+    {"id": "per_risk", "strategy": "per_risk", "object_threshold": 0.5},
+    {"id": "self_verify", "strategy": "self_verify", "object_threshold": 0.5},
+    {"id": "structured_recall", "strategy": "combined", "object_threshold": 0.25},
+    {"id": "owlv2", "strategy": "owlv2", "object_threshold": 0.3},
+    {"id": "owlv2_recall", "strategy": "owlv2", "object_threshold": 0.15}
+  ]
+}

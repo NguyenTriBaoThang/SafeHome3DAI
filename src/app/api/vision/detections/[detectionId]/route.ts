@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { VerificationStatus, DetectionCategory } from "@/lib/vision/types";
+import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
+import { normalizeBoundingBox } from "@/lib/vision/providers/normalization";
 
 export async function PATCH(
   req: NextRequest,
@@ -22,8 +24,19 @@ export async function PATCH(
       bbox?: any;
     } = body;
 
+    if ((verificationStatus && !["PENDING_REVIEW", "CONFIRMED", "CORRECTED", "REJECTED"].includes(verificationStatus)) ||
+        (category && !Object.hasOwn(CATEGORY_TAXONOMY, category)) ||
+        (userLabel !== undefined && (typeof userLabel !== "string" || userLabel.length > 200))) {
+      return NextResponse.json({ success: false, error: "Nhãn hoặc trạng thái xác nhận không hợp lệ." }, { status: 400 });
+    }
+    let validatedBox;
+    if (bbox !== undefined) {
+      try { validatedBox = normalizeBoundingBox(bbox); }
+      catch { return NextResponse.json({ success: false, error: "Tọa độ bbox không hợp lệ." }, { status: 400 }); }
+    }
+
     const existing = await prisma.objectDetection.findUnique({
-      where: { id: detectionId },
+      where: { id: detectionId }, include: { analysis: { select: { roomId: true } } },
     });
 
     if (!existing) {
@@ -39,14 +52,14 @@ export async function PATCH(
         verificationStatus: verificationStatus || existing.verificationStatus,
         userLabel: userLabel !== undefined ? userLabel : existing.userLabel,
         category: category || existing.category,
-        bboxJson: bbox ? JSON.stringify(bbox) : existing.bboxJson,
+        bboxJson: validatedBox ? JSON.stringify(validatedBox) : existing.bboxJson,
       },
     });
 
     // Audit event
     await prisma.visionAuditEvent.create({
       data: {
-        roomId: "unknown",
+        roomId: existing.analysis.roomId,
         actionType: `DETECTION_${verificationStatus || "UPDATED"}`,
         objectId: detectionId,
         oldValue: JSON.stringify({ label: existing.originalLabel, status: existing.verificationStatus }),

@@ -1,0 +1,90 @@
+{
+  "verified_at": "2026-11-22T04:41:43.819719+00:00",
+  "mode": "AI_REFERENCE_EXPLORATORY",
+  "official_accuracy": false,
+  "config_id": "e60ba174df03959af5671faeef3aa780d15e4854b309a42a0ba020749646a9b7",
+  "sealed_artifacts_valid": true,
+  "raw_zip_files_unchanged": 506,
+  "runtime_addendum": {
+    "recorded_at": "2026-11-22T04:32:29.264815+00:00",
+    "config_id": "e60ba174df03959af5671faeef3aa780d15e4854b309a42a0ba020749646a9b7",
+    "scipy": "1.18.1",
+    "numpy": "2.5.5",
+    "reason": "Missing optional resize backend installed before the first successful OWLv2 preprocessing/forward; no inference code, prompt, labels, split or threshold changed. Earlier Gemini predictions reused byte-for-byte.",
+    "requirements_full_sha256": "7912858de7bbe3dd8d47f42e5891d5b8290a89b23e95238d7653b48a8654a6f1",
+    "requirements_runtime_sha256": "e1155b388eafdf4e6d5884fb862d7c83a86538c827622c9ee9b617ec42eb7ac8",
+    "content_sha256": "24c1727cba5b922627c473308ecca53b6d6683b47d236590ca31285fb6be6679"
+  },
+  "raw_human_flags_created": 0,
+  "human_decisions_unchanged": true,
+  "candidate_groups": 37,
+  "split_images": {
+    "train": 27,
+    "val": 6,
+    "test": 5
+  },
+  "group_leakage": false,
+  "reference_support": {
+    "train": {
+      "images": 3,
+      "objects": 25,
+      "risks": {
+        "unknown": 14,
+        "not_applicable": 8,
+        "negative": 2
+      }
+    },
+    "val": {
+      "images": 6,
+      "objects": 22,
+      "risks": {
+        "negative": 1,
+        "unknown": 31,
+        "not_applicable": 16
+      }
+    },
+    "test": {
+      "images": 5,
+      "objects": 12,
+      "risks": {
+        "unknown": 25,
+        "not_applicable": 13,
+        "negative": 2
+      }
+    }
+  },
+  "winner": "structured",
+  "selection_basis": "objects_only_no_HIGH_positive_reference",
+  "validation_configurations": 8,
+  "validation_zero_failure_configurations": 5,
+  "validation_failures_by_config": {
+    "baseline": 6,
+    "structured": 0,
+    "few_shot": 0,
+    "per_risk": 1,
+    "self_verify": 1,
+    "structured_recall": 0,
+    "owlv2": 0,
+    "owlv2_recall": 0
+  },
+  "test_images_attempted_once": 5,
+  "test_failures": 0,
+  "gemini_invocations_in_experiments": 98,
+  "detector_invocations_in_experiments": 12,
+  "tests": {
+    "python_unittest": {
+      "passed": 60,
+      "failed": 0
+    },
+    "node_bridge_tests": {
+      "passed": 14,
+      "failed": 0
+    },
+    "vitest_vision": {
+      "passed": 16,
+      "failed": 0
+    },
+    "typescript_noemit_exit_code": 0
+  },
+  "scope_note": "Automated tests verify code/guards; ML agreement uses AI references and does not establish human-verified accuracy or HIGH-risk recall."
+}

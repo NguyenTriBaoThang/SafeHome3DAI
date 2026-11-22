@@ -1,0 +1,5 @@
+# Optional CPU detector environment; not installed during blocked readiness checks.
+# Core licenses checked against upstream tags, see docs/ML_STAGE4.md.
+-r requirements.txt
+transformers==4.57.1
+torch==2.9.0

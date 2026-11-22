@@ -1,0 +1,72 @@
+{
+  "checked_at": "2026-11-22T04:44:24.740357+00:00",
+  "gallery_checks": [
+    {
+      "gallery": "reports\\stage4_exploratory\\test\\structured_errors.html",
+      "referenced_images": 2,
+      "boxes": 14,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\baseline_errors.html",
+      "referenced_images": 6,
+      "boxes": 22,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\few_shot_errors.html",
+      "referenced_images": 6,
+      "boxes": 43,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\owlv2_errors.html",
+      "referenced_images": 4,
+      "boxes": 42,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\owlv2_recall_errors.html",
+      "referenced_images": 6,
+      "boxes": 90,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\per_risk_errors.html",
+      "referenced_images": 4,
+      "boxes": 33,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\self_verify_errors.html",
+      "referenced_images": 5,
+      "boxes": 41,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\structured_errors.html",
+      "referenced_images": 5,
+      "boxes": 41,
+      "ai_notice": true,
+      "image_links_valid": true
+    },
+    {
+      "gallery": "reports\\stage4_exploratory\\val\\structured_recall_errors.html",
+      "referenced_images": 5,
+      "boxes": 41,
+      "ai_notice": true,
+      "image_links_valid": true
+    }
+  ],
+  "object_metric_rows": 153,
+  "risk_metric_rows": 72,
+  "passed": true,
+  "temporary_download_cleanup": "Automatic approval review rejected the recursive removal command; 74 temporary weight parts retained unchanged."
+}

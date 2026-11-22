@@ -22,7 +22,8 @@ export async function saveImageFile(
   extension: string
 ): Promise<{ filename: string; fileUrl: string }> {
   ensureUploadDir();
-  const filename = generateSafeStorageKey(roomId, extension);
+  if (!["jpg", "jpeg", "png", "webp"].includes(extension)) throw new Error("Unsupported image extension");
+  const filename = generateSafeStorageKey(roomId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80), extension);
   const filePath = path.join(UPLOAD_DIR, filename);
 
   await fs.promises.writeFile(filePath, buffer);

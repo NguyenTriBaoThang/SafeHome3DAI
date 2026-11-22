@@ -164,35 +164,26 @@ export function normalizedToPixelBox(
  * Removes APP1 marker (0xFF 0xE1) containing GPS and camera info.
  */
 export function stripExifMetadata(buffer: Buffer): Buffer {
-  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
-    return buffer; // not a valid jpeg
-  }
-
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return buffer;
+  const pieces: Buffer[] = [buffer.subarray(0, 2)];
   let offset = 2;
-  while (offset < buffer.length - 1) {
-    if (buffer[offset] !== 0xff) break;
-    const marker = buffer[offset + 1];
-
-    // Standalone markers
-    if (marker === 0xd8 || marker === 0xd9) {
-      offset += 2;
-      continue;
+  while (offset < buffer.length) {
+    const start = offset;
+    if (buffer[offset] !== 0xff) { pieces.push(buffer.subarray(offset)); break; }
+    while (offset < buffer.length && buffer[offset] === 0xff) offset++;
+    if (offset >= buffer.length) { pieces.push(buffer.subarray(start)); break; }
+    const marker = buffer[offset++];
+    // Keep compressed scan data verbatim; FF E1 there is not an APP1 header.
+    if (marker === 0xda || marker === 0xd9) { pieces.push(buffer.subarray(start)); break; }
+    if (marker === 0x01 || marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7)) {
+      pieces.push(buffer.subarray(start, offset)); continue;
     }
-
-    if (offset + 4 > buffer.length) break;
-    const length = buffer.readUInt16BE(offset + 2);
-
-    // APP1 marker (EXIF)
-    if (marker === 0xe1) {
-      // Return a slice excluding this segment
-      const before = buffer.subarray(0, offset);
-      const after = buffer.subarray(offset + 2 + length);
-      return Buffer.concat([before, after]);
-    }
-
-    offset += 2 + length;
+    if (offset + 2 > buffer.length) throw new Error("Truncated JPEG segment");
+    const length = buffer.readUInt16BE(offset);
+    if (length < 2 || offset + length > buffer.length) throw new Error("Invalid JPEG segment length");
+    const end = offset + length;
+    if (marker !== 0xe1) pieces.push(buffer.subarray(start, end));
+    offset = end;
   }
-
-  return buffer;
+  return Buffer.concat(pieces);
 }
-

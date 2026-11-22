@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-11-22T01:32:31.700205+00:00",
+  "status": "tooling_ready_waiting_for_human_scene_review",
+  "real_data": {
+    "images": 500,
+    "scene_pending": 500,
+    "eligible_images": 0,
+    "groups_all_raw": 366,
+    "group_edges": 134,
+    "split_status": "blocked",
+    "frozen_split_exists": false,
+    "prelabel": {
+      "status": "blocked",
+      "reason": "No human-scene-verified eligible images",
+      "api_calls": 0,
+      "images_completed": 0
+    },
+    "risk_rows": 4000,
+    "risk_review_status": {
+      "unlabeled": 4000
+    },
+    "raw_zip_files_checked": 506,
+    "raw_files_changed": [],
+    "raw_manifest_sha256": "750ba47724261bd8cbb3b633c60032ea670d1d1709c9ca35db8bf0621d52c4ce"
+  },
+  "contracts": {
+    "classes": 18,
+    "risks": 8,
+    "new_classes": [
+      "lamp",
+      "light_switch"
+    ]
+  },
+  "validation": {
+    "python_unittest": {
+      "passed": 28,
+      "failed": 0,
+      "uses": "synthetic temporary fixtures"
+    },
+    "node_sdk_tests": {
+      "passed": 3,
+      "failed": 0,
+      "uses": "fake SDK client, no network"
+    },
+    "vitest_vision": {
+      "passed": 14,
+      "failed": 0,
+      "config": "vitest.experience.config.ts; no DB setup"
+    },
+    "typescript_noemit": "passed"
+  },
+  "limitations": [
+    "No live Gemini/model validation; 0 eligible reviewed images",
+    "No Label Studio server installed; import tested structurally only",
+    "Metadata groups need human household review",
+    "Declared Google SDK not installed in current node_modules"
+  ],
+  "ml_metrics": "chua danh gia duoc"
+}

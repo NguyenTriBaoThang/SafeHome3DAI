@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-11-22T03:20:18.304442+00:00",
+  "status": "all_500_ai_scene_reviews_completed",
+  "images_reviewed": 500,
+  "contact_sheets": 25,
+  "original_resolution_rechecks": 12,
+  "decisions": {
+    "reject": 386,
+    "keep": 47,
+    "needs_review": 67
+  },
+  "keep_with_complete_license_metadata": 38,
+  "keep_license_holds": 9,
+  "coverage": "500 unique image IDs, each with explicit visual note, matching the complete raw manifest",
+  "raw_files_checked_against_zip": 506,
+  "raw_files_changed": [],
+  "human_decisions_revision": 1,
+  "human_decisions_sha256_preserved": "80c506c72161b4157bbe44503864e909f5d9a4fc8fc9a02d7e7bd5577b34680d",
+  "human_ai_conflicts": [
+    "hallway_0001"
+  ],
+  "raw_human_verification_flags_unchanged": true,
+  "bbox_annotations_created": 0,
+  "risk_ground_truth_created": 0,
+  "training_or_benchmark_runs": 0,
+  "python_compile": "passed",
+  "browser_checks_passed": 8,
+  "browser_errors": [],
+  "git_diff_check": "passed",
+  "manifest_sha256": "750ba47724261bd8cbb3b633c60032ea670d1d1709c9ca35db8bf0621d52c4ce",
+  "ai_review_sha256": "5331249f5503eb8159e34d1178d43e2c77b75ad819f7418e0c7c59a6bb4665b9"
+}

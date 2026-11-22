@@ -1,0 +1,19 @@
+class,vietnamese_name,train_objects_per_class,train_positive_images_per_class,train_positive_groups_per_class,val_positive_images_per_class,val_positive_groups_per_class,val_objects,eligible,warning,need_train_objects_per_class,need_train_positive_images_per_class,need_train_positive_groups_per_class,need_val_positive_images_per_class,need_val_positive_groups_per_class
+bed,Giường ngủ,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+chair,Ghế ngồi / Ghế đẩu,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+table,Bàn / Bàn trà,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+cabinet,Tủ quần áo / Tủ đồ,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+nightstand,Tab đầu giường,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+door,Cửa ra vào / Cửa phòng,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+toilet,Bồn cầu vệ sinh,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+sink,Chậu rửa mặt / Lavabo,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+bathtub,Bồn tắm / Sen tắm,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+sofa,Ghế Sofa,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+rug,Thảm trải sàn,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+electrical_cable,Dây điện / Dây sạc,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+grab_bar,Thanh tay vịn an toàn,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+obstacle_route,Vật cản lối đi,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+threshold_step,Gờ bậc cửa,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+lamp,Đèn chiếu sáng,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+light_switch,Công tắc đèn,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5
+other,Vật thể khác,0,0,0,0,0,0,False,Planning minimums only; <20 positive validation images gives an uncertain estimate,50,20,10,5,5

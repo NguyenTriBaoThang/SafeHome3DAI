@@ -1,0 +1,469 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Baseline error examples</title><style>body{font:16px system-ui;max-width:1100px;margin:30px auto;padding:12px;background:#eef3f2;color:#173b34}article{background:white;padding:20px;margin:20px 0;border-radius:12px}svg{max-width:100%;max-height:650px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><aside style="padding:18px;background:#fff2c6;border:2px solid #bd6a00"><strong>NHÃN AI — THĂM DÒ, CHƯA PHẢI ĐỘ CHÍNH XÁC CHÍNH THỨC.</strong> Khung xanh là nhãn tham chiếu AI chưa được con người xác nhận. Lớp mở other không chấm điểm và không xuất hiện trong gallery này.</aside><h1>Ví dụ thăm dò so với nhãn AI</h1><article><h2>bathroom_0081 · val</h2><svg viewBox="0 0 1145 858"><image href="../../../data/raw/images/bathroom/bathroom_0081.jpg" width="1145" height="858"/><rect x="264.0" y="192.0" width="588.0" height="666.0" fill="none" stroke="#32d484" stroke-width="3"><title>bathtub 1.000</title></rect><rect x="59.0" y="698.0" width="236.0" height="141.00000000000003" fill="none" stroke="#32d484" stroke-width="3"><title>toilet 1.000</title></rect><rect x="405.0" y="514.0" width="254.00000000000006" height="31.999999999999964" fill="none" stroke="#32d484" stroke-width="3"><title>grab_bar 1.000</title></rect><rect x="294.7881774902344" y="680.9048461914062" width="519.6147155761719" height="175.99114990234378" fill="none" stroke="#ff6868" stroke-width="3"><title>bathtub 0.603</title></rect><rect x="403.73309326171875" y="518.2603759765625" width="256.1021728515625" height="30.19354248046878" fill="none" stroke="#ff6868" stroke-width="3"><title>grab_bar 0.454</title></rect><rect x="422.5348510742188" y="481.5404968261719" width="94.54272460937496" height="38.5473327636719" fill="none" stroke="#ff6868" stroke-width="3"><title>toilet 0.362</title></rect><rect x="49.31340408325195" y="697.966796875" width="243.65781784057614" height="139.11822509765628" fill="none" stroke="#ff6868" stroke-width="3"><title>sink 0.330</title></rect><rect x="307.35406494140625" y="196.8699493408203" width="44.10031127929688" height="26.176055908203153" fill="none" stroke="#ff6868" stroke-width="3"><title>grab_bar 0.306</title></rect></svg><p>Tham chiếu AI xanh; dự đoán đỏ. Di chuột vào khung để xem lớp.</p><ul><li>Object FP/FN at IoU=.5: 6</li></ul><details><summary>Nhãn và dự đoán từng nguy cơ</summary><pre>{
+  &quot;ground_truth&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. One horizontal grab bar is visible inside shower; toilet partly cropped. Cannot determine absence at all other required locations or load-bearing strength.&quot;
+    }
+  },
+  &quot;prediction&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy thảm trải sàn trong ảnh phòng tắm này.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy dây điện hoặc cáp băng ngang lối đi trong khu vực này.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực lối đi trước bồn cầu và bồn tắm nhìn thấy được, nhưng không thể xác định chính xác bề rộng thông thủy hay đánh giá vật cản chỉ qua ảnh đơn.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Quan sát thấy cửa sổ có rèm chắn và khu vực tắm, nhưng không thể đo đạc chính xác độ chiếu sáng ban đêm hay chỉ số lux từ ảnh đơn.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Quan sát thấy khu vực bồn tắm và sàn gạch, tuy nhiên không thể xác định chính xác độ trơn trượt hoặc hệ số ma sát bề mặt mà không đo đạc thực tế.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Nhìn thấy khu vực bồn cầu và bồn tắm có thanh gắn ngang kính (tay nắm cửa kính), tuy nhiên không đủ bằng chứng để kết luận có tay vịn an toàn chuyên dụng hay đánh giá tình trạng thiếu hụt.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát rõ gờ cửa hoặc bậc chênh cao trong góc chụp hiện tại.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy giường ngủ trong ảnh phòng tắm này.&quot;
+    }
+  }
+}</pre></details></article><article><h2>bathroom_0144 · val</h2><svg viewBox="0 0 963 1280"><image href="../../../data/raw/images/bathroom/bathroom_0144.jpg" width="963" height="1280"/><rect x="0.0" y="545.0" width="391.0" height="314.00000000000006" fill="none" stroke="#32d484" stroke-width="3"><title>sink 1.000</title></rect><rect x="574.0" y="617.0" width="389.0" height="653.0" fill="none" stroke="#32d484" stroke-width="3"><title>bathtub 1.000</title></rect><rect x="195.0" y="883.0" width="502.0" height="326.0000000000001" fill="none" stroke="#32d484" stroke-width="3"><title>rug 1.000</title></rect><rect x="8.0" y="48.0" width="290.0" height="209.0" fill="none" stroke="#32d484" stroke-width="3"><title>cabinet 1.000</title></rect><rect x="0" y="575.5052490234375" width="387.7188720703125" height="154.43432617187497" fill="none" stroke="#ff6868" stroke-width="3"><title>sink 0.573</title></rect><rect x="583.971923828125" y="615.318359375" width="379.02807617187506" height="319.4381713867188" fill="none" stroke="#ff6868" stroke-width="3"><title>bathtub 0.563</title></rect><rect x="189.12477111816406" y="875.5945434570312" width="494.73399353027344" height="328.92852783203125" fill="none" stroke="#ff6868" stroke-width="3"><title>rug 0.538</title></rect><rect x="577.666748046875" y="627.1153564453125" width="385.33325195312494" height="616.0489501953124" fill="none" stroke="#ff6868" stroke-width="3"><title>bathtub 0.507</title></rect></svg><p>Tham chiếu AI xanh; dự đoán đỏ. Di chuột vào khung để xem lớp.</p><ul><li>Object FP/FN at IoU=.5: 4</li></ul><details><summary>Nhãn và dự đoán từng nguy cơ</summary><pre>{
+  &quot;ground_truth&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Routine bathing scene. Adult obscures wall beside tub and tub front; missing support cannot be established. Modular perforated floor mat is visible, no friction measurement.&quot;
+    }
+  },
+  &quot;prediction&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Thảm nhựa dạng lưới được nhìn thấy trên sàn, nhưng không thể xác định lớp đế hoặc độ cố định từ ảnh đơn.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy dây điện hay cáp băng ngang lối đi trong khung hình.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực bồn rửa và bồn tắm có lối đi, tuy nhiên không thể đo chính xác thông thủy hoặc khoảng cách hẹp mà không có dữ liệu chiều sâu.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Ảnh chụp ban ngày, không thể đánh giá độ chiếu sáng ban đêm hoặc đèn dẫn đường từ ảnh đơn này.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Sàn nhà tắm lát gạch và có thảm chống trượt, nhưng không thể xác định độ ướt hay hệ số ma sát thực tế từ hình ảnh.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực bồn tắm có người đang tắm và người chăm sóc, không thấy tay vịn an toàn được lắp đặt trên tường dọc theo bồn tắm trong khung hình.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không nhìn thấy cửa ra vào hoặc gờ cửa, bậc chênh cao nào trong khung hình để đánh giá.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy giường ngủ trong ảnh này.&quot;
+    }
+  }
+}</pre></details></article><article><h2>bedroom_0109 · val</h2><svg viewBox="0 0 1280 459"><image href="../../../data/raw/images/bedroom/bedroom_0109.jpg" width="1280" height="459"/><rect x="462.0" y="305.0" width="516.0" height="153.99999999999997" fill="none" stroke="#32d484" stroke-width="3"><title>bed 1.000</title></rect><rect x="600.0" y="151.0" width="265.99999999999994" height="185.0" fill="none" stroke="#32d484" stroke-width="3"><title>cabinet 1.000</title></rect><rect x="537.0" y="287.0" width="61.99999999999996" height="75.00000000000004" fill="none" stroke="#32d484" stroke-width="3"><title>chair 1.000</title></rect><rect x="448.0" y="247.0" width="53.00000000000004" height="121.0" fill="none" stroke="#32d484" stroke-width="3"><title>lamp 1.000</title></rect><rect x="78.0" y="49.0" width="98.99999999999999" height="357.0" fill="none" stroke="#32d484" stroke-width="3"><title>door 1.000</title></rect><rect x="58.0" y="369.0" width="167.0" height="89.99999999999999" fill="none" stroke="#32d484" stroke-width="3"><title>table 1.000</title></rect><rect x="219.0" y="264.0" width="15.0" height="18.00000000000004" fill="none" stroke="#32d484" stroke-width="3"><title>light_switch 1.000</title></rect><rect x="222.31021118164062" y="264.95458984375" width="10.878646850585945" height="14.375488281249993" fill="none" stroke="#ff6868" stroke-width="3"><title>light_switch 0.618</title></rect><rect x="718.87060546875" y="292.5579528808594" width="37.248107910156136" height="39.91061401367187" fill="none" stroke="#ff6868" stroke-width="3"><title>bed 0.534</title></rect><rect x="533.3236083984375" y="312.903076171875" width="432.96203613281244" height="146.096923828125" fill="none" stroke="#ff6868" stroke-width="3"><title>bed 0.520</title></rect><rect x="452.176513671875" y="248.02146911621094" width="43.329925537109375" height="121.29527282714842" fill="none" stroke="#ff6868" stroke-width="3"><title>lamp 0.473</title></rect><rect x="536.054443359375" y="287.3572998046875" width="60.31811523437504" height="67.17092895507812" fill="none" stroke="#ff6868" stroke-width="3"><title>chair 0.385</title></rect><rect x="237.5947265625" y="384.7998046875" width="10.16246032714843" height="13.65930175781251" fill="none" stroke="#ff6868" stroke-width="3"><title>light_switch 0.346</title></rect><rect x="84.0763168334961" y="58.20323944091797" width="131.47882843017578" height="365.41565704345703" fill="none" stroke="#ff6868" stroke-width="3"><title>door 0.309</title></rect></svg><p>Tham chiếu AI xanh; dự đoán đỏ. Di chuột vào khung để xem lớp.</p><ul><li>Object FP/FN at IoU=.5: 4</li></ul><details><summary>Nhãn và dự đoán từng nguy cơ</summary><pre>{
+  &quot;ground_truth&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: false,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Exposed wood floor to left of bed has no rug in observed walking region; lamp wiring and hidden floor prevent whole-route cable exclusion.&quot;
+    }
+  },
+  &quot;prediction&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: false,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;LOW&quot;,
+      &quot;evidence&quot;: &quot;Khong quan sat thay tham traisan trong khu vuc nhin thay cua phong.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: false,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;LOW&quot;,
+      &quot;evidence&quot;: &quot;Khong nhin thay day dien hoac cap nao bang ngang qua cac loi di chinh.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Co ghe va tu lon trong phong nhung can thuoc hoac du lieu chieu sau de xac thuc chinh xac khoang thong thuy.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Co nhin thay den cay va cong tac, nhung khong the xac dinh chi so lux ban dem hoac he thong den dan duong bang anh don.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vuc nay khong phai la nha tam hoac khong quan sat thay san uot.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khong co khu vuc bon cau hay voi sen trong anh phong ngu nay de danh gia tay vin.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Nhin thay khu vuc cua ra vao nhung can vat chuan hoac do cao do cu the (cm) de danh gia go cua.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Nhin thay giuong va cong tac gan do, nhung can kiem tra thuc te kha nang voi va khoang cach.&quot;
+    }
+  }
+}</pre></details></article><article><h2>hallway_0022 · val</h2><svg viewBox="0 0 1280 1080"><image href="../../../data/raw/images/hallway/hallway_0022.jpg" width="1280" height="1080"/><rect x="635.0" y="0.0" width="645.0" height="1080.0" fill="none" stroke="#32d484" stroke-width="3"><title>cabinet 1.000</title></rect><rect x="501.0" y="552.0" width="91.99999999999996" height="184.00000000000003" fill="none" stroke="#32d484" stroke-width="3"><title>chair 1.000</title></rect><rect x="406.0" y="628.0" width="96.99999999999996" height="126.99999999999999" fill="none" stroke="#32d484" stroke-width="3"><title>chair 1.000</title></rect><rect x="359.0" y="580.0000000000001" width="152.00000000000003" height="150.99999999999991" fill="none" stroke="#32d484" stroke-width="3"><title>table 1.000</title></rect><rect x="370.0" y="513.0" width="58.999999999999986" height="89.00000000000009" fill="none" stroke="#32d484" stroke-width="3"><title>lamp 1.000</title></rect><rect x="550.0" y="761.0" width="58.999999999999986" height="132.0" fill="none" stroke="#32d484" stroke-width="3"><title>rug 1.000</title></rect><rect x="337.0" y="916.0" width="275.0" height="28.0000000000001" fill="none" stroke="#32d484" stroke-width="3"><title>threshold_step 1.000</title></rect><rect x="540.5322875976562" y="736.2097778320312" width="67.81976318359376" height="152.66345214843741" fill="none" stroke="#ff6868" stroke-width="3"><title>rug 0.416</title></rect><rect x="373.2414245605469" y="513.4692993164062" width="54.71282958984375" height="88.73431396484375" fill="none" stroke="#ff6868" stroke-width="3"><title>lamp 0.408</title></rect><rect x="502.7550964355469" y="555.5988159179688" width="88.50704956054692" height="179.25317382812503" fill="none" stroke="#ff6868" stroke-width="3"><title>chair 0.365</title></rect><rect x="346.2454833984375" y="219.2015838623047" width="274.43115234375" height="713.2552032470703" fill="none" stroke="#ff6868" stroke-width="3"><title>door 0.353</title></rect><rect x="435.7585144042969" y="582.5498046875" width="15.42327880859375" height="16.708435058593775" fill="none" stroke="#ff6868" stroke-width="3"><title>light_switch 0.347</title></rect></svg><p>Tham chiếu AI xanh; dự đoán đỏ. Di chuột vào khung để xem lớp.</p><ul><li>Object FP/FN at IoU=.5: 6</li></ul><details><summary>Nhãn và dự đoán từng nguy cơ</summary><pre>{
+  &quot;ground_truth&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Assessment limited to visible region; occlusion/fastening/support uncertainty retained. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Uncalibrated single image cannot establish measurement/nighttime/reach. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: &quot;unknown&quot;,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Not applicable under unchanged registry. Dark foreground hides route details. Mat partly visible in adjacent room; fixation unknown. Doorway frame alone is not a door leaf; visible threshold has no calibrated height.&quot;
+    }
+  },
+  &quot;prediction&quot;: {
+    &quot;RISK-001&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Thảm trải sàn nhìn thấy một phần ở góc phòng phía trong, không quan sát rõ mép quăn hay tình trạng lỏng lẻo.&quot;
+    },
+    &quot;RISK-002&quot;: {
+      &quot;present&quot;: false,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;LOW&quot;,
+      &quot;evidence&quot;: &quot;Không quan sát thấy dây điện hay cáp băng ngang lối đi trong vùng nhìn thấy.&quot;
+    },
+    &quot;RISK-003&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Lối đi qua cửa thông thoáng, có thể quan sát thấy bàn ghế nhưng không đo được chính xác bề rộng thông thủy.&quot;
+    },
+    &quot;RISK-004&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực hành lang tối, có ánh sáng chiếu từ phòng trong nhưng không đủ điều kiện đánh giá độ chiếu sáng ban đêm.&quot;
+    },
+    &quot;RISK-005&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực không phải nhà tắm, sàn khô ráo trong phạm vi quan sát.&quot;
+    },
+    &quot;RISK-006&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Khu vực không chứa bồn cầu hay vòi sen.&quot;
+    },
+    &quot;RISK-007&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: true,
+      &quot;applicable&quot;: true,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Có gờ cửa hoặc bậc chênh cao nhẹ tại lối ra vào phòng nhưng không có thước đo cao độ.&quot;
+    },
+    &quot;RISK-008&quot;: {
+      &quot;present&quot;: &quot;unknown&quot;,
+      &quot;visible&quot;: false,
+      &quot;applicable&quot;: false,
+      &quot;severity&quot;: &quot;UNKNOWN&quot;,
+      &quot;evidence&quot;: &quot;Không nhìn thấy giường ngủ trong ảnh.&quot;
+    }
+  }
+}</pre></details></article></html>

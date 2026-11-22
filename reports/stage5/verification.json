@@ -1,0 +1,85 @@
+{
+  "verified_at": "2026-11-22T07:08:00.108506+00:00",
+  "status": "preparation_verified_training_blocked",
+  "training_on_user_data": false,
+  "raw_files_match_original_zip": 506,
+  "human_decisions_unchanged": true,
+  "stage4_sources_unchanged": true,
+  "protected_prior_test_images": 5,
+  "test_annotations_parsed": false,
+  "human_scene_eligible_images": 1,
+  "verified_train_images": 0,
+  "verified_val_images": 0,
+  "eligible_object_classes": [],
+  "ai_train_reference_images_not_trainable": 3,
+  "ai_train_reference_objects_not_trainable": 25,
+  "raw_unlabeled_risk_rows_preserved": 4000,
+  "additional_positive_verified_train_images_per_risk": {
+    "RISK-001": 50,
+    "RISK-002": 50,
+    "RISK-003": 50,
+    "RISK-004": 50,
+    "RISK-005": 50,
+    "RISK-006": 50,
+    "RISK-007": 50,
+    "RISK-008": 50
+  },
+  "cli_gates": [
+    {
+      "command": [
+        "prepare_stage5.py",
+        "export"
+      ],
+      "exit_code": 2,
+      "status": "blocked"
+    },
+    {
+      "command": [
+        "train_detector.py",
+        "--device",
+        "cpu"
+      ],
+      "exit_code": 2,
+      "status": "blocked"
+    },
+    {
+      "command": [
+        "export_stage5_onnx.py",
+        "export"
+      ],
+      "exit_code": 2,
+      "status": "blocked"
+    },
+    {
+      "command": [
+        "export_stage5_onnx.py",
+        "benchmark"
+      ],
+      "exit_code": 2,
+      "status": "blocked"
+    },
+    {
+      "command": [
+        "final_test_stage5.py"
+      ],
+      "exit_code": 2,
+      "status": "blocked"
+    }
+  ],
+  "notebook_code_cells_syntax_checked": 6,
+  "notebook_execution_outputs": 0,
+  "python_unittest": {
+    "passed": 75,
+    "failed": 0,
+    "stage5_cases": 15,
+    "includes_tiny_random_model_one_epoch_on_temporary_synthetic_data": true
+  },
+  "real_finetuned_models": 0,
+  "onnx_exports": 0,
+  "real_model_latency_ms": null,
+  "real_model_onnx_parity": "not_evaluated",
+  "cuda_or_colab_training": "not_executed",
+  "optional_stage5_dependencies_installed": false,
+  "stage5_pretrained_weights_downloaded": false,
+  "scope": "Guard/data/geometry and synthetic training-loop checks only; no user-data fine-tuning, accuracy or latency claim."
+}

@@ -1,0 +1,9 @@
+risk_id,positive,negative,unknown,not_applicable,additional_positive_images_needed,risk_classifier_implemented,minimum_positive_images
+RISK-001,0,0,0,0,50,False,50
+RISK-002,0,0,0,0,50,False,50
+RISK-003,0,0,0,0,50,False,50
+RISK-004,0,0,0,0,50,False,50
+RISK-005,0,0,0,0,50,False,50
+RISK-006,0,0,0,0,50,False,50
+RISK-007,0,0,0,0,50,False,50
+RISK-008,0,0,0,0,50,False,50

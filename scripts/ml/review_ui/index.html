@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SafeHome · Duyệt cảnh</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><div><p class="eyebrow">SAFEHOME / BỘ DỮ LIỆU ẢNH</p><h1>Duyệt cảnh nhà ở</h1><p>Chỉ bạn xác nhận Giữ / Loại / Cần thay. Tiền lọc là gợi ý, chưa phải nhãn nguy cơ.</p></div><a href="/export.csv" download="manifest_reviewed.csv" class="download">Tải manifest làm việc</a></header>
+<main>
+<section id="summary" aria-label="Tiến độ theo phòng"></section>
+<section class="toolbar" aria-label="Bộ lọc"><label>Người duyệt<input id="reviewer" maxlength="100" placeholder="Nhập tên trước khi lưu" autocomplete="name"></label><label>Phòng<select id="room"><option value="all">Tất cả</option><option value="bedroom">Phòng ngủ</option><option value="bathroom">Phòng tắm</option><option value="hallway">Hành lang</option></select></label><label>Trạng thái<select id="status"><option value="pending">Chưa duyệt</option><option value="all">Tất cả</option><option value="keep">Đã giữ</option><option value="reject">Đã loại</option><option value="replace">Cần thay</option></select></label><label>Tiền lọc<select id="flag"><option value="all">Tất cả · đề xuất xem trước</option><option value="flagged">Chỉ ảnh có cảnh báo</option><option value="clear">Không có cảnh báo</option></select></label><button id="reload">Nạp lại</button></section>
+<p id="message" role="status" aria-live="polite">Đang tải dữ liệu…</p>
+<section id="workspace" class="workspace" hidden>
+<div class="viewer"><div class="image-wrap"><img id="photo" alt="Ảnh cần người dùng duyệt"><div id="conceal" hidden><p>Ảnh art hoặc metadata có dấu hiệu nhạy cảm.</p><button id="reveal">Hiển thị ảnh để duyệt</button></div></div><div class="navigation"><button id="prev">← Trước</button><span id="position"></span><button id="next">Sau →</button></div></div>
+<aside><div class="label-row"><span id="image-id"></span><span id="decision"></span></div><h2 id="title"></h2><p id="dimensions"></p><h3>Đề xuất cần kiểm tra</h3><ul id="reasons"></ul><p class="hint">Có phải ảnh chụp thật bên trong nhà ở? Có người hoặc nội dung không phù hợp? Đúng loại phòng? Xem cả những ảnh không bị gắn cờ.</p><details><summary>Nguồn và giấy phép</summary><dl id="metadata"></dl><a id="source" target="_blank" rel="noopener noreferrer">Mở trang nguồn Wikimedia</a></details><label>Ghi chú<textarea id="note" maxlength="2000" rows="3" placeholder="Lý do loại/thay; điều cần xác minh…"></textarea></label><div class="actions"><button id="keep" class="keep">Giữ · K</button><button id="reject" class="reject">Loại · X</button><button id="replace" class="replace">Cần thay · T</button></div><button id="reset" class="reset">Đưa về chưa duyệt</button><p class="hint">Giữ chỉ xác nhận cảnh phù hợp. Ảnh vướng hash/file/giấy phép vẫn bị chặn khỏi ứng viên cuối. Không gán nhãn nguy cơ ở màn hình này.</p></aside>
+</section>
+<section id="empty" hidden><h2>Không có ảnh trong bộ lọc này.</h2><p>Chọn bộ lọc khác để tiếp tục hoặc xem lại quyết định.</p></section>
+</main><footer>Ảnh và quyết định chỉ lưu trên máy này. Bản gốc data/raw/ không bị ghi đè.</footer>
+</body></html>

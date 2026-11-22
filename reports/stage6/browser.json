@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-11-22T08:40:59.014Z",
+  "status": "passed",
+  "build_id": "5k7Q8Wbr8ZtJziJ2dl_dm",
+  "checks": [
+    {
+      "name": "photo_header_does_not_show_simulation_safety_score_or_lux",
+      "status": "passed"
+    },
+    {
+      "name": "demo_does_not_persist_fake_detections",
+      "status": "passed"
+    },
+    {
+      "name": "real_image_upload_persistence_and_display_with_fixture_detector",
+      "status": "passed"
+    },
+    {
+      "name": "detection_confirmation_persists",
+      "status": "passed"
+    },
+    {
+      "name": "corrected_label_round_trips",
+      "status": "passed"
+    },
+    {
+      "name": "legacy_invalid_answer_does_not_block_new_confirmation",
+      "status": "passed"
+    },
+    {
+      "name": "reload_restores_saved_photo_without_new_inference",
+      "status": "passed"
+    },
+    {
+      "name": "unknown_edit_retracts_database_and_canonical_survey",
+      "status": "passed"
+    },
+    {
+      "name": "single_grab_bar_location_remains_missing_other_location",
+      "status": "passed"
+    },
+    {
+      "name": "unknown_parent_does_not_produce_default_clinical_score",
+      "status": "passed"
+    },
+    {
+      "name": "mobile_layout_has_no_horizontal_overflow",
+      "status": "passed"
+    },
+    {
+      "name": "inference_failure_clears_stale_visible_result",
+      "status": "passed"
+    },
+    {
+      "name": "no_browser_runtime_exceptions",
+      "status": "passed"
+    },
+    {
+      "name": "user_database_bytes_unchanged",
+      "status": "passed"
+    }
+  ],
+  "browser_runtime_exceptions": [],
+  "fixture_detector_calls": 3,
+  "paid_api_calls": 0,
+  "real_onnx_inferences": 0,
+  "scope": "Real browser, image file, Next API and isolated SQLite; detector output is a test fixture, no model accuracy claim.",
+  "user_database_unchanged": true,
+  "screenshots": [
+    "data/review/qa_stage6/desktop.png",
+    "data/review/qa_stage6/mobile.png"
+  ]
+}

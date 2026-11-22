@@ -16,7 +16,8 @@
     "test:experience:browser": "node scripts/verify_cinematic_experience.cjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "test:vision": "vitest run --config vitest.experience.config.ts tests/visionProviders.test.ts tests/structuredGemini.test.ts tests/visionState.test.ts tests/visionProfile.test.ts tests/visionRoutes.test.ts tests/visionEngine.test.ts tests/visionIntegration.test.ts tests/geminiVision.test.ts"
   },
   "dependencies": {
     "@google/genai": "^3.4.0",

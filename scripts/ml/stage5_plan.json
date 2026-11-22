@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "model": "PekingU/rtdetr_r18vd",
+  "revision": "ac77a11ff0170a41b771c03264987f8ce2b0d753",
+  "seed": 20261122,
+  "minimums": {
+    "train_objects_per_class": 50,
+    "train_positive_images_per_class": 20,
+    "train_positive_groups_per_class": 10,
+    "val_positive_images_per_class": 5,
+    "val_positive_groups_per_class": 5,
+    "risk_train_positive_images": 50
+  },
+  "stage4_object_targets": {"map50": 0.8, "class_recall": 0.85},
+  "training": {
+    "epochs": 40,
+    "batch_size": 4,
+    "learning_rate": 0.00005,
+    "weight_decay": 0.0001,
+    "patience": 6,
+    "min_delta": 0.001,
+    "image_size": 640,
+    "horizontal_flip_probability": 0.5,
+    "brightness_jitter": 0.1,
+    "contrast_jitter": 0.1,
+    "confidence_threshold": 0.25,
+    "gradient_clip_norm": 0.1,
+    "bootstrap": 1000
+  },
+  "scope": "object_detection_only; no risk classifier; no automatic rare-class merging",
+  "minimums_note": "Planning heuristics, not a statistical sufficiency guarantee. Change only before a new training run; unknown/unlabeled never count as negatives. Object targets are engineering defaults, not medical thresholds."
+}

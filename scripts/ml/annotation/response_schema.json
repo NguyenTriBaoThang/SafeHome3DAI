@@ -1,0 +1,546 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "objects": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "bed",
+              "chair",
+              "table",
+              "cabinet",
+              "nightstand",
+              "door",
+              "toilet",
+              "sink",
+              "bathtub",
+              "sofa",
+              "rug",
+              "electrical_cable",
+              "grab_bar",
+              "obstacle_route",
+              "threshold_step",
+              "lamp",
+              "light_switch",
+              "other"
+            ]
+          },
+          "bbox": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "xMin": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "yMin": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "xMax": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "yMax": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "xMin",
+              "yMin",
+              "xMax",
+              "yMax"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "category",
+          "bbox",
+          "confidence",
+          "evidence"
+        ]
+      }
+    },
+    "risks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "RISK-001": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-002": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-003": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-004": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-005": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-006": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-007": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        },
+        "RISK-008": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "present": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "visible": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "unknown"
+                  ]
+                }
+              ]
+            },
+            "applicable": {
+              "type": "boolean"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "HIGH",
+                "MEDIUM",
+                "LOW",
+                "UNKNOWN"
+              ]
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "present",
+            "visible",
+            "applicable",
+            "severity",
+            "evidence"
+          ]
+        }
+      },
+      "required": [
+        "RISK-001",
+        "RISK-002",
+        "RISK-003",
+        "RISK-004",
+        "RISK-005",
+        "RISK-006",
+        "RISK-007",
+        "RISK-008"
+      ]
+    }
+  },
+  "required": [
+    "objects",
+    "risks"
+  ]
+}

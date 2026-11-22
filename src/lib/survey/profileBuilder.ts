@@ -46,7 +46,7 @@ export function buildRoomProfile(
     isWetReported: wetVal === "YES" ? true : wetVal === "NO" ? false : null,
     isSlipperyReported: slipVal === "YES" ? true : slipVal === "NO" ? false : null,
     levelDifferenceReported: stepVal === "YES" ? true : stepVal === "NO" ? false : null,
-    levelDifferenceCm: stepVal === "YES" ? 5 : 0,
+    levelDifferenceCm: stepVal === "NO" ? 0 : null,
   };
 
   // 3. Lighting
@@ -98,11 +98,8 @@ export function buildRoomProfile(
 
   const obstacles = {
     present:
-      bedObst === "YES" || bathObst === "YES"
-        ? true
-        : bedObst === "NO" && bathObst === "NO"
-        ? false
-        : null,
+      (roomType === "BATHROOM" ? bathObst : bedObst) === "YES" ? true :
+        (roomType === "BATHROOM" ? bathObst : bedObst) === "NO" ? false : null,
     types: obstacleTypes,
     descriptions: typeof answersMap["BATH_012"]?.value === "string" ? answersMap["BATH_012"].value : "",
     sourceQuestionIds: [
@@ -118,7 +115,7 @@ export function buildRoomProfile(
   const grabInspectVal = answersMap["BATH_007"]?.value;
 
   const grabLocations: string[] = [];
-  if (grabLocVal) {
+  if (grabLocVal && grabLocVal !== "UNKNOWN") {
     if (grabLocVal === "BOTH") grabLocations.push("TOILET", "SHOWER");
     else grabLocations.push(grabLocVal);
   }

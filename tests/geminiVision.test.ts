@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   analyzeRoomPhotoWithGemini,
   getFallbackRoomDetections,
@@ -7,16 +7,6 @@ import fs from "fs";
 import path from "path";
 
 describe("Gemini Vision Intelligence Engine", () => {
-  beforeAll(() => {
-    const envPath = path.join(process.cwd(), ".env");
-    if (fs.existsSync(envPath)) {
-      const envContent = fs.readFileSync(envPath, "utf-8");
-      const match = envContent.match(/GEMINI_API_KEY=["']?([^"'\r\n]+)/);
-      if (match && match[1]) {
-        process.env.GEMINI_API_KEY = match[1];
-      }
-    }
-  });
   it("should gracefully handle missing or invalid image input", async () => {
     const emptyBuffer = Buffer.from("");
     await expect(
@@ -24,7 +14,7 @@ describe("Gemini Vision Intelligence Engine", () => {
     ).rejects.toThrow();
   });
 
-  it("should process and parse interior room image if API key is present", async () => {
+  it.skipIf(process.env.SAFEHOME_RUN_LIVE_VISION_TESTS !== "true")("should process and parse interior room image if explicitly enabled", async () => {
     const refImagePath = path.join(process.cwd(), "public/reference/reference_room.jpg");
     if (!fs.existsSync(refImagePath) || !process.env.GEMINI_API_KEY) {
       console.warn("Skipping live API test: image or API key missing.");

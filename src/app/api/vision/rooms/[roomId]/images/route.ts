@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
+import { hydrateVisionAnalysis } from "@/lib/vision/visionPersistence";
 
 export async function GET(
   req: NextRequest,
@@ -14,7 +15,7 @@ export async function GET(
         analyses: {
           include: {
             detections: true,
-            observations: true,
+            observations: { include: { clarifications: true } },
           },
           orderBy: { startedAt: "desc" },
           take: 1,
@@ -25,12 +26,12 @@ export async function GET(
     const mapped = images.map((img) => ({
       id: img.id,
       roomId: img.roomId,
-      fileUrl: `/uploads/vision/${img.storageKey}`,
+      fileUrl: `/api/vision/images/${encodeURIComponent(img.id)}/file`,
       storageKey: img.storageKey,
       viewpoint: img.viewpoint,
       caption: img.caption,
       createdAt: img.createdAt,
-      latestAnalysis: img.analyses[0] || null,
+      latestAnalysis: img.analyses[0] ? hydrateVisionAnalysis(img.analyses[0]) : null,
     }));
 
     return NextResponse.json({ success: true, data: mapped });

@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 export const AppHeader: React.FC = () => {
   const pathname = usePathname();
+  const isPhotoVision = pathname === "/ai-vision" || pathname === "/vision";
   const {
     isNightMode,
     toggleNightMode,
@@ -73,6 +74,12 @@ export const AppHeader: React.FC = () => {
         ) : null}
 
         {/* Real-time Status Badges & Quick Action Controls */}
+        {isPhotoVision ? (
+          <div className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[10px] sm:text-xs text-amber-800 font-semibold">
+            <Camera className="h-4 w-4 shrink-0" />
+            <span>Ảnh cần xác nhận tại nhà</span>
+          </div>
+        ) : (
         <div className="flex items-center space-x-2.5">
           {/* Safety Score Indicator */}
           <div
@@ -159,6 +166,7 @@ export const AppHeader: React.FC = () => {
             </>
           )}
         </div>
+        )}
       </div>
     </header>
   );

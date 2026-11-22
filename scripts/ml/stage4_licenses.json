@@ -1,0 +1,38 @@
+{
+  "checked_date": "2026-11-22",
+  "installed_or_downloaded_in_stage4": true,
+  "sources": [
+    {
+      "name": "google/owlv2-base-patch16-ensemble",
+      "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d",
+      "license": "Apache-2.0 (declared model-card metadata)",
+      "url": "https://huggingface.co/google/owlv2-base-patch16-ensemble/blob/cfd3195ba4ea9592eec887ded089f4c08eff231d/README.md",
+      "metadata_url": "https://huggingface.co/api/models/google/owlv2-base-patch16-ensemble",
+      "safetensors_available": true
+    },
+    {
+      "name": "transformers",
+      "version": "4.57.1",
+      "license": "Apache-2.0",
+      "url": "https://raw.githubusercontent.com/huggingface/transformers/v4.57.1/LICENSE",
+      "api_reference": "https://huggingface.co/docs/transformers/v4.57.1/model_doc/owlv2"
+    },
+    {
+      "name": "torch",
+      "version": "2.9.0",
+      "license": "BSD-style, three redistribution conditions; retains upstream notices",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/v2.9.0/LICENSE"
+    },
+    {
+      "name": "scipy",
+      "version": "1.18.1",
+      "license": "BSD-3-Clause source; binary wheels include additional bundled-library notices; retain installed dist-info/licenses.",
+      "url": "https://github.com/scipy/scipy/blob/v1.18.1/LICENSE.txt",
+      "metadata_url": "https://pypi.org/pypi/scipy/1.18.1/json",
+      "usage": "OWLv2ImageProcessor.resize required backend on CPU"
+    }
+  ],
+  "existing_dependencies": "Installed environment recorded in scripts/ml/requirements-stage4-resolved.txt. Complete detector runtime entrypoint is requirements-stage4-runtime.txt. Model/checkpoint are unchanged; wheels retain their upstream license notices.",
+  "weights_sha256": "e1e130b9e404cf91a75ad45644c1da9d7fa5284085eecc864266a6923efb99e7",
+  "weights_bytes": 619918824
+}

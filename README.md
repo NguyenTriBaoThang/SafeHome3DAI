@@ -31,7 +31,7 @@
     <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"/>
   </a>
   <a href="./docs/audit/TEST_RESULTS.md">
-    <img src="https://img.shields.io/badge/Verified_Tests-109%20%2F%20109%20Passed%20(100%25)-success?logo=vitest" alt="Test Evidence"/>
+    <img src="https://img.shields.io/badge/Vision_tests-npm_run_test%3Avision-blue?logo=vitest" alt="Vision contract tests"/>
   </a>
   <img src="https://img.shields.io/badge/Next.js-14.2.5-black?logo=next.js" alt="Next.js 14"/>
   <img src="https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react" alt="React 18"/>
@@ -57,7 +57,7 @@
   &nbsp;•&nbsp;
   <a href="./ARCHITECTURE.md"><strong>📐 Sơ Đồ Kiến Trúc</strong></a>
   &nbsp;•&nbsp;
-  <a href="./docs/audit/TEST_RESULTS.md"><strong>🔍 Báo Cáo Kiểm Thử (109 Tests)</strong></a>
+  <a href="./docs/ML_COMPLETION.md"><strong>🔍 Kiểm Thử & Tích Hợp Vision</strong></a>
 </p>
 
 <p align="center">
@@ -86,7 +86,7 @@ Hệ thống kết hợp:
 1. **Khảo sát thích ứng từng câu hỏi** với thuật toán tỉa nhánh động và hiểu ngôn ngữ tự nhiên tiếng Việt.
 2. **Thị giác máy tính đa tầng**: Quét không gian toàn cảnh phòng (`/ai-vision`) và **Thẩm định rủi ro vật dụng đơn lẻ qua ảnh** (`ItemAssessmentModal`) với điểm số rủi ro, căn cứ y khoa và tọa độ điểm nguy cơ H1..H4 chuẩn CDC STEADI.
 3. **Bản sao số 3D WebGL (Three.js)** với không gian kiến trúc photorealistic dollhouse, mô phỏng ánh sáng động (0 - 520 Lux), ma sát mặt sàn (sàn ướt/khô ráo) và thuật toán gom cụm nhãn thông minh (<0.95m).
-4. **Động cơ đánh giá y khoa tất định 100% (Deterministic Clinical Rules)** dựa trên cẩm nang WHO 2021 & CDC STEADI, loại trừ hoàn toàn ảo giác trong chấm điểm an toàn sinh mạng.
+4. **Động cơ luật đánh giá nguy cơ (Deterministic Clinical Rules)** tham chiếu WHO 2021 & CDC STEADI. Kết quả phụ thuộc dữ liệu đầu vào đã được xác nhận; ảnh đơn chưa đủ để chấm điểm an toàn.
 5. **Trợ lý AI RAG có căn cứ (Grounded RAG Copilot)** với ngăn tra cứu bằng chứng 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG 8 tiêu chí) và trình định dạng văn bản y tế chuyên biệt.
 6. **Sơ đồ giải trình quyết định (XAI Decision Graph)** trực quan hóa cây suy luận từ phòng $\rightarrow$ vật thể $\rightarrow$ đo đạc $\rightarrow$ quy chuẩn $\rightarrow$ nguy cơ $\rightarrow$ can thiệp.
 
@@ -125,7 +125,7 @@ Hệ sinh thái **SafeHome 3D AI** được triển khai trực tiếp với cá
 | Giải Trình AI & Nguồn Gốc Quyết Định (`/explainability`) |
 | :---: |
 | <img src="./assets/images/screenshots/demo_08_xai_decision_graph.jpg" alt="Giải Trình AI & Cây Quyết Định XAI" width="100%"/> |
-| **Cây suy luận nhân quả ReactFlow minh bạch 100%**: Trực quan hóa toàn bộ chuỗi quyết định từ Vật thể 3D $\rightarrow$ Đo đạc không gian $\rightarrow$ Quy chuẩn y tế $\rightarrow$ Nguy cơ $\rightarrow$ Giải pháp can thiệp. |
+| **Cây suy luận ReactFlow**: Trực quan hóa chuỗi quyết định từ Vật thể 3D $\rightarrow$ Đo đạc không gian $\rightarrow$ Quy chuẩn y tế $\rightarrow$ Nguy cơ $\rightarrow$ Giải pháp can thiệp. |
 
 ---
 
@@ -167,8 +167,8 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
 - **Điều hướng thông suốt:** Dễ dàng chuyển tiếp giữa thẩm định ảnh vật dụng sang quét toàn bộ căn phòng bằng **Thị giác AI (`/ai-vision`)** hoặc hỏi chuyên sâu với **SafeHome Copilot (`/ai-assistant`)**.
 
 ### 3.2. Thị Giác AI Đa Phương Thức (Vision Intelligence Studio)
-- **Bảo mật tuyệt đối ảnh gia đình:** Xác thực Magic Bytes nhị phân (chống MIME spoofing) và cắt bỏ 100% dữ liệu EXIF GPS trước khi xử lý.
-- **Nhận diện 18 lớp vật thể y tế:** Thảm trải sàn lỏng lẻo, giường ngủ, dây điện bừa bộn, thanh vịn, bồn cầu, đèn ngủ, bàn trà, chướng ngại vật lối đi.
+- **Xử lý ảnh gia đình:** Kiểm tra Magic Bytes và loại bỏ segment APP1/EXIF của JPEG trước khi gọi provider. Gemini gửi ảnh tới dịch vụ Google; chọn local nếu cần xử lý tại dịch vụ của bạn. Bộ lọc này không bảo đảm loại bỏ mọi loại metadata của mọi định dạng.
+- **Taxonomy 18 lớp vật thể:** Bao gồm thảm, giường, dây điện, thanh vịn, bồn cầu, đèn và công tắc. Nhận diện vật thể chưa xác nhận tình trạng nguy hiểm; lớp chưa được detector local huấn luyện được trả riêng trong `untrainedClasses`.
 - **Hiển thị Bounding Box & Nhãn tên sắc nét:** Loại bỏ hoàn toàn lỗi phóng đại chữ SVG trong Chromium bằng hệ thống nhãn phủ CSS HTML Overlay gọn gàng (`text-[10px] font-bold`), tự động căn chỉnh vị trí thông minh khi vật thể ở sát mép trên ảnh.
 - **Human-in-the-Loop:** Cho phép người dùng xác nhận (`CONFIRMED`), điều chỉnh nhãn (`CORRECTED`) hoặc loại bỏ (`REJECTED`) trước khi đồng bộ vào Bản sao số 3D.
 
@@ -177,7 +177,7 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
 - **Studio điều khiển ánh sáng tương tác:** Chuyển đổi linh hoạt giữa Hoàng hôn, Ban ngày (250 Lux), Ban đêm (40 Lux) và Studio (320 Lux); thanh trượt điều chỉnh cường độ rọi từ 0 đến 520 Lux.
 - **Mô phỏng mặt sàn & Ma sát:** Kiểm tra tình trạng sàn khô ráo vs sàn ướt; công tắc bổ sung thiết bị chống ngã: thanh vịn bồn cầu, thanh vịn vòi sen, thảm cao su chống trượt giác hút.
 - **Đa dạng góc máy quan sát:** Chế độ Dollhouse toàn cảnh, Tầm mắt người già (Eye-level), Mặt bằng phẳng (Top 2D), Đi bộ khám phá (Walkthrough), Tự căn chỉnh góc (Fit) và Chụp ảnh màn hình (Snapshot).
-- **Thuật toán gom cụm nhãn thông minh (<0.95m):** Tự động gom các nguy cơ gần nhau thành 1 nhãn cụm duy nhất (ví dụ: `🔴 +3 Nguy cơ`), loại bỏ 100% hiện tượng chữ đè lấn nhau trong không gian 3D.
+- **Thuật toán gom cụm nhãn (<0.95m):** Gom các nguy cơ gần nhau thành một nhãn cụm (ví dụ: `🔴 +3 Nguy cơ`) để giảm chữ đè lấn trong không gian 3D.
 
 ### 3.4. Trợ Lý AI RAG & Ngăn Tra Cứu Bằng Chứng Y Khoa (`/ai-assistant`)
 - **Trình định dạng chuyên biệt SafeHomeMarkdown:** Trình bày rõ ràng các tiêu đề, thẻ ghi nhớ không gian 3D (`📌`), hộp cảnh báo an toàn (`* ⚠️`) và các thẻ trích dẫn chỉ mục y khoa tương tác (`[1]`, `[2]`, `[3]`, `[4]`).
@@ -189,7 +189,7 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
 - **Cơ chế phòng vệ chống ảo giác (Evidence Fallback Active):** Phân định rạch ròi giữa câu trả lời có bằng chứng xác thực (`SUPPORTED`), bằng chứng một phần (`PARTIALLY_SUPPORTED`) và từ chối khẳng định khi thiếu số liệu kiểm chứng (`INSUFFICIENT_EVIDENCE`).
 
 ### 3.5. Sơ Đồ Giải Trình Quyết Định & Truy Vết Y Khoa (XAI Decision Graph — `/explainability`)
-- **Minh bạch hóa 100% chuỗi suy luận AI:** Sử dụng đồ thị tương tác ReactFlow trực quan hóa từ Phòng khảo sát $\rightarrow$ Vật thể 3D nhận diện $\rightarrow$ Số đo hình học $\rightarrow$ Điều khoản quy chuẩn y tế $\rightarrow$ Kết luận nguy cơ $\rightarrow$ Giải pháp can thiệp.
+- **Hiển thị chuỗi suy luận:** Dùng đồ thị ReactFlow từ Phòng khảo sát $\rightarrow$ Vật thể 3D nhận diện $\rightarrow$ Số đo hình học $\rightarrow$ Điều khoản quy chuẩn y tế $\rightarrow$ Kết luận nguy cơ $\rightarrow$ Giải pháp can thiệp.
 - **Audit Trail:** Truy xuất toàn bộ nhật ký thay đổi trạng thái, ghi nhận đầy đủ người can thiệp, thời điểm và căn cứ y văn.
 
 ---
@@ -240,34 +240,67 @@ flowchart TB
 
 ## 📊 6. Đảm Bảo Chất Lượng & Kết Quả Kiểm Thử (QA & Tests)
 
-SafeHome 3D AI duy trì chất lượng kiểm thử nghiêm ngặt với **100% tỷ lệ vượt qua trên toàn bộ 20 bộ kiểm thử tự động (109/109 tests passed)**:
+Kiểm thử phần mềm và chất lượng mô hình là hai kết quả riêng. Bộ kiểm thử provider/API/bbox/`unknown` không gọi API trả phí và chỉ khởi tạo SQLite tạm riêng:
 
-```text
- ✓ tests/spatialValidationEngine.test.ts  (8 tests)   - Kiểm tra tính hợp lệ không gian hình học 3D
- ✓ tests/surveyEngine.test.ts             (9 tests)   - Tỉa nhánh thích ứng, completeness, NLP tiếng Việt
- ✓ tests/riskIntelligence.test.ts         (10 tests)  - Đánh giá 8 quy tắc lâm sàng WHO 2021 & CDC STEADI
- ✓ tests/realisticReconstruction.test.ts (6 tests)   - Tái tạo không gian phòng 3D thực tế
- ✓ tests/visionEngine.test.ts             (14 tests)  - Magic bytes, bóc tách EXIF, chuẩn hóa BBox [0..1]
- ✓ tests/riskEngine.test.ts               (11 tests)  - Động cơ chấm điểm an toàn và phân tầng rủi ro
- ✓ tests/copilotEngine.test.ts            (10 tests)  - Hội thoại AI RAG, phân tích ý định, phòng chống ảo giác
- ✓ tests/visionIntegration.test.ts        (2 tests)   - Tích hợp Vision -> Fact -> Survey -> Reassessment
- ✓ tests/riskIntegration.test.ts          (3 tests)   - Tích hợp đánh giá rủi ro đa phòng & lưu trữ snapshot
- ✓ tests/dollhouseReferenceScene.test.ts  (5 tests)   - Kiểm tra cảnh tham chiếu dollhouse phòng ngủ & vệ sinh
- ✓ tests/copilotIntegration.test.ts       (4 tests)   - Tích hợp AI Chat, RAG search và kiểm định nguồn gốc
- ✓ tests/surveyIntegration.test.ts        (4 tests)   - Tích hợp luồng khảo sát và lưu trữ database SQLite
- ✓ tests/simulationUndoRedo.test.ts       (3 tests)   - Khôi phục trạng thái can thiệp mô phỏng (Undo/Redo)
- ✓ tests/workflowEngine.test.ts           (4 tests)   - Gom cụm nhãn 3D (<0.95m), máy trạng thái 7 bước
- ✓ tests/itemHazardAssessment.test.ts     (4 tests)   - Thẩm định rủi ro vật dụng, Hotspot pins H1..H4, chi phí
- ✓ tests/geminiVision.test.ts             (3 tests)   - Tích hợp API Gemini Multimodal Vision phân tích phòng
- ✓ tests/integration.test.ts              (3 tests)   - Kiểm tra tổng thể các dịch vụ tích hợp hệ thống
- ✓ tests/ragEngine.test.ts                (4 tests)   - Truy xuất ngữ nghĩa tài liệu an toàn lão khoa WHO/CDC
- ✓ tests/ragEvaluation.test.ts            (1 test)    - Benchmark đánh giá RAG 8 tiêu chí chất lượng
- ✓ tests/workflowIntegration.test.ts      (1 test)    - Tích hợp lưu trữ và khôi phục trạng thái quy trình khép kín
+Luồng Vision hiện tại: **120 ca kiểm thử đạt, 1 ca live API mặc định bỏ qua**, gồm kiểm thử SQLite tạm thực; thêm **33 ca hồi quy khảo sát/luật nguy cơ đạt**. Kiểm thử trình duyệt nằm trong báo cáo riêng. Đây là kiểm thử phần mềm, không phải tỷ lệ nhận diện đúng trên ảnh thực tế.
 
-Test Files  20 passed (20)
-     Tests  109 passed (109)
-  Duration  24.11s (100% Pass Rate)
+```bash
+npm run test:vision
+npx tsc --noEmit
 ```
+
+Kết quả hoàn thiện mới nhất nằm trong [ML_COMPLETION.md](docs/ML_COMPLETION.md), [Vitest JSON](reports/stage6/vitest.json) và [kiểm tra tính nguyên vẹn](reports/stage6/verification.json). Lệnh test dùng schema trên SQLite tạm mới, không chạy Prisma global setup vào database người dùng. Ca adapter Gemini lịch sử chỉ chạy khi chủ động đặt `SAFEHOME_RUN_LIVE_VISION_TESTS=true`; mặc định bỏ qua.
+
+### Chất lượng mô hình đã đo
+
+**Chưa có độ chính xác chính thức trên nhãn con người.** Bộ thăm dò được cho phép dùng nhãn AI; ảnh nguồn chủ yếu từ Wikimedia Commons. Chỉ 38 ảnh đủ điều kiện cảnh AI và giấy phép trong bộ ứng viên; chia theo nhóm thành train 27, val 6, test 5. Không huấn luyện trên bộ này.
+
+| Cấu hình thăm dò Giai đoạn 4 | Ảnh | mAP@0.5 so với nhãn AI | Lỗi inference |
+| --- | ---: | ---: | ---: |
+| `structured` — validation | 6 | 0.7822 | 0 |
+| `structured` — test đã khóa, một lượt | 5 | 0.7092 | 0 |
+| Pipeline Gemini cũ — validation | 6 | Không diễn giải thành chất lượng mô hình | 6 |
+
+CI95 bootstrap mAP: val [0.5000, 0.9626], test [0.4673, 1.0000]. Mẫu rất nhỏ; nhãn AI có thể sai hoặc tương quan với dự đoán. Không có nhãn HIGH dương tính, nên recall HIGH và hiệu quả phát hiện nguy cơ **chưa đánh giá được**. Xem [toàn bộ so sánh](reports/stage4_exploratory/comparison.md).
+
+Các số trên thuộc cấu hình thí nghiệm `structured` đã khóa, **không phải điểm đo của provider tích hợp mới**. `GeminiProvider` hiện port prompt/schema/seed/threshold của recipe đó sang `structured-serving-v1`, kiểm tra JSON bằng schema và Zod, timeout mặc định 60 giây và một attempt. Adapter cũ được giữ nguyên cho baseline lịch sử; không chạy lại test đóng băng. Giai đoạn 5 có 0 ảnh train/val được xác nhận bbox, chưa fine-tune, chưa có ONNX hoặc độ trễ local thật. [Báo cáo thiếu dữ liệu](reports/stage5/readiness.md) nêu điều kiện để huấn luyện.
+
+[Kiểm tra Gemini thật](reports/stage6/gemini-live.json) đã chạy một request trên ảnh được người dùng duyệt cảnh, không thuộc test: JSON hợp lệ, khoảng 18.9 giây. Không chấm độ chính xác hay recall trên lần gọi này. [Kiểm thử trình duyệt](reports/stage6/browser.json) dùng Chromium, Next và SQLite thật với đầu ra detector là fixture; không thay thế đánh giá mô hình.
+
+### Chọn provider
+
+Đặt trong môi trường server (mẫu ở [.env.example](.env.example)):
+
+```dotenv
+VISION_PROVIDER=gemini
+GEMINI_API_KEY=your_key
+GEMINI_MODEL=gemini-3.5-flash-lite
+VISION_TIMEOUT_MS=60000
+```
+
+Hoặc dùng detector local sau khi hoàn thành huấn luyện và xuất ONNX qua các cổng kiểm tra Giai đoạn 5:
+
+```dotenv
+VISION_PROVIDER=local
+LOCAL_DETECTOR_URL=http://127.0.0.1:8766
+```
+
+Chạy FastAPI bằng môi trường đã cài [dependencies Giai đoạn 5](scripts/ml/requirements-stage5.txt):
+
+```powershell
+.\.venv-stage5\Scripts\python.exe -m uvicorn serve_stage5:create_app --factory --app-dir scripts/ml --host 127.0.0.1 --port 8766
+```
+
+`SAFEHOME_STAGE5_ONNX` của tiến trình Python có thể trỏ tới thư mục export khác; mặc định `models/stage5/rtdetr_r18/onnx`. Thiếu model, checksum sai hoặc chưa đạt parity thì dịch vụ không khởi động. Không cần đổi provider khi xem demo có nhãn `MOCK_DEMO`. Ảnh thật không có nhánh dự phòng sinh bố cục mẫu; provider lỗi trả 503 để người dùng biết và chuyển sang duyệt thủ công. Local không âm thầm gọi Gemini hay tải model.
+
+### Giới hạn đã biết
+
+- Ảnh Wikimedia chưa đại diện cho nhà Việt Nam, sinh hoạt người cao tuổi hoặc điều kiện ánh sáng thực tế; số nhà Việt Nam còn ít và chưa có thống kê nguồn được xác minh. Nhiều ảnh gốc không phải cảnh nhà ở phù hợp.
+- RISK-003/004/005/007/008 cần thông tin chiều rộng, lux, chống trượt/ma sát, cao độ hoặc tầm với. Một ảnh chưa hiệu chuẩn không cung cấp các phép đo này.
+- Thảm có được cố định, dây có cắt lối đi và tay vịn có thiếu/đủ/chắc chắn cần quan sát đủ vùng hoặc kiểm tra tại nhà. Không thấy trong ảnh không chứng minh không có.
+- Gemini cung cấp vật thể và `riskCandidates` chưa được xác nhận; detector local chỉ cung cấp vật thể. Tám nguy cơ trước xác nhận trả `unknown`, `risk_supported=false`. Người dùng trả lời câu hỏi theo question bank chính; hồ sơ và dữ kiện cập nhật nguyên tử. Luồng Vision chỉ áp dụng luật khi đủ dữ kiện xác nhận, giữ unknown cho thông tin chưa đo và không chấm điểm tổng hợp khi dữ liệu chưa đủ.
+- Ảnh, bbox, nhãn đã sửa, câu trả lời và nguồn/config suy luận được lưu và khôi phục sau tải lại trang. Lỗi lưu trả lỗi rõ; demo không ghi dữ liệu giả vào hồ sơ thật. Đổi câu trả lời sang unknown thu hồi dữ kiện do câu trả lời đó sở hữu.
+- Độ tin cậy detector chưa hiệu chuẩn; tái dựng 3D là ước lượng cần hiệu chỉnh kích thước. Không dùng kết quả để bảo đảm an toàn lâm sàng.
 
 ---
 
@@ -277,7 +310,7 @@ Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD v�
 
 1. **`ci.yml` (CI Pipeline):**
    - Tự động kích hoạt khi có `push` hoặc `pull_request` trên các nhánh `main`, `master`, `develop`.
-   - Cài đặt thư viện sạch (`npm ci`), sinh Prisma Client (`npx prisma generate`), kiểm tra kiểu dữ liệu TypeScript (`npx tsc --noEmit`), chạy 109 ca kiểm thử Vitest (`npm test -- --run`) và đóng gói Next.js production (`npm run build`).
+   - Cài đặt thư viện sạch (`npm ci`), sinh Prisma Client (`npx prisma generate`), kiểm tra kiểu dữ liệu TypeScript (`npx tsc --noEmit`), chạy kiểm thử Vitest (`npm test -- --run`) và đóng gói Next.js production (`npm run build`).
 
 2. **`deploy-pages.yml` (Technical Documentation Portal):**
    - Tự động đóng gói cổng tài liệu kỹ thuật tĩnh trong thư mục `docs-site/` (Vite + React) và xuất bản lên **GitHub Pages**:
@@ -347,7 +380,7 @@ Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` v
 | **Trợ lý AI & RAG y tế** | [`docs/RAG_ARCHITECTURE.md`](./docs/RAG_ARCHITECTURE.md) | Kiến trúc truy xuất vector, đối chứng y văn, ngăn tra cứu bằng chứng 4 tab |
 | **Bản sao số 3D & Gom cụm** | [`docs/RISK_3D_INTEGRATION.md`](./docs/RISK_3D_INTEGRATION.md) | Tích hợp không gian 3D, chiếu sáng động, mặt sàn ma sát và thuật toán gom cụm nhãn |
 | **Quy tắc nguy cơ y khoa** | [`docs/RISK_RULE_REGISTRY.md`](./docs/RISK_RULE_REGISTRY.md) | Đặc tả 8 quy tắc lâm sàng WHO 2021 & CDC STEADI |
-| **Báo cáo kiểm thử** | [`docs/audit/TEST_RESULTS.md`](./docs/audit/TEST_RESULTS.md) | Bằng chứng kiểm thử tự động 109/109 ca kiểm thử Vitest (20 suites) |
+| **Báo cáo hoàn thiện Vision** | [`docs/ML_COMPLETION.md`](./docs/ML_COMPLETION.md) | Kiểm thử provider, SQLite, trình duyệt và giới hạn đánh giá mô hình |
 | **Hướng dẫn sử dụng** | [`docs/USER_GUIDE.md`](./docs/USER_GUIDE.md) | Cẩm nang trải nghiệm toàn diện cho người dùng và chuyên viên y tế |
 | **Luồng 7 bước khép kín** | [`docs/architecture/END_TO_END_WORKFLOW.md`](./docs/architecture/END_TO_END_WORKFLOW.md) | Quy trình tuần tự từ Khảo sát đến Báo cáo can thiệp |
 

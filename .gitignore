@@ -59,3 +59,12 @@ ehthumbs.db
 # Agent & Temp caches
 .superpowers/
 .scratch/
+
+# Local ML datasets, review decisions and model weights
+/data/
+/models/
+/.venv-ml/
+/.venv-stage5/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

@@ -40,6 +40,8 @@ const VALID_CATEGORIES: Set<DetectionCategory> = new Set([
   "obstacle_route",
   "threshold_step",
   "nightstand",
+  "lamp",
+  "light_switch",
   "other",
 ]);
 
@@ -48,6 +50,8 @@ function normalizeCategory(raw: string): DetectionCategory {
   if (VALID_CATEGORIES.has(lower as DetectionCategory)) {
     return lower as DetectionCategory;
   }
+  if (lower.includes("light switch") || lower.includes("công tắc đèn")) return "light_switch";
+  if (lower.includes("lamp") || lower.includes("đèn ngủ") || lower.includes("đèn bàn")) return "lamp";
   if (lower.includes("bed") || lower.includes("giường")) return "bed";
   if (lower.includes("nightstand") || lower.includes("đầu giường")) return "nightstand";
   if (lower.includes("wardrobe") || lower.includes("closet") || lower.includes("tủ")) return "cabinet";
@@ -134,7 +138,7 @@ Hãy nhận diện tất cả các đồ nội thất chính và các nguy cơ t
 2. Nguy cơ an toàn: electrical_cable (dây điện vắt qua lối đi), obstacle_route (vật cản sàn), loose_rug (thảm quăn góc/không chống trượt), threshold_step (gờ cửa cao).
 
 Với mỗi vật thể, trích xuất:
-- category: Một trong các giá trị chuẩn [bed, chair, table, cabinet, toilet, sink, bathtub, sofa, rug, electrical_cable, grab_bar, obstacle_route, threshold_step, nightstand, other].
+- category: Một trong 18 giá trị chuẩn [bed, chair, table, cabinet, door, toilet, sink, bathtub, sofa, rug, electrical_cable, grab_bar, obstacle_route, threshold_step, nightstand, lamp, light_switch, other]. lamp là bộ đèn nhìn thấy được, light_switch là công tắc đèn gắn tường (không phải ổ cắm). Không suy ra lux ban đêm hoặc tầm với thực tế từ sự hiện diện của chúng.
 - labelVi: Tên tiếng Việt rõ ràng, thân thiện (ví dụ: "Sofa nệm gỗ", "Bàn trà", "Băng ghế đôn", "Thảm trải sàn", "Bộ tranh treo tường", "Quạt trần", "Điều hòa").
 - sceneModelType: Định danh mô hình 3D khớp với thư viện [sofa, coffee_table, bench, rug, wall_art, ceiling_fan, air_conditioner, slat_partition, curtain, media_console, bed, nightstand, wardrobe, desk, chair, stool, plant, tv, mirror, window, toilet, sink, shower].
 - placementWall: Vị trí áp tường tương đối đối với góc chụp: "left" (tường trái), "right" (tường phải), "back" (tường đối diện phía sau), hoặc "free" (nằm tự do giữa phòng/sàn).

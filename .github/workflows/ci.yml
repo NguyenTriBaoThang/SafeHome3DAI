@@ -42,9 +42,17 @@ jobs:
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
+      - name: Vision provider contracts (offline, no database setup)
+        run: npm run test:vision
+
       - name: Run automated test suite (Vitest)
         run: npm test -- --run
 
       - name: Build Next.js production bundle
         run: npm run build
+
+      - name: Built Vision HTTP checks (local provider deliberately offline)
+        run: node scripts/ml/smoke_stage6.cjs
+        env:
+          SAFEHOME_BUILD_DIR: .next
 

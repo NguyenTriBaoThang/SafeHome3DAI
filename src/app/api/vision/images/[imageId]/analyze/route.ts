@@ -1,140 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { runVisionAnalysis } from "@/lib/vision/visionProvider";
-import fs from "fs";
-import path from "path";
+import { persistVisionAnalysis } from "@/lib/vision/visionPersistence";
+import { VisionProviderError } from "@/lib/vision/providers";
+import { MAX_IMAGE_FILE_SIZE } from "@/lib/vision/imagePreprocessor";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { imageId: string } }
-) {
+export const runtime = "nodejs";
+export const maxDuration = 150;
+
+export async function POST(req: NextRequest, { params }: { params: { imageId: string } }) {
   try {
     const { imageId } = params;
-    const body = await req.json().catch(() => ({}));
-    const roomId = body.roomId || "room-bedroom-01";
-    const mode = body.mode || "AI_VISION";
-    const roomType = body.roomType || (roomId.toLowerCase().includes("bath") ? "BATHROOM" : "BEDROOM");
-
-    // Extract base64 image if provided
-    let imageBufferBase64 = body.imageBufferBase64;
-    if (imageBufferBase64 && imageBufferBase64.includes(",")) {
-      imageBufferBase64 = imageBufferBase64.split(",")[1];
+    const body = await req.json();
+    const roomId = body.roomId || "room-bedroom-01", mode = body.mode || "AI_VISION";
+    const roomType = body.roomType || "BEDROOM";
+    if (typeof roomId !== "string" || roomId.length > 100 || !["BEDROOM", "BATHROOM", "LIVING_ROOM"].includes(roomType) ||
+        !["AI_VISION", "MANUAL_REVIEW"].includes(mode) || typeof (body.caption || "") !== "string") {
+      return NextResponse.json({ success: false, error: "Thông tin phòng hoặc chế độ không hợp lệ." }, { status: 400 });
     }
-
-    // If not in body, check disk or database storage
-    if (!imageBufferBase64 && imageId) {
-      try {
-        const roomImg = await prisma.roomImage.findUnique({
-          where: { id: imageId },
-        });
-        if (roomImg?.storageKey) {
-          const filePath = path.join(process.cwd(), "public", "uploads", "vision", path.basename(roomImg.storageKey));
-          if (fs.existsSync(filePath)) {
-            const buf = await fs.promises.readFile(filePath);
-            imageBufferBase64 = buf.toString("base64");
-          }
-        }
-      } catch (err) {
-        // ignore fallback
-      }
+    let base64 = body.imageBufferBase64;
+    if (base64 !== undefined && (typeof base64 !== "string" || base64.length > Math.ceil(MAX_IMAGE_FILE_SIZE / 3) * 4 + 100)) {
+      return NextResponse.json({ success: false, error: "Ảnh không hợp lệ hoặc vượt quá 10 MB." }, { status: 413 });
     }
-
-    // 1. Run inference/heuristic
-    const caption = body.caption || "";
-    const analysisResult = await runVisionAnalysis(imageId, roomId, {
-      mode,
-      roomType,
-      viewpoint: body.viewpoint,
-      caption,
-      imageBufferBase64,
-    });
-
-    // 2. Persist analysis & detections in database
-    try {
-      // Ensure parent roomImage exists if custom upload
-      const existingImg = await prisma.roomImage.findUnique({ where: { id: imageId } });
-      if (!existingImg) {
-        await prisma.roomImage.create({
-          data: {
-            id: imageId,
-            roomId,
-            storageKey: imageId,
-            viewpoint: body.viewpoint || "ENTRANCE",
-            caption: caption || "Ảnh hiện trường",
-          },
-        }).catch(() => {});
-      }
-
-      const dbAnalysis = await prisma.visionAnalysis.create({
-        data: {
-          id: analysisResult.id,
-          roomId,
-          imageId,
-          modelId: analysisResult.modelId,
-          modelVersion: analysisResult.modelVersion,
-          analysisStatus: "COMPLETED",
-          startedAt: new Date(analysisResult.startedAt),
-          completedAt: new Date(),
-        },
-      });
-
-      // Save detections
-      for (const det of analysisResult.detections) {
-        await prisma.objectDetection.create({
-          data: {
-            id: det.id,
-            analysisId: dbAnalysis.id,
-            category: det.category,
-            originalLabel: det.originalLabel,
-            confidence: det.confidence,
-            bboxJson: JSON.stringify(det.bbox),
-            source: det.source,
-            verificationStatus: det.verificationStatus,
-          },
-        });
-      }
-
-      // Save observations
-      for (const obs of analysisResult.observations) {
-        await prisma.visionObservation.create({
-          data: {
-            id: obs.id,
-            analysisId: dbAnalysis.id,
-            observationType: obs.observationType,
-            description: obs.description,
-            uncertaintyType: obs.uncertaintyType,
-            requiresConfirmation: obs.requiresConfirmation,
-            verificationStatus: obs.verificationStatus,
-            surveyQuestionId: obs.surveyQuestionId,
-          },
-        });
-      }
-
-      // Save clarifications
-      for (const clar of analysisResult.clarifications) {
-        await prisma.visionClarification.create({
-          data: {
-            id: clar.id,
-            roomId,
-            observationId: clar.observationId || null,
-            surveyQuestionId: clar.surveyQuestionId,
-            questionText: clar.questionText,
-            optionsJson: JSON.stringify(clar.options),
-            status: clar.status,
-          },
-        });
-      }
-    } catch (err) {
-      console.warn("[VisionAnalyze API] Persistence fallback to in-memory:", err);
+    if (base64?.startsWith("data:")) base64 = base64.slice(base64.indexOf(",") + 1);
+    const demo = ["img-demo-bed", "img-demo-bedroom", "img-demo-bathroom"].includes(imageId) && !base64;
+    if (!base64 && !demo && mode !== "MANUAL_REVIEW") {
+      const image = await prisma.roomImage.findUnique({ where: { id: imageId } });
+      if (!image || image.roomId !== roomId) throw new VisionProviderError("INVALID_IMAGE", "Không tìm thấy ảnh trong phòng đang chọn.");
+      try { base64 = (await fs.readFile(path.join(process.cwd(), "public/uploads/vision", path.basename(image.storageKey)))).toString("base64"); }
+      catch { throw new VisionProviderError("INVALID_IMAGE", "Không đọc được ảnh đã lưu. Hãy tải lại ảnh."); }
     }
-
-    return NextResponse.json({ success: true, data: analysisResult });
-  } catch (error: any) {
-    console.error("[VisionAnalyze API] Error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message || "Lỗi phân tích hình ảnh" },
-      { status: 500 }
-    );
+    if (base64 && Buffer.from(base64, "base64").toString("base64") !== base64) {
+      throw new VisionProviderError("INVALID_IMAGE", "Dữ liệu ảnh base64 không hợp lệ.");
+    }
+    const result = await runVisionAnalysis(imageId, roomId, { mode, roomType, viewpoint: body.viewpoint,
+      caption: body.caption || "", imageBufferBase64: base64, demo });
+    // Demonstration and drawing mode never write fabricated detections into a real survey.
+    if (demo || mode === "MANUAL_REVIEW") return NextResponse.json({ success: true, data: result, persisted: false });
+    await persistVisionAnalysis(result, Buffer.from(base64, "base64"), body.caption || "", roomType, body.viewpoint || "ENTRANCE");
+    return NextResponse.json({ success: true, data: result, persisted: true, image: { id: imageId, fileUrl: `/api/vision/images/${encodeURIComponent(imageId)}/file` } });
+  } catch (error) {
+    if (error instanceof VisionProviderError) return NextResponse.json({ success: false, error: error.message, code: error.code },
+      { status: error.code === "INVALID_IMAGE" ? 400 : 503 });
+    return NextResponse.json({ success: false, error: "Không thể hoàn tất hoặc lưu phân tích. Kết quả chưa được lưu.", code: "PERSISTENCE_FAILED" }, { status: 503 });
   }
 }
-
