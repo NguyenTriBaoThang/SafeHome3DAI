@@ -1,16 +1,23 @@
 import type { VisionDetection, VisionObservation } from "./types";
 import type { AssessmentSnapshot } from "@/lib/risk/types";
-import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
+import {
+  evaluateRoomHazardsCanonical,
+  adaptCanonicalToLegacySnapshot,
+  CanonicalAssessmentResult,
+  CanonicalEngineOptions,
+} from "@/lib/risk/canonicalEngine";
 
 /**
- * Computes deterministic clinical fall-risk assessment snapshot tailored directly to the detections in a photo
+ * Builds normalized raw assessment input from 2D vision detections and observations.
+ * Tags the source explicitly as "AI_VISION" so findings are marked as "PROVISIONAL"
+ * and require manual confirmation.
  */
-export function computeImageRiskAssessment(
+function buildVisionAssessmentRawInput(
   roomType: "BEDROOM" | "BATHROOM",
   dets: VisionDetection[],
   obs: VisionObservation[],
   customCaption?: string
-): AssessmentSnapshot {
+) {
   const hasRug = dets.some((d) => d.category === "rug");
   const hasUnsecuredRug = dets.some(
     (d) =>
@@ -45,11 +52,16 @@ export function computeImageRiskAssessment(
     ? "Phòng tắm & Nhà vệ sinh (Ảnh hiện trường)"
     : "Phòng sinh hoạt (Ảnh hiện trường)";
 
-  const rawInput = {
-    roomId: `vision-eval-${Date.now()}`,
+  // Deterministic stable ID based on detection IDs
+  const detectionDigest = dets.map((d) => d.id).sort().join("_") || "empty";
+  const roomId = `vision_room_${roomType.toLowerCase()}_${detectionDigest.slice(0, 16)}`;
+
+  return {
+    roomId,
     roomName: displayRoomName,
     roomType,
-    dimensions: { lengthM: 4.5, widthM: 4.0, heightM: 2.8 },
+    sourceType: "AI_VISION", // Explicit data lineage
+    dimensions: { lengthM: 4.5, widthM: 4.0, heightM: 2.8, source: "USER_ESTIMATED" },
     floor: {
       material: roomType === "BATHROOM" ? "Gạch men" : "Sàn gỗ",
       isWet: hasWetFloor,
@@ -61,6 +73,10 @@ export function computeImageRiskAssessment(
       nighttimeLux: 40,
       nightLightPresent: false,
       adequateAtNight: false,
+      motionSensorPresent: false,
+      pathLightToBathroom: false,
+      switchReachableFromEntrance: true,
+      switchReachableFromBed: false,
     },
     rugs: {
       present: hasRug,
@@ -117,8 +133,41 @@ export function computeImageRiskAssessment(
       showerGrabBarPresent: hasGrabBar,
       inspectedSecure: hasGrabBar,
     },
+    accessibility: {
+      lightSwitchReachableFromBed: false,
+      essentialItemsReachableFromBed: false,
+      emergencyCallReachable: false,
+    },
   };
-
-  return evaluateRoomHazards(rawInput);
 }
 
+/**
+ * Canonical Vision Assessment (AssessmentResultV1).
+ * Executes the single source of truth risk engine.
+ */
+export function computeImageRiskAssessmentCanonical(
+  roomType: "BEDROOM" | "BATHROOM",
+  dets: VisionDetection[],
+  obs: VisionObservation[],
+  customCaption?: string,
+  options?: CanonicalEngineOptions
+): CanonicalAssessmentResult {
+  const rawInput = buildVisionAssessmentRawInput(roomType, dets, obs, customCaption);
+  return evaluateRoomHazardsCanonical(rawInput, options);
+}
+
+/**
+ * Backward-compatible adapter for existing UI components expecting AssessmentSnapshot.
+ */
+export function computeImageRiskAssessment(
+  roomType: "BEDROOM" | "BATHROOM",
+  dets: VisionDetection[],
+  obs: VisionObservation[],
+  customCaption?: string
+): AssessmentSnapshot {
+  const canonical = computeImageRiskAssessmentCanonical(roomType, dets, obs, customCaption);
+  return adaptCanonicalToLegacySnapshot(canonical, {
+    roomType,
+    roomName: customCaption ? `Khu vực: ${customCaption}` : "Ảnh hiện trường",
+  });
+}

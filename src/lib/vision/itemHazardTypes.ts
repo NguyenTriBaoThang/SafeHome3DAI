@@ -57,6 +57,30 @@ export interface ItemHazardAssessment {
   imageUrl: string;
   analyzedAt: string;
   modelProvider: string;
+  canonicalRuleId?: string; // Unified Risk Engine Rule Reference (Task A03, e.g. "RISK-001")
+}
+
+/**
+ * Maps item hazard category to the Unified Canonical Risk Engine Rule ID (RISK-001..008).
+ */
+export function getCanonicalRuleForItemCategory(category: string): string {
+  switch (category) {
+    case "rug":
+      return "RISK-001";
+    case "electrical_cable":
+      return "RISK-002";
+    case "chair":
+    case "table":
+    case "clutter":
+      return "RISK-003";
+    case "bathroom_fixture":
+      return "RISK-006";
+    case "threshold_step":
+    case "bed":
+      return "RISK-007";
+    default:
+      return "RISK-003";
+  }
 }
 
 /**

@@ -1,9 +1,10 @@
 import { StructuredCitation } from "@/lib/rag/types";
 export * from "./itemHazardTypes";
-import type {
+import {
   ItemDangerHotspot,
   ItemRemediation,
   ItemHazardAssessment,
+  getCanonicalRuleForItemCategory,
 } from "./itemHazardTypes";
 
 // Pre-curated knowledge base for deterministic fall-hazard assessment
@@ -577,6 +578,7 @@ Trả về định dạng JSON thuần túy, không có markdown formatting hay 
 
           return {
             id: assessmentId,
+            canonicalRuleId: getCanonicalRuleForItemCategory(parsed.itemCategory || "other"),
             itemName: parsed.itemName || "Vật dụng được thẩm định",
             itemCategory: parsed.itemCategory || "other",
             riskScore: typeof parsed.riskScore === "number" ? parsed.riskScore : 80,
@@ -636,6 +638,7 @@ Trả về định dạng JSON thuần túy, không có markdown formatting hay 
 
   return {
     id: assessmentId,
+    canonicalRuleId: getCanonicalRuleForItemCategory(baseTemplate.itemCategory || categoryKey),
     ...baseTemplate,
     imageUrl: imageBase64,
     analyzedAt: now,
