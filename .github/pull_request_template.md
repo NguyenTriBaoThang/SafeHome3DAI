@@ -44,3 +44,4 @@
 - [ ] Thao tác ghi database thất bại phải báo lỗi cho UI, không có hành vi "báo thành công giả".
 - [ ] Không có sự mâu thuẫn mức độ nguy cơ giữa các màn hình (Digital Twin, Risk Assessment, AI Vision).
 - [ ] Dữ liệu người dùng thực tế không bị trộn lẫn với dữ liệu DEMO/fixtures.
+

@@ -308,3 +308,4 @@ export const INVALID_ROOM_ID_PREFIX = {
   ...VALID_MEASURED_ROOM,
   id: "bedroom_nam_invalid_prefix", // Does not start with 'room-'
 };
+

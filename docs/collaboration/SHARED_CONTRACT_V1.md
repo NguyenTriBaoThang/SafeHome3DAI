@@ -211,3 +211,4 @@ Hệ thống thống nhất duy nhất 1 bộ quy tắc thẩm định chuẩn (
 3. Test suite vượt qua: `npm test -- --run` đạt 100% PASS.
 4. Tuân thủ `.github/pull_request_template.md` kèm đầy đủ bằng chứng câu lệnh và log thực tế.
 5. Không có lỗi bảo mật P0 (không lộ secret, không vi phạm IDOR trên server).
+
