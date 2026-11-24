@@ -23,6 +23,12 @@ import {
   ProvenanceRecord,
   computeDataQuality,
 } from "@/lib/provenance/measurementProvenance";
+import {
+  calculateEnvironmentalBarrierScore,
+  getRiskThresholdConfig,
+  ScoreCalculationResult,
+} from "./thresholdConfig";
+import { DEFAULT_CLINICAL_REVIEW_REGISTRY } from "./clinicalReviewTypes";
 
 /**
  * ==============================================================================
@@ -68,6 +74,8 @@ export interface CanonicalAssessmentResult extends AssessmentResultV1 {
   ruleTrace: RuleTraceStep[];
   ruleEvaluations: RuleEvaluationResult[];
   clinicalDisclaimer: string;
+  scoreCalculation?: ScoreCalculationResult;
+  thresholdConfigVersion: string;
 }
 
 /**
@@ -269,15 +277,18 @@ export function evaluateRoomHazardsCanonical(
     }
   }
 
-  // Calculate environmental barrier compliance score (0-100)
-  // Penalties: High = 15pts, Medium = 8pts, Low = 4pts, NeedsVerification = 3pts
-  let calculatedScore = 100;
-  calculatedScore -= highPriorityCount * 15;
-  calculatedScore -= mediumPriorityCount * 8;
-  calculatedScore -= lowPriorityCount * 4;
-  calculatedScore -= needsVerificationCount * 3;
-
-  const heuristicSafetyScore = Math.max(10, Math.min(100, Math.round(calculatedScore)));
+  // Calculate environmental barrier compliance score using versioned threshold config
+  const thresholdConfig = getRiskThresholdConfig("2026.1");
+  const scoreResult = calculateEnvironmentalBarrierScore(
+    {
+      highHazardCount: highPriorityCount,
+      mediumHazardCount: mediumPriorityCount,
+      lowHazardCount: lowPriorityCount,
+      needsVerificationCount,
+    },
+    thresholdConfig
+  );
+  const heuristicSafetyScore = scoreResult.score;
 
   // Populate data quality metrics
   let measuredCount = 0;
@@ -333,6 +344,8 @@ export function evaluateRoomHazardsCanonical(
     ruleEvaluations: evaluations,
     clinicalDisclaimer:
       "Chỉ số an toàn môi trường vật lý (0-100) theo hướng dẫn CDC STEADI / WHO 2021. Không cấu thành chẩn đoán y khoa hoặc dự báo xác suất té ngã lâm sàng của cá nhân.",
+    scoreCalculation: scoreResult,
+    thresholdConfigVersion: thresholdConfig.configVersion,
   };
 
   // Validate output against Shared Contract V1
