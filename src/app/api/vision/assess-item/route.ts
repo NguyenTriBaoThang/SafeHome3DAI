@@ -1,9 +1,10 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { analyzeItemHazardFromImage } from "@/lib/vision/itemHazardAnalyzer";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";
 
@@ -84,3 +85,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

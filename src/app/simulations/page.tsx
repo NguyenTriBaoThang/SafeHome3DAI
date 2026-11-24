@@ -41,7 +41,8 @@ interface SavedRoom {
   lightingLevel: number;
   isWet?: boolean;
   isSlipResistant?: boolean;
-  safetyScore: number;
+  safetyScore: number | null;
+  evidenceStatus?: "PHOTO_DRAFT";
   hazardsResolved: number;
   hazardsRemaining: number;
   totalHazards: number;
@@ -55,6 +56,7 @@ export default function SimulationsArchivePage() {
 
   const [savedRooms, setSavedRooms] = useState<SavedRoom[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -89,14 +91,15 @@ export default function SimulationsArchivePage() {
   // Fetch all saved simulation rooms
   const fetchRooms = async () => {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/simulations");
       const json = await res.json();
-      if (json.success && json.data) {
-        setSavedRooms(json.data);
-      }
+      if (!res.ok || !json.success) throw new Error(json.error || "Không tải được danh sách phòng.");
+      setSavedRooms(json.data);
     } catch (err) {
       console.error("Lỗi lấy danh sách phòng:", err);
+      setError(err instanceof Error ? err.message : "Không tải được danh sách phòng.");
     } finally {
       setLoading(false);
     }
@@ -107,39 +110,21 @@ export default function SimulationsArchivePage() {
   }, []);
 
   // Handle open in 3D Digital Twin
-  const handleOpenIn3D = (roomId: string) => {
-    const storeRooms = useSimulationStore.getState().rooms;
-    const exists = storeRooms.some((r) => r.id === roomId);
-    if (!exists) {
-      const target = savedRooms.find((r) => r.id === roomId);
-      if (target) {
-        useSimulationStore.getState().loadReconstructedRoom({
-          id: target.id,
-          name: target.name,
-          roomType: (target.roomType as any) || "BEDROOM",
-          dimensions: target.dimensions,
-          floorMaterial: target.roomType === "BATHROOM" ? "CERAMIC_TILE" : "WOOD",
-          lightingLevel: target.lightingLevel || 200,
-          isWet: Boolean(target.isWet),
-          isSlipResistant: Boolean(target.isSlipResistant),
-          grabBarsCount: 0,
-          walkingZones: [
-            {
-              id: `zone-${target.id}-1`,
-              name: "Lối đi chính",
-              startPoint: [0, 0],
-              endPoint: [0, target.dimensions.length / 2 - 0.5],
-              width: 0.9,
-              importance: "CRITICAL",
-            },
-          ],
-          objects: [],
-        });
-      }
-    } else {
-      switchRoom(roomId);
+  const handleOpenIn3D = async (roomId: string, destination = "/digital-twin") => {
+    setError("");
+    const target = savedRooms.find(r => r.id === roomId);
+    if (target?.isCustom) {
+      try {
+        const response = await fetch(`/api/simulations/${encodeURIComponent(roomId)}`);
+        const json = await response.json();
+        if (!response.ok || !json.success) throw new Error(json.error || "Không tải được bản dựng.");
+        useSimulationStore.getState().loadReconstructedRoom(json.data);
+        router.push(destination);
+      } catch (err) { setError(err instanceof Error ? err.message : "Không tải được bản dựng."); }
+      return;
     }
-    router.push("/digital-twin");
+    switchRoom(roomId);
+    router.push(destination);
   };
 
   // Handle Delete
@@ -151,9 +136,13 @@ export default function SimulationsArchivePage() {
       const res = await fetch(`/api/simulations/${roomId}`, { method: "DELETE" });
       if (res.ok) {
         setSavedRooms(savedRooms.filter((r) => r.id !== roomId));
-      }
+        const state = useSimulationStore.getState();
+        useSimulationStore.setState({ rooms: state.rooms.filter(r => r.id !== roomId), comparison: null, selectedObjectId: null });
+        if (state.currentRoomId === roomId) useSimulationStore.getState().switchRoom("room-bedroom-01");
+      } else throw new Error("Không xóa được phòng. Hãy thử lại.");
     } catch (err) {
       console.error("Lỗi xóa phòng:", err);
+      setError(err instanceof Error ? err.message : "Không xóa được phòng.");
     }
   };
 
@@ -173,7 +162,6 @@ export default function SimulationsArchivePage() {
           width: newWidth,
           length: newLength,
           height: newHeight,
-          photoUrl: uploadedPhotoUrl || undefined,
         }),
       });
 
@@ -183,9 +171,10 @@ export default function SimulationsArchivePage() {
         setUploadedPhotoUrl(null);
         setUploadedPhotoFile(null);
         fetchRooms();
-      }
+      } else throw new Error("Không lưu được phòng. Hãy thử lại.");
     } catch (err) {
       console.error("Lỗi tạo phòng:", err);
+      setError(err instanceof Error ? err.message : "Không lưu được phòng.");
     } finally {
       setIsSubmitting(false);
     }
@@ -205,14 +194,13 @@ export default function SimulationsArchivePage() {
   });
 
   const totalRooms = savedRooms.length;
-  const avgScore =
-    totalRooms > 0
-      ? Math.round(savedRooms.reduce((acc, r) => acc + r.safetyScore, 0) / totalRooms)
-      : 70;
+  const scoredRooms = savedRooms.filter(r => r.safetyScore != null);
+  const avgScore = scoredRooms.length ? Math.round(scoredRooms.reduce((sum, r) => sum + r.safetyScore!, 0) / scoredRooms.length) : null;
   const totalResolved = savedRooms.reduce((acc, r) => acc + r.hazardsResolved, 0);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      {error && <div role="alert" className="p-3 rounded-xl bg-rose-50 text-rose-800">{error}<button onClick={fetchRooms} className="ml-3 underline">Tải lại</button></div>}
       {/* 1. Header & Quick Actions */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -268,7 +256,7 @@ export default function SimulationsArchivePage() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <div className="text-lg font-black text-emerald-600">{avgScore}/100</div>
+            <div className="text-lg font-black text-emerald-600">{avgScore == null ? "Chưa đánh giá" : `${avgScore}/100`}</div>
             <div className="text-xs text-slate-500 font-medium">Điểm an toàn trung bình</div>
           </div>
         </div>
@@ -345,12 +333,13 @@ export default function SimulationsArchivePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredRooms.map((room) => {
-            const isHighSafety = room.safetyScore >= 80;
-            const isMedSafety = room.safetyScore >= 60;
+            const isHighSafety = room.safetyScore != null && room.safetyScore >= 80;
+            const isMedSafety = room.safetyScore != null && room.safetyScore >= 60;
 
             return (
               <div
                 key={room.id}
+                data-room-id={room.id}
                 onClick={() => handleOpenIn3D(room.id)}
                 className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between cursor-pointer group hover:border-teal-300"
               >
@@ -425,7 +414,7 @@ export default function SimulationsArchivePage() {
                             : "text-rose-600"
                         }
                       >
-                        {room.safetyScore}/100
+                        {room.safetyScore == null ? "Chưa đánh giá" : `${room.safetyScore}/100`}
                       </span>
                     </div>
                     <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -437,7 +426,7 @@ export default function SimulationsArchivePage() {
                             ? "bg-amber-500"
                             : "bg-rose-500"
                         }`}
-                        style={{ width: `${room.safetyScore}%` }}
+                        style={{ width: `${room.safetyScore ?? 0}%` }}
                       />
                     </div>
                   </div>
@@ -448,7 +437,7 @@ export default function SimulationsArchivePage() {
                       Đã khắc phục: <strong className="text-emerald-600">{room.hazardsResolved}</strong>
                     </span>
                     <span>
-                      Còn lại: <strong className="text-amber-600">{room.hazardsRemaining}</strong>
+                      Còn lại: <strong className="text-amber-600">{room.hazardsRemaining ?? "Chưa xác định"}</strong>
                     </span>
                   </div>
                 </div>
@@ -463,7 +452,7 @@ export default function SimulationsArchivePage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push("/reports");
+                      void handleOpenIn3D(room.id, "/reports");
                     }}
                     className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-[11px] flex items-center gap-1"
                     title="Xem báo cáo an toàn"

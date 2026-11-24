@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createHomeSurvey, getSurveys } from "@/lib/survey/surveyManager";
@@ -10,7 +11,7 @@ const CreateSurveySchema = z.object({
   generalNotes: z.string().optional(),
 });
 
-export async function GET() {
+async function GETHandler() {
   try {
     const surveys = await getSurveys();
     return NextResponse.json({
@@ -26,7 +27,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const parseResult = CreateSurveySchema.safeParse(body);
@@ -53,3 +54,7 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

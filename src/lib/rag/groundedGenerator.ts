@@ -13,11 +13,12 @@ export interface GeneratorContext {
   evaluation: SufficiencyEvaluationResult;
   retrievedChunks: RetrievedChunk[];
   roomContext?: {
+    evidenceStatus?: "PHOTO_DRAFT" | "DEMO";
     roomId?: string;
     roomName: string;
     hazardCount: number;
     hazardTitles: string[];
-    lightingLux: number;
+    lightingLux: number | null;
     objects?: Array<{
       id: string;
       name: string;
@@ -33,7 +34,7 @@ export interface GeneratorContext {
       recommendationText: string;
     }>;
     residentName?: string;
-    residentAge?: number;
+    residentAge?: number | null;
     healthConditions?: string[];
   };
 }
@@ -368,8 +369,12 @@ function generateDeterministicGroundedAnswer(
   // Inject 3D Room Context if not already included
   if (roomContext && !body.includes(roomContext.roomName)) {
     body += `\n\n📌 **Đối chiếu với không gian 3D (${roomContext.roomName}):**\n`;
-    body += `- Ghi nhận **${roomContext.hazardCount}** nguy cơ tiềm ẩn: ${roomContext.hazardTitles.join(", ") || "Không gian đạt chuẩn an toàn"}.\n`;
-    body += `- Cường độ ánh sáng: **${roomContext.lightingLux} Lux**.\n`;
+    if (roomContext.evidenceStatus === "PHOTO_DRAFT") {
+      body += "- Bản dựng ảnh chưa có số đo xác minh; chưa thể kết luận điểm an toàn hoặc số nguy cơ thực tế. Hãy bổ sung khảo sát.\n";
+    } else {
+      body += `- Dữ liệu mô phỏng: **${roomContext.hazardCount}** nguy cơ theo quy tắc: ${roomContext.hazardTitles.join(", ") || "Không phát hiện theo dữ liệu đã nhập; không chứng nhận an toàn"}.\n`;
+      body += `- Cường độ ánh sáng mô phỏng: **${roomContext.lightingLux ?? "chưa xác định"} Lux**.\n`;
+    }
   }
 
   body += MEDICAL_DISCLAIMER;

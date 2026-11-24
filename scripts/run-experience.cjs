@@ -6,6 +6,6 @@ if (mode === 'build') args.push('--no-lint');
 else args.push('-p', process.env.SAFEHOME_PREVIEW_PORT || '3210');
 const child = spawn(process.execPath, args, {
   stdio: 'inherit',
-  env: { ...process.env, SAFEHOME_BUILD_DIR: process.env.SAFEHOME_BUILD_DIR || (mode === 'dev' ? '.scratch/cinematic-dev' : '.scratch/cinematic-production') },
+  env: { ...process.env, SAFEHOME_BUILD_DIR: process.argv[3] || process.env.SAFEHOME_BUILD_DIR || (mode === 'dev' ? '.scratch/cinematic-dev' : '.scratch/cinematic-production') },
 });
 child.on('exit', code => { process.exitCode = code || 0; });

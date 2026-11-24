@@ -36,9 +36,6 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Initialize Database Schema (SQLite)
-        run: npx prisma db push --skip-generate --accept-data-loss
-
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
@@ -51,8 +48,13 @@ jobs:
       - name: Build Next.js production bundle
         run: npm run build
 
-      - name: Built Vision HTTP checks (local provider deliberately offline)
-        run: node scripts/ml/smoke_stage6.cjs
+      - name: Authenticated HTTP and restore checks (isolated accounts, no cloud calls)
+        run: node scripts/completion/http-smoke.cjs
+        env:
+          SAFEHOME_BUILD_DIR: .next
+
+      - name: Browser acceptance (isolated accounts and fixture detector)
+        run: node scripts/completion/browser.cjs
         env:
           SAFEHOME_BUILD_DIR: .next
 

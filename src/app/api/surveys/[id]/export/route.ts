@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { exportSurveyData } from "@/lib/survey/surveyManager";
 
-export async function GET(
+async function GETHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const data = await exportSurveyData(params.id);
     return NextResponse.json({
@@ -20,3 +22,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

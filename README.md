@@ -390,3 +390,8 @@ Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục `docs/` v
 
 - **Bản quyền**: Phát hành theo giấy phép [MIT License](./LICENSE). Copyright © 2026 **Nguyễn Tri Bão Thắng**.
 - **Tuyên bố y tế**: *SafeHome 3D AI là công cụ hỗ trợ giáo dục cộng đồng, tầm soát nguy cơ môi trường và hỗ trợ hoạch định cải tạo không gian sống an toàn cho người cao tuổi. Ứng dụng không thay thế cho chẩn đoán y khoa, thẩm định xây dựng thực tế hoặc ý kiến của bác sĩ chuyên khoa.*
+## Cập nhật hoàn thiện và tài khoản gia đình
+
+Ứng dụng hiện yêu cầu đăng nhập qua `/sign-in`. Mỗi tài khoản gia đình có database SQLite và ảnh riêng trong `SAFEHOME_PRIVATE_DIR`; dữ liệu `dev.db` cũ không tự được gán cho tài khoản mới. Cần một Node server với ổ đĩa bền vững; khi triển khai HTTPS phải cấu hình `SAFEHOME_APP_ORIGIN`. Xem [vận hành tài khoản và sao lưu](docs/ACCOUNTS_OPERATIONS.md) và [danh sách task nghiệm thu](docs/PROJECT_COMPLETION_TASKS.md).
+
+Bản dựng 3D từ ảnh chỉ dùng vật thể đã xác nhận; hình học là ước lượng và không sinh điểm an toàn thực tế. Chất lượng ML chính thức vẫn chưa được đánh giá vì chưa đủ nhãn người xác nhận. Các báo cáo Giai đoạn 4/6 cũ là bằng chứng lịch sử theo phạm vi ghi trong từng báo cáo.

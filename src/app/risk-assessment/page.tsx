@@ -56,6 +56,18 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function RiskAssessmentDashboardPage() {
+  const room = useSimulationStore(state => state.rooms.find(r => r.id === state.currentRoomId) || state.rooms[0]);
+  if (room.evidenceStatus === "PHOTO_DRAFT") return (
+    <div className="p-6 space-y-4" data-testid="risk-photo-draft">
+      <h1 className="text-xl font-bold">Chưa đủ dữ liệu đánh giá nguy cơ</h1>
+      <p>Bản dựng ảnh chỉ ước lượng hình học. Cần khảo sát và xác minh thực trạng trước khi tính điểm hoặc so sánh can thiệp.</p>
+      <Link href="/ai-guided-survey" className="text-teal-700 underline">Bổ sung khảo sát thực tế</Link>
+    </div>
+  );
+  return <SimulationRiskDashboard key={room.id} />;
+}
+
+function SimulationRiskDashboard() {
   const {
     rooms,
     currentRoomId,

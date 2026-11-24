@@ -168,6 +168,7 @@ ${evidencePrompt || "Chưa tìm thấy tài liệu phù hợp."}
     evaluation,
     retrievedChunks,
     roomContext: {
+      evidenceStatus: activeRoom.evidenceStatus,
       roomId: activeRoom.id,
       roomName: activeRoom.name,
       hazardCount: activeRoom.hazards.length,

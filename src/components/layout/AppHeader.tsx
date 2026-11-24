@@ -26,10 +26,13 @@ export const AppHeader: React.FC = () => {
     currentAssessment,
     runSimulation,
     restoreBaseline,
+    getCurrentRoom,
   } = useSimulationStore();
+  const isPhotoDraft = getCurrentRoom().evidenceStatus === "PHOTO_DRAFT";
+  const hasAssessment = currentAssessment?.safetyScore != null;
 
   const hazardCount = currentAssessment?.findings.length ?? 0;
-  const safetyScore = currentAssessment?.safetyScore ?? 70;
+  const safetyScore = currentAssessment?.safetyScore ?? 0;
 
   const scoreBadgeColor =
     safetyScore >= 80
@@ -38,7 +41,7 @@ export const AppHeader: React.FC = () => {
       ? "bg-amber-50 text-amber-700 border-amber-200"
       : "bg-rose-50 text-rose-700 border-rose-200";
 
-  if (pathname === "/experience") return null;
+  if (pathname === "/experience" || pathname === "/sign-in") return null;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur-md">
@@ -66,6 +69,13 @@ export const AppHeader: React.FC = () => {
         </div>
 
         {/* Center: Context-aware Navigation */}
+        <button className="text-xs text-slate-600 underline" onClick={async () => {
+          const response = await fetch("/api/auth/logout", { method: "POST" });
+          if (!response.ok) return;
+          for (const key of Object.keys(localStorage)) if (key.startsWith("safehome:")) localStorage.removeItem(key);
+          localStorage.setItem("safehome:auth-change", crypto.randomUUID());
+          window.location.assign("/sign-in");
+        }}>Đăng xuất</button>
         {pathname === "/workflow" ? (
           <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
             <Compass className="h-4 w-4 text-teal-600 animate-spin-slow" />
@@ -74,10 +84,10 @@ export const AppHeader: React.FC = () => {
         ) : null}
 
         {/* Real-time Status Badges & Quick Action Controls */}
-        {isPhotoVision ? (
+        {isPhotoVision || isPhotoDraft || !hasAssessment ? (
           <div className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[10px] sm:text-xs text-amber-800 font-semibold">
             <Camera className="h-4 w-4 shrink-0" />
-            <span>Ảnh cần xác nhận tại nhà</span>
+            <span>{isPhotoDraft ? "Bản dựng ước lượng — chưa đánh giá thực trạng" : isPhotoVision ? "Ảnh cần xác nhận tại nhà" : "Chưa đủ dữ liệu để đánh giá"}</span>
           </div>
         ) : (
         <div className="flex items-center space-x-2.5">

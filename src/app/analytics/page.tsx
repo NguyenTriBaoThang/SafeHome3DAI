@@ -75,10 +75,20 @@ export default function AnalyticsPage() {
       return {
         room: r.name.split("(")[0].trim(),
         "Nguy cơ ban đầu": base?.findings.length || 0,
-        "Điểm an toàn": base?.safetyScore || 70,
+        "Điểm an toàn": base?.safetyScore ?? null,
       };
     });
   }, [rooms, baselineAssessments]);
+
+  if (currentRoom.evidenceStatus === "PHOTO_DRAFT") return (
+    <div className="p-6 space-y-4 text-slate-700">
+      <h1 className="text-xl font-bold">Chưa thể đối sánh an toàn thực tế</h1>
+      <p>Bản dựng ảnh chỉ ước lượng hình học. Cần khảo sát và đo tại nhà trước khi kết luận hiệu quả can thiệp.</p>
+      <Link href="/ai-guided-survey" className="block text-teal-700 underline">Hoàn thành khảo sát tại nhà</Link>
+      <Link href="/reports" className="block text-teal-700 underline">Mở báo cáo hiện có</Link>
+    </div>
+  );
+  const beforeScore = baseline?.safetyScore ?? null, afterScore = currentAssessment?.safetyScore ?? null;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -151,10 +161,10 @@ export default function AnalyticsPage() {
           <div>
             <div className="text-[11px] font-semibold text-slate-400">Chỉ số an toàn cải thiện</div>
             <div className="text-2xl font-black text-teal-700">
-              +{Math.max(0, (currentAssessment?.safetyScore || 70) - (baseline?.safetyScore || 54))}đ
+              {beforeScore == null || afterScore == null ? "Chưa đủ dữ liệu" : `+${Math.max(0, afterScore - beforeScore)}đ`}
             </div>
             <div className="text-[10px] text-teal-600 font-medium">
-              Từ {baseline?.safetyScore || 54} lên {currentAssessment?.safetyScore || 70}đ
+              {beforeScore == null || afterScore == null ? "Cần dữ kiện trước và sau can thiệp" : `Từ ${beforeScore} lên ${afterScore}đ`}
             </div>
           </div>
         </div>

@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getSurveyById, deleteSurvey } from "@/lib/survey/surveyManager";
 
-export async function GET(
+async function GETHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const survey = await getSurveyById(params.id);
     if (!survey) {
@@ -27,10 +29,11 @@ export async function GET(
   }
 }
 
-export async function DELETE(
+async function DELETEHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     await deleteSurvey(params.id);
     return NextResponse.json({
@@ -46,3 +49,7 @@ export async function DELETE(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const DELETE = withAccount(DELETEHandler);
+export const dynamic = "force-dynamic";

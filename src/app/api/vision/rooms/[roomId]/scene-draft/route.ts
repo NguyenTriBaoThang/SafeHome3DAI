@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { createSceneDraftFromVision } from "@/lib/vision/sceneDraftAdapter";
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
-  { params }: { params: { roomId: string } }
+  { params: routeParams }: { params: Promise<{ roomId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { roomId } = params;
     const draft = await createSceneDraftFromVision(roomId);
@@ -17,3 +19,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

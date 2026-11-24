@@ -53,6 +53,7 @@ export const ObjectInspector: React.FC = () => {
   if (!selectedObject) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
+        {room.evidenceStatus === "PHOTO_DRAFT" && <p className="text-xs text-amber-800 bg-amber-50 p-3 rounded-lg">Các giá trị dưới đây chỉ phục vụ dựng hình. Độ rọi, độ ướt và tình trạng chống trượt thực tế chưa được xác minh.</p>}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-teal-600" />

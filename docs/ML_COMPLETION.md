@@ -1,5 +1,9 @@
 # Hoàn thiện luồng Vision sau Giai đoạn 6
 
+> Báo cáo lịch sử của đợt hoàn thiện Vision. Các task tiếp theo, tài khoản gia đình, xóa ảnh và kiểm thử mới được theo dõi trong [PROJECT_COMPLETION_TASKS.md](PROJECT_COMPLETION_TASKS.md). Hướng dẫn triển khai/sao lưu ở [ACCOUNTS_OPERATIONS.md](ACCOUNTS_OPERATIONS.md). Những số liệu bên dưới chỉ áp dụng cho phiên bản đã kiểm thử khi lập báo cáo này.
+
+**Cập nhật sau rà soát toàn dự án:** đã hoàn thành T1–T5 và T7 trong [bảng task](PROJECT_COMPLETION_TASKS.md): 294 ca đạt, 1 ca bỏ qua; 10 kiểm tra HTTP và 22 kiểm tra trình duyệt đạt; build, TypeScript và sao lưu/khôi phục đạt. Dữ liệu gia đình được tách theo tài khoản. T6 còn phụ thuộc nhãn người xác nhận: train/val verified đều 0, nên chất lượng ML chính thức và fine-tune vẫn chưa hoàn thành. [Bằng chứng mới](../reports/completion/verification.json).
+
 Ngày 22/11/2026. Báo cáo này thay thế kết luận nghiệm thu phần mềm trong bản Giai đoạn 6 đầu tiên; các thí nghiệm ML cũ vẫn giữ nguyên để truy vết.
 
 ## 1. Đã làm gì

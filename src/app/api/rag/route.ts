@@ -1,7 +1,8 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { processRAGQuery } from "@/lib/rag/engine";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json();
     const { query, roomContext } = body;
@@ -23,3 +24,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

@@ -1,9 +1,11 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { runEnvironmentalAssessment, calculateSafetyScore } from "@/features/risk-engine/rules";
 import { RoomState } from "@/types";
+import { unverifiedPhotoAssessment } from "@/lib/vision/photoSceneDraft";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json();
     const roomState: RoomState = body.roomState;
@@ -15,6 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
+    if (roomState.evidenceStatus === "PHOTO_DRAFT") return NextResponse.json(unverifiedPhotoAssessment(roomState));
     const findings = runEnvironmentalAssessment(roomState);
     const safetyScore = calculateSafetyScore(findings);
 
@@ -30,7 +33,8 @@ export async function POST(request: Request) {
       findings,
     };
 
-    // Attempt to persist if database is available
+    // A calculated result must explicitly report whether it was saved.
+    let persisted = false;
     try {
       await prisma.assessment.create({
         data: {
@@ -58,12 +62,13 @@ export async function POST(request: Request) {
           },
         },
       });
+      persisted = true;
     } catch (dbErr) {
       // Non-blocking in-memory return
       console.warn("DB save skipped:", dbErr);
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, persisted, ...(persisted ? {} : { warning: "Kết quả chỉ được tính tạm thời; chưa lưu vào hồ sơ." }) });
   } catch (error: any) {
     return NextResponse.json(
       { error: "Lỗi tính toán đánh giá", details: error.message },
@@ -72,3 +77,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

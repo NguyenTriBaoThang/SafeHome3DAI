@@ -1,10 +1,24 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
+import { restoreSimulation, snapshotInclude } from "@/lib/simulations/persistence";
 
-export async function DELETE(
+async function GETHandler(_request: Request, { params: routeParams }: { params: Promise<{ id: string }> }) {
+  const params = await routeParams;
+  try {
+    const room = await prisma.room.findUnique({ where: { id: params.id }, include: snapshotInclude });
+    if (!room) return NextResponse.json({ error: "Không tìm thấy phòng." }, { status: 404 });
+    return NextResponse.json({ success: true, data: restoreSimulation(room) });
+  } catch {
+    return NextResponse.json({ error: "Không tải được bản dựng đã lưu." }, { status: 503 });
+  }
+}
+
+async function DELETEHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const roomId = params.id;
 
@@ -37,3 +51,7 @@ export async function DELETE(
   }
 }
 
+
+export const DELETE = withAccount(DELETEHandler);
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

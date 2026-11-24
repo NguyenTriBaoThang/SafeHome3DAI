@@ -74,6 +74,7 @@ export interface WalkingZone {
 }
 
 export interface RoomState {
+  evidenceStatus?: "PHOTO_DRAFT";
   id: string;
   name: string;
   roomType: RoomType;
@@ -127,7 +128,8 @@ export interface AssessmentResult {
   resolvedHazards: number;
   remainingHazards: number;
   newHazards: number;
-  safetyScore: number; // 0 - 100 heuristic index
+  safetyScore: number | null; // null when the scene has not been measured/verified
+  assessmentStatus?: "NEEDS_VERIFICATION";
   findings: HazardFindingResult[];
   notes?: string;
 }

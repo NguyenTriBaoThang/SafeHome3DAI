@@ -1,15 +1,19 @@
 import { prisma } from "../database/prisma";
 import type { PrismaClient } from "@prisma/client";
 import { createHash } from "node:crypto";
-import { saveImageFile, deleteImageFile } from "./imageStorage";
+import { saveImageFile, deleteImageFile, imageFilePath } from "./imageStorage";
+import { readFile } from "node:fs/promises";
 import { prepareProviderImage } from "./providers/normalization";
 import type { ProviderAnalysisResult } from "./visionProvider";
+import { imageDimensions } from "./imageMetadata";
 
 export async function persistVisionAnalysis(result: ProviderAnalysisResult, photo: Buffer, caption: string, roomType: string,
   viewpoint: string, database: PrismaClient = prisma) {
   const prepared = prepareProviderImage(photo);
   const extension = prepared.mimeType === "image/png" ? "png" : prepared.mimeType === "image/webp" ? "webp" : "jpg";
-  const file = await saveImageFile(result.roomId, prepared.image, extension);
+  const file = await saveImageFile(result.roomId, prepared.image, extension, result.imageId);
+  const dimensions = imageDimensions(prepared.image);
+  let previousStorage: string | undefined;
   try {
     await database.$transaction(async tx => {
       const room = await tx.surveyRoom.findUnique({ where: { id: result.roomId } });
@@ -19,9 +23,14 @@ export async function persistVisionAnalysis(result: ProviderAnalysisResult, phot
         survey: { connectOrCreate: { where: { id: `vision-${result.roomId}` }, create: { id: `vision-${result.roomId}`, name: "Khảo sát từ ảnh hiện trường" } } } } });
       const image = await tx.roomImage.findUnique({ where: { id: result.imageId } });
       if (image && image.roomId !== result.roomId) throw new Error("Ảnh thuộc phòng khác.");
+      if (image) {
+        if (!(await readFile(imageFilePath(image.storageKey))).equals(prepared.image)) throw new Error("ID ảnh đã thuộc ảnh khác. Hãy dùng ID mới để giữ nguyên nguồn bằng chứng.");
+        previousStorage = image.storageKey;
+      }
       await tx.roomImage.upsert({ where: { id: result.imageId },
-        create: { id: result.imageId, roomId: result.roomId, storageKey: file.filename, caption, viewpoint },
-        update: { storageKey: file.filename, caption, viewpoint } });
+        create: { id: result.imageId, roomId: result.roomId, storageKey: file.filename, caption, viewpoint,
+          imageWidth: dimensions?.width ?? null, imageHeight: dimensions?.height ?? null, consentStatus: true },
+        update: { caption, viewpoint, imageWidth: dimensions?.width ?? null, imageHeight: dimensions?.height ?? null } });
       await tx.visionAnalysis.create({ data: { id: result.id, roomId: result.roomId, imageId: result.imageId,
         modelId: result.modelId, modelVersion: result.modelVersion, analysisStatus: result.analysisStatus,
         startedAt: new Date(result.startedAt), completedAt: new Date(result.completedAt!) } });
@@ -42,7 +51,8 @@ export async function persistVisionAnalysis(result: ProviderAnalysisResult, phot
         observationId: context.id, surveyQuestionId: q.surveyQuestionId, questionText: q.questionText,
         optionsJson: JSON.stringify(q.options), status: "PENDING" } });
     }, { timeout: 20000 });
-    return file;
+    if (previousStorage) await deleteImageFile(file.filename);
+    return { ...file, filename: previousStorage || file.filename };
   } catch (error) { await deleteImageFile(file.filename); throw error; }
 }
 

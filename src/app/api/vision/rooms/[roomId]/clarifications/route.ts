@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
-  { params }: { params: { roomId: string } }
+  { params: routeParams }: { params: Promise<{ roomId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { roomId } = params;
     const questions = await prisma.visionClarification.findMany({
@@ -33,3 +35,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

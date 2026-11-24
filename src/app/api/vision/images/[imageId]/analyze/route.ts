@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { runVisionAnalysis } from "@/lib/vision/visionProvider";
@@ -6,11 +7,13 @@ import { VisionProviderError } from "@/lib/vision/providers";
 import { MAX_IMAGE_FILE_SIZE } from "@/lib/vision/imagePreprocessor";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { imageFilePath } from "@/lib/vision/imageStorage";
 
 export const runtime = "nodejs";
 export const maxDuration = 150;
 
-export async function POST(req: NextRequest, { params }: { params: { imageId: string } }) {
+async function POSTHandler(req: NextRequest, { params: routeParams }: { params: Promise<{ imageId: string }> }) {
+  const params = await routeParams;
   try {
     const { imageId } = params;
     const body = await req.json();
@@ -26,10 +29,11 @@ export async function POST(req: NextRequest, { params }: { params: { imageId: st
     }
     if (base64?.startsWith("data:")) base64 = base64.slice(base64.indexOf(",") + 1);
     const demo = ["img-demo-bed", "img-demo-bedroom", "img-demo-bathroom"].includes(imageId) && !base64;
+    if (base64 && body.consent !== true) return NextResponse.json({ success: false, error: "Cần xác nhận đồng ý xử lý và lưu ảnh." }, { status: 400 });
     if (!base64 && !demo && mode !== "MANUAL_REVIEW") {
       const image = await prisma.roomImage.findUnique({ where: { id: imageId } });
       if (!image || image.roomId !== roomId) throw new VisionProviderError("INVALID_IMAGE", "Không tìm thấy ảnh trong phòng đang chọn.");
-      try { base64 = (await fs.readFile(path.join(process.cwd(), "public/uploads/vision", path.basename(image.storageKey)))).toString("base64"); }
+      try { base64 = (await fs.readFile(imageFilePath(image.storageKey))).toString("base64"); }
       catch { throw new VisionProviderError("INVALID_IMAGE", "Không đọc được ảnh đã lưu. Hãy tải lại ảnh."); }
     }
     if (base64 && Buffer.from(base64, "base64").toString("base64") !== base64) {
@@ -47,3 +51,6 @@ export async function POST(req: NextRequest, { params }: { params: { imageId: st
     return NextResponse.json({ success: false, error: "Không thể hoàn tất hoặc lưu phân tích. Kết quả chưa được lưu.", code: "PERSISTENCE_FAILED" }, { status: 503 });
   }
 }
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

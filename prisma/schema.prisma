@@ -331,8 +331,8 @@ model RoomImage {
   id            String           @id @default(uuid())
   roomId        String
   storageKey    String           // e.g. "/uploads/vision/room-1_img1.jpg" or data URI
-  imageWidth    Int              @default(1920)
-  imageHeight   Int              @default(1080)
+  imageWidth    Int?
+  imageHeight   Int?
   viewpoint     String           @default("ENTRANCE") // "ENTRANCE" | "OPPOSITE_CORNER" | "WALKWAY" | "CLOSE_UP" | "OTHER"
   caption       String?
   uploadedBy    String?          @default("Gia đình")

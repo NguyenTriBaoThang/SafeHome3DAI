@@ -11,6 +11,7 @@ const dimensions = z.object({
 // Only accept fields needed by the deterministic environmental assessment.
 // Scores and findings are recomputed on the server, never accepted from clients.
 export const ChatRoomStateSchema = z.object({
+  evidenceStatus: z.literal("PHOTO_DRAFT").optional(),
   id,
   name: z.string().min(1).max(200),
   roomType: z.enum(["BEDROOM", "BATHROOM", "LIVING_ROOM", "DOLLHOUSE"]),

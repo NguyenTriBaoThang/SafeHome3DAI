@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/database/prisma";
@@ -7,10 +8,11 @@ const PatchAnswerSchema = z.object({
   value: z.any(),
 });
 
-export async function PATCH(
+async function PATCHHandler(
   request: Request,
-  { params }: { params: { id: string; roomId: string; answerId: string } }
+  { params: routeParams }: { params: Promise<{ id: string; roomId: string; answerId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const existing = await prisma.surveyAnswer.findUnique({
       where: { id: params.answerId },
@@ -55,3 +57,6 @@ export async function PATCH(
   }
 }
 
+
+export const PATCH = withAccount(PATCHHandler);
+export const dynamic = "force-dynamic";

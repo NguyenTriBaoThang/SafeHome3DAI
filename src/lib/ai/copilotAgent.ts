@@ -8,7 +8,7 @@ const searchParameters = z.object({ query: z.string().trim().min(1).max(1000) })
 
 // All current tools have flat string/enum arguments. Derive the wire schema from
 // the same Zod definitions used by the executor so the two cannot drift.
-function parametersSchema(parameters: z.AnyZodObject) {
+function parametersSchema(parameters: z.ZodObject) {
   const properties: Record<string, { type: string; description?: string; enum?: string[] }> = {};
   const required: string[] = [];
   for (const [name, field] of Object.entries(parameters.shape) as [string, z.ZodTypeAny][]) {
@@ -19,7 +19,7 @@ function parametersSchema(parameters: z.AnyZodObject) {
     properties[name] = {
       type: "STRING",
       description: field.description || value.description,
-      ...(value instanceof z.ZodEnum ? { enum: value.options } : {}),
+      ...(value instanceof z.ZodEnum ? { enum: value.options.map(String) } : {}),
     };
     if (!field.isOptional()) required.push(name);
   }

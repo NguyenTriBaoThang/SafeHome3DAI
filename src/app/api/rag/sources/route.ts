@@ -1,7 +1,8 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
 
-export async function GET() {
+async function GETHandler() {
   try {
     const sourcesSummary = CURATED_KNOWLEDGE_SOURCES.map((src) => ({
       id: src.id,
@@ -23,3 +24,6 @@ export async function GET() {
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

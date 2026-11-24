@@ -1,0 +1,497 @@
+{
+  "generated_at": "2026-11-22T11:47:52.987212+00:00",
+  "status": "blocked",
+  "training_permitted": false,
+  "training_runs": 0,
+  "trained_models": 0,
+  "onnx_exports": 0,
+  "latency_ms": null,
+  "plan": {
+    "version": 1,
+    "model": "PekingU/rtdetr_r18vd",
+    "revision": "ac77a11ff0170a41b771c03264987f8ce2b0d753",
+    "seed": 20261122,
+    "minimums": {
+      "train_objects_per_class": 50,
+      "train_positive_images_per_class": 20,
+      "train_positive_groups_per_class": 10,
+      "val_positive_images_per_class": 5,
+      "val_positive_groups_per_class": 5,
+      "risk_train_positive_images": 50
+    },
+    "stage4_object_targets": {
+      "map50": 0.8,
+      "class_recall": 0.85
+    },
+    "training": {
+      "epochs": 40,
+      "batch_size": 4,
+      "learning_rate": 5e-05,
+      "weight_decay": 0.0001,
+      "patience": 6,
+      "min_delta": 0.001,
+      "image_size": 640,
+      "horizontal_flip_probability": 0.5,
+      "brightness_jitter": 0.1,
+      "contrast_jitter": 0.1,
+      "confidence_threshold": 0.25,
+      "gradient_clip_norm": 0.1,
+      "bootstrap": 1000
+    },
+    "scope": "object_detection_only; no risk classifier; no automatic rare-class merging",
+    "minimums_note": "Planning heuristics, not a statistical sufficiency guarantee. Change only before a new training run; unknown/unlabeled never count as negatives. Object targets are engineering defaults, not medical thresholds."
+  },
+  "raw_images": 500,
+  "human_scene_eligible_images": 1,
+  "verified_train_images": 0,
+  "verified_val_images": 0,
+  "blockers": [
+    "Missing official human-reviewed frozen split",
+    "No object class reaches the declared verified train/val support minimums",
+    "Need a human-verified Stage 4 validation result to establish whether object fine-tuning is justified; AI agreement is insufficient"
+  ],
+  "official_accuracy": "not_evaluated",
+  "raw_manifest_sha256": "750ba47724261bd8cbb3b633c60032ea670d1d1709c9ca35db8bf0621d52c4ce",
+  "human_review_revision": 1,
+  "human_decisions_sha256": "80c506c72161b4157bbe44503864e909f5d9a4fc8fc9a02d7e7bd5577b34680d",
+  "test_annotations_parsed": false,
+  "raw_risk_unlabeled_rows": 4000,
+  "protected_prior_test": {
+    "source": "G:\\GITHUB\\SafeHome3DAI\\data\\processed\\stage4\\exploratory\\protocol.json",
+    "source_sha256": "8e717b349ea7ab7eb9d57dadc7668367af0beb1f749e055977e7e3f46367a135",
+    "test_images": 5,
+    "protected_images_in_all_raw_groups": 15,
+    "note": "Protect the complete source/near-duplicate group of each previously frozen test image from train/val."
+  },
+  "ai_train_reference_images_not_trainable": 3,
+  "ai_train_reference_objects_not_trainable": 25,
+  "objects": [
+    {
+      "class": "bed",
+      "vietnamese_name": "Giường ngủ",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "chair",
+      "vietnamese_name": "Ghế ngồi / Ghế đẩu",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "table",
+      "vietnamese_name": "Bàn / Bàn trà",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "cabinet",
+      "vietnamese_name": "Tủ quần áo / Tủ đồ",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "nightstand",
+      "vietnamese_name": "Tab đầu giường",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "door",
+      "vietnamese_name": "Cửa ra vào / Cửa phòng",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "toilet",
+      "vietnamese_name": "Bồn cầu vệ sinh",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "sink",
+      "vietnamese_name": "Chậu rửa mặt / Lavabo",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "bathtub",
+      "vietnamese_name": "Bồn tắm / Sen tắm",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "sofa",
+      "vietnamese_name": "Ghế Sofa",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "rug",
+      "vietnamese_name": "Thảm trải sàn",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "electrical_cable",
+      "vietnamese_name": "Dây điện / Dây sạc",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "grab_bar",
+      "vietnamese_name": "Thanh tay vịn an toàn",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "obstacle_route",
+      "vietnamese_name": "Vật cản lối đi",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "threshold_step",
+      "vietnamese_name": "Gờ bậc cửa",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "lamp",
+      "vietnamese_name": "Đèn chiếu sáng",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "light_switch",
+      "vietnamese_name": "Công tắc đèn",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    },
+    {
+      "class": "other",
+      "vietnamese_name": "Vật thể khác",
+      "train_objects_per_class": 0,
+      "train_positive_images_per_class": 0,
+      "train_positive_groups_per_class": 0,
+      "val_positive_images_per_class": 0,
+      "val_positive_groups_per_class": 0,
+      "val_objects": 0,
+      "additional_needed": {
+        "train_objects_per_class": 50,
+        "train_positive_images_per_class": 20,
+        "train_positive_groups_per_class": 10,
+        "val_positive_images_per_class": 5,
+        "val_positive_groups_per_class": 5
+      },
+      "eligible": false,
+      "warning": "Planning minimums only; <20 positive validation images gives an uncertain estimate"
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "RISK-001",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-002",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-003",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-004",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-005",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-006",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-007",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    },
+    {
+      "risk_id": "RISK-008",
+      "positive": 0,
+      "negative": 0,
+      "unknown": 0,
+      "not_applicable": 0,
+      "additional_positive_images_needed": 50,
+      "risk_classifier_implemented": false,
+      "minimum_positive_images": 50
+    }
+  ],
+  "eligible_classes": [],
+  "stage4_validation_sha256": "4f2ea8628e21c29d4e21a4295583808079a940907bee04d5ace9d470a20f692f",
+  "content_sha256": "687649d92d88f8cc54454df179e407cb496cd435004277abc5b910d82d4963cb"
+}

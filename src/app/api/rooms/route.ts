@@ -1,8 +1,9 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { INITIAL_ROOMS } from "@/data/mockRooms";
 
-export async function GET() {
+async function GETHandler() {
   try {
     const dbRooms = await prisma.room.findMany({
       include: {
@@ -27,3 +28,6 @@ export async function GET() {
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

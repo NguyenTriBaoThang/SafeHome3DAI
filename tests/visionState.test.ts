@@ -9,6 +9,8 @@ import { interpretVisionAnswer } from "@/lib/vision/visionAnswerContract";
 import { createPhotoClarifications } from "@/lib/vision/photoClarifications";
 import { hydrateVisionAnalysis, persistVisionAnalysis } from "@/lib/vision/visionPersistence";
 import type { ProviderAnalysisResult } from "@/lib/vision/visionProvider";
+import { imageFilePath } from "@/lib/vision/imageStorage";
+import { deleteVisionImage } from "@/lib/vision/deleteVisionImage";
 
 let db: PrismaClient, directory: string;
 const files: string[] = [];
@@ -27,6 +29,48 @@ afterAll(async () => {
   await db?.$disconnect();
   for (const name of files) if (fs.existsSync(name)) fs.unlinkSync(name);
   if (directory && path.dirname(directory) === scratch && path.basename(directory).startsWith("vision-state-")) fs.rmSync(directory, { recursive: true, force: true });
+});
+
+async function savedBathroomFixture() {
+  const roomId = crypto.randomUUID(), imageId = crypto.randomUUID(), now = new Date().toISOString();
+  const result: ProviderAnalysisResult = { id: crypto.randomUUID(), roomId, imageId, modelId: "lifecycle-fixture", modelVersion: "fixture",
+    analysisStatus: "COMPLETED", startedAt: now, completedAt: now, detections: [], observations: [],
+    clarifications: createPhotoClarifications(roomId, "BATHROOM") };
+  const photo = Buffer.from([255, 216, 255, 224, 0, 2, 255, 217]);
+  const file = await persistVisionAnalysis(result, photo, "Lifecycle fixture", "BATHROOM", "ENTRANCE", db);
+  files.push(imageFilePath(file.filename));
+  const question = await db.visionClarification.findFirstOrThrow({ where: { roomId, surveyQuestionId: "BATH_005" } });
+  await answer(question.id, "NO");
+  return { roomId, imageId, file, question, result, photo };
+}
+describe("Image lifecycle withdraws only its evidence and commits before unlinking", () => {
+  it("withdraws a deleted photo's answer and profile instead of retaining a confirmed finding", async () => {
+    const fixture = await savedBathroomFixture();
+    expect((await triggerRiskAssessmentFromVision(fixture.roomId, db)).ruleEvaluations.find(r => r.ruleId === "RISK-006")?.state).toBe("DETECTED");
+    await deleteVisionImage(fixture.imageId, db);
+    expect(await db.roomImage.findUnique({ where: { id: fixture.imageId } })).toBeNull();
+    expect(fs.existsSync(imageFilePath(fixture.file.filename))).toBe(false);
+    expect((await db.visionClarification.findUniqueOrThrow({ where: { id: fixture.question.id } })).userResponse).toBe("UNKNOWN");
+    expect((await triggerRiskAssessmentFromVision(fixture.roomId, db)).ruleEvaluations.find(r => r.ruleId === "RISK-006")?.state).toBe("NEEDS_VERIFICATION");
+  });
+  it("rolls back answer retraction and keeps file bytes when database deletion fails", async () => {
+    const fixture = await savedBathroomFixture();
+    await db.$executeRawUnsafe("CREATE TRIGGER block_fixture_delete BEFORE DELETE ON RoomImage BEGIN SELECT RAISE(ABORT, 'fixture rollback'); END");
+    try { await expect(deleteVisionImage(fixture.imageId, db)).rejects.toThrow(); }
+    finally { await db.$executeRawUnsafe("DROP TRIGGER block_fixture_delete"); }
+    expect((await db.visionClarification.findUniqueOrThrow({ where: { id: fixture.question.id } })).userResponse).toBe("NO");
+    expect(fs.existsSync(imageFilePath(fixture.file.filename))).toBe(true);
+    expect((await profile(fixture.roomId)).grabBars.present).toBe(false);
+  });
+  it("preserves independent survey evidence and rejects replacing bytes behind an existing image ID", async () => {
+    const fixture = await savedBathroomFixture();
+    await db.surveyAnswer.update({ where: { roomId_questionId: { roomId: fixture.roomId, questionId: "BATH_005" } },
+      data: { answerSource: "USER_SELECTED", value: JSON.stringify("YES"), confirmationStatus: "CONFIRMED" } });
+    await expect(persistVisionAnalysis({ ...fixture.result, id: crypto.randomUUID() }, Buffer.from([255, 216, 255, 224, 0, 2, 1, 255, 217]), "replace", "BATHROOM", "ENTRANCE", db)).rejects.toThrow();
+    expect(fs.readFileSync(imageFilePath(fixture.file.filename))).toEqual(fixture.photo);
+    await deleteVisionImage(fixture.imageId, db);
+    expect((await profile(fixture.roomId)).grabBars.present).toBe(true);
+  });
 });
 
 async function room(type = "BATHROOM") {
@@ -149,7 +193,7 @@ describe("Stateful vision answers on a new isolated SQLite database", () => {
       providerMetadata: { recipeId: "fixture", recipeSha256: "a".repeat(64), referenceConfigId: "reference", modelVersion: "fixture-model", latencyMs: 1, objectThreshold: .5 } };
     const photo = Buffer.from([255, 216, 255, 224, 0, 2, 255, 217]);
     const file = await persistVisionAnalysis(result, photo, "Private fixture", "BEDROOM", "ENTRANCE", db);
-    files.push(path.join(process.cwd(), "public/uploads/vision", file.filename));
+    files.push(imageFilePath(file.filename));
     const saved = await db.visionAnalysis.findUniqueOrThrow({ where: { id: analysisId }, include: { detections: true, observations: { include: { clarifications: true } } } });
     const hydrated = hydrateVisionAnalysis(saved);
     expect(hydrated.detections[0].bbox).toEqual(result.detections[0].bbox);

@@ -17,11 +17,14 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "test:vision": "vitest run --config vitest.experience.config.ts tests/visionProviders.test.ts tests/structuredGemini.test.ts tests/visionState.test.ts tests/visionProfile.test.ts tests/visionRoutes.test.ts tests/visionEngine.test.ts tests/visionIntegration.test.ts tests/geminiVision.test.ts"
+    "test:vision": "vitest run --config vitest.experience.config.ts tests/visionProviders.test.ts tests/structuredGemini.test.ts tests/visionState.test.ts tests/visionProfile.test.ts tests/visionRoutes.test.ts tests/visionEngine.test.ts tests/visionIntegration.test.ts tests/geminiVision.test.ts",
+    "test:completion:http": "node scripts/completion/http-smoke.cjs",
+    "test:completion:browser": "node scripts/completion/browser.cjs",
+    "build:completion": "prisma generate && node scripts/run-experience.cjs build .scratch/completion-production",
+    "start:completion": "node scripts/run-experience.cjs start .scratch/completion-production"
   },
   "dependencies": {
     "@google/genai": "^3.4.0",
-    "@huggingface/transformers": "^3.8.1",
     "@prisma/client": "^5.22.0",
     "@react-three/drei": "^9.106.0",
     "@react-three/fiber": "^8.16.8",
@@ -29,26 +32,29 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.10",
     "lucide-react": "^0.395.0",
-    "next": "14.2.5",
+    "next": "15.5.29",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "recharts": "^2.12.7",
     "tailwind-merge": "^2.3.0",
     "three": "^0.165.0",
     "three-stdlib": "^2.30.4",
-    "zod": "^3.23.8",
+    "zod": "4.6.7",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
+    "@types/node": "^22.19.0",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@types/three": "^0.165.0",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.33",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
-  }
+    "vitest": "5.1.1",
+    "vite": "^8.3.8"
+  },
+  "engines": { "node": ">=22.12.0" },
+  "overrides": { "postcss": "$postcss", "sharp": "^0.35.5" }
 }

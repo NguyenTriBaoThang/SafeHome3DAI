@@ -28,8 +28,8 @@ describe("SafeHome AI Copilot 2.0 Test Suite", () => {
 
       expect(ctx).toBeDefined();
       expect(ctx.activeRoomId).toBe("room-bedroom-01");
-      expect(ctx.residentProfile.name).toBe("Bác Nam");
-      expect(ctx.residentProfile.age).toBe(75);
+      expect(ctx.residentProfile.name).toBe("Chưa cung cấp");
+      expect(ctx.residentProfile.age).toBeNull();
       expect(ctx.rooms.length).toBeGreaterThanOrEqual(2);
 
       const bedroom = ctx.rooms.find((r) => r.id === "room-bedroom-01");
@@ -44,8 +44,8 @@ describe("SafeHome AI Copilot 2.0 Test Suite", () => {
       const ctx = getSafeHomeSystemContext("room-bedroom-01");
       const prompt = formatSystemContextPrompt(ctx);
 
-      expect(prompt).toContain("Bác Nam");
-      expect(prompt).toContain("75 tuổi");
+      expect(prompt).toContain("chưa cung cấp");
+      expect(prompt).toContain("DỮ LIỆU MÔ PHỎNG");
       expect(prompt).toContain("DANH MỤC ĐỒ NỘI THẤT");
       expect(prompt).toContain("CÁC MỐI NGUY TÉ NGÃ");
     });

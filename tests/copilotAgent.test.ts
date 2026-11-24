@@ -11,7 +11,7 @@ const modelReply = (parts: unknown[], finishReason = "STOP") => new Response(JSO
 }), { headers: { "Content-Type": "application/json" } });
 
 describe("RAG + LLM Copilot Agent", () => {
-  const fetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>();
+  const fetchMock = vi.fn<typeof fetch>();
   const request = (index: number) => JSON.parse(fetchMock.mock.calls[index][1]?.body as string);
 
   beforeEach(() => {

@@ -1,13 +1,15 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { VerificationStatus, DetectionCategory } from "@/lib/vision/types";
 import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
 import { normalizeBoundingBox } from "@/lib/vision/providers/normalization";
 
-export async function PATCH(
+async function PATCHHandler(
   req: NextRequest,
-  { params }: { params: { detectionId: string } }
+  { params: routeParams }: { params: Promise<{ detectionId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { detectionId } = params;
     const body = await req.json();
@@ -29,7 +31,7 @@ export async function PATCH(
         (userLabel !== undefined && (typeof userLabel !== "string" || userLabel.length > 200))) {
       return NextResponse.json({ success: false, error: "Nhãn hoặc trạng thái xác nhận không hợp lệ." }, { status: 400 });
     }
-    let validatedBox;
+    let validatedBox: ReturnType<typeof normalizeBoundingBox> | undefined;
     if (bbox !== undefined) {
       try { validatedBox = normalizeBoundingBox(bbox); }
       catch { return NextResponse.json({ success: false, error: "Tọa độ bbox không hợp lệ." }, { status: 400 }); }
@@ -46,7 +48,8 @@ export async function PATCH(
       );
     }
 
-    const updated = await prisma.objectDetection.update({
+    const updated = await prisma.$transaction(async tx => {
+    const updated = await tx.objectDetection.update({
       where: { id: detectionId },
       data: {
         verificationStatus: verificationStatus || existing.verificationStatus,
@@ -57,7 +60,7 @@ export async function PATCH(
     });
 
     // Audit event
-    await prisma.visionAuditEvent.create({
+    await tx.visionAuditEvent.create({
       data: {
         roomId: existing.analysis.roomId,
         actionType: `DETECTION_${verificationStatus || "UPDATED"}`,
@@ -68,6 +71,8 @@ export async function PATCH(
       },
     });
 
+    return updated;
+    });
     return NextResponse.json({
       success: true,
       data: {
@@ -89,3 +94,6 @@ export async function PATCH(
   }
 }
 
+
+export const PATCH = withAccount(PATCHHandler);
+export const dynamic = "force-dynamic";

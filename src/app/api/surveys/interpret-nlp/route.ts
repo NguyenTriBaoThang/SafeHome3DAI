@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getQuestionById } from "@/lib/survey/questionBank";
@@ -8,7 +9,7 @@ const InterpretNLPSchema = z.object({
   userInput: z.string().min(1, "Câu trả lời không được để trống"),
 });
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json();
     const parseResult = InterpretNLPSchema.safeParse(body);
@@ -45,3 +46,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

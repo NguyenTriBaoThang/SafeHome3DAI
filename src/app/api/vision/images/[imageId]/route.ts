@@ -1,26 +1,19 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { deleteImageFile } from "@/lib/vision/imageStorage";
+import { deleteVisionImage } from "@/lib/vision/deleteVisionImage";
 
-export async function DELETE(
+async function DELETEHandler(
   req: NextRequest,
-  { params }: { params: { imageId: string } }
+  { params: routeParams }: { params: Promise<{ imageId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { imageId } = params;
 
-    const img = await prisma.roomImage.findUnique({
-      where: { id: imageId },
-    });
-
-    if (img) {
-      await deleteImageFile(img.storageKey);
-      await prisma.roomImage.delete({
-        where: { id: imageId },
-      });
-    }
-
-    return NextResponse.json({ success: true });
+    const data = await deleteVisionImage(imageId);
+    return NextResponse.json({ success: !!data, data }, { status: data ? 200 : 404 });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message },
@@ -29,3 +22,6 @@ export async function DELETE(
   }
 }
 
+
+export const DELETE = withAccount(DELETEHandler);
+export const dynamic = "force-dynamic";

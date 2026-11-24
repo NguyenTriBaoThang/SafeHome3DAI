@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-11-22T12:29:05.510Z",
+  "build_id": "R2tdyZb9GCFFl7TUv-R3r",
+  "build_directory": ".scratch/completion-production",
+  "checks": [
+    {
+      "name": "anonymous_api_rejected",
+      "status": "passed"
+    },
+    {
+      "name": "anonymous_login_javascript_assets_available",
+      "status": "passed"
+    },
+    {
+      "name": "real_registration",
+      "status": "passed"
+    },
+    {
+      "name": "cross_origin_rejected",
+      "status": "passed"
+    },
+    {
+      "name": "stale_browser_account_rejected",
+      "status": "passed"
+    },
+    {
+      "name": "legacy_public_media_blocked",
+      "status": "passed"
+    },
+    {
+      "name": "offline_provider_returns_503_without_demo",
+      "status": "passed"
+    },
+    {
+      "name": "invalid_image_returns_400",
+      "status": "passed"
+    },
+    {
+      "name": "oversized_stream_returns_413",
+      "status": "passed"
+    },
+    {
+      "name": "analysis_failure_before_persistence",
+      "status": "passed"
+    }
+  ],
+  "paid_api_calls": 0,
+  "onnx_inferences": 0,
+  "scope": "Actual built Next server; local provider deliberately unreachable. No browser rendering or model inference."
+}

@@ -65,6 +65,7 @@ ehthumbs.db
 /models/
 /.venv-ml/
 /.venv-stage5/
+/.private/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/

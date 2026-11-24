@@ -6,19 +6,20 @@ export interface SystemRoomContext {
   id: string;
   name: string;
   roomType: string;
-  dimensions: { width: number; length: number; height: number };
-  floorMaterial: string;
-  lightingLevel: number;
-  isWet: boolean;
-  isSlipResistant: boolean;
-  grabBarsCount: number;
+  evidenceStatus?: "PHOTO_DRAFT" | "DEMO";
+  dimensions: { width: number; length: number; height: number } | null;
+  floorMaterial: string | null;
+  lightingLevel: number | null;
+  isWet: boolean | null;
+  isSlipResistant: boolean | null;
+  grabBarsCount: number | null;
   objects: Array<{
     id: string;
     name: string;
     category: string;
     modelType: string;
     position: [number, number, number];
-    dimensions: { width: number; length: number; height: number };
+    dimensions: { width: number; length: number; height: number } | null;
     isFixed?: boolean;
     isLoose?: boolean;
     isWalkwayObstacle?: boolean;
@@ -32,7 +33,7 @@ export interface SystemRoomContext {
     targetObjectId?: string;
     recommendationText: string;
   }>;
-  safetyScore: number;
+  safetyScore: number | null;
 }
 
 export interface FullSystemContext {
@@ -40,7 +41,7 @@ export interface FullSystemContext {
   rooms: SystemRoomContext[];
   residentProfile: {
     name: string;
-    age: number;
+    age: number | null;
     healthConditions: string[];
     mobilityNotes: string;
   };
@@ -51,32 +52,34 @@ export interface FullSystemContext {
  */
 export function getSafeHomeSystemContext(activeRoomId?: string, roomState?: RoomState): FullSystemContext {
   const sourceRooms = roomState
-    ? [...INITIAL_ROOMS.filter((room) => room.id !== roomState.id), roomState]
+    ? [roomState]
     : INITIAL_ROOMS;
   const rooms: SystemRoomContext[] = sourceRooms.map((r) => {
-    const findings: HazardFindingResult[] = runEnvironmentalAssessment(r);
-    const score = calculateSafetyScore(findings);
+    const draft = r.evidenceStatus === "PHOTO_DRAFT";
+    const findings: HazardFindingResult[] = draft ? [] : runEnvironmentalAssessment(r);
+    const score = draft ? null : calculateSafetyScore(findings);
 
     return {
       id: r.id,
       name: r.name,
       roomType: r.roomType,
-      dimensions: r.dimensions,
-      floorMaterial: r.floorMaterial,
-      lightingLevel: r.lightingLevel,
-      isWet: r.isWet,
-      isSlipResistant: r.isSlipResistant,
-      grabBarsCount: r.grabBarsCount,
+      evidenceStatus: draft ? "PHOTO_DRAFT" : "DEMO",
+      dimensions: draft ? null : r.dimensions,
+      floorMaterial: draft ? null : r.floorMaterial,
+      lightingLevel: draft ? null : r.lightingLevel,
+      isWet: draft ? null : r.isWet,
+      isSlipResistant: draft ? null : r.isSlipResistant,
+      grabBarsCount: draft ? null : r.grabBarsCount,
       objects: r.objects.map((obj) => ({
         id: obj.id,
         name: obj.name,
         category: obj.category,
         modelType: obj.modelType,
         position: obj.position,
-        dimensions: obj.dimensions,
-        isFixed: obj.isFixed,
-        isLoose: obj.isLoose,
-        isWalkwayObstacle: obj.isWalkwayObstacle,
+        dimensions: draft ? null : obj.dimensions,
+        isFixed: draft ? undefined : obj.isFixed,
+        isLoose: draft ? undefined : obj.isLoose,
+        isWalkwayObstacle: draft ? undefined : obj.isWalkwayObstacle,
       })),
       hazards: findings.map((f) => ({
         id: f.id,
@@ -97,10 +100,10 @@ export function getSafeHomeSystemContext(activeRoomId?: string, roomState?: Room
     activeRoomId: selectedRoomId,
     rooms,
     residentProfile: {
-      name: "Bác Nam",
-      age: 75,
-      healthConditions: ["Giảm thị lực ban đêm", "Thoái hóa khớp gối độ 2", "Hạ huyết áp tư thế"],
-      mobilityNotes: "Đi lại cần khoảng tựa vững, bước chân lê, tần suất đi vệ sinh ban đêm 2 lần/đêm",
+      name: "Chưa cung cấp",
+      age: null,
+      healthConditions: [],
+      mobilityNotes: "Chưa cung cấp; không suy đoán bệnh hoặc khả năng vận động.",
     },
   };
 }
@@ -112,14 +115,20 @@ export function formatSystemContextPrompt(ctx: FullSystemContext): string {
   const activeRoom = ctx.rooms.find((r) => r.id === ctx.activeRoomId) || ctx.rooms[0];
 
   let prompt = `### THÔNG TIN HỒ SƠ NGƯỜI CAO TUỔI:\n`;
-  prompt += `- Đối tượng: ${ctx.residentProfile.name} (${ctx.residentProfile.age} tuổi)\n`;
+  prompt += `- Đối tượng: ${ctx.residentProfile.name}; tuổi: ${ctx.residentProfile.age ?? "chưa cung cấp"}\n`;
   prompt += `- Bệnh nền & suy giảm thể chất: ${ctx.residentProfile.healthConditions.join(", ")}\n`;
   prompt += `- Đặc điểm vận động: ${ctx.residentProfile.mobilityNotes}\n\n`;
 
   prompt += `### KHÔNG GIAN ĐANG CHỌN KHẢO SÁT: ${activeRoom.name} (${activeRoom.id})\n`;
-  prompt += `- Kích thước: ${activeRoom.dimensions.width}m x ${activeRoom.dimensions.length}m x ${activeRoom.dimensions.height}m\n`;
+  if (activeRoom.evidenceStatus === "PHOTO_DRAFT") {
+    prompt += "- BẢN DỰNG ẢNH CHƯA XÁC MINH. Kích thước, vật liệu, độ rọi, độ ướt, chống trượt, tay vịn và điểm an toàn đều chưa xác định. Không diễn giải tọa độ dựng hình thành số đo hoặc danh sách nguy cơ rỗng thành an toàn. Hãy đề nghị khảo sát thực tế.\n";
+    prompt += `- Vật thể trong bản dựng: ${activeRoom.objects.map(o => `${o.name} [${o.id}]`).join(", ")}\n`;
+    return prompt;
+  }
+  prompt += "- DỮ LIỆU MÔ PHỎNG: chỉ minh họa, không phải kết luận cho nhà thực tế.\n";
+  prompt += `- Kích thước: ${activeRoom.dimensions?.width}m x ${activeRoom.dimensions?.length}m x ${activeRoom.dimensions?.height}m\n`;
   prompt += `- Vật liệu sàn: ${activeRoom.floorMaterial} (${activeRoom.isSlipResistant ? "Chống trượt" : "Dễ trơn trượt"})\n`;
-  prompt += `- Độ rọi ánh sáng: ${activeRoom.lightingLevel} Lux (${activeRoom.lightingLevel < 50 ? "Thiếu sáng ban đêm nghiêm trọng" : "Đầy đủ"})\n`;
+  prompt += `- Độ rọi ánh sáng mô phỏng: ${activeRoom.lightingLevel} Lux\n`;
   prompt += `- Tình trạng ẩm ướt: ${activeRoom.isWet ? "Sàn ướt" : "Khô ráo"}\n`;
   prompt += `- Số lượng thanh vịn hiện có: ${activeRoom.grabBarsCount} thanh\n`;
   prompt += `- Điểm an toàn môi trường hiện tại: ${activeRoom.safetyScore}/100\n\n`;

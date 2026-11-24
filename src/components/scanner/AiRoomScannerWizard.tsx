@@ -71,7 +71,7 @@ export const AiRoomScannerWizard: React.FC<{
     initialRoomType || "BEDROOM"
   );
   const [roomName, setRoomName] = useState<string>(
-    initialRoomName || "Phòng ngủ Bác Nam"
+    initialRoomName || "Bản dựng phòng ngủ"
   );
 
   // Step 2: Media Input
@@ -90,6 +90,8 @@ export const AiRoomScannerWizard: React.FC<{
   // Step 3: AI Inference State
   const [isInferencing, setIsInferencing] = useState<boolean>(false);
   const [scanError, setScanError] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [inferenceStage, setInferenceStage] = useState<string>("");
 
   // Step 4: Human Verification Data
@@ -165,7 +167,7 @@ export const AiRoomScannerWizard: React.FC<{
   // Trigger AI Reconstruction Pipeline
   const runAiReconstruction = async () => {
     const url = imageUrls[selectedImgIndex];
-    if (!url || isInferencing || isProcessingVideo) return;
+    if (!url || isInferencing || isProcessingVideo || !consent) return;
     setScanError("");
     setDetections([]);
     setCurrentStep(3);
@@ -214,7 +216,8 @@ export const AiRoomScannerWizard: React.FC<{
 
   // Confirm Human Verification & Build 3D Scene
   const handleConfirmVerification = () => {
-    const sceneGraph = reconstructSceneFromDetections(detections, {
+    const confirmed = detections.filter(d => d.verificationStatus !== "REJECTED").map(d => ({ ...d, verificationStatus: "CONFIRMED" as const }));
+    const sceneGraph = reconstructSceneFromDetections(confirmed, {
       roomType,
       viewpoint,
       imageAspect: photoPixels.current ? photoPixels.current.width / photoPixels.current.height : 1,
@@ -231,6 +234,7 @@ export const AiRoomScannerWizard: React.FC<{
 
     const liveRoomState = convertSceneGraphToRoomState(sceneGraph);
     liveRoomState.name = `${roomName} (AI Reconstructed)`;
+    liveRoomState.evidenceStatus = "PHOTO_DRAFT";
 
     // Load into Zustand store
     loadReconstructedRoom(liveRoomState);
@@ -269,6 +273,22 @@ export const AiRoomScannerWizard: React.FC<{
           : d
       )
     );
+  };
+
+  const saveRoom = async () => {
+    const room = useSimulationStore.getState().rooms.find(r => r.id === reconstructedRoomId);
+    if (!room || isSaving) return;
+    setIsSaving(true); setScanError("");
+    try {
+      const response = await fetch("/api/simulations", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: room.name, roomType: room.roomType, roomState: room }) });
+      const json = await response.json();
+      if (!response.ok || !json.success) throw new Error(json.error || "Không lưu được bản dựng.");
+      loadReconstructedRoom(json.data);
+      setReconstructedRoomId(json.data.id);
+      if (onComplete) onComplete(json.data.id); else router.push("/digital-twin");
+    } catch (error) { setScanError(error instanceof Error ? error.message : "Không lưu được bản dựng."); }
+    finally { setIsSaving(false); }
   };
 
   return (
@@ -573,6 +593,7 @@ export const AiRoomScannerWizard: React.FC<{
 
             {scanError && <p role="alert" className="mt-3 text-sm text-rose-700">{scanError}</p>}
             {imageUrls.length > 1 && <p className="mt-2 text-sm">Chọn một góc ảnh phía trên để dựng bố cục.</p>}
+            <label className="flex items-start gap-2 mt-3 text-sm"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} />Tôi đồng ý gửi ảnh đến nhà cung cấp AI đã cấu hình để nhận diện vật thể. Tránh ảnh có người hoặc thông tin riêng tư.</label>
             <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
               <span>
@@ -590,7 +611,7 @@ export const AiRoomScannerWizard: React.FC<{
               <span>Quay lại</span>
             </button>
             <button
-              disabled={isProcessingVideo || !imageUrls[selectedImgIndex]}
+              disabled={isProcessingVideo || !imageUrls[selectedImgIndex] || !consent}
               onClick={runAiReconstruction}
               className="px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md flex items-center gap-2 transition active:scale-95"
             >
@@ -879,15 +900,16 @@ export const AiRoomScannerWizard: React.FC<{
       {/* --- STEP 6: SAFETY ANALYSIS & WHAT-IF --- */}
       {currentStep === 6 && (
         <div className="flex-1 p-8 max-w-4xl mx-auto w-full flex flex-col justify-between space-y-6 animate-fade-in">
+          {scanError && <p role="alert" className="text-rose-700">{scanError}</p>}
           <div>
             <span className="text-xs font-bold text-teal-600 uppercase tracking-wider">
               Bước 6: Đánh giá nguy cơ & Mô phỏng can thiệp
             </span>
             <h3 className="text-xl font-bold text-slate-900 mt-1">
-              Phân tích an toàn phòng ngừa té ngã hoàn tất!
+              Bản dựng 3D ước lượng đã sẵn sàng
             </h3>
             <p className="text-sm text-slate-500 mt-1">
-              Mô hình 3D của căn phòng đã sẵn sàng cho quy trình đánh giá lâm sàng chuẩn WHO/CDC và mô phỏng What-If.
+              Vị trí và kích thước từ ảnh chưa phải số đo thực tế. Cần bổ sung khảo sát trước khi đánh giá nguy cơ.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -949,16 +971,11 @@ export const AiRoomScannerWizard: React.FC<{
               Xem lại 3D Canvas
             </button>
             <button
-              onClick={() => {
-                if (onComplete && reconstructedRoomId) {
-                  onComplete(reconstructedRoomId);
-                } else {
-                  router.push("/digital-twin");
-                }
-              }}
+              onClick={saveRoom}
+              disabled={isSaving}
               className="px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md flex items-center gap-2 transition active:scale-95"
             >
-              <span>Hoàn tất & Lưu hồ sơ căn phòng</span>
+              <span>{isSaving ? "Đang lưu…" : "Lưu bản dựng ước lượng"}</span>
               <CheckCircle2 className="h-4 w-4" />
             </button>
           </div>

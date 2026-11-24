@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { saveClarificationAnswer } from "@/lib/vision/clarificationEngine";
 
-export async function POST(
+async function POSTHandler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { id } = params;
     const body = await req.json();
@@ -27,3 +29,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

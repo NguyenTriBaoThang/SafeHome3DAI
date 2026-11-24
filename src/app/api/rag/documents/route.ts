@@ -1,8 +1,9 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { ingestDocument } from "@/lib/rag/ingestion";
 import { prisma } from "@/lib/database/prisma";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json();
     const {
@@ -74,3 +75,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

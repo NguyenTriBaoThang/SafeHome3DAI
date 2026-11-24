@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { createVisionProvider, VisionProviderError } from "@/lib/vision/providers";
 import { MAX_IMAGE_FILE_SIZE } from "@/lib/vision/imagePreprocessor";
@@ -5,7 +6,7 @@ import { MAX_IMAGE_FILE_SIZE } from "@/lib/vision/imagePreprocessor";
 export const runtime = "nodejs";
 export const maxDuration = 150;
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     // Bound the streamed body before buffering; Content-Length is not trusted.
     const reader = request.body?.getReader();
@@ -33,3 +34,6 @@ export async function POST(request: Request) {
       { status: known && error.code === "INVALID_IMAGE" ? 400 : 503 });
   }
 }
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

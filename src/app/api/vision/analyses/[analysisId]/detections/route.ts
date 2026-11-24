@@ -1,11 +1,15 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { DetectionCategory } from "@/lib/vision/types";
+import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
+import { normalizeBoundingBox } from "@/lib/vision/providers/normalization";
 
-export async function POST(
+async function POSTHandler(
   req: NextRequest,
-  { params }: { params: { analysisId: string } }
+  { params: routeParams }: { params: Promise<{ analysisId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { analysisId } = params;
     const body = await req.json();
@@ -20,13 +24,17 @@ export async function POST(
       bbox: { xMin: number; yMin: number; xMax: number; yMax: number };
     } = body;
 
-    if (!category || !bbox) {
+    if (typeof category !== "string" || !Object.hasOwn(CATEGORY_TAXONOMY, category) || !bbox || (label !== undefined && (typeof label !== "string" || label.length > 200))) {
       return NextResponse.json(
         { success: false, error: "Thiếu thông tin phân loại hoặc tọa độ khung bao." },
         { status: 400 }
       );
     }
 
+    let box;
+    try { box = normalizeBoundingBox(bbox); }
+    catch { return NextResponse.json({ success: false, error: "Tọa độ không hợp lệ." }, { status: 400 }); }
+    if (!await prisma.visionAnalysis.findUnique({ where: { id: analysisId } })) return NextResponse.json({ success: false, error: "Không tìm thấy phân tích." }, { status: 404 });
     const newDetection = await prisma.objectDetection.create({
       data: {
         analysisId,
@@ -34,7 +42,7 @@ export async function POST(
         originalLabel: label || category,
         userLabel: label || category,
         confidence: 1.0, // Manual annotation has full human confidence
-        bboxJson: JSON.stringify(bbox),
+        bboxJson: JSON.stringify(box),
         source: "MANUAL_ANNOTATION",
         verificationStatus: "CONFIRMED",
       },
@@ -48,7 +56,7 @@ export async function POST(
         originalLabel: newDetection.originalLabel,
         userLabel: newDetection.userLabel,
         confidence: newDetection.confidence,
-        bbox,
+        bbox: box,
         source: newDetection.source,
         verificationStatus: newDetection.verificationStatus,
       },
@@ -61,3 +69,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

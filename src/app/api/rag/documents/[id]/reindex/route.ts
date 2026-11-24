@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 
-export async function POST(
+async function POSTHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const existing = await prisma.knowledgeSource.findUnique({
       where: { id: params.id },
@@ -31,10 +33,11 @@ export async function POST(
   }
 }
 
-export async function DELETE(
+async function DELETEHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     await prisma.knowledgeSource.delete({
       where: { id: params.id },
@@ -45,3 +48,7 @@ export async function DELETE(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const DELETE = withAccount(DELETEHandler);
+export const dynamic = "force-dynamic";

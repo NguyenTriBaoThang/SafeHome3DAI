@@ -1,7 +1,8 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { listConversations, createConversation } from "@/lib/ai/conversationManager";
 
-export async function GET() {
+async function GETHandler() {
   try {
     const list = await listConversations();
     return NextResponse.json(list);
@@ -10,7 +11,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const title = body.title || "Tư vấn an toàn phòng ngừa té ngã";
@@ -21,3 +22,7 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

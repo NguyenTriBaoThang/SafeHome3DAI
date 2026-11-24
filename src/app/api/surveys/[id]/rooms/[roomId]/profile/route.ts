@@ -1,11 +1,13 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getRoomSurveyState } from "@/lib/survey/surveyManager";
 import { convertRoomProfileToSceneDraft } from "@/lib/survey/sceneDraftAdapter";
 
-export async function GET(
+async function GETHandler(
   request: Request,
-  { params }: { params: { id: string; roomId: string } }
+  { params: routeParams }: { params: Promise<{ id: string; roomId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const state = await getRoomSurveyState(params.roomId);
 
@@ -32,3 +34,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

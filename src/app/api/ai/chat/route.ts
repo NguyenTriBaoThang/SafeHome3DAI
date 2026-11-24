@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { ChatRequestSchema } from "@/lib/ai/chatRequest";
 import { processCopilotChat } from "@/lib/ai/geminiChatService";
@@ -7,7 +8,7 @@ import {
   getRecentConversationTurns,
 } from "@/lib/ai/conversationManager";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const rawBody = await request.json();
     const parseResult = ChatRequestSchema.safeParse(rawBody);
@@ -74,3 +75,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

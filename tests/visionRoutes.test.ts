@@ -53,8 +53,8 @@ describe("Vision API contracts without database or paid requests", () => {
   it("does not persist a fabricated successful analysis after inference failure", async () => {
     vi.stubEnv("VISION_PROVIDER", "gemini"); vi.stubEnv("GEMINI_API_KEY", "");
     const response = await analyze(new NextRequest("http://localhost/analyze", { method: "POST",
-      body: JSON.stringify({ imageBufferBase64: Buffer.from(jpeg).toString("base64"), caption: "table" }) }),
-      { params: { imageId: "img-user-failed" } });
+      body: JSON.stringify({ consent: true, imageBufferBase64: Buffer.from(jpeg).toString("base64"), caption: "table" }) }),
+      { params: Promise.resolve({ imageId: "img-user-failed" }) });
     expect(response.status).toBe(503);
     expect((await response.json()).success).toBe(false);
     expect(database.visionAnalysis.create).not.toHaveBeenCalled();
@@ -65,8 +65,8 @@ describe("Vision API contracts without database or paid requests", () => {
     database.roomImage.findUnique.mockResolvedValue({ id: "img-user-ok" });
     database.visionAnalysis.create.mockImplementation(async ({ data }) => data);
     const response = await analyze(new NextRequest("http://localhost/analyze", { method: "POST",
-      body: JSON.stringify({ imageBufferBase64: Buffer.from(jpeg).toString("base64"), roomId: "r" }) }),
-      { params: { imageId: "img-user-ok" } });
+      body: JSON.stringify({ consent: true, imageBufferBase64: Buffer.from(jpeg).toString("base64"), roomId: "r" }) }),
+      { params: Promise.resolve({ imageId: "img-user-ok" }) });
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.data).toMatchObject({ provider: "local", risk_supported: false, modelSha256: "b".repeat(64) });

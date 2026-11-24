@@ -1,10 +1,12 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { triggerRiskAssessmentFromVision } from "@/lib/vision/surveySyncAdapter";
 
-export async function POST(
+async function POSTHandler(
   req: NextRequest,
-  { params }: { params: { roomId: string } }
+  { params: routeParams }: { params: Promise<{ roomId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { roomId } = params;
     const snapshot = await triggerRiskAssessmentFromVision(roomId);
@@ -17,3 +19,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

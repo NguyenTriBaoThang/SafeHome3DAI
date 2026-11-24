@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import {
   getConversationWithMessages,
@@ -5,10 +6,11 @@ import {
   renameConversation,
 } from "@/lib/ai/conversationManager";
 
-export async function GET(
+async function GETHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const conv = await getConversationWithMessages(params.id);
     if (!conv) {
@@ -23,10 +25,11 @@ export async function GET(
   }
 }
 
-export async function DELETE(
+async function DELETEHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     await deleteConversation(params.id);
     return NextResponse.json({ success: true, message: "Đã xóa cuộc trò chuyện" });
@@ -35,10 +38,11 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
+async function PATCHHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const body = await request.json();
     if (!body.title) {
@@ -51,3 +55,8 @@ export async function PATCH(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const DELETE = withAccount(DELETEHandler);
+export const PATCH = withAccount(PATCHHandler);
+export const dynamic = "force-dynamic";

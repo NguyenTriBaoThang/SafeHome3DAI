@@ -29,6 +29,12 @@ export const HazardFindingList: React.FC = () => {
 
   const findings = currentAssessment?.findings || [];
   const room = getCurrentRoom();
+  if (room.evidenceStatus === "PHOTO_DRAFT") return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      Bản dựng từ ảnh chỉ ước lượng vị trí và kích thước. Chưa có điểm an toàn hoặc kết luận nguy cơ thực tế.
+      Hãy hoàn thành khảo sát và đo tại nhà để đánh giá thực trạng.
+    </div>
+  );
 
   const handleFocus = (finding: HazardFindingResult) => {
     if (finding.targetObjectId) {

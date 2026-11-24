@@ -89,7 +89,7 @@ export const AppSidebar: React.FC = () => {
   const isWorkflowActive = pathname === "/workflow";
   const [showComponents, setShowComponents] = useState(false);
 
-  if (pathname === "/experience") return null;
+  if (pathname === "/experience" || pathname === "/sign-in") return null;
 
   return (
     <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
@@ -221,13 +221,13 @@ export const AppSidebar: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold text-slate-800">
-                Bác Nam (75 tuổi)
+                Gia đình của bạn
               </div>
-              <div className="text-[10px] text-slate-500">Đối tượng đánh giá</div>
+              <div className="text-[10px] text-slate-500">Hồ sơ khảo sát riêng</div>
             </div>
           </div>
           <p className="text-[10px] text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
-            Giảm thị lực ban đêm, thoái hóa khớp gối độ 2, đi lại cần khoảng tựa vững, dậy vệ sinh 2 lần/đêm.
+            Thông tin người được khảo sát cần do gia đình cung cấp và xác nhận trong phần khảo sát tại nhà.
           </p>
         </div>
       </div>

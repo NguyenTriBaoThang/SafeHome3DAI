@@ -1,11 +1,13 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { hydrateVisionAnalysis } from "@/lib/vision/visionPersistence";
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
-  { params }: { params: { analysisId: string } }
+  { params: routeParams }: { params: Promise<{ analysisId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { analysisId } = params;
 
@@ -38,3 +40,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

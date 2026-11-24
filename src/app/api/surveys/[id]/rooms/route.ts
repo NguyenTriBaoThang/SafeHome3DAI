@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addRoomToSurvey } from "@/lib/survey/surveyManager";
@@ -7,10 +8,11 @@ const AddRoomSchema = z.object({
   name: z.string().optional(),
 });
 
-export async function POST(
+async function POSTHandler(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: routeParams }: { params: Promise<{ id: string }> }
 ) {
+  const params = await routeParams;
   try {
     const body = await request.json();
     const parseResult = AddRoomSchema.safeParse(body);
@@ -41,3 +43,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

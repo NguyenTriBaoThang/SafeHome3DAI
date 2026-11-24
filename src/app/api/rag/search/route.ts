@@ -1,7 +1,8 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { retrieveEvidenceChunks } from "@/lib/rag/retrieval";
 
-export async function POST(request: Request) {
+async function POSTHandler(request: Request) {
   try {
     const body = await request.json();
     const { query, topK = 4, minScoreThreshold = 1.0 } = body;
@@ -26,3 +27,6 @@ export async function POST(request: Request) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

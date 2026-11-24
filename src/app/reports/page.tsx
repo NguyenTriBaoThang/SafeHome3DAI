@@ -29,7 +29,8 @@ export default function ReportsPage() {
   const room = getCurrentRoom();
   const baseline = baselineAssessments[room.id];
   const findings = currentAssessment?.findings || [];
-  const score = currentAssessment?.safetyScore || 70;
+  const score = currentAssessment?.safetyScore ?? null;
+  const isDraft = room.evidenceStatus === "PHOTO_DRAFT";
 
   const handlePrint = () => {
     window.print();
@@ -38,14 +39,15 @@ export default function ReportsPage() {
   const handleExportJSON = () => {
     const reportData = {
       project: "SafeHome 3D AI — Chương trình an toàn nhà ở người cao tuổi",
-      resident: "Bác Nam (75 tuổi) - Hà Nội",
+      resident: null,
       room: {
         id: room.id,
         name: room.name,
-        dimensions: room.dimensions,
-        lightingLevel: room.lightingLevel,
-        isWet: room.isWet,
-        isSlipResistant: room.isSlipResistant,
+        evidenceStatus: room.evidenceStatus,
+        dimensions: isDraft ? null : room.dimensions,
+        lightingLevel: isDraft ? null : room.lightingLevel,
+        isWet: isDraft ? null : room.isWet,
+        isSlipResistant: isDraft ? null : room.isSlipResistant,
       },
       assessmentDate: new Date().toISOString(),
       safetyScore: score,
@@ -135,10 +137,10 @@ export default function ReportsPage() {
             </div>
             <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
               <User className="h-3.5 w-3.5 text-teal-600" />
-              <span>Bác Nam (75 tuổi) — Hà Nội</span>
+              <span>Chưa nhập thông tin người được khảo sát</span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Đặc điểm: Thoái hóa khớp gối độ 2, giảm thị lực ban đêm, thường dậy đi vệ sinh lúc 2h và 5h sáng.
+              Chỉ sử dụng thông tin đã được gia đình xác nhận.
             </p>
           </div>
 
@@ -151,7 +153,7 @@ export default function ReportsPage() {
               <span>{room.name}</span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Kích thước: {room.dimensions.width}m x {room.dimensions.length}m | Chiếu sáng: {room.lightingLevel} Lux | Sàn: {room.floorMaterial}
+              {isDraft ? "Hình học ước lượng từ ảnh; kích thước, độ rọi và tình trạng sàn chưa được xác minh." : `Kích thước: ${room.dimensions.width}m x ${room.dimensions.length}m | Chiếu sáng: ${room.lightingLevel} Lux | Sàn: ${room.floorMaterial}`}
             </p>
           </div>
         </div>
@@ -163,23 +165,23 @@ export default function ReportsPage() {
               Chỉ số an toàn môi trường hiện tại:
             </div>
             <p className="text-[11px] text-teal-700 mt-0.5">
-              Đã đánh giá qua 8 quy tắc hình học không gian xác định.
+              {isDraft ? "Bản dựng ảnh chưa đủ dữ kiện để đánh giá thực trạng." : "Chỉ số mô phỏng theo dữ kiện hiện có, không phải chứng nhận an toàn."}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-3xl font-black text-teal-800 font-mono">
-              {score} <span className="text-sm font-semibold text-teal-600">/ 100</span>
+              {score == null ? "Chưa đánh giá" : `${score} / 100`}
             </div>
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold ${
-                score >= 80
+                score != null && score >= 80
                   ? "bg-emerald-100 text-emerald-800"
-                  : score >= 60
+                  : score != null && score >= 60
                   ? "bg-amber-100 text-amber-800"
                   : "bg-rose-100 text-rose-800"
               }`}
             >
-              {score >= 80 ? "Đạt chuẩn an toàn" : score >= 60 ? "Cần cải thiện" : "Nguy cơ cao"}
+              {score == null ? "Cần xác minh" : score >= 80 ? "Chỉ số mô phỏng cao" : score >= 60 ? "Cần cải thiện" : "Nguy cơ mô phỏng cao"}
             </span>
           </div>
         </div>
@@ -232,7 +234,7 @@ export default function ReportsPage() {
                 ) : (
                   <tr>
                     <td colSpan={4} className="p-4 text-center text-slate-400">
-                      Không có nguy cơ nào được ghi nhận. Không gian đạt tiêu chuẩn an toàn!
+                      {isDraft ? "Chưa đủ dữ kiện để kết luận nguy cơ. Cần khảo sát và đo tại nhà." : "Chưa ghi nhận nguy cơ theo dữ kiện mô phỏng hiện có; cần xác minh tại nhà."}
                     </td>
                   </tr>
                 )}

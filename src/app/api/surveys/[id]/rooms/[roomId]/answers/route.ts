@@ -1,3 +1,4 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { saveRoomAnswer } from "@/lib/survey/surveyManager";
@@ -21,10 +22,11 @@ const SubmitAnswerSchema = z.object({
   ]).optional(),
 });
 
-export async function POST(
+async function POSTHandler(
   request: Request,
-  { params }: { params: { id: string; roomId: string } }
+  { params: routeParams }: { params: Promise<{ id: string; roomId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const body = await request.json();
     const parseResult = SubmitAnswerSchema.safeParse(body);
@@ -60,3 +62,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

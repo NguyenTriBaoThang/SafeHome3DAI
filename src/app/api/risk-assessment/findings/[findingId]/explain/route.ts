@@ -1,11 +1,13 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { explainHazardFinding } from "@/lib/risk/explanationEngine";
 import { RiskFinding } from "@/lib/risk/types";
 
-export async function POST(
+async function POSTHandler(
   req: NextRequest,
-  { params }: { params: { findingId: string } }
+  { params: routeParams }: { params: Promise<{ findingId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const body = await req.json();
     const finding: RiskFinding = body.finding;
@@ -27,3 +29,6 @@ export async function POST(
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

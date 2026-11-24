@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppHeader } from "@/components/layout/AppHeader";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AccountShell } from "@/components/layout/AccountShell";
 
 export const metadata: Metadata = {
   title: "SafeHome 3D AI — Nhà an toàn, tuổi già an tâm",
@@ -21,11 +20,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className="h-full">
       <body className="font-sans antialiased h-full bg-slate-50 flex flex-col text-slate-900">
-        <AppHeader />
-        <div className="flex flex-1 overflow-hidden">
-          <AppSidebar />
-          <main className="flex-1 overflow-y-auto">{children}</main>
-        </div>
+        <AccountShell>{children}</AccountShell>
       </body>
     </html>
   );

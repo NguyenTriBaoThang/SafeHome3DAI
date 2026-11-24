@@ -48,7 +48,7 @@ import { explainHazardFinding, FindingExplanation } from "@/lib/risk/explanation
 import { createUnverifiedPhotoAssessment, type PhotoRiskAssessment } from "@/lib/vision/photoRiskAssessment";
 import type { AssessmentSnapshot } from "@/lib/risk/types";
 import { useSimulationStore } from "@/stores/useSimulationStore";
-import { RoomState, SceneObjectState, ObjectCategory } from "@/types";
+import { buildVerifiedPhotoDraft } from "@/lib/vision/photoSceneDraft";
 
 // Default mock room images for instant zero-setup demonstration
 const DEFAULT_DEMO_BEDROOM =
@@ -106,6 +106,7 @@ export default function AiVisionStudioPage() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string>("Đã sẵn sàng");
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [imageConsent, setImageConsent] = useState(false);
 
   // Canvas / Workspace interactions
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -226,6 +227,7 @@ export default function AiVisionStudioPage() {
           viewpoint: selectedViewpoint,
           caption,
           imageBufferBase64: base64,
+          consent: imageConsent,
         }),
         signal: AbortSignal.timeout(135000),
       });
@@ -282,19 +284,30 @@ export default function AiVisionStudioPage() {
   };
 
   // Delete an image from studio gallery
-  const handleDeleteImage = (imgId: string, e: React.MouseEvent) => {
+  const handleDeleteImage = async (imgId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const remaining = images.filter((i) => i.id !== imgId);
-    if (remaining.length === 0) return;
-    setImages(remaining);
-    if (selectedImageId === imgId) {
-      handleSelectImage(remaining[0]);
-    }
+    try {
+      const image = images.find(i => i.id === imgId);
+      if (image?.isCustom) {
+        const response = await fetch(`/api/vision/images/${encodeURIComponent(imgId)}`, { method: "DELETE" });
+        const body = await response.json();
+        if (!response.ok || !body.success) throw new Error(body.error || "Không xóa được ảnh.");
+      }
+      const remaining = images.filter(i => i.id !== imgId);
+      setAnalysisByImage(previous => { const next = { ...previous }; delete next[imgId]; return next; });
+      if (!remaining.length) remaining.push({ id: "img-demo-bed", fileUrl: activeRoomType === "BEDROOM" ? DEFAULT_DEMO_BEDROOM : DEFAULT_DEMO_BATHROOM, viewpoint: "ENTRANCE", caption: "Ảnh minh họa", isCustom: false });
+      setImages(remaining);
+      if (selectedImageId === imgId) {
+        setSelectedImageId(remaining[0].id); setDetections([]); setObservations([]); setClarifications([]); setRiskSnapshot(null);
+      }
+      setSyncStatus("Đã xóa ảnh và thu hồi xác nhận phụ thuộc ảnh. Hãy đánh giá lại hồ sơ.");
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không xóa được ảnh."); }
   };
 
   // Core file processor for both input pick & drag-and-drop
   const processUploadFile = (file: File) => {
     if (!file) return;
+    if (!imageConsent) { setSyncStatus("Hãy đồng ý xử lý ảnh trước khi tải hoặc chụp ảnh."); return; }
 
     if (!file.type.startsWith("image/")) {
       alert("Vui lòng chọn một tệp hình ảnh hợp lệ (JPG, PNG, WebP).");
@@ -400,69 +413,13 @@ export default function AiVisionStudioPage() {
     setCameraModalOpen(false);
   };
 
-  // Convert detections to 3D room objects and load into 3D Digital Twin
+  // Only confirmed objects enter a photo draft. Its geometry is not a measurement.
   const handleBuild3DFromImage = () => {
-    if (!detections || detections.length === 0) {
-      alert("Chưa có vật thể nào được nhận diện để dựng 3D.");
-      return;
-    }
-    const newRoomId = `reconstructed-${Date.now()}`;
-    const roomName = `Mô phỏng 3D từ ảnh (${selectedImage.caption || "Hiện trường"})`;
-
-    const newObjects: SceneObjectState[] = detections.map((det, idx) => {
-      const centerX = (det.bbox.xMin + det.bbox.xMax) / 2;
-      const centerY = (det.bbox.yMin + det.bbox.yMax) / 2;
-      const posX = Number(((centerX - 0.5) * 3.8).toFixed(2));
-      const posZ = Number(((centerY - 0.5) * 3.4).toFixed(2));
-      const isHazard =
-        det.category === "electrical_cable" ||
-        (det.category === "rug" && det.verificationStatus !== "REJECTED");
-
-      let category: ObjectCategory = "FURNITURE";
-      if (det.category === "rug") category = "RUG";
-      else if (det.category === "electrical_cable") category = "CABLE";
-      else if (det.category === "grab_bar") category = "SAFETY_DEVICE";
-      else if (det.category === "obstacle_route") category = "OBSTACLE";
-
-      return {
-        id: `obj-rec-${idx}-${Date.now()}`,
-        roomId: newRoomId,
-        name: det.userLabel || CATEGORY_TAXONOMY[det.category]?.vietnameseName || det.originalLabel,
-        category,
-        modelType: det.category,
-        position: [posX, det.category === "rug" ? 0.02 : 0.4, posZ],
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-        dimensions: {
-          width: 1.0,
-          length: 1.0,
-          height: det.category === "rug" ? 0.02 : 0.8,
-        },
-        verified: ["CONFIRMED", "CORRECTED"].includes(det.verificationStatus),
-        isLoose: isHazard,
-      };
-    });
-
-    const newRoom: RoomState = {
-      id: newRoomId,
-      name: roomName,
-      roomType: activeRoomType,
-      dimensions: {
-        width: 4.5,
-        length: 4.0,
-        height: 2.8,
-      },
-      floorMaterial: activeRoomType === "BATHROOM" ? "CERAMIC_TILE" : "WOOD",
-      lightingLevel: 200,
-      isWet: activeRoomType === "BATHROOM",
-      isSlipResistant: activeRoomType !== "BATHROOM",
-      grabBarsCount: detections.filter((d) => d.category === "grab_bar").length,
-      walkingZones: [],
-      objects: newObjects,
-    };
-
-    useSimulationStore.getState().loadReconstructedRoom(newRoom);
-    router.push("/digital-twin");
+    try {
+      const draft = buildVerifiedPhotoDraft(detections, activeRoomType, selectedImage.caption || "Ảnh hiện trường");
+      useSimulationStore.getState().loadReconstructedRoom(draft);
+      router.push("/digital-twin");
+    } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Chưa thể dựng 3D."); }
   };
 
   // Verification Actions (Confirm, Correct, Reject)
@@ -669,6 +626,10 @@ export default function AiVisionStudioPage() {
             </div>
 
             {/* Upload & Camera Buttons */}
+            <label className="flex gap-2 text-xs text-slate-600">
+              <input id="vision-photo-consent" type="checkbox" checked={imageConsent} onChange={e => setImageConsent(e.target.checked)} />
+              Tôi có quyền sử dụng ảnh và đồng ý phân tích, lưu ảnh trong hồ sơ. Khi dùng Gemini, ảnh sẽ được gửi tới dịch vụ AI.
+            </label>
             <div className="grid grid-cols-2 gap-2 pt-1">
               <label
                 htmlFor="vision-file-upload-input"
@@ -680,6 +641,7 @@ export default function AiVisionStudioPage() {
                   id="vision-file-upload-input"
                   ref={fileInputRef}
                   type="file"
+                  disabled={!imageConsent}
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={handleFileUpload}
                   className="hidden"
@@ -688,6 +650,7 @@ export default function AiVisionStudioPage() {
 
               <button
                 onClick={handleStartCamera}
+                disabled={!imageConsent}
                 className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <Camera className="h-3.5 w-3.5 text-indigo-600" />

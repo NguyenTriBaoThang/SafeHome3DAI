@@ -1,13 +1,15 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
-import { getAssessmentSnapshotById } from "@/lib/risk/assessmentManager";
+import { loadAssessmentSnapshot } from "@/lib/risk/assessmentManager";
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
-  { params }: { params: { assessmentId: string } }
+  { params: routeParams }: { params: Promise<{ assessmentId: string }> }
 ) {
+  const params = await routeParams;
   try {
     const { assessmentId } = params;
-    const snapshot = getAssessmentSnapshotById(assessmentId);
+    const snapshot = await loadAssessmentSnapshot(assessmentId);
 
     if (!snapshot) {
       return NextResponse.json(
@@ -25,3 +27,6 @@ export async function GET(
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";

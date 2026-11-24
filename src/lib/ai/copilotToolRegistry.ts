@@ -165,6 +165,7 @@ export async function executeCopilotTool(
           id: currentRoom.id,
           name: currentRoom.name,
           dimensions: currentRoom.dimensions,
+          evidenceStatus: currentRoom.evidenceStatus,
           floorMaterial: currentRoom.floorMaterial,
           lightingLevel: currentRoom.lightingLevel,
           isWet: currentRoom.isWet,
@@ -193,7 +194,7 @@ export async function executeCopilotTool(
       return {
         tool: toolName,
         success: true,
-        message: `Ghi nhận ${filtered.length} nguy cơ té ngã cần lưu ý`,
+        message: currentRoom.evidenceStatus === "PHOTO_DRAFT" ? "Chưa xác minh nguy cơ thực tế; cần bổ sung khảo sát." : `Ghi nhận ${filtered.length} nguy cơ mô phỏng cần lưu ý`,
         data: filtered,
       };
     }
@@ -202,10 +203,10 @@ export async function executeCopilotTool(
       return {
         tool: toolName,
         success: true,
-        message: `Điểm an toàn hiện tại là ${currentRoom.safetyScore}/100`,
+        message: currentRoom.safetyScore == null ? "Chưa đủ dữ liệu đánh giá; cần bổ sung khảo sát thực tế." : `Điểm mô phỏng là ${currentRoom.safetyScore}/100`,
         data: {
           safetyScore: currentRoom.safetyScore,
-          totalHazards: currentRoom.hazards.length,
+          totalHazards: currentRoom.evidenceStatus === "PHOTO_DRAFT" ? null : currentRoom.hazards.length,
           criticalCount: currentRoom.hazards.filter((h) => h.severityCategory === "HIGH").length,
           standards: ["WHO 2021", "CDC STEADI"],
         },

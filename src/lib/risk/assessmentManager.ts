@@ -1,3 +1,4 @@
+import { currentDatabaseScope } from "@/lib/database/scope";
 import { prisma } from "@/lib/database/prisma";
 import {
   AssessmentInput,
@@ -10,70 +11,53 @@ import { compareAssessments } from "./comparisonEngine";
 import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
 
 // In-memory snapshot cache for fast retrieval and demo/offline scenarios
-const snapshotMemoryStore = new Map<string, AssessmentSnapshot>();
+const snapshots = new Map<string, AssessmentSnapshot>();
+const scopedKey = (key: string) => `${currentDatabaseScope()?.id || "offline-test"}:${key}`;
+const snapshotMemoryStore = {
+  set: (key: string, snapshot: AssessmentSnapshot) => snapshots.set(scopedKey(key), snapshot),
+  get: (key: string) => snapshots.get(scopedKey(key)),
+};
+export function invalidateRoomAssessments(roomId: string) {
+  const prefix = `${currentDatabaseScope()?.id || "offline-test"}:`;
+  for (const [key, snapshot] of snapshots) if (key.startsWith(prefix) && snapshot.roomId === roomId) snapshots.delete(key);
+}
 
 /**
  * Executes a full risk assessment on a room and persists findings to SQLite database if room exists.
  */
-export async function runAndPersistAssessment(rawInput: any): Promise<AssessmentSnapshot> {
+export async function runAndPersistAssessment(rawInput: any): Promise<AssessmentSnapshot & { persisted: boolean }> {
+  if (rawInput?.evidenceStatus === "PHOTO_DRAFT") throw new Error("Bản dựng ảnh cần bổ sung khảo sát trước khi đánh giá.");
   const snapshot = evaluateRoomHazards(rawInput);
-  snapshotMemoryStore.set(snapshot.id, snapshot);
-
-  // Also cache by room ID as latest
-  snapshotMemoryStore.set(`latest-${snapshot.roomId}`, snapshot);
-
-  // Persist to Prisma DB if roomId corresponds to a database Room or SurveyRoom
-  try {
-    const dbRoom = await prisma.room.findUnique({
-      where: { id: snapshot.roomId },
-    });
-
-    if (dbRoom) {
-      // Save Assessment record
-      const dbAssessment = await prisma.assessment.create({
-        data: {
-          roomId: dbRoom.id,
-          totalHazards: snapshot.detectedCount,
-          resolvedHazards: 0,
-          remainingHazards: snapshot.detectedCount,
-          newHazards: 0,
-          safetyScore: snapshot.safetyScore,
-          status: "COMPLETED",
-          notes: JSON.stringify({
-            snapshotId: snapshot.id,
-            totalRulesEvaluated: snapshot.totalRulesEvaluated,
-            highPriorityCount: snapshot.highPriorityCount,
-            mediumPriorityCount: snapshot.mediumPriorityCount,
-            lowPriorityCount: snapshot.lowPriorityCount,
-            needsVerificationCount: snapshot.needsVerificationCount,
-          }),
-        },
-      });
-
-      // Save Hazard Findings
-      for (const finding of snapshot.findings) {
-        await prisma.hazardFinding.create({
-          data: {
-            assessmentId: dbAssessment.id,
-            hazardType: finding.hazardType,
-            title: finding.title,
-            description: finding.description,
-            severityCategory: finding.severityCategory,
-            detectionRuleId: finding.ruleId,
-            evidence: JSON.stringify(finding.evidence),
-            recommendationText: finding.recommendationText,
-            targetObjectId: finding.targetObjectId || null,
-            status: finding.status,
-          },
-        });
-      }
-    }
-  } catch (err) {
-    // If DB insert encounters an issue (e.g. synthetic or test roomId), we gracefully continue with in-memory snapshot
-    console.warn("[RiskManager] SQLite persistence skipped, served from in-memory snapshot:", err);
+  let persisted = false;
+  const dbRoom = await prisma.room.findUnique({ where: { id: snapshot.roomId } });
+  if (dbRoom) {
+    // Findings and the complete snapshot commit together. IDs remain readable after restart.
+    await prisma.assessment.create({ data: {
+      id: snapshot.id, roomId: dbRoom.id, totalHazards: snapshot.detectedCount, remainingHazards: snapshot.detectedCount,
+      safetyScore: snapshot.safetyScore, status: "COMPLETED",
+      notes: JSON.stringify({ format: "risk-snapshot-v1", snapshot }),
+      findings: { create: snapshot.findings.map(finding => ({
+        hazardType: finding.hazardType, title: finding.title, description: finding.description,
+        severityCategory: finding.severityCategory, detectionRuleId: finding.ruleId,
+        evidence: JSON.stringify(finding.evidence), recommendationText: finding.recommendationText,
+        targetObjectId: finding.targetObjectId || null, status: finding.status,
+      })) },
+    } });
+    persisted = true;
   }
+  cacheAssessmentSnapshot(snapshot);
+  return { ...snapshot, persisted };
+}
 
-  return snapshot;
+export async function loadAssessmentSnapshot(snapshotId: string): Promise<AssessmentSnapshot | null> {
+  const cached = getAssessmentSnapshotById(snapshotId);
+  if (cached) return cached;
+  const record = await prisma.assessment.findUnique({ where: { id: snapshotId } });
+  if (!record?.notes) return null;
+  const saved = JSON.parse(record.notes);
+  if (saved.format !== "risk-snapshot-v1" || saved.snapshot?.id !== record.id || saved.snapshot?.roomId !== record.roomId) return null;
+  snapshotMemoryStore.set(saved.snapshot.id, saved.snapshot);
+  return saved.snapshot;
 }
 
 /**
@@ -82,6 +66,12 @@ export async function runAndPersistAssessment(rawInput: any): Promise<Assessment
 export async function getLatestAssessmentForRoom(roomId: string): Promise<AssessmentSnapshot | null> {
   const cached = snapshotMemoryStore.get(`latest-${roomId}`);
   if (cached) return cached;
+
+  const latest = await prisma.assessment.findFirst({ where: { roomId }, orderBy: { assessmentDate: "desc" } });
+  if (latest) {
+    const restored = await loadAssessmentSnapshot(latest.id);
+    if (restored) { snapshotMemoryStore.set(`latest-${roomId}`, restored); return restored; }
+  }
 
   // Try to find if survey profile exists
   try {

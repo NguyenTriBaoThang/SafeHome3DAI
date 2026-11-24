@@ -7,6 +7,7 @@ import {
   ScenarioComparison,
 } from "@/types";
 import { INITIAL_ROOMS } from "@/data/mockRooms";
+import { unverifiedPhotoAssessment } from "@/lib/vision/photoSceneDraft";
 import {
   runEnvironmentalAssessment,
   calculateSafetyScore,
@@ -547,6 +548,11 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
 
     runSimulation: () => {
       const currentRoom = get().getCurrentRoom();
+      if (currentRoom.evidenceStatus === "PHOTO_DRAFT") {
+        const assessment = unverifiedPhotoAssessment(currentRoom);
+        set({ currentAssessment: assessment, comparison: null });
+        return assessment;
+      }
       const baseline =
         get().baselineAssessments[currentRoom.id] ||
         get().baselineAssessments[INITIAL_ROOMS[0].id];
@@ -598,9 +604,9 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         resolved,
         remaining,
         newlyIntroduced,
-        baselineScore: baseline.safetyScore,
+        baselineScore: baseline.safetyScore ?? 0,
         currentScore: currentScore,
-        scoreDelta: currentScore - baseline.safetyScore,
+        scoreDelta: currentScore - (baseline.safetyScore ?? 0),
       };
 
       set({
@@ -656,7 +662,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     loadReconstructedRoom: (room: RoomState) => {
       const findings = runEnvironmentalAssessment(room);
       const score = calculateSafetyScore(findings);
-      const assessment: AssessmentResult = {
+      const assessment: AssessmentResult = room.evidenceStatus === "PHOTO_DRAFT" ? unverifiedPhotoAssessment(room) : {
         id: `assessment-live-${room.id}`,
         roomId: room.id,
         timestamp: new Date().toISOString(),
@@ -683,6 +689,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
           rooms: updatedRooms,
           currentRoomId: room.id,
           currentAssessment: assessment,
+          comparison: null,
           selectedObjectId: null,
           cameraFocusPoint: null,
           baselineAssessments: {

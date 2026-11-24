@@ -13,6 +13,10 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 
+# This historical source was frozen with CRLF in the sealed Stage 4 protocol.
+# Preserve those bytes across Windows/Linux checkouts without editing the protocol.
+src/lib/vision/imageRiskAssessment.ts text eol=crlf
+
 # Denote all binary files
 *.png binary
 *.jpg binary

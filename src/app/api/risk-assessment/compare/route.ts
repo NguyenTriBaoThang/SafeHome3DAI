@@ -1,16 +1,18 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { compareAssessments } from "@/lib/risk/comparisonEngine";
 import {
-  getAssessmentSnapshotById,
+  loadAssessmentSnapshot,
   compareSnapshots,
 } from "@/lib/risk/assessmentManager";
 import { AssessmentSnapshot } from "@/lib/risk/types";
 
-export async function POST(req: NextRequest) {
+async function POSTHandler(req: NextRequest) {
   try {
     const body = await req.json();
 
     if (body.beforeSnapshotId && body.afterSnapshotId) {
+      await Promise.all([loadAssessmentSnapshot(body.beforeSnapshotId), loadAssessmentSnapshot(body.afterSnapshotId)]);
       const result = compareSnapshots(body.beforeSnapshotId, body.afterSnapshotId);
       if (!result) {
         return NextResponse.json(
@@ -41,3 +43,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
+export const POST = withAccount(POSTHandler);
+export const dynamic = "force-dynamic";

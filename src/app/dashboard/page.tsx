@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
   const currentRoom = getCurrentRoom();
   const currentFindings = currentAssessment?.findings || [];
-  const safetyScore = currentAssessment?.safetyScore || 70;
+  const safetyScore = currentAssessment?.safetyScore;
 
   // Donut chart: Hazard breakdown by category
   const categoryData = useMemo(() => {
@@ -163,7 +163,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="text-[11px] font-semibold text-slate-400">Chỉ số an toàn (0-100)</div>
-            <div className="text-xl font-black text-slate-800">{safetyScore} / 100</div>
+            <div className="text-xl font-black text-slate-800">{safetyScore == null ? "Chưa đánh giá" : `${safetyScore} / 100`}</div>
             <div className="text-[10px] text-slate-500 font-medium">Chỉ số ước lượng giáo dục</div>
           </div>
         </div>

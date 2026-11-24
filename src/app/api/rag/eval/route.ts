@@ -1,7 +1,8 @@
+import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { runRAGEvaluationSuite } from "@/lib/rag/evaluator";
 
-export async function GET() {
+async function GETHandler() {
   try {
     const report = await runRAGEvaluationSuite();
     return NextResponse.json(report);
@@ -13,3 +14,6 @@ export async function GET() {
   }
 }
 
+
+export const GET = withAccount(GETHandler);
+export const dynamic = "force-dynamic";
