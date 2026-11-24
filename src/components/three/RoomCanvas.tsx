@@ -7,6 +7,8 @@ import * as THREE from "three";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { RoomEnvironment } from "./RoomEnvironment";
 import { ModelRenderer } from "./ModelRenderer";
+import { WheelchairDriver, WheelchairPadState } from "./WheelchairDriver";
+import { AccessibleSuiteModel } from "./AccessibleSuiteModel";
 import { canWalkTo } from "@/lib/experience/navigation";
 import {
   AlertTriangle,
@@ -316,9 +318,17 @@ export const RoomCanvas: React.FC = () => {
     null
   );
   const [fitTrigger, setFitTrigger] = useState(0);
+  const [showWheelchair, setShowWheelchair] = useState(true);
+  const wheelchairPadRef = useRef<WheelchairPadState>({
+    fwd: false,
+    back: false,
+    left: false,
+    right: false,
+  });
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const room = getCurrentRoom();
+  const isAccessibleSuite = room.id === "room-accessible-suite-01";
   const findings = currentAssessment?.findings || [];
 
   // Auto-fit room when room ID changes
@@ -326,6 +336,9 @@ export const RoomCanvas: React.FC = () => {
     setFitTrigger((prev) => prev + 1);
     selectObject(null);
     setExpandedClusterId(null);
+    if (room.id === "room-accessible-suite-01") {
+      setShowWheelchair(true);
+    }
   }, [room.id]);
 
   // Deterministic numbering map for findings: H1, H2, H3...
@@ -508,34 +521,91 @@ export const RoomCanvas: React.FC = () => {
       >
         <CameraController fitTrigger={fitTrigger} />
 
-        <RoomEnvironment
-          room={room}
-          showWalkingZones={showWalkingZones}
-          showGrid={showMeasurements}
-          transparentWalls={transparentWalls}
-          isNightMode={isNightMode}
-          lightingPreset={lightingPreset}
-        />
+        {isAccessibleSuite ? (
+          <React.Suspense fallback={null}>
+            <AccessibleSuiteModel
+              room={room}
+              cutaway={cameraPreset === "ISOMETRIC" || cameraPreset === "TOP"}
+              transparentWalls={transparentWalls}
+              showWalkingZones={showWalkingZones}
+              showGrid={showMeasurements}
+              isNightMode={isNightMode}
+              lightingPreset={lightingPreset}
+            />
+          </React.Suspense>
+        ) : (
+          <RoomEnvironment
+            room={room}
+            showWalkingZones={showWalkingZones}
+            showGrid={showMeasurements}
+            transparentWalls={transparentWalls}
+            isNightMode={isNightMode}
+            lightingPreset={lightingPreset}
+          />
+        )}
 
-        {/* 3D Scene Objects with Photorealistic ModelRenderer */}
+        {/* Interactive Elderly Wheelchair Driver (WASD / D-Pad + Ø1.5m Turning Circle) */}
+        {showWheelchair && (
+          <React.Suspense fallback={null}>
+            <WheelchairDriver
+              room={room}
+              active={showWheelchair && cameraPreset !== "WALKTHROUGH"}
+              padRef={wheelchairPadRef}
+            />
+          </React.Suspense>
+        )}
+
+        {/* 3D Scene Objects with Photorealistic ModelRenderer (works for ALL rooms including Accessible Suite!) */}
         {room.objects.map((obj) => {
           const isSelected = selectedObjectId === obj.id;
           const hazardEntry = hazardMap.get(obj.id);
           const hasHazard = Boolean(hazardEntry) && showHazardOverlay;
           const isClustered = clusteredObjectIds.has(obj.id);
+          const isSuiteBuiltin = isAccessibleSuite && Boolean(obj.assetId?.startsWith("suite_builtin_"));
 
           return (
             <group key={obj.id}>
-              <ModelRenderer
-                object={obj}
-                isSelected={isSelected}
-                hasHazard={hasHazard}
-                hazardSeverity={hazardEntry?.hazard.severityCategory}
-                onClick={() => {
-                  selectObject(obj.id);
-                  focusOnLocation(obj.position);
-                }}
-              />
+              {isSuiteBuiltin ? (
+                <mesh
+                  position={[
+                    obj.position[0],
+                    (obj.position[1] ?? 0) + obj.dimensions.height / 2,
+                    obj.position[2],
+                  ]}
+                  rotation={obj.rotation}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    selectObject(obj.id);
+                    focusOnLocation(obj.position);
+                  }}
+                >
+                  <boxGeometry
+                    args={[
+                      obj.dimensions.width,
+                      Math.max(obj.dimensions.height, 0.05),
+                      obj.dimensions.length,
+                    ]}
+                  />
+                  <meshBasicMaterial
+                    color={isSelected ? "#38bdf8" : "#f43f5e"}
+                    transparent
+                    opacity={isSelected ? 0.18 : 0.0}
+                    wireframe={isSelected}
+                    depthWrite={false}
+                  />
+                </mesh>
+              ) : (
+                <ModelRenderer
+                  object={obj}
+                  isSelected={isSelected}
+                  hasHazard={hasHazard}
+                  hazardSeverity={hazardEntry?.hazard.severityCategory}
+                  onClick={() => {
+                    selectObject(obj.id);
+                    focusOnLocation(obj.position);
+                  }}
+                />
+              )}
 
               {/* Sleek Teardrop Pin Marker (H1, H2, H3...) */}
               {hazardEntry && showHazardOverlay && !isClustered && (
@@ -974,6 +1044,21 @@ export const RoomCanvas: React.FC = () => {
             <span className="hidden sm:inline">Trước/Sau</span>
           </button>
           <button
+            onClick={() => {
+              if (cameraPreset === "WALKTHROUGH") setCameraPreset("ISOMETRIC");
+              setShowWheelchair((v) => !v);
+            }}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+              showWheelchair
+                ? "bg-emerald-600 text-white font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Bật/tắt nhân vật người cao tuổi ngồi xe lăn (Lái bằng WASD / Mũi tên)"
+          >
+            <span>♿</span>
+            <span className="hidden sm:inline">Xe lăn 3D</span>
+          </button>
+          <button
             onClick={handleFitRoom}
             className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition flex items-center gap-1"
             title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
@@ -991,6 +1076,61 @@ export const RoomCanvas: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* --- WHEELCHAIR MINI D-PAD & WASD HINT (WHEN WHEELCHAIR ACTIVE) --- */}
+      {showWheelchair && cameraPreset !== "WALKTHROUGH" && (
+        <div className="absolute bottom-16 left-3 z-20 flex items-end gap-2 pointer-events-auto">
+          <div className="grid grid-cols-3 gap-1 p-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 shadow-xl">
+            <div />
+            <button
+              onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
+              onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
+              onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+              title="Tiến (W / ↑)"
+            >
+              ▲
+            </button>
+            <div />
+            <button
+              onPointerDown={() => { wheelchairPadRef.current.left = true; }}
+              onPointerUp={() => { wheelchairPadRef.current.left = false; }}
+              onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+              title="Trái (A / ←)"
+            >
+              ◀
+            </button>
+            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
+              ♿
+            </div>
+            <button
+              onPointerDown={() => { wheelchairPadRef.current.right = true; }}
+              onPointerUp={() => { wheelchairPadRef.current.right = false; }}
+              onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+              title="Phải (D / →)"
+            >
+              ▶
+            </button>
+            <div />
+            <button
+              onPointerDown={() => { wheelchairPadRef.current.back = true; }}
+              onPointerUp={() => { wheelchairPadRef.current.back = false; }}
+              onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+              title="Lùi (S / ↓)"
+            >
+              ▼
+            </button>
+            <div />
+          </div>
+          <div className="hidden sm:block px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10.5px] text-slate-200 shadow-lg">
+            <div className="font-bold text-emerald-300">Lái xe lăn kiểm định Ø1.5m</div>
+            <div className="text-slate-400">Phím <kbd className="px-1 bg-slate-800 rounded text-white">WASD</kbd> / Mũi tên • <kbd className="px-1 bg-slate-800 rounded text-white">Shift</kbd> nhanh</div>
+          </div>
+        </div>
+      )}
 
       {/* --- BOTTOM FLOATING TOOLBAR: TOGGLES & LEGEND --- */}
       <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
