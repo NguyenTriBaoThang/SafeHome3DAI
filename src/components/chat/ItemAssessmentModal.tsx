@@ -97,13 +97,16 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
 
       if (!res || !res.ok) {
         const errData = await res?.json().catch(() => null);
-        throw new Error(errData?.error || "Không thể phân tích ảnh vật dụng lúc này.");
+        throw new Error(
+          errData?.error ||
+            "Chưa xác định: không thể phân tích ảnh vật dụng lúc này. Hãy thử lại hoặc dùng checklist thủ công."
+        );
       }
 
       const data = await res.json();
       if (data.success && data.assessment) {
         setResultAssessment(data.assessment);
-        onAssessmentCompleted?.(data.assessment);
+        if (!data.assessment.demo) onAssessmentCompleted?.(data.assessment);
       } else {
         throw new Error("Không nhận được kết quả thẩm định từ máy chủ.");
       }
@@ -131,14 +134,13 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
       });
 
       if (!res.ok) {
-        throw new Error("Không thể tải mẫu thẩm định");
+        throw new Error("Không thể tải mẫu minh họa (DEMO)");
       }
 
       const data = await res.json();
-      if (data.success && data.assessment) {
+      if (data.success && data.assessment?.demo === true) {
+        // DEMO example only: shown with a banner, never forwarded to the chat/assessment pipeline.
         setResultAssessment(data.assessment);
-        setPreviewUrl(data.assessment.imageUrl);
-        onAssessmentCompleted?.(data.assessment);
       }
     } catch (err: any) {
       setErrorMsg("Lỗi khi tải mẫu thẩm định: " + err.message);
@@ -369,9 +371,9 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
               <div className="pt-4 border-t border-slate-100 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Hoặc chọn nhanh vật dụng mẫu để kiểm nghiệm:
+                    Ví dụ minh họa (DEMO), không phải ảnh của bạn:
                   </span>
-                  <span className="text-[10px] text-slate-400">Dữ liệu chuẩn CDC</span>
+                  <span className="text-[10px] text-slate-400">Ví dụ cố định, không phải kết quả AI</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -395,12 +397,21 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
           ) : (
             /* Result Assessment View */
             <div className="space-y-4">
+              {resultAssessment.demo && (
+                <div role="status" className="p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">
+                  DEMO: đây là ví dụ minh họa cố định, không phải kết quả phân tích ảnh của bạn và không phải đánh giá an toàn.
+                </div>
+              )}
               <ItemHazardCard
                 assessment={resultAssessment}
-                onAskCopilot={(query) => {
-                  onSendToChat?.(resultAssessment);
-                  onClose();
-                }}
+                onAskCopilot={
+                  resultAssessment.demo
+                    ? undefined
+                    : () => {
+                        onSendToChat?.(resultAssessment);
+                        onClose();
+                      }
+                }
               />
             </div>
           )}
@@ -430,6 +441,7 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
               </Link>
             </div>
 
+            {!resultAssessment.demo && (
             <button
               type="button"
               onClick={() => {
@@ -442,6 +454,7 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
               <span>Đưa kết quả vào cuộc trò chuyện AI</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
+            )}
           </div>
         )}
       </div>
