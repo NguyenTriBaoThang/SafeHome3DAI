@@ -40,6 +40,11 @@ async function POSTHandler(req: NextRequest) {
       );
     }
 
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ success: false, error: "Ảnh vượt quá 10 MB." }, { status: 413 });
+    }
+    const prepared = prepareProviderImage(Buffer.from(await file.arrayBuffer()));
+
     const accountId = resolveAccountScopeId();
     // Enforce ConsentRecord governance (blocks if consent was revoked in DB)
     const consentCheck = await assertConsentForAction({
@@ -48,10 +53,6 @@ async function POSTHandler(req: NextRequest) {
       requestConsentFlag: form.get("consent") === "true",
     });
 
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ success: false, error: "Ảnh vượt quá 10 MB." }, { status: 413 });
-    }
-    const prepared = prepareProviderImage(Buffer.from(await file.arrayBuffer()));
     const dimensions = imageDimensions(prepared.image),
       id = randomUUID();
     const extension =
