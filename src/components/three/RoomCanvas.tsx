@@ -1068,8 +1068,9 @@ export const RoomCanvas: React.FC = () => {
                 onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
                 onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
                 onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
-                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
                 title="Tiến (W / ↑)"
+                aria-label="Xe lăn: Tiến"
               >
                 ▲
               </button>
@@ -1078,20 +1079,22 @@ export const RoomCanvas: React.FC = () => {
                 onPointerDown={() => { wheelchairPadRef.current.left = true; }}
                 onPointerUp={() => { wheelchairPadRef.current.left = false; }}
                 onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
-                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
                 title="Trái (A / ←)"
+                aria-label="Xe lăn: Trái"
               >
                 ◀
               </button>
-              <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
+              <div className="w-11 h-11 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
                 ♿
               </div>
               <button
                 onPointerDown={() => { wheelchairPadRef.current.right = true; }}
                 onPointerUp={() => { wheelchairPadRef.current.right = false; }}
                 onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
-                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
                 title="Phải (D / →)"
+                aria-label="Xe lăn: Phải"
               >
                 ▶
               </button>
@@ -1100,8 +1103,9 @@ export const RoomCanvas: React.FC = () => {
                 onPointerDown={() => { wheelchairPadRef.current.back = true; }}
                 onPointerUp={() => { wheelchairPadRef.current.back = false; }}
                 onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
-                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
                 title="Lùi (S / ↓)"
+                aria-label="Xe lăn: Lùi"
               >
                 ▼
               </button>
@@ -1118,7 +1122,7 @@ export const RoomCanvas: React.FC = () => {
       {/* Provenance label: shown unless room size and every object are measured / user-confirmed. */}
       <div
         data-testid="room-model-label"
-        className={`absolute bottom-14 right-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-[10px] font-semibold border ${
+        className={`absolute bottom-14 right-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-xs font-semibold border ${
           isApproximateRoomModel(room) ? "bg-amber-950/80 text-amber-200 border-amber-700/70" : "bg-emerald-950/80 text-emerald-200 border-emerald-700/70"
         }`}
       >
@@ -1129,13 +1133,13 @@ export const RoomCanvas: React.FC = () => {
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-20">
         {/* Lighting Selector (Top-Left) */}
         <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
-          <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden md:flex items-center gap-1">
+          <span className="text-xs text-slate-300 font-medium px-1.5 hidden md:flex items-center gap-1">
             <Sun className="h-3.5 w-3.5 text-amber-400" />
             <span>Ánh sáng:</span>
           </span>
           <button
             onClick={() => setLightingPreset("MORNING")}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "MORNING"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1146,7 +1150,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={() => setLightingPreset("AFTERNOON")}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "AFTERNOON"
                 ? "bg-sky-500 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1157,7 +1161,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={() => setLightingPreset("NIGHT")}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "NIGHT"
                 ? "bg-indigo-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1169,7 +1173,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={() => setLightingPreset("STUDIO")}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "STUDIO"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1183,7 +1187,7 @@ export const RoomCanvas: React.FC = () => {
 
         {/* Camera Views & Actions (Top-Right) */}
         <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg overflow-x-auto max-w-[calc(100%-180px)]">
-          <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden md:flex items-center gap-1">
+          <span className="text-xs text-slate-300 font-medium px-1.5 hidden md:flex items-center gap-1">
             <Camera className="h-3.5 w-3.5 text-teal-400" />
             <span>Góc nhìn:</span>
           </span>
@@ -1192,7 +1196,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("ISOMETRIC");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
               cameraPreset === "ISOMETRIC"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1206,7 +1210,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("INTERIOR");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
               cameraPreset === "INTERIOR"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1220,7 +1224,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("TOP");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
               cameraPreset === "TOP"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1234,7 +1238,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("WALKTHROUGH");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               cameraPreset === "WALKTHROUGH"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1249,7 +1253,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("SAFETY");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               cameraPreset === "SAFETY"
                 ? "bg-rose-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1264,7 +1268,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("COMPARISON");
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               cameraPreset === "COMPARISON"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1279,7 +1283,7 @@ export const RoomCanvas: React.FC = () => {
               if (cameraPreset === "WALKTHROUGH") setCameraPreset("ISOMETRIC");
               setShowWheelchair((v) => !v);
             }}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               showWheelchair
                 ? "bg-emerald-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1293,7 +1297,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={showSourceCompare}
             onClick={() => setShowSourceCompare((v) => !v)}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               showSourceCompare
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1305,7 +1309,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={handleFitRoom}
-            className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition flex items-center gap-1"
+            className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1"
             title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
           >
             <Maximize2 className="h-3 w-3" />
@@ -1313,7 +1317,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={handleScreenshot}
-            className="px-2 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-sm"
+            className="px-2 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
             title="Chụp ảnh khung nhìn 3D hiện tại (PNG)"
           >
             <Camera className="h-3 w-3" />
@@ -1334,7 +1338,7 @@ export const RoomCanvas: React.FC = () => {
               }
               className="rounded text-rose-500 focus:ring-rose-400 h-3.5 w-3.5"
             />
-            <span className="text-[11px] font-medium text-rose-300">
+            <span className="text-xs font-medium text-rose-300">
               Cảnh báo nguy cơ
             </span>
           </label>
@@ -1351,7 +1355,7 @@ export const RoomCanvas: React.FC = () => {
               onChange={(e) => setClusterMarkers(e.target.checked)}
               className="rounded text-teal-500 focus:ring-teal-400 h-3.5 w-3.5"
             />
-            <span className="text-[11px] font-medium text-teal-300">
+            <span className="text-xs font-medium text-teal-300">
               Gom cụm chống đè
             </span>
           </label>
@@ -1365,7 +1369,7 @@ export const RoomCanvas: React.FC = () => {
               onChange={(e) => setShowAllLabels(e.target.checked)}
               className="rounded text-sky-500 focus:ring-sky-400 h-3.5 w-3.5"
             />
-            <span className="text-[11px] font-medium text-slate-300">
+            <span className="text-xs font-medium text-slate-300">
               Tên đồ vật
             </span>
           </label>
@@ -1381,7 +1385,7 @@ export const RoomCanvas: React.FC = () => {
               }
               className="rounded text-emerald-500 focus:ring-emerald-400 h-3.5 w-3.5"
             />
-            <span className="text-[11px] font-medium text-emerald-300">
+            <span className="text-xs font-medium text-emerald-300">
               Hành lang
             </span>
           </label>
@@ -1391,7 +1395,7 @@ export const RoomCanvas: React.FC = () => {
               <span className="text-slate-600">|</span>
               <button
                 onClick={handleFocusSelected}
-                className="flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 transition"
+                className="flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition"
               >
                 <Focus className="h-3 w-3" />
                 <span>Focus vật thể</span>
@@ -1401,15 +1405,15 @@ export const RoomCanvas: React.FC = () => {
         </div>
 
         {/* Legend */}
-        <div className="bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto text-[11px] text-slate-300 flex items-center gap-3 hidden sm:flex shadow-lg">
+        <div className="bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto text-xs text-slate-300 flex items-center gap-3 hidden sm:flex shadow-lg">
           <span className="flex items-center gap-1">
-            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-600 text-[9px] font-black text-white">
+            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-600 text-xs font-black text-white">
               H
             </span>
             <span className="font-semibold text-rose-400">Nguy cơ cao</span>
           </span>
           <span className="flex items-center gap-1">
-            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-[9px] font-black text-white">
+            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-xs font-black text-white">
               H
             </span>
             <span>Cần lưu ý</span>
