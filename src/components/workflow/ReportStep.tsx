@@ -161,7 +161,7 @@ export function ReportStep(props: {
         ))}
       </div>
 
-      <details className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 print:hidden" open={!props.verified} data-testid="verified-panel">
+      <details className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 print:hidden" open data-testid="verified-panel">
         <summary className="text-xs font-bold text-emerald-900 cursor-pointer">Tôi đã sửa ngoài thực tế (khai báo để tạo trạng thái &quot;Đã xác minh thực tế&quot;)</summary>
         <div className="mt-3 space-y-3 text-xs">
           <p className="text-slate-600">Chỉ khai báo những gì đã làm thật. Độ rộng lối đi và độ rọi đêm của hiện trạng <strong>không được mang sang</strong>: hãy đo/xác nhận lại sau khi sửa, nếu không hệ thống sẽ ghi &quot;chưa đo&quot; và không kết luận.</p>

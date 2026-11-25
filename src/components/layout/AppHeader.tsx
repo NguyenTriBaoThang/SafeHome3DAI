@@ -98,7 +98,7 @@ export const AppHeader: React.FC = () => {
         ) : null}
 
         {/* Real-time Status Badges & Quick Action Controls */}
-        {isPhotoVision || isPhotoDraft || status.kind === "none" ? (
+        {isPhotoVision || status.kind === "none" ? (
           <div
             data-testid="header-status-none"
             className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[10px] sm:text-xs text-amber-800 font-semibold"

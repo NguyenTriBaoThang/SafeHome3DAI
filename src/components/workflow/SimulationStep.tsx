@@ -79,7 +79,7 @@ export function SimulationStep(props: {
               {card.screeningScore == null ? (
                 <span className="text-amber-300">chưa thể đánh giá đầy đủ ({card.unknownCount} quy tắc thiếu dữ liệu)</span>
               ) : (
-                <span>chỉ số sàng lọc mô phỏng {card.screeningScore}/100</span>
+                <span>chỉ số sàng lọc mô phỏng {card.screeningScore}/100 (giả lập, không phải xác nhận an toàn)</span>
               )}
               <span className="ml-2 text-[10px] font-mono text-slate-400">rev {card.revision}</span>
             </div>

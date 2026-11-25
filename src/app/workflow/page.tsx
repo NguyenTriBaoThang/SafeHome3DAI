@@ -74,7 +74,7 @@ const WORKFLOW_STEPS = [
   { step: 1, id: "PROFILE", title: "1. Hồ sơ khảo sát", desc: "Thông tin gia đình & phòng" },
   { step: 2, id: "COLLECTION", title: "2. Thu thập dữ liệu", desc: "Kích thước & checklist nguy cơ" },
   { step: 3, id: "VISION", title: "3. Thị giác AI", desc: "Nhận diện & kiểm định không gian" },
-  { step: 4, id: "DIGITAL_TWIN", title: "4. Bản sao số 3D", desc: "Dựng hình & tương tác vật thể" },
+  { step: 4, id: "DIGITAL_TWIN", title: "4. Mô hình phòng", desc: "Mô phỏng gần đúng & tương tác vật thể" },
   { step: 5, id: "ASSESSMENT", title: "5. Đánh giá nguy cơ", desc: "8 Quy tắc an toàn & XAI" },
   { step: 6, id: "SIMULATION", title: "6. Mô phỏng cải thiện", desc: "Thử nghiệm can thiệp & What-if" },
   { step: 7, id: "REPORT", title: "7. Kế hoạch & Báo cáo", desc: "So sánh Trước/Sau & Xuất PDF" },

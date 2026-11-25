@@ -143,11 +143,11 @@ export function buildAssessmentInput(d: WorkflowDraft, nowIso: string) {
     rugs:
       c.looseRug == null
         ? { present: null, items: [] }
-        : { present: c.looseRug, items: c.looseRug ? [{ id: rugObj?.id ?? "rug-reported", name: "Thảm sàn (người dùng khai báo)", location: "lối đi", isSecured: false, edgesCurled: true, inWalkway: true }] : [] },
+        : { present: c.looseRug, items: c.looseRug ? [{ id: rugObj?.id ?? "rug-reported", name: "Thảm sàn", location: "lối đi", isSecured: false, edgesCurled: true, inWalkway: true }] : [] },
     cables:
       c.cablesOnWalkway == null
         ? { crossingWalkway: null, items: [] }
-        : { crossingWalkway: c.cablesOnWalkway, items: c.cablesOnWalkway ? [{ id: cableObj?.id ?? "cable-reported", name: "Dây điện (người dùng khai báo)", location: "lối đi", crossesWalkway: true, hasCordCover: false, hasSkirtingTrunking: false }] : [] },
+        : { crossingWalkway: c.cablesOnWalkway, items: c.cablesOnWalkway ? [{ id: cableObj?.id ?? "cable-reported", name: "Dây điện", location: "lối đi", crossesWalkway: true, hasCordCover: false, hasSkirtingTrunking: false }] : [] },
     obstacles: { present: walkway != null ? walkway < 0.85 : null, walkwayClearWidthM: walkway, items: [] },
     grabBars:
       c.missingGrabBar == null
