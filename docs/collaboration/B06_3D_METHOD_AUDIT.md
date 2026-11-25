@@ -91,3 +91,7 @@ Chưa làm: lưu `det → obj` trong snapshot A11 (cần A).
 - Đường nhập `measured` (dụng cụ) cho từng vật/phòng trong UI chưa có.
 - Chưa có kiểm tra va chạm giữa vật thể với nhau ngoài tách chồng lấn heuristic; vật xoay không vuông góc dùng AABB nên kiểm tra hơi rộng.
 - Chiều cao đèn bàn không có parent (không có nơi đỡ) đặt xuống sàn.
+
+## 8. Ảnh chụp B07 (chỉ dùng `public/reference/reference_room.jpg`)
+
+`docs/collaboration/b07-screenshots/DEMO_*`: bước 3 với bbox Gemini thật (1440, 375); cảnh phòng ngủ dựng từ 6 vật thể đã chấp nhận; phòng mẫu phòng ngủ/phòng tắm trước (`*_before`) và sau (`*_after`) khi sửa, góc cao và tầm mắt. Ảnh tham chiếu là một ảnh ghép (ảnh thật bên trái, ảnh dựng minh họa bên phải), nên bbox chỉ khớp ở nửa trái. Không chụp bước nào bằng ảnh riêng tư.
