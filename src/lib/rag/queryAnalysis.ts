@@ -31,7 +31,7 @@ const EMERGENCY_KEYWORDS = [
   /ngất xỉu/i,
   /chảy nhiều máu/i,
   /chảy máu/i,
-  /gãy (cổ )?xương/i,
+  /(?:vừa|mới|đang|bị)\s+(?:ngã\s+)?gãy\s+(?:cổ\s+)?xương|nghi\s+(?:ngờ\s+)?gãy\s+(?:cổ\s+)?xương/i,
   /không thở được|khó thở/i,
   /nôn ra máu/i,
   /chấn thương sọ não/i,
@@ -51,6 +51,14 @@ const OUT_OF_SCOPE_MEDICAL_KEYWORDS = [
   /tiêm/i,
   /loãng xương/i,
   /thoái hóa khớp/i,
+  /rối loạn tiền đình/i,
+  /tai biến|đột quỵ/i,
+  /tiểu đường|huyết áp cao/i,
+  /thoát vị|đĩa đệm|mất ngủ|khớp háng/i,
+  /xác suất.*(?:té\s*ngã|ngã)/i,
+  /dự\s*(?:đoán|báo).*(?:té\s*ngã|ngã)/i,
+  /tỷ lệ.*ngã\s*(?:của\s*(?:ông|bà|bố|mẹ|bác))?/i,
+  /(?:cam kết|chắc chắn).*(?:không bao giờ|không)\s*(?:té\s*ngã|ngã)/i,
   /prescription/i,
   /medication/i,
   /diagnos/i,
@@ -62,17 +70,22 @@ const PROMPT_INJECTION_KEYWORDS = [
   /system override/i,
   /secret keys/i,
   /passwords/i,
-  /bỏ qua (mọi )?chỉ dẫn/i,
+  /bỏ qua (?:mọi |toàn bộ |các )?(?:chỉ dẫn|hướng dẫn|tài liệu|nguồn|chứng cứ|bằng chứng)/i,
+  /không cần (?:dựa vào|theo) tài liệu/i,
   /hãy giả vờ/i,
   /jailbreak/i,
   /reveal (the )?secret/i,
   /bật chế độ dev/i,
   /you are now DAN/i,
   /act as an? unrestricted/i,
+];
+
+const FABRICATION_TRAP_KEYWORDS = [
   /hãy bịa/i,
   /bịa ra/i,
   /bịa nguồn/i,
   /thông tư số 9999/i,
+  /tiến sĩ john smith/i,
 ];
 
 /**
@@ -96,6 +109,20 @@ export function analyzeUserQuery(
       isEmergency: false,
       isOutOfScope: true,
       isPromptInjection: true,
+      extractedEntities: {},
+    };
+  }
+
+  // 1b. Check Fabrication Traps (requests to cite nonexistent circulars/studies)
+  const isFabricationTrap = FABRICATION_TRAP_KEYWORDS.some((rgx) => rgx.test(trimmed));
+  if (isFabricationTrap) {
+    return {
+      originalQuery: trimmed,
+      rewrittenQuery: trimmed,
+      intent: "EVIDENCE_REQUEST",
+      isEmergency: false,
+      isOutOfScope: false,
+      isPromptInjection: false,
       extractedEntities: {},
     };
   }

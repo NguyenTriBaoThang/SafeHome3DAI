@@ -8,6 +8,7 @@ import {
 import { verifyAndFormatCitations } from "./citationVerifier";
 import { buildDocumentVersionAuditTrail } from "./documentRegistry";
 import { inspectAndSanitizeUntrustedText } from "@/lib/security/promptInjectionGuard";
+import { applySafetyResponseGuardrails } from "./responseGuardrails";
 
 export interface GeneratorContext {
   query: string;
@@ -15,6 +16,7 @@ export interface GeneratorContext {
   intent: UserIntent;
   evaluation: SufficiencyEvaluationResult;
   retrievedChunks: RetrievedChunk[];
+  isPromptInjection?: boolean;
   roomContext?: {
     evidenceStatus?: "PHOTO_DRAFT" | "DEMO";
     roomId?: string;
@@ -73,17 +75,51 @@ export async function generateGroundedAnswer(
     };
   }
 
-  // 2. OUT_OF_SCOPE Medical Response
-  if (evaluation.isOutOfScope || intent === "OUT_OF_SCOPE_MEDICAL") {
-    const outOfScopeAnswer = `Tôi hiểu bạn đang quan tâm đến sức khỏe của người thân, tuy nhiên **SafeHome Copilot là trợ lý chuyên sâu về an toàn môi trường vật lý và phòng ngừa té ngã trong nhà**, không có thẩm quyền chẩn đoán bệnh lý hoặc hướng dẫn dùng thuốc.\n\nViệc sử dụng các loại thuốc điều trị (đặc biệt là thuốc hạ huyết áp, an thần, giãn cơ) có thể gây tác dụng phụ chóng mặt hoặc hạ huyết áp tư thế, làm tăng nguy cơ ngã [1]. Bạn vui lòng tham vấn trực tiếp bác sĩ điều trị hoặc dược sĩ để được kê đơn và chỉ định liều lượng chính xác.${MEDICAL_DISCLAIMER}`;
+  // 2. OUT_OF_SCOPE Medical / Fall Probability Prediction / Prompt Injection Guard Response
+  const injectionCheck = inspectAndSanitizeUntrustedText(query, 300);
+  if (ctx.isPromptInjection || injectionCheck.isInjection) {
+    const injectionRefusalRaw = `SafeHome Copilot **từ chối thực hiện yêu cầu ngoài phạm vi hoặc có dấu hiệu yêu cầu bỏ qua nguồn tài liệu kiểm chứng**. Dữ liệu đầu vào của người dùng luôn được tách biệt khỏi chỉ dẫn hệ thống; tôi chỉ tham chiếu các tài liệu đã được thẩm định (WHO, CDC, Bộ Y tế, NCOA) và không đưa ra khẳng định an toàn tuyệt đối hay bịa đặt nguồn.${MEDICAL_DISCLAIMER}`;
+    const guarded = applySafetyResponseGuardrails(injectionRefusalRaw, {
+      evidenceStatus: "OUT_OF_SCOPE",
+      isOutOfScope: true,
+      isPromptInjection: true,
+    });
+    return {
+      answer: guarded.safeAnswer,
+      evidenceStatus: "OUT_OF_SCOPE",
+      responseMode: "REFUSAL_INSUFFICIENT",
+      citations: [],
+      retrievedChunkIds: [],
+      modelProvider: "safety-guardrail",
+      modelName: "prompt-injection-guard",
+      suggestedFollowUps: [
+        "Theo WHO, thảm trải sàn không cố định gây nguy hiểm như thế nào?",
+        "Nhà vệ sinh nên lắp thanh vịn ở độ cao bao nhiêu?",
+      ],
+      warnings: ["Phát hiện mẫu can thiệp hệ thống/bỏ qua tài liệu - đã cách ly và từ chối an toàn."],
+      sourceSupportMap: [],
+      documentAuditTrail: [],
+      evidenceBreakdown: {
+        documentRecommendations: [],
+        selfReportedSituationNotes: ["Nội dung đầu vào chứa chỉ dẫn can thiệp bị cách ly (untrusted data)."],
+      },
+    };
+  }
 
-    const { verifiedAnswer, citations } = verifyAndFormatCitations(
+  if (evaluation.isOutOfScope || intent === "OUT_OF_SCOPE_MEDICAL") {
+    const outOfScopeAnswer = `Tôi hiểu bạn đang quan tâm đến sức khỏe của người thân, tuy nhiên **SafeHome Copilot là trợ lý sàng lọc an toàn môi trường vật lý và phòng ngừa té ngã trong nhà**, **không có thẩm quyền chẩn đoán bệnh lý, kê đơn/chỉnh liều thuốc, dự báo xác suất té ngã cá nhân hay cam kết loại bỏ hoàn toàn rủi ro**.\n\nViệc sử dụng nhiều thuốc điều trị (đặc biệt thuốc an thần, hạ huyết áp) có thể gây tác dụng phụ chóng mặt làm tăng nguy cơ ngã [1]. Bạn vui lòng đưa người thân đi khám và tham vấn trực tiếp bác sĩ điều trị hoặc dược sĩ chuyên khoa để được đánh giá lâm sàng chính xác.${MEDICAL_DISCLAIMER}`;
+
+    const { verifiedAnswer, citations, sourceSupportMap } = verifyAndFormatCitations(
       outOfScopeAnswer,
       retrievedChunks
     );
+    const guarded = applySafetyResponseGuardrails(verifiedAnswer, {
+      evidenceStatus: "OUT_OF_SCOPE",
+      isOutOfScope: true,
+    });
 
     return {
-      answer: verifiedAnswer,
+      answer: guarded.safeAnswer,
       evidenceStatus: "OUT_OF_SCOPE",
       responseMode: "REFUSAL_INSUFFICIENT",
       citations,
@@ -91,10 +127,14 @@ export async function generateGroundedAnswer(
       modelProvider: "safety-guardrail",
       modelName: "medical-scope-guard",
       suggestedFollowUps: [
-        "Những loại thuốc nào có thể làm tăng nguy cơ té ngã ở người già?",
+        "Những yếu tố môi trường nào dễ gây té ngã trong phòng ngủ?",
         "Làm thế nào để cải thiện ánh sáng và lối đi an toàn trong nhà?",
       ],
-      warnings: ["Câu hỏi liên quan đến thuốc/chẩn đoán y tế - đã từ chối an toàn."],
+      warnings: [
+        "Câu hỏi liên quan đến chẩn đoán y tế / thuốc / dự báo xác suất té ngã - đã từ chối an toàn.",
+        ...guarded.triggeredGuardrails,
+      ],
+      sourceSupportMap,
       documentAuditTrail: buildDocumentVersionAuditTrail(
         retrievedChunks,
         citations.map((c) => c.chunkId)
@@ -104,7 +144,7 @@ export async function generateGroundedAnswer(
           "Việc kiểm tra nhà ở cần kết hợp tham vấn bác sĩ về tác dụng phụ thuốc gây chóng mặt/hạ áp tư thế.",
         ],
         selfReportedSituationNotes: [
-          "Yêu cầu liên quan đến thuốc hoặc chẩn đoán y khoa cá nhân nằm ngoài phạm vi đánh giá không gian vật lý.",
+          "Yêu cầu chẩn đoán bệnh, kê đơn thuốc hoặc dự báo xác suất té ngã cá nhân nằm ngoài phạm vi tư vấn môi trường vật lý.",
         ],
       },
     };
@@ -181,6 +221,16 @@ function generateDeterministicGroundedAnswer(
   const c2 = retrievedChunks[1]?.citationIndex ?? c1;
   const docRecommendations: string[] = [];
   const selfReportedNotes: string[] = [];
+
+  // Helper: find exact citation index whose sectionTitle + chunkText actually supports the terms
+  const findExactChunkIndex = (terms: string[]): number | null => {
+    const match = retrievedChunks.find((chunk) => {
+      const hay = `${chunk.sectionTitle} ${chunk.chunkText}`.toLowerCase();
+      return terms.some((t) => hay.includes(t.toLowerCase()));
+    });
+    return match?.citationIndex ?? null;
+  };
+  const findCitationFor = (terms: string[]): number => findExactChunkIndex(terms) ?? c1;
 
   let body = "";
   const suggestedFollowUps: string[] = [];
@@ -259,9 +309,11 @@ function generateDeterministicGroundedAnswer(
       qLower.includes("chọn tay") ||
       qLower.includes("làm bằng gì"))
   ) {
+    const citeGrabWho = findCitationFor(["150 kg", "phòng tắm"]);
+    const citeGrabByt = findExactChunkIndex(["hạ huyết áp tư thế", "thanh tay vịn hình chữ L"]);
     body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (Bộ Y tế Việt Nam, WHO & CDC STEADI):**\n\n`;
-    body += `- Cần lắp thanh vịn chịu tải tối thiểu **150 kg** tại vị trí bồn cầu và khu vực tắm vòi sen ở độ cao **80 đến 90 cm** so với mặt sàn phòng tắm [${c1}].\n`;
-    body += `- **Inox 304 có vân sần / phay xước ma sát** hoặc **lõi thép bọc Nylon/ABS kháng khuẩn** giúp bám tay chắc chắn trong môi trường sàn ướt và phòng ngừa ngã quỵ do hạ huyết áp tư thế [${c2}].\n`;
+    body += `- Cần lắp thanh vịn chịu tải tối thiểu **150 kg** tại vị trí bồn cầu và khu vực tắm vòi sen ở độ cao **80 đến 90 cm** so với mặt sàn phòng tắm [${citeGrabWho}].\n`;
+    body += `- Nên chọn **Inox 304 có vân sần / phay xước ma sát** hoặc **lõi thép bọc Nylon/ABS kháng khuẩn** để bám chắc trong môi trường sàn ướt${citeGrabByt ? `, hỗ trợ điểm tựa đứng lên tránh hạ huyết áp tư thế [${citeGrabByt}]` : ""}.\n`;
     body += `- Tuyệt đối **tránh thanh vịn giác hút chân không**, kim loại trơn bóng hoặc ống mỏng không khoan bắt vít chịu lực vào tường gạch đặc.\n`;
     body += `- Kích thước tham khảo: đường kính thanh 32 - 38 mm, cách tường khoảng 38 mm, bắt vít nở inox chịu tải 150 - 250 kg.\n`;
 
@@ -281,10 +333,12 @@ function generateDeterministicGroundedAnswer(
       qLower.includes("lắp đặt") ||
       qLower.includes("lắp như thế nào"))
   ) {
+    const citeGrabWho = findCitationFor(["150 kg", "phòng tắm"]);
+    const citeGrabByt = findExactChunkIndex(["hạ huyết áp tư thế", "thanh tay vịn hình chữ L"]);
     body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (Bộ Y tế Việt Nam & WHO):**\n\n`;
-    body += `Phòng tắm là nơi xảy ra hơn 60% các ca ngã nghiêm trọng; vị trí lắp thanh vịn cần bố trí đúng các điểm tựa [${c1}]:\n\n`;
-    body += `1. **Cạnh bồn cầu:** Lắp thanh vịn chữ L hoặc thanh ngang ở độ cao 80 - 90 cm để giảm tải khớp gối khi đứng lên, phòng ngừa hạ huyết áp tư thế [${c2}].\n`;
-    body += `2. **Khu vực buồng tắm / vòi sen:** Lắp thanh thẳng đứng tại lối bước vào và thanh ngang chịu tải tối thiểu 150 kg ở độ cao 80 - 90 cm [${c1}].\n`;
+    body += `Phòng tắm là nơi xảy ra hơn 60% các ca ngã nghiêm trọng; vị trí lắp thanh vịn cần bố trí đúng các điểm tựa [${citeGrabWho}]:\n\n`;
+    body += `1. **Cạnh bồn cầu:** Lắp thanh vịn chữ L hoặc thanh ngang ở độ cao 80 - 90 cm để làm điểm tựa chắc chắn khi đứng lên${citeGrabByt ? `, phòng ngừa hạ huyết áp tư thế [${citeGrabByt}]` : ` [${citeGrabWho}]`}.\n`;
+    body += `2. **Khu vực buồng tắm / vòi sen:** Lắp thanh thẳng đứng tại lối bước vào và thanh ngang chịu tải tối thiểu 150 kg ở độ cao 80 - 90 cm [${citeGrabWho}].\n`;
     docRecommendations.push("Lắp thanh tay vịn chữ L hoặc thanh ngang cạnh bồn cầu và vòi sen (80-90 cm, tải >= 150 kg).");
 
     suggestedFollowUps.push("Nên chọn thanh vịn chất liệu gì cho nhà tắm?");
@@ -337,11 +391,15 @@ function generateDeterministicGroundedAnswer(
 
   // 5. INTENT: RUG / MAT FALL PREVENTION
   else if (qLower.includes("thảm") || qLower.includes("rug") || qLower.includes("mép thảm")) {
+    const citeWhoRug = findCitationFor(["nếp gấp", "băng dính hai mặt", "non-slip underlay"]);
+    const citeNcoaRug = findExactChunkIndex(["39%", "sửa chữa nhà ở đơn giản"]);
     body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (WHO & NCOA):**\n\n`;
-    body += `Thảm trải sàn không được cố định chặt và các nếp gấp của thảm là nguyên nhân hàng đầu gây vấp ngã ở người cao tuổi tại nhà [${c1}]:\n\n`;
-    body += `1. Loại bỏ các tấm thảm nhỏ không cố định khỏi lối đi chính [${c1}].\n`;
-    body += `2. Sử dụng băng dính hai mặt chuyên dụng hoặc lớp lót chống trượt (non-slip underlay) để dán cố định các mép thảm [${c1}].\n`;
-    body += `3. Can thiệp sửa chữa nhà ở đơn giản (như dán băng dính chống trượt mép thảm, gom dây điện) có thể giúp giảm nguy cơ ngã tới 39% ở người có tiền sử ngã [${c2}].\n`;
+    body += `Thảm trải sàn không được cố định chặt và các nếp gấp của thảm là nguyên nhân hàng đầu gây vấp ngã ở người cao tuổi tại nhà [${citeWhoRug}]:\n\n`;
+    body += `1. Loại bỏ các tấm thảm nhỏ không cố định khỏi lối đi chính [${citeWhoRug}].\n`;
+    body += `2. Sử dụng băng dính hai mặt chuyên dụng hoặc lớp lót chống trượt (non-slip underlay) để dán cố định các mép thảm [${citeWhoRug}].\n`;
+    if (citeNcoaRug) {
+      body += `3. Can thiệp sửa chữa nhà ở đơn giản (như dán băng dính chống trượt mép thảm, gom dây điện) có thể giúp giảm nguy cơ ngã tới 39% ở người có tiền sử ngã [${citeNcoaRug}].\n`;
+    }
     docRecommendations.push("Loại bỏ thảm nhỏ rời hoặc dán cố định mép thảm bằng băng dính hai mặt/lớp lót chống trượt.");
 
     suggestedFollowUps.push("Cách nhận biết thảm trải sàn không đảm bảo an toàn?");
@@ -351,11 +409,17 @@ function generateDeterministicGroundedAnswer(
 
   // 6. INTENT: LIGHTING & NIGHT ILLUMINATION
   else if (qLower.includes("sáng") || qLower.includes("đèn") || qLower.includes("lux") || qLower.includes("đêm")) {
+    const citeLightWho = findCitationFor(["150 đến 200", "30-50 lux", "thích ứng sáng - tối"]);
+    const citeSwitchByt = findExactChunkIndex(["công tắc đèn", "cảm ứng chuyển động"]);
     body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (WHO & Bộ Y tế Việt Nam):**\n\n`;
-    body += `Thị lực của người cao tuổi giảm tốc độ thích ứng sáng - tối chậm hơn gấp 3 lần so với người trẻ [${c1}]:\n\n`;
-    body += `1. **Độ rọi ban ngày:** Duy trì tối thiểu từ **150 đến 200 lux** dọc lối đi từ giường ngủ đến nhà vệ sinh [${c1}].\n`;
-    body += `2. **Chiếu sáng ban đêm:** Bố trí đèn ngủ ban đêm dịu nhẹ **30 - 50 lux** dọc chân tường để tránh lóa mắt [${c1}].\n`;
-    body += `3. **Công tắc đèn:** Bố trí công tắc ngang tầm với ngay cửa vào hoặc gắn cảm ứng chuyển động [${c2}].\n`;
+    body += `Thị lực của người cao tuổi giảm tốc độ thích ứng sáng - tối chậm hơn gấp 3 lần so với người trẻ [${citeLightWho}]:\n\n`;
+    body += `1. **Độ rọi ban ngày:** Duy trì tối thiểu từ **150 đến 200 lux** dọc lối đi từ giường ngủ đến nhà vệ sinh [${citeLightWho}].\n`;
+    body += `2. **Chiếu sáng ban đêm:** Bố trí đèn ngủ ban đêm dịu nhẹ **30 - 50 lux** dọc chân tường để tránh lóa mắt [${citeLightWho}].\n`;
+    if (citeSwitchByt) {
+      body += `3. **Công tắc đèn:** Bố trí công tắc ngang tầm với ngay cửa vào hoặc gắn cảm ứng chuyển động [${citeSwitchByt}].\n`;
+    } else {
+      body += `3. **Công tắc đèn (gợi ý thực hành):** Đặt công tắc ở vị trí dễ với ngay cửa ra vào phòng ngủ và nhà vệ sinh.\n`;
+    }
     docRecommendations.push("Duy trì 150-200 lux ban ngày, 30-50 lux ban đêm và bố trí công tắc cảm ứng ngang tầm với.");
 
     suggestedFollowUps.push("Tại sao người già cần ánh sáng dịu hơn thay vì đèn quá chói?");
@@ -365,9 +429,12 @@ function generateDeterministicGroundedAnswer(
 
   // 7. INTENT: CABLES & WALKWAY CLEARANCE
   else if (qLower.includes("dây") || qLower.includes("cáp") || qLower.includes("lối đi") || qLower.includes("thông thủy")) {
+    const citeWalkwayCdc = findCitationFor(["80 cm đến 90 cm", "thông thủy"]);
+    const citeCableNcoa = findExactChunkIndex(["máng luồn dây", "dây cáp điện"]);
+    const citeCableFallback = citeCableNcoa ?? citeWalkwayCdc;
     body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (CDC STEADI & WHO):**\n\n`;
-    body += `1. **Độ rộng thông thủy lối đi:** Duy trì chiều rộng tối thiểu **80 cm đến 90 cm** để người cao tuổi sử dụng gậy hoặc khung tập đi an toàn [${c1}].\n`;
-    body += `2. **Xử lý dây điện:** Không để dây điện kéo dài, ổ cắm phụ hay đồ lộn xộn cắt ngang lối đi từ phòng ngủ sang nhà vệ sinh/bếp; cần gom gọn vào máng luồn dây sát tường [${c2}].\n`;
+    body += `1. **Độ rộng thông thủy lối đi:** Duy trì chiều rộng tối thiểu **80 cm đến 90 cm** để người cao tuổi sử dụng gậy hoặc khung tập đi an toàn [${citeWalkwayCdc}].\n`;
+    body += `2. **Xử lý dây điện:** Không để dây điện kéo dài, ổ cắm phụ hay đồ lộn xộn cắt ngang lối đi từ phòng ngủ sang nhà vệ sinh/bếp; cần thu gom dây điện khỏi mặt sàn [${citeCableFallback}].\n`;
     docRecommendations.push("Giữ lối đi rộng tối thiểu 80-90 cm và thu gọn dây điện khỏi mặt sàn.");
 
     suggestedFollowUps.push("Kích thước thông thủy tối thiểu theo tiêu chuẩn CDC là bao nhiêu?");
@@ -437,6 +504,12 @@ function generateDeterministicGroundedAnswer(
     retrievedChunks
   );
 
+  const guarded = applySafetyResponseGuardrails(verifiedAnswer, {
+    evidenceStatus: evaluation.status,
+    isOutOfScope: false,
+    isEmergency: false,
+  });
+
   const usedChunkIds = citations.map((c) => c.chunkId);
   const evidenceBreakdown: EvidenceSectionBreakdown = {
     documentRecommendations: docRecommendations,
@@ -444,7 +517,7 @@ function generateDeterministicGroundedAnswer(
   };
 
   return {
-    answer: verifiedAnswer,
+    answer: guarded.safeAnswer,
     evidenceStatus: evaluation.status,
     responseMode: "LOCAL_GROUNDED",
     citations,
@@ -452,7 +525,7 @@ function generateDeterministicGroundedAnswer(
     modelProvider: "SafeHome-LocalRAG",
     modelName: "curated-evidence-engine-v2",
     suggestedFollowUps: suggestedFollowUps.slice(0, 3),
-    warnings,
+    warnings: [...warnings, ...guarded.triggeredGuardrails],
     sourceSupportMap,
     documentAuditTrail: buildDocumentVersionAuditTrail(retrievedChunks, usedChunkIds),
     evidenceBreakdown,

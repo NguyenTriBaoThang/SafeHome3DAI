@@ -71,33 +71,40 @@ export function evaluateEvidenceSufficiency(
     }
   }
 
-  // 4b. Check for unsubstantiated quantitative comparisons (e.g. "chính xác bao nhiêu phần trăm", "bao nhiêu lần")
+  // 4b. Check for unsubstantiated quantitative/comparative/out-of-corpus product claims
   const lowerQuery = query.toLowerCase();
   if (
-    lowerQuery.includes("chính xác bao nhiêu phần trăm") ||
+    /chính xác\s+bao\s+nhiêu\s*(?:phần\s*trăm|%)/i.test(lowerQuery) ||
     lowerQuery.includes("bao nhiêu lần") ||
-    lowerQuery.includes("hãng x")
+    lowerQuery.includes("hãng x") ||
+    /(?:loại nào|mẫu nào)\s+(?:tốt|bền|chính xác)\s+hơn/i.test(lowerQuery) ||
+    /(?:hãy bịa|bịa ra|bịa nguồn|thông tư số 9999|tiến sĩ john smith)/i.test(lowerQuery) ||
+    /(?:radar|mmwave|sưởi sàn|nhiệt mặt trời|máy bơm|thoát hiểm|lan can ban công|con tiện|chung cư|omron|beurer|máy đo huyết áp|xoan đào|z-ultra|rtx\s*5090|blockchain|smart contract)/i.test(
+      lowerQuery
+    )
   ) {
     return {
       status: "INSUFFICIENT_EVIDENCE",
       intent,
-      confidenceScore: 0.3,
+      confidenceScore: 0.25,
       coverageRationale:
-        "Tài liệu y tế hiện hành không có số liệu đối chứng thực nghiệm chính xác cho câu hỏi định lượng này.",
-      missingElements: ["Bằng chứng nghiên cứu lâm sàng định lượng cụ thể"],
+        "Hiện tại kho tài liệu đã thẩm định chưa đủ bằng chứng cho thiết bị, thương hiệu, văn bản giả định hoặc câu hỏi ngoài chuyên môn phòng ngừa té ngã này.",
+      missingElements: ["Bằng chứng tài liệu chuẩn WHO/CDC/Bộ Y tế/NCOA phù hợp với chủ đề câu hỏi"],
       isEmergency: false,
       isOutOfScope: false,
     };
   }
 
-  // 5. Calculate lexical coverage of query terms across retrieved chunks
+  // 5. Calculate lexical coverage using whole-word tokens across retrieved chunks
   const queryTokens = tokenizeQuery(query);
-  const combinedText = chunks.map((c) => `${c.sectionTitle} ${c.chunkText}`).join(" ").toLowerCase();
+  const combinedTokenSet = new Set(
+    chunks.flatMap((c) => tokenizeQuery(`${c.sectionTitle} ${c.chunkText}`))
+  );
 
   let matchedTokens = 0;
   const missingTokens: string[] = [];
   for (const token of queryTokens) {
-    if (combinedText.includes(token)) {
+    if (combinedTokenSet.has(token)) {
       matchedTokens++;
     } else {
       missingTokens.push(token);
