@@ -36,8 +36,14 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Run CI Quality Gates (Secrets, Migrations, Contract & Auth)
+        run: npm run qa:gates
+
       - name: TypeScript typecheck
         run: npx tsc --noEmit
+
+      - name: Run Vietnamese 40Q RAG & Guardrail Benchmark (Offline)
+        run: npm run eval:rag:a09
 
       - name: Vision provider contracts (offline, no database setup)
         run: npm run test:vision

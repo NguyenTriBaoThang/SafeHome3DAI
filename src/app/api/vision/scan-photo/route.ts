@@ -31,11 +31,26 @@ async function POSTHandler(request: Request) {
         chunks.push(value);
       }
     } finally { reader.releaseLock(); }
+    const buffer = Buffer.concat(chunks);
+    const validation = validateImageBuffer(buffer);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { error: validation.errorMessage || "Dữ liệu ảnh không hợp lệ.", code: "INVALID_IMAGE" },
+        { status: 400 }
+      );
+    }
     const requestedRoomType = new URL(request.url).searchParams.get("roomType");
     const roomType = requestedRoomType && ["BEDROOM", "BATHROOM", "LIVING_ROOM"].includes(requestedRoomType)
       ? (requestedRoomType as "BEDROOM" | "BATHROOM" | "LIVING_ROOM")
       : undefined;
-    const result = await createVisionProvider().analyze(Buffer.concat(chunks), undefined, roomType ? { roomType } : {});
+    const provider = createVisionProvider();
+    const consentHeader = request.headers.get("X-SafeHome-Consent") === "true";
+    await assertConsentForAction({
+      accountId: resolveAccountScopeId(),
+      requiredScope: provider.name === "gemini" ? "third_party_ai" : "image_storage",
+      requestConsentFlag: provider.name === "gemini" ? consentHeader : true,
+    });
+    const result = await provider.analyze(buffer, undefined, roomType ? { roomType } : {});
     return NextResponse.json({ ...result, engine: result.provider === "gemini" ? "GEMINI_VLM" : "LOCAL_FINE_TUNED_DETECTOR" });
   } catch (error) {
     if (error instanceof ConsentRevokedError || error instanceof ConsentRequiredError) {

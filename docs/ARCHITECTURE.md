@@ -7,17 +7,17 @@
 
 ## 1. Executive Summary & Vision
 
-**SafeHome 3D AI** (*Nhà an toàn, tuổi già an tâm*) is an integrated multimodal AI, 3D WebGL digital twin, and clinical decision-support platform dedicated to identifying, visualizing, explaining, and remediating environmental fall hazards in elderly living spaces.
+**SafeHome 3D AI** (*Nhà an toàn, tuổi già an tâm*) is an integrated multimodal AI, 3D WebGL digital twin, and environmental-risk screening platform dedicated to identifying, visualizing, tracing, and supporting remediation of environmental fall hazards in elderly living spaces (*hỗ trợ đánh giá yếu tố môi trường, không phải thiết bị chẩn đoán lâm sàng hay khẳng định giảm tai nạn đã chứng minh*).
 
 According to the World Health Organization (WHO) and the US Centers for Disease Control and Prevention (CDC STEADI), **environmental hazards cause more than 50% of falls in older adults**, leading to fractures, hospitalizations, and severe loss of independence. SafeHome 3D AI transforms traditional static paper checklists into a **closed-loop 7-step digital workflow**:
 
 ```text
 1. Khảo sát thông minh (AI Guided Survey)
-   └── 2. Thị giác máy tính & Thẩm định vật dụng (Multimodal Vision & Item Hazard Assessment)
+   └── 2. Thị giác máy tính & Sàng lọc vật dụng (Multimodal Vision & Item Hazard Screening)
          └── 3. Bản sao số 3D (Photorealistic Digital Twin)
-               └── 4. Đánh giá nguy cơ y khoa (Deterministic Clinical Risk Engine)
+               └── 4. Đánh giá yếu tố môi trường (Deterministic Rule Engine)
                      └── 5. Mô phỏng kịch bản (Interactive What-If Simulation)
-                           └── 6. Phân tích Trước/Sau (Comparative Analytics)
+                           └── 6. Đối chiếu Trước/Sau (Reproducible Snapshot Diff)
                                  └── 7. Báo cáo & Lộ trình (Action Plan & Export)
 ```
 
@@ -163,8 +163,8 @@ flowchart TB
 - **Camera Viewports:** Dollhouse, Eye-level (Tầm mắt người cao tuổi), Top-down floorplan (Mặt bằng 2D), First-person Walkthrough, Fit to screen, and Snapshot export.
 - **Smart Marker Clustering (<0.95m):** Euclidean distance clustering groups adjacent hazards into a single interactive cluster badge, preventing 3D label visual overlap.
 
-### 4.4. Động Cơ Đánh Giá Nguy Cơ Lâm Sàng Tất Định (Deterministic Risk Engine)
-- **Zero Hallucination Guarantee:** Risk scores and hazard findings are computed strictly via deterministic mathematical formulas based on WHO 2021 & CDC STEADI clinical guidelines:
+### 4.4. Động Cơ Đánh Giá Yếu Tố Môi Trường Tất Định (Deterministic Risk Engine)
+- **Zero Hallucination Rule Logic:** Heuristic barrier scores and environmental hazard findings are computed strictly via deterministic mathematical formulas referencing WHO 2021 & CDC STEADI guidelines (thresholds await formal clinical board verification; not clinical diagnosis or fall-probability prediction):
   $$S = \max\left(0, 100 - \sum \text{Penalties}\right)$$
 - **8 Core Clinical Rules:**
   1. `RUG_NO_GRIP` (Penalty: 20 pts)
@@ -185,10 +185,10 @@ flowchart TB
   - **Tab 4 — Thẩm định RAG (Eval):** Live execution of the 8-metric RAG benchmark (Faithfulness, Relevance, Grounding).
 - **Anti-Hallucination Fallback:** When external LLM APIs are unavailable or lack verified medical grounding, the engine activates `Evidence Fallback Active` to ensure complete accuracy without hallucinated statistics.
 
-### 4.6. Giải Trình Quyết Định & Truy Vết Nguồn Gốc (XAI & Audit Trail — `/explainability`)
-- **Causal Graph Visualization:** Powered by `@xyflow/react`, linking:
-  $$\text{Phòng khảo sát} \longrightarrow \text{Vật thể 3D} \longrightarrow \text{Số đo hình học} \longrightarrow \text{Quy chuẩn y tế} \longrightarrow \text{Nguy cơ cảnh báo} \longrightarrow \text{Biện pháp can thiệp}$$
-- **Audit Trail:** Immutable log recording all state transitions, user overrides, timestamps, and clinical rationale.
+### 4.6. Rule-Based Explainability & Decision Provenance (`/explainability`)
+- **Decision Provenance Graph:** Powered by `@xyflow/react`, tracing deterministic rules from room snapshot & input `sourceType` to findings and verified citations *(strictly separated from internal Gemini/LLM model explainability)*:
+  $$\text{Room Snapshot} \longrightarrow \text{Vật thể (objectId)} \longrightarrow \text{Đầu vào (sourceType)} \longrightarrow \text{Quy tắc RISK-XXX} \longrightarrow \text{Nguy cơ} \longrightarrow \text{Nguồn đã duyệt} \longrightarrow \text{Khuyến nghị}$$
+- **Audit Trail:** Immutable snapshot revision & `PersistenceAuditEvent` records (`RuleBasedProvenance`, no fabricated citations when evidence is missing).
 
 ---
 

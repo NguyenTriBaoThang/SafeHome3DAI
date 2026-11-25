@@ -80,13 +80,13 @@ Té ngã là nguyên nhân hàng đầu gây chấn thương tử vong, chấn t
 ### Giải Pháp Đột Phá Của SafeHome 3D AI
 **SafeHome 3D AI** giải quyết triệt để thách thức trên bằng cách chuyển hóa toàn bộ quy trình thành một **chu trình khép kín 7 bước được số hóa hoàn toàn**:
 
-$$\text{Khảo sát AI} \longrightarrow \text{Thị giác AI} \longrightarrow \text{Bản sao số 3D} \longrightarrow \text{Đánh giá nguy cơ y khoa} \longrightarrow \text{Mô phỏng} \longrightarrow \text{So sánh} \longrightarrow \text{Báo cáo}$$
+$$\text{Khảo sát AI} \longrightarrow \text{Thị giác AI} \longrightarrow \text{Bản sao số 3D} \longrightarrow \text{Đánh giá yếu tố môi trường} \longrightarrow \text{Mô phỏng} \longrightarrow \text{Đối chiếu} \longrightarrow \text{Báo cáo}$$
 
 Hệ thống kết hợp:
 1. **Khảo sát thích ứng từng câu hỏi** với thuật toán tỉa nhánh động và hiểu ngôn ngữ tự nhiên tiếng Việt.
-2. **Thị giác máy tính đa tầng**: Quét không gian toàn cảnh phòng (`/ai-vision`) và **Thẩm định rủi ro vật dụng đơn lẻ qua ảnh** (`ItemAssessmentModal`) với điểm số rủi ro, căn cứ y khoa và tọa độ điểm nguy cơ H1..H4 chuẩn CDC STEADI.
+2. **Thị giác máy tính đa tầng**: Quét không gian toàn cảnh phòng (`/ai-vision`) và **Hỗ trợ đánh giá yếu tố nguy cơ vật dụng qua ảnh** (`ItemAssessmentModal`) tham chiếu tiêu chuẩn CDC STEADI (các điểm H1..H4 chỉ mang tính tham chiếu môi trường, không thay thế đánh giá y khoa).
 3. **Bản sao số 3D WebGL (Three.js)** với không gian kiến trúc photorealistic dollhouse, mô phỏng ánh sáng động (0 - 520 Lux), ma sát mặt sàn (sàn ướt/khô ráo) và thuật toán gom cụm nhãn thông minh (<0.95m).
-4. **Động cơ luật đánh giá nguy cơ (Deterministic Clinical Rules)** tham chiếu WHO 2021 & CDC STEADI. Kết quả phụ thuộc dữ liệu đầu vào đã được xác nhận; ảnh đơn chưa đủ để chấm điểm an toàn.
+4. **Động cơ luật hỗ trợ đánh giá yếu tố môi trường (Deterministic Rules)** tham chiếu WHO 2021 & CDC STEADI. Kết quả phụ thuộc dữ liệu đầu vào đã được xác nhận; ảnh đơn chưa đủ để chấm điểm an toàn và không phải chẩn đoán y khoa.
 5. **Trợ lý AI RAG có căn cứ (Grounded RAG Copilot)** với ngăn tra cứu bằng chứng 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG 8 tiêu chí) và trình định dạng văn bản y tế chuyên biệt.
 6. **Truy vết quyết định theo quy tắc (Rule-Based Explainability / Decision Provenance)** trực quan hóa chuỗi truy nguyên: Vật thể $\rightarrow$ Dữ liệu đầu vào & nguồn gốc $\rightarrow$ Quy tắc phiên bản hóa $\rightarrow$ Mối nguy $\rightarrow$ Tài liệu đã phê duyệt $\rightarrow$ Khuyến nghị *(tách biệt với model explainability nội tại của Gemini/LLM)*.
 
@@ -138,9 +138,9 @@ Tất cả các phân hệ được xâu chuỗi liền mạch trong phân hệ 
 | **01** | **Khảo Sát Thông Minh** | `/ai-guided-survey` | Khảo sát từng câu hỏi, hỗ trợ giọng nói / văn bản tiếng Việt | Dynamic Irrelevance Pruning, NLP tiếng Việt, True Denominator Progress |
 | **02** | **Thị Giác AI (Vision)** | `/ai-vision` | Quét ảnh phòng thực tế, nhận diện vật thể & thẩm định nguy cơ vật dụng | Magic Bytes validation, EXIF stripping, 18-class taxonomy, Hotspot pins H1..H4 |
 | **03** | **Bản Sao Số 3D** | `/digital-twin` | Tái hiện không gian số hóa tỉ lệ 1:1, điều khiển độ sáng & ma sát sàn | Three.js, React Three Fiber, Photorealistic Dollhouse, Smart Clustering <0.95m |
-| **04** | **Đánh Giá Nguy Cơ Y Khoa** | `/risk-assessment` | Chấm điểm an toàn (0-100), lập danh sách mối nguy lâm sàng | Deterministic 8 Clinical Rules (WHO 2021 & CDC STEADI) |
-| **05** | **Mô Phỏng Kịch Bản** | `/scenario-simulator` | Thử nghiệm can thiệp (dán thảm, đèn cảm ứng, thanh vịn) | Real-time What-If Intervention Engine, 3D State Sync, Undo/Redo |
-| **06** | **Phân Tích Trước / Sau** | `/analytics` | Đối sánh trực quan mức độ cải thiện và tỷ lệ giảm chấn thương ngã | Radar Chart, Delta Score KPI, Remediated Finding Matrix |
+| **04** | **Đánh Giá Yếu Tố Môi Trường** | `/risk-assessment` | Điểm tham chiếu (0-100), lập danh sách mối nguy môi trường | Deterministic 8 Rules (tham chiếu WHO 2021 & CDC STEADI) |
+| **05** | **Mô Phỏng Kịch Bản** | `/scenario-simulator` | Thử nghiệm giả lập can thiệp (dán thảm, đèn cảm ứng, thanh vịn) | Real-time What-If Intervention Engine, 3D State Sync, Undo/Redo |
+| **06** | **Đối Chiếu Trước / Sau** | `/analytics` | Đối chiếu trước/sau giữa snapshot mô phỏng và hiện trạng đã kiểm chứng *(không tuyên bố giảm té ngã đã chứng minh)* | Reproducible Diff Matrix, Before–After API v1, Provenance Badges |
 | **07** | **Báo Cáo & Hành Động** | `/reports` | Xuất kế hoạch cải tạo an toàn chi tiết kèm dự toán chi phí & in PDF | Printable PDF Exporter, Clinical Action Plan Generator |
 
 ---
