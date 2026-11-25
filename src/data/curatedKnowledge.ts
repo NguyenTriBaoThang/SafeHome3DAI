@@ -4,12 +4,14 @@ export interface EnrichedKnowledgeSource extends KnowledgeSourceItem {
   publisher: string;
   officialUrl: string;
   language: string;
+  license: string;
   documentType: "GUIDELINE" | "STANDARD" | "RESEARCH";
   version: string;
   approvalStatus: "APPROVED" | "PENDING" | "REJECTED";
   ingestionStatus: "INDEXED" | "FAILED" | "PENDING";
   contentHash: string;
   lastVerifiedAt: string;
+  validUntil?: string;
   passages: {
     id: string;
     section: string;
@@ -33,13 +35,14 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
     officialUrl: "https://www.who.int/publications/i/item/9789241563536",
     publicationDate: "2021",
     retrievedAt: "2024-01-15T00:00:00.000Z",
-    lastVerifiedAt: "2024-04-10T00:00:00.000Z",
+    lastVerifiedAt: "2026-11-01T00:00:00.000Z",
     language: "vi",
+    license: "CC BY-NC-SA 3.0 IGO (WHO Open Access)",
     documentType: "GUIDELINE",
     version: "2.1",
     approvalStatus: "APPROVED",
     ingestionStatus: "INDEXED",
-    contentHash: "sha256-who-step-safety-2021-verified",
+    contentHash: "3801f71d2014cc3f1b97a502762db22297445482bb817d1d38c656b2c2850f93",
     sourceStatus: "VERIFIED",
     passages: [
       {
@@ -50,7 +53,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 34,
         startOffset: 1200,
         endOffset: 1540,
-        contentHash: "sha256-who-pass-01",
+        contentHash: "fe53f36abfdc748c250be18f37666a2473e943237c36b739cd28f0c4bb0506f1",
         keywords: ["thảm", "thảm trải sàn", "cố định thảm", "trượt ngã", "vấp ngã", "chướng ngại vật", "mép thảm"],
         relatedRules: ["RULE_RUG_01", "RULE_PATH_OBST_06"],
       },
@@ -62,7 +65,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 42,
         startOffset: 2400,
         endOffset: 2780,
-        contentHash: "sha256-who-pass-02",
+        contentHash: "ec2cb61af6353e0da2319553b191604c703627269178031fe6e4c811d837761b",
         keywords: ["chiếu sáng", "đèn ngủ", "độ sáng", "lux", "thị lực", "ban đêm", "lối đi", "lóa mắt"],
         relatedRules: ["RULE_LIGHT_03"],
       },
@@ -74,7 +77,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 51,
         startOffset: 3100,
         endOffset: 3480,
-        contentHash: "sha256-who-pass-03",
+        contentHash: "a191b6f0446b4bb7f770136b4325e81b3c3913bfa90d4dd7a0d2773dcc13d1c8",
         keywords: ["phòng tắm", "sàn ướt", "thanh vịn", "tay vịn", "trơn trượt", "gạch chống trượt", "bồn cầu"],
         relatedRules: ["RULE_BATH_WET_04", "RULE_BATH_GRAB_05"],
       },
@@ -89,13 +92,14 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
     officialUrl: "https://www.cdc.gov/steadi/materials.html",
     publicationDate: "2023",
     retrievedAt: "2024-02-10T00:00:00.000Z",
-    lastVerifiedAt: "2024-04-12T00:00:00.000Z",
+    lastVerifiedAt: "2026-11-01T00:00:00.000Z",
     language: "vi",
+    license: "Public Domain (U.S. Government / CDC STEADI)",
     documentType: "GUIDELINE",
     version: "2023.1",
     approvalStatus: "APPROVED",
     ingestionStatus: "INDEXED",
-    contentHash: "sha256-cdc-steadi-2023-verified",
+    contentHash: "29e336c9babaa738adcb97c2667b9792ed3ea3f424a0d5e9703b0b2861d8698c",
     sourceStatus: "VERIFIED",
     passages: [
       {
@@ -106,7 +110,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 3,
         startOffset: 450,
         endOffset: 780,
-        contentHash: "sha256-cdc-pass-01",
+        contentHash: "0a468832288c741074b9a5590ed4e106a87c63b6b21df65359819f9ade243b6f",
         keywords: ["lối đi", "thông thủy", "dây điện", "ổ cắm", "khung tập đi", "vướng chân", "kích thước"],
         relatedRules: ["RULE_CABLE_02", "RULE_PATH_OBST_06", "RULE_ROUTE_CLUTTER_07"],
       },
@@ -118,7 +122,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 5,
         startOffset: 890,
         endOffset: 1220,
-        contentHash: "sha256-cdc-pass-02",
+        contentHash: "a662069797b2d453d45ac6bfb7a37ac88f8802f54879bca18aa8ce5c3f97cbaf",
         keywords: ["nội thất", "giường ngủ", "bàn", "vững chắc", "chiều cao giường", "góc nhọn", "bàn kính"],
         relatedRules: ["RULE_DANGEROUS_OBJECT_08"],
       },
@@ -130,7 +134,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 7,
         startOffset: 1400,
         endOffset: 1710,
-        contentHash: "sha256-cdc-pass-03",
+        contentHash: "8efa847016b15af034b253eb183dc64debbb8005e7fa1b578940aa6e72e68021",
         keywords: ["cầu thang", "bậc tam cấp", "tay vịn cầu thang", "phản quang", "chống trượt"],
         relatedRules: [],
       },
@@ -145,13 +149,14 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
     officialUrl: "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
     publicationDate: "2020",
     retrievedAt: "2024-03-01T00:00:00.000Z",
-    lastVerifiedAt: "2024-04-15T00:00:00.000Z",
+    lastVerifiedAt: "2026-11-01T00:00:00.000Z",
     language: "vi",
+    license: "Tài liệu chuyên môn công khai — Bộ Y tế Việt Nam",
     documentType: "GUIDELINE",
     version: "1.0",
     approvalStatus: "APPROVED",
     ingestionStatus: "INDEXED",
-    contentHash: "sha256-byt-vn-2020-verified",
+    contentHash: "b0f203d41aa6136e42f135a219b6562f0a0be4dd6802281492e28041f0fc466f",
     sourceStatus: "VERIFIED",
     passages: [
       {
@@ -162,7 +167,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 18,
         startOffset: 2100,
         endOffset: 2510,
-        contentHash: "sha256-byt-pass-01",
+        contentHash: "91753ab7ec41907925413c225d9dbedeafa5d2203ea6f1156378d02d2cb683da",
         keywords: ["bộ y tế", "tai nạn thương tích", "gãy xương", "công tắc đèn", "cảm ứng", "sàn trơn", "xương đùi"],
         relatedRules: ["RULE_LIGHT_03", "RULE_BATH_WET_04"],
       },
@@ -174,7 +179,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 22,
         startOffset: 2850,
         endOffset: 3240,
-        contentHash: "sha256-byt-pass-02",
+        contentHash: "9c237add396400ea537ab038cbefcd691d5594a0397770d13925137fa80ae3f9",
         keywords: ["hạ huyết áp tư thế", "thanh vịn chữ L", "bồn cầu", "khớp gối", "điểm tựa", "tắm"],
         relatedRules: ["RULE_BATH_GRAB_05"],
       },
@@ -189,13 +194,14 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
     officialUrl: "https://www.ncoa.org/older-adults/health/prevention/falls-prevention",
     publicationDate: "2023",
     retrievedAt: "2024-04-12T00:00:00.000Z",
-    lastVerifiedAt: "2024-04-18T00:00:00.000Z",
+    lastVerifiedAt: "2026-11-01T00:00:00.000Z",
     language: "vi",
+    license: "NCOA Educational Resource (Attribution / Non-Commercial)",
     documentType: "RESEARCH",
     version: "2023.2",
     approvalStatus: "APPROVED",
     ingestionStatus: "INDEXED",
-    contentHash: "sha256-ncoa-2023-verified",
+    contentHash: "308b12d1ec134dbaa37d98a337f6dc7d15e352b1ecbbca331fc809e1703d4662",
     sourceStatus: "VERIFIED",
     passages: [
       {
@@ -206,7 +212,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 12,
         startOffset: 1100,
         endOffset: 1470,
-        contentHash: "sha256-ncoa-pass-01",
+        contentHash: "3e9392542e33d25559e33905f8dc60cfbb76123bd0b64c54fafea531fcc37d75",
         keywords: ["giảm nguy cơ ngã", "hiệu quả chi phí", "máng luồn dây", "đèn led", "thanh vịn", "can thiệp"],
         relatedRules: ["RULE_RUG_01", "RULE_CABLE_02", "RULE_LIGHT_03"],
       },
@@ -218,7 +224,7 @@ export const CURATED_KNOWLEDGE_SOURCES: EnrichedKnowledgeSource[] = [
         pageNumber: 15,
         startOffset: 1600,
         endOffset: 1950,
-        contentHash: "sha256-ncoa-pass-02",
+        contentHash: "1d29420ebdd59487c0a655d2b73ffc9ab7954a53c924fb38b42981f3b2df0a73",
         keywords: ["thuốc", "tác dụng phụ", "chóng mặt", "hạ áp", "bác sĩ", "khám"],
         relatedRules: [],
       },

@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { validateOfficialSourceUrl } from "./documentRegistry";
 
 export interface DocumentIngestionInput {
   documentId: string;
@@ -9,6 +10,7 @@ export interface DocumentIngestionInput {
   language?: string;
   documentType?: "GUIDELINE" | "STANDARD" | "RESEARCH";
   version?: string;
+  license?: string;
   rawText: string;
 }
 
@@ -33,8 +35,9 @@ export interface IngestedDocumentResult {
   language: string;
   documentType: string;
   version: string;
-  approvalStatus: "APPROVED" | "PENDING";
-  ingestionStatus: "INDEXED";
+  license: string;
+  approvalStatus: "APPROVED" | "PENDING" | "REJECTED";
+  ingestionStatus: "INDEXED" | "PENDING" | "FAILED";
   contentHash: string;
   chunks: IngestedChunk[];
 }
@@ -182,6 +185,10 @@ export function ingestDocument(input: DocumentIngestionInput): IngestedDocumentR
   if (!input.publisher || input.publisher.trim().length < 2) {
     throw new Error("Tổ chức phát hành không được để trống");
   }
+  const urlValidation = validateOfficialSourceUrl(input.officialUrl, { requireHttps: true });
+  if (!urlValidation.valid) {
+    throw new Error(urlValidation.reason || "URL nguồn tài liệu không hợp lệ hoặc bị từ chối");
+  }
   if (!input.rawText || input.rawText.trim().length < 20) {
     throw new Error("Nội dung tài liệu quá ngắn để phân tách đoạn trích");
   }
@@ -194,12 +201,13 @@ export function ingestDocument(input: DocumentIngestionInput): IngestedDocumentR
     documentId: input.documentId,
     title: input.title.trim(),
     publisher: input.publisher.trim(),
-    officialUrl: input.officialUrl?.trim() || "",
+    officialUrl: urlValidation.normalizedUrl,
     publicationDate: input.publicationDate || new Date().getFullYear().toString(),
     language: input.language || "vi",
     documentType: input.documentType || "GUIDELINE",
     version: input.version || "1.0",
-    approvalStatus: "APPROVED",
+    license: input.license?.trim() || "Attribution-Required / Pending License Verification",
+    approvalStatus: "PENDING",
     ingestionStatus: "INDEXED",
     contentHash: documentHash,
     chunks,

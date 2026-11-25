@@ -1,5 +1,5 @@
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
-import { KnowledgeSourceItem, ChatMessage, RoomState, HazardFindingResult } from "@/types";
+import { getActiveRegistrySources } from "@/lib/rag/documentRegistry";
+import { ChatMessage, RoomState, HazardFindingResult } from "@/types";
 
 export interface RetrievedPassage {
   sourceId: string;
@@ -32,7 +32,8 @@ export function retrieveKnowledgePassages(
   const queryTokens = tokenize(query);
   const scoredPassages: RetrievedPassage[] = [];
 
-  for (const source of CURATED_KNOWLEDGE_SOURCES) {
+  const { activeSources } = getActiveRegistrySources({ approvalOnly: true });
+  for (const source of activeSources) {
     for (const passage of source.passages) {
       let score = 0;
       const passageTokens = tokenize(

@@ -1,10 +1,13 @@
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { getActiveRegistrySources, validateOfficialSourceUrl } from "./documentRegistry";
 import { RetrievedChunk } from "./types";
 
 export interface RetrievalOptions {
   topK?: number;
   minScoreThreshold?: number;
   approvalOnly?: boolean;
+  maxAgeDays?: number;
+  now?: Date;
+  excludeOutdated?: boolean;
 }
 
 export const VIETNAMESE_STOP_WORDS = new Set([
@@ -73,12 +76,18 @@ export function retrieveEvidenceChunks(
   const queryTokens = tokenizeQuery(query);
   if (queryTokens.length === 0) return [];
 
+  const { activeSources } = getActiveRegistrySources({
+    approvalOnly,
+    maxAgeDays: options.maxAgeDays,
+    now: options.now,
+    excludeOutdated: options.excludeOutdated ?? true,
+  });
+
   const candidateChunks: RetrievedChunk[] = [];
 
-  for (const source of CURATED_KNOWLEDGE_SOURCES) {
-    if (approvalOnly && source.approvalStatus !== "APPROVED") {
-      continue;
-    }
+  for (const source of activeSources) {
+    const urlCheck = validateOfficialSourceUrl(source.officialUrl || source.url);
+    if (!urlCheck.valid) continue;
 
     for (const passage of source.passages) {
       let score = 0;
@@ -127,14 +136,19 @@ export function retrieveEvidenceChunks(
           documentId: source.id,
           documentTitle: source.title,
           publisher: source.publisher || source.organization,
-          officialUrl: source.officialUrl || source.url,
+          officialUrl: urlCheck.normalizedUrl,
           sectionTitle: passage.section,
           chunkText: passage.passageText,
           pageNumber: passage.pageNumber,
+          startOffset: passage.startOffset,
+          endOffset: passage.endOffset,
           score: Math.round(score * 10) / 10,
           contentHash: passage.contentHash,
           publicationDate: source.publicationDate,
           lastVerifiedAt: source.lastVerifiedAt,
+          version: source.version,
+          license: source.license,
+          approvalStatus: source.approvalStatus,
         });
       }
     }

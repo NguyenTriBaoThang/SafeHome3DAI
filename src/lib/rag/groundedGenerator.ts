@@ -3,8 +3,11 @@ import {
   GroundedGenerationResult,
   SufficiencyEvaluationResult,
   UserIntent,
+  EvidenceSectionBreakdown,
 } from "./types";
 import { verifyAndFormatCitations } from "./citationVerifier";
+import { buildDocumentVersionAuditTrail } from "./documentRegistry";
+import { inspectAndSanitizeUntrustedText } from "@/lib/security/promptInjectionGuard";
 
 export interface GeneratorContext {
   query: string;
@@ -92,12 +95,26 @@ export async function generateGroundedAnswer(
         "Làm thế nào để cải thiện ánh sáng và lối đi an toàn trong nhà?",
       ],
       warnings: ["Câu hỏi liên quan đến thuốc/chẩn đoán y tế - đã từ chối an toàn."],
+      documentAuditTrail: buildDocumentVersionAuditTrail(
+        retrievedChunks,
+        citations.map((c) => c.chunkId)
+      ),
+      evidenceBreakdown: {
+        documentRecommendations: [
+          "Việc kiểm tra nhà ở cần kết hợp tham vấn bác sĩ về tác dụng phụ thuốc gây chóng mặt/hạ áp tư thế.",
+        ],
+        selfReportedSituationNotes: [
+          "Yêu cầu liên quan đến thuốc hoặc chẩn đoán y khoa cá nhân nằm ngoài phạm vi đánh giá không gian vật lý.",
+        ],
+      },
     };
   }
 
-  // 3. INSUFFICIENT EVIDENCE Response
+  // 3. INSUFFICIENT EVIDENCE Response (including source removed / outdated / out-of-corpus)
   if (evaluation.status === "INSUFFICIENT_EVIDENCE") {
-    const insufficientAnswer = `Hiện tại, tôi chưa tìm thấy đủ bằng chứng trong kho tài liệu đã được kiểm chứng (WHO, CDC, Bộ Y tế) để đưa ra kết luận chắc chắn về nội dung này.\n\n**Lý do chưa đủ căn cứ:**\n- ${evaluation.coverageRationale}\n${evaluation.missingElements.length > 0 ? `- Thiếu thông tin về: ${evaluation.missingElements.join(", ")}` : ""}\n\nTrong an toàn phòng ngừa té ngã, không có giải pháp đơn lẻ nào có thể cam kết loại bỏ hoàn toàn nguy cơ mà cần kết hợp đồng bộ: cải tạo môi trường (thông thoáng lối đi, chống trơn), nâng cao thị lực và duy trì tập luyện thăng bằng.${MEDICAL_DISCLAIMER}`;
+    const abstentionGuidance =
+      "Hãy kiểm tra thủ công tại hiện trường: đo chiều rộng lối đi (khuyến nghị tối thiểu 80-90 cm), kiểm tra độ cố định mép thảm/dây điện, độ bám sàn ướt và tham vấn kỹ thuật viên hoặc nhân viên y tế trước khi áp dụng biện pháp đặc thù.";
+    const insufficientAnswer = `**Chưa đủ bằng chứng trong kho tài liệu đã kiểm chứng (WHO, CDC, Bộ Y tế, NCOA)** để đưa ra kết luận chắc chắn cho yêu cầu này.\n\n**Lý do chưa đủ căn cứ:**\n- ${evaluation.coverageRationale}\n${evaluation.missingElements.length > 0 ? `- Thiếu bằng chứng về: ${evaluation.missingElements.join(", ")}\n` : ""}\n🛠️ **Hướng dẫn kiểm tra thủ công thay thế:**\n- ${abstentionGuidance}${MEDICAL_DISCLAIMER}`;
 
     return {
       answer: insufficientAnswer,
@@ -113,6 +130,15 @@ export async function generateGroundedAnswer(
         "Thảm trải sàn không cố định có thể gây nguy hiểm như thế nào?",
       ],
       warnings: [evaluation.coverageRationale],
+      sourceSupportMap: [],
+      documentAuditTrail: buildDocumentVersionAuditTrail(retrievedChunks, []),
+      evidenceBreakdown: {
+        documentRecommendations: [],
+        selfReportedSituationNotes: roomContext
+          ? [`Bối cảnh phòng người dùng đang xem: ${inspectAndSanitizeUntrustedText(roomContext.roomName, 80).sanitizedText}`]
+          : [],
+        abstentionGuidance,
+      },
     };
   }
 
@@ -151,11 +177,15 @@ function generateDeterministicGroundedAnswer(
   const { query, evaluation, retrievedChunks, roomContext } = ctx;
   const qLower = query.toLowerCase();
 
+  const c1 = retrievedChunks[0]?.citationIndex ?? 1;
+  const c2 = retrievedChunks[1]?.citationIndex ?? c1;
+  const docRecommendations: string[] = [];
+  const selfReportedNotes: string[] = [];
+
   let body = "";
   const suggestedFollowUps: string[] = [];
 
   // 1. INTENT: ROOM OBJECTS & FURNITURE INVENTORY
-  // "Trong phòng có vật dụng gì ?", "có đồ gì", "danh sách vật dụng", "nội thất trong phòng"
   const isAskingObjects =
     qLower.includes("vật dụng") ||
     qLower.includes("đồ đạc") ||
@@ -168,10 +198,11 @@ function generateDeterministicGroundedAnswer(
 
   if (isAskingObjects && roomContext?.objects && roomContext.objects.length > 0) {
     const objs = roomContext.objects;
-    const roomName = roomContext.roomName || "không gian 3D đang chọn";
-    body += `Trong **${roomName}** hiện có **${objs.length} vật dụng/đồ nội thất** được lập bản sao số và giám sát an toàn:\n\n`;
+    const roomName = inspectAndSanitizeUntrustedText(roomContext.roomName || "không gian 3D đang chọn", 80).sanitizedText;
+    body += `📝 **Kết luận theo tình huống tự khai / dữ liệu phòng (${roomName}):**\n`;
+    body += `Hiện ghi nhận **${objs.length} vật dụng/đồ nội thất** trong dữ liệu mô hình:\n\n`;
+    selfReportedNotes.push(`Danh mục ${objs.length} vật dụng từ dữ liệu phòng ${roomName}.`);
 
-    // Group items
     const furniture = objs.filter(
       (o) =>
         !["RUG", "CABLE"].includes(o.category.toUpperCase()) &&
@@ -188,16 +219,26 @@ function generateDeterministicGroundedAnswer(
 
     body += `🪑 **Danh mục đồ nội thất & tiện nghi sinh hoạt:**\n`;
     furniture.forEach((item, i) => {
-      body += `${i + 1}. **${item.name}** [1]`;
+      const safeName = inspectAndSanitizeUntrustedText(item.name, 80).sanitizedText;
+      body += `${i + 1}. **${safeName}**`;
       if (item.isFixed) body += ` *(Đã cố định vững chắc)*`;
       body += `\n`;
     });
 
     if (fallRiskItems.length > 0) {
-      body += `\n⚠️ **Vật dụng cần chú ý nguy cơ té ngã:**\n`;
+      body += `\n⚠️ **Vật dụng cần kiểm tra nguy cơ té ngã (từ dữ liệu phòng):**\n`;
       fallRiskItems.forEach((item) => {
-        body += `- **${item.name}**: Tiềm ẩn rủi ro trượt hoặc vấp ngã nếu không được cố định chặt xuống sàn [1].\n`;
+        const safeName = inspectAndSanitizeUntrustedText(item.name, 80).sanitizedText;
+        body += `- **${safeName}**: Cần kiểm tra độ cố định và khoảng trống lối đi tại hiện trường.\n`;
       });
+    }
+
+    const primaryChunk = retrievedChunks[0];
+    if (primaryChunk) {
+      const firstSentence = primaryChunk.chunkText.split(". ")[0] || primaryChunk.chunkText.slice(0, 180);
+      body += `\n📚 **Khuyến nghị theo tài liệu đã thẩm định:**\n`;
+      body += `- **${primaryChunk.sectionTitle} (${primaryChunk.publisher}):** ${firstSentence} [${c1}].\n`;
+      docRecommendations.push(`${primaryChunk.sectionTitle}: ${firstSentence}`);
     }
 
     body += `\n💡 *Gợi ý:* Bạn có thể bấm trực tiếp vào từng vật thể trên mô hình 3D để định vị góc nhìn và kiểm tra khoảng cách an toàn.`;
@@ -208,7 +249,6 @@ function generateDeterministicGroundedAnswer(
   }
 
   // 2. INTENT: GRAB BAR MATERIAL SPECIFICATIONS
-  // "Nên chọn thanh vịn chất liệu gì cho nhà tắm?", "chất liệu thanh vịn", "chất liệu tay vịn", "thanh vịn loại nào tốt"
   else if (
     (qLower.includes("thanh vịn") || qLower.includes("tay vịn") || qLower.includes("thanh nắm")) &&
     (qLower.includes("chất liệu") ||
@@ -219,22 +259,13 @@ function generateDeterministicGroundedAnswer(
       qLower.includes("chọn tay") ||
       qLower.includes("làm bằng gì"))
   ) {
-    body += `Theo tiêu chuẩn phòng ngừa tai nạn thương tích của **Bộ Y tế Việt Nam** và **CDC STEADI Hoa Kỳ**, khi chọn chất liệu thanh vịn cho nhà tắm, cần tuân thủ các khuyến cáo y khoa sau:\n\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (Bộ Y tế Việt Nam, WHO & CDC STEADI):**\n\n`;
+    body += `- Cần lắp thanh vịn chịu tải tối thiểu **150 kg** tại vị trí bồn cầu và khu vực tắm vòi sen ở độ cao **80 đến 90 cm** so với mặt sàn phòng tắm [${c1}].\n`;
+    body += `- **Inox 304 có vân sần / phay xước ma sát** hoặc **lõi thép bọc Nylon/ABS kháng khuẩn** giúp bám tay chắc chắn trong môi trường sàn ướt và phòng ngừa ngã quỵ do hạ huyết áp tư thế [${c2}].\n`;
+    body += `- Tuyệt đối **tránh thanh vịn giác hút chân không**, kim loại trơn bóng hoặc ống mỏng không khoan bắt vít chịu lực vào tường gạch đặc.\n`;
+    body += `- Kích thước tham khảo: đường kính thanh 32 - 38 mm, cách tường khoảng 38 mm, bắt vít nở inox chịu tải 150 - 250 kg.\n`;
 
-    body += `🛡️ **1. Chất liệu khuyến nghị hàng đầu:**\n`;
-    body += `- **Inox 304 không gỉ có vân sần / phay xước ma sát (Knurled/Textured Stainless Steel) [1]:** Đây là chất liệu tối ưu nhất vì chống ăn mòn tuyệt đối trong môi trường nước/xà phòng và tạo độ bám ma sát cao, không bị trượt tay ngay cả khi tay dính nước xà phòng.\n`;
-    body += `- **Lõi thép không gỉ bọc nhựa Nylon/ABS kháng khuẩn [1]:** Có các rãnh gân nổi chống trơn, ưu điểm bề mặt không bị lạnh buốt vào mùa đông và êm ái cho người già thoái hóa khớp bàn tay.\n\n`;
-
-    body += `⚠️ **2. Các loại tuyệt đối KHÔNG NÊN DÙNG:**\n`;
-    body += `- ❌ **Thanh vịn gắn bằng giác hút chân không (Suction Grab Bars):** Cực kỳ nguy hiểm vì lực hút cao su sẽ thoái hóa dần theo thời gian và bung tuột bất thình lình khi người già dồn tải trọng lúc trượt chân [1].\n`;
-    body += `- ❌ **Kim loại mạ bóng nhẵn:** Rất trơn tuột khi dính xà phòng.\n`;
-    body += `- ❌ **Ống nhôm mỏng hoặc nhựa dẻo:** Dễ cong gãy khi chịu tải trọng va đập lớn.\n\n`;
-
-    body += `📐 **3. Tiêu chuẩn kích thước & lắp đặt an toàn [2]:**\n`;
-    body += `- **Khả năng chịu tải trọng:** Phải chịu được tối thiểu **150 kg - 250 kg** (khoan bắt vít nở inox xuyên sâu vào tường gạch đặc hoặc xương đố chịu lực, không bắt vào tấm thạch cao rỗng).\n`;
-    body += `- **Đường kính thân thanh vịn:** Chuẩn **32 mm - 38 mm** (1.25 - 1.5 inch) để vòng bàn tay người cao tuổi ôm trọn chắc chắn.\n`;
-    body += `- **Khoảng cách từ thanh tới tường:** Chuẩn **38 mm (1.5 inch)** để vừa khít bàn tay, tránh kẹt mu tay khi ngã.\n`;
-    body += `- **Độ cao lắp đặt:** Từ **80 cm đến 85 cm** tính từ mặt sàn gạch [1].\n`;
+    docRecommendations.push("Lắp thanh vịn chịu tải tối thiểu 150 kg tại bồn cầu và buồng tắm ở độ cao 80-90 cm.");
 
     suggestedFollowUps.push("Vị trí lắp đặt thanh vịn buồng tắm vòi sen chuẩn?");
     suggestedFollowUps.push("Cách khoan bắt vít thanh vịn chắc chắn vào tường gạch?");
@@ -242,7 +273,6 @@ function generateDeterministicGroundedAnswer(
   }
 
   // 3. INTENT: GRAB BAR LOCATION & PLACEMENT
-  // "Vị trí lắp đặt thanh vịn", "độ cao thanh vịn", "lắp ở đâu"
   else if (
     (qLower.includes("thanh vịn") || qLower.includes("tay vịn") || qLower.includes("thanh nắm")) &&
     (qLower.includes("vị trí") ||
@@ -251,14 +281,11 @@ function generateDeterministicGroundedAnswer(
       qLower.includes("lắp đặt") ||
       qLower.includes("lắp như thế nào"))
   ) {
-    body += `Theo hướng dẫn của **Bộ Y tế Việt Nam** và **CDC STEADI**, nhà vệ sinh là nơi xảy ra trên 60% các ca ngã nặng. Vị trí lắp thanh vịn cần bố trí đúng các điểm tỳ lực [1]:\n\n`;
-    body += `1. **Cạnh bồn cầu (Toilet Grab Bars):**\n`;
-    body += `- Lắp thanh vịn chữ L hoặc thanh vịn ngang ở độ cao **80 - 85 cm** so với mặt sàn [1].\n`;
-    body += `- Chiều dài thanh tối thiểu 60 - 90 cm để người già tỳ tay lấy đà khi đứng dậy, phòng ngừa hạ huyết áp tư thế.\n\n`;
-    body += `2. **Khu vực buồng tắm / vòi sen (Shower Grab Bars):**\n`;
-    body += `- Lắp 1 thanh thẳng đứng tại lối bước vào (cao 80 - 120 cm) để người già vịn bước qua gờ sàn [1].\n`;
-    body += `- Lắp 1 thanh ngang hoặc thanh nghiêng dọc theo tường tắm ở độ cao **85 - 90 cm** để bám giữ khi đứng tắm hoặc kỳ cọ chân [2].\n\n`;
-    body += `3. **Yêu cầu kỹ thuật:** Khoan bắt vít inox nở thép chịu lực tối thiểu 150 kg [2].\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (Bộ Y tế Việt Nam & WHO):**\n\n`;
+    body += `Phòng tắm là nơi xảy ra hơn 60% các ca ngã nghiêm trọng; vị trí lắp thanh vịn cần bố trí đúng các điểm tựa [${c1}]:\n\n`;
+    body += `1. **Cạnh bồn cầu:** Lắp thanh vịn chữ L hoặc thanh ngang ở độ cao 80 - 90 cm để giảm tải khớp gối khi đứng lên, phòng ngừa hạ huyết áp tư thế [${c2}].\n`;
+    body += `2. **Khu vực buồng tắm / vòi sen:** Lắp thanh thẳng đứng tại lối bước vào và thanh ngang chịu tải tối thiểu 150 kg ở độ cao 80 - 90 cm [${c1}].\n`;
+    docRecommendations.push("Lắp thanh tay vịn chữ L hoặc thanh ngang cạnh bồn cầu và vòi sen (80-90 cm, tải >= 150 kg).");
 
     suggestedFollowUps.push("Nên chọn thanh vịn chất liệu gì cho nhà tắm?");
     suggestedFollowUps.push("Cần lưu ý gì khi chọn gạch lát sàn nhà tắm?");
@@ -266,7 +293,6 @@ function generateDeterministicGroundedAnswer(
   }
 
   // 4. INTENT: BEDROOM FALL HAZARDS
-  // "Phòng ngủ của tôi có những nguy cơ té ngã nào?", "nguy cơ phòng ngủ"
   else if (
     (qLower.includes("phòng ngủ") || qLower.includes("bedroom")) &&
     (qLower.includes("nguy cơ") ||
@@ -275,27 +301,33 @@ function generateDeterministicGroundedAnswer(
       qLower.includes("rủi ro") ||
       qLower.includes("có gì nguy hiểm"))
   ) {
-    const roomName = roomContext?.roomName || "Phòng ngủ";
-    body += `Dựa trên dữ liệu khảo sát hiện trường và chuẩn đối chiếu **WHO 2021 & CDC STEADI**, các nguy cơ té ngã chính trong **${roomName}** gồm:\n\n`;
+    const roomName = inspectAndSanitizeUntrustedText(roomContext?.roomName || "Phòng ngủ", 80).sanitizedText;
+    const primaryChunk = retrievedChunks[0];
+    const secondaryChunk = retrievedChunks[1];
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (${Array.from(new Set(retrievedChunks.map((c) => c.publisher))).join(", ")}):**\n\n`;
+    if (primaryChunk) {
+      const s1 = primaryChunk.chunkText.split(". ")[0] || primaryChunk.chunkText.slice(0, 220);
+      body += `- **${primaryChunk.sectionTitle}:** ${s1} [${c1}].\n`;
+      docRecommendations.push(`${primaryChunk.sectionTitle}: ${s1}`);
+    }
+    if (secondaryChunk) {
+      const s2 = secondaryChunk.chunkText.split(". ")[0] || secondaryChunk.chunkText.slice(0, 220);
+      body += `- **${secondaryChunk.sectionTitle}:** ${s2} [${c2}].\n`;
+      docRecommendations.push(`${secondaryChunk.sectionTitle}: ${s2}`);
+    }
+    body += `- Khuyến nghị thực hành chung: cố định mép thảm, dọn dây điện lối đi, giữ chiều cao giường 45-50 cm và duy trì ánh sáng ban đêm 30-50 lux.\n`;
 
     if (roomContext?.hazards && roomContext.hazards.length > 0) {
+      body += `\n📝 **Kết luận theo tình huống tự khai / dữ liệu phòng (${roomName}):**\n`;
       roomContext.hazards.forEach((h, i) => {
-        body += `### ${i + 1}. ${h.title} [1]\n`;
-        body += `- **Nguyên nhân y khoa:** ${h.description}\n`;
-        body += `- **Giải pháp can thiệp:** ${h.recommendationText}\n\n`;
+        const safeTitle = inspectAndSanitizeUntrustedText(h.title, 100).sanitizedText;
+        const safeDesc = inspectAndSanitizeUntrustedText(h.description, 160).sanitizedText;
+        const safeRec = inspectAndSanitizeUntrustedText(h.recommendationText, 160).sanitizedText;
+        body += `### ${i + 1}. ${safeTitle}\n`;
+        body += `- **Ghi nhận hiện trạng:** ${safeDesc}\n`;
+        body += `- **Gợi ý xử lý:** ${safeRec}\n\n`;
+        selfReportedNotes.push(`${safeTitle}: ${safeDesc}`);
       });
-    } else {
-      body += `### 1. Thảm trải sàn mép cong vênh, thiếu đế bám ma sát [1]\n`;
-      body += `- Người già có dáng đi bước lê chân thấp, đầu ngón chân dễ vấp vào mép thảm nhô cao gây ngã chúi.\n`;
-      body += `- **Khắc phục:** Dán cố định 4 góc thảm bằng băng dính hai mặt chuyên dụng hoặc thay thảm có đế cao su TPE chống trượt.\n\n`;
-
-      body += `### 2. Dây điện / dây sạc thiết bị vắt ngang lối đi [1]\n`;
-      body += `- Dây điện tự do là chướng ngại vật dễ mắc vào dép khi đi lại ban đêm.\n`;
-      body += `- **Khắc phục:** Luồn dây vào nẹp gen bảo vệ ốp sát chân tường.\n\n`;
-
-      body += `### 3. Chiều cao thành giường và ánh sáng đêm yếu (<50 Lux) [2]\n`;
-      body += `- Mặt đệm giường cần đạt độ cao 45 - 50 cm để hai bàn chân chạm phẳng sàn khi thức dậy, tránh hạ huyết áp tư thế gây choáng váng.\n`;
-      body += `- **Khắc phục:** Lắp đèn ngủ cảm ứng chuyển động ánh sáng vàng ấm (30 - 50 Lux) sát chân giường.\n\n`;
     }
 
     suggestedFollowUps.push("Làm sao để cố định thảm chống trơn trượt mép giường?");
@@ -305,12 +337,12 @@ function generateDeterministicGroundedAnswer(
 
   // 5. INTENT: RUG / MAT FALL PREVENTION
   else if (qLower.includes("thảm") || qLower.includes("rug") || qLower.includes("mép thảm")) {
-    body += `Theo số liệu từ **CDC STEADI**, thảm rời không cố định là nguyên nhân hàng đầu gây ra tới 35% các vụ té ngã sinh hoạt ở người cao tuổi [1]:\n\n`;
-    body += `1. **Căn nguyên sinh cơ học:** Người cao tuổi thường có dáng đi lê chân (shuffling gait), độ nhấc bàn chân chỉ từ 1 đến 2 cm. Mép thảm quăn góc dễ làm kẹt mũi dép gây mất thăng bằng đột ngột [1].\n`;
-    body += `2. **Giải pháp can thiệp hiệu quả:**\n`;
-    body += `- Dán cố định 4 góc và chu vi mép thảm xuống sàn bằng băng dính hai mặt cường lực chuyên dụng (Rug Tape) [1].\n`;
-    body += `- Sử dụng tấm lót cao su chống trượt (Non-skid Rug Underlay) bên dưới toàn bộ bề mặt thảm [1].\n`;
-    body += `- Với các tấm thảm nhỏ trôi nổi ở mép giường hoặc lối vào, khuyến nghị loại bỏ hoàn toàn khỏi luồng giao thông chính [2].\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (WHO & NCOA):**\n\n`;
+    body += `Thảm trải sàn không được cố định chặt và các nếp gấp của thảm là nguyên nhân hàng đầu gây vấp ngã ở người cao tuổi tại nhà [${c1}]:\n\n`;
+    body += `1. Loại bỏ các tấm thảm nhỏ không cố định khỏi lối đi chính [${c1}].\n`;
+    body += `2. Sử dụng băng dính hai mặt chuyên dụng hoặc lớp lót chống trượt (non-slip underlay) để dán cố định các mép thảm [${c1}].\n`;
+    body += `3. Can thiệp sửa chữa nhà ở đơn giản (như dán băng dính chống trượt mép thảm, gom dây điện) có thể giúp giảm nguy cơ ngã tới 39% ở người có tiền sử ngã [${c2}].\n`;
+    docRecommendations.push("Loại bỏ thảm nhỏ rời hoặc dán cố định mép thảm bằng băng dính hai mặt/lớp lót chống trượt.");
 
     suggestedFollowUps.push("Cách nhận biết thảm trải sàn không đảm bảo an toàn?");
     suggestedFollowUps.push("Vị trí lắp đặt thanh vịn chuẩn theo hướng dẫn CDC STEADI?");
@@ -319,10 +351,12 @@ function generateDeterministicGroundedAnswer(
 
   // 6. INTENT: LIGHTING & NIGHT ILLUMINATION
   else if (qLower.includes("sáng") || qLower.includes("đèn") || qLower.includes("lux") || qLower.includes("đêm")) {
-    body += `Theo hướng dẫn an toàn môi trường sống của **WHO 2021** và **Bộ Y tế Việt Nam**, thị lực người cao tuổi giảm mạnh độ nhạy tương phản và tốc độ thích nghi sáng-tối [1]:\n\n`;
-    body += `1. **Độ rọi ban ngày:** Cần đạt tối thiểu **150 - 200 Lux** trên toàn bộ mặt sàn phòng sinh hoạt [1].\n`;
-    body += `2. **Chiếu sáng ban đêm:** Duy trì từ **30 - 50 Lux** dọc theo tuyến đường từ giường ngủ tới nhà vệ sinh bằng đèn LED cảm ứng bước chân [2].\n`;
-    body += `3. **Tránh chói mắt:** Tuyệt đối không dùng bóng đèn trần công suất lớn chiếu thẳng vào mắt vì gây mù tạm thời khi thức giấc nửa đêm [2].\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (WHO & Bộ Y tế Việt Nam):**\n\n`;
+    body += `Thị lực của người cao tuổi giảm tốc độ thích ứng sáng - tối chậm hơn gấp 3 lần so với người trẻ [${c1}]:\n\n`;
+    body += `1. **Độ rọi ban ngày:** Duy trì tối thiểu từ **150 đến 200 lux** dọc lối đi từ giường ngủ đến nhà vệ sinh [${c1}].\n`;
+    body += `2. **Chiếu sáng ban đêm:** Bố trí đèn ngủ ban đêm dịu nhẹ **30 - 50 lux** dọc chân tường để tránh lóa mắt [${c1}].\n`;
+    body += `3. **Công tắc đèn:** Bố trí công tắc ngang tầm với ngay cửa vào hoặc gắn cảm ứng chuyển động [${c2}].\n`;
+    docRecommendations.push("Duy trì 150-200 lux ban ngày, 30-50 lux ban đêm và bố trí công tắc cảm ứng ngang tầm với.");
 
     suggestedFollowUps.push("Tại sao người già cần ánh sáng dịu hơn thay vì đèn quá chói?");
     suggestedFollowUps.push("Cách bố trí công tắc đèn tiện lợi cho người cao tuổi?");
@@ -331,34 +365,34 @@ function generateDeterministicGroundedAnswer(
 
   // 7. INTENT: CABLES & WALKWAY CLEARANCE
   else if (qLower.includes("dây") || qLower.includes("cáp") || qLower.includes("lối đi") || qLower.includes("thông thủy")) {
-    body += `Theo tiêu chuẩn **ADA** và hướng dẫn phòng ngừa té ngã của **CDC STEADI** [1]:\n\n`;
-    body += `1. **Độ rộng thông thủy lối đi:** Luôn đảm bảo tối thiểu **80 - 90 cm** không có vật cản để người cao tuổi sử dụng gậy chống hoặc khung tập đi an toàn [1].\n`;
-    body += `2. **Xử lý dây điện:** Tuyệt đối không để dây sạc điện thoại, dây quạt vắt ngang mặt sàn. Phải thu gom luồn vào ống gen nẹp cố định sát chân tường [1].\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (CDC STEADI & WHO):**\n\n`;
+    body += `1. **Độ rộng thông thủy lối đi:** Duy trì chiều rộng tối thiểu **80 cm đến 90 cm** để người cao tuổi sử dụng gậy hoặc khung tập đi an toàn [${c1}].\n`;
+    body += `2. **Xử lý dây điện:** Không để dây điện kéo dài, ổ cắm phụ hay đồ lộn xộn cắt ngang lối đi từ phòng ngủ sang nhà vệ sinh/bếp; cần gom gọn vào máng luồn dây sát tường [${c2}].\n`;
+    docRecommendations.push("Giữ lối đi rộng tối thiểu 80-90 cm và thu gọn dây điện khỏi mặt sàn.");
 
     suggestedFollowUps.push("Kích thước thông thủy tối thiểu theo tiêu chuẩn CDC là bao nhiêu?");
     suggestedFollowUps.push("Làm sao để cố định thảm chống trơn trượt mép giường?");
     suggestedFollowUps.push("Hãy cho tôi xem các điểm nguy cơ trên không gian 3D.");
   }
 
-  // 8. GENERAL CLINICAL SYNTHESIS (FALLBACK WITHOUT DUMPING RAW CHUNKS)
+  // 8. GENERAL CLINICAL SYNTHESIS
   else {
     const primaryChunk = retrievedChunks[0];
     const secondaryChunk = retrievedChunks[1];
 
-    body += `Dựa trên tài liệu chuyên môn từ **${Array.from(new Set(retrievedChunks.map((c) => c.publisher))).join(", ")}**, tôi xin giải đáp câu hỏi của bạn:\n\n`;
+    body += `📚 **Khuyến nghị theo tài liệu đã thẩm định (${Array.from(new Set(retrievedChunks.map((c) => c.publisher))).join(", ")}):**\n\n`;
 
     if (primaryChunk) {
-      body += `📌 **${primaryChunk.sectionTitle}** [1]:\n`;
-      body += `${primaryChunk.chunkText.split("\n")[0] || primaryChunk.chunkText.slice(0, 260)}...\n\n`;
+      const snippet = primaryChunk.chunkText.split("\n")[0] || primaryChunk.chunkText.slice(0, 260);
+      body += `📌 **${primaryChunk.sectionTitle}** [${c1}]:\n`;
+      body += `${snippet}\n\n`;
+      docRecommendations.push(`${primaryChunk.sectionTitle}: ${snippet}`);
     }
 
-    body += `**Khuyến nghị thực tế cho an toàn không gian sống:**\n`;
-    body += `- Duy trì lối đi thông thoáng tối thiểu 80-90 cm, loại bỏ thảm rời không cố định và dây điện vắt ngang sàn [1].\n`;
-    body += `- Lắp đặt thanh tay vịn chịu tải tối thiểu 150 kg tại các vị trí đổi tư thế (cạnh bồn cầu, vòi sen, mép giường) [2].\n`;
-    body += `- Đảm bảo ánh sáng ban đêm dịu nhẹ (30-50 Lux) để người cao tuổi nhìn rõ đường đi vệ sinh mà không bị lóa mắt [1].\n`;
-
     if (secondaryChunk) {
-      body += `\n*Tham khảo thêm:* ${secondaryChunk.sectionTitle} (${secondaryChunk.publisher}) [2].\n`;
+      const snippet2 = secondaryChunk.chunkText.split("\n")[0] || secondaryChunk.chunkText.slice(0, 220);
+      body += `*Tham khảo thêm:* ${secondaryChunk.sectionTitle} (${secondaryChunk.publisher}): ${snippet2} [${c2}].\n`;
+      docRecommendations.push(`${secondaryChunk.sectionTitle}: ${snippet2}`);
     }
 
     suggestedFollowUps.push("Những yếu tố nào có thể gây té ngã trong phòng ngủ?");
@@ -366,23 +400,48 @@ function generateDeterministicGroundedAnswer(
     suggestedFollowUps.push("Hãy cho tôi xem các điểm nguy cơ trên không gian 3D.");
   }
 
-  // Inject 3D Room Context if not already included
-  if (roomContext && !body.includes(roomContext.roomName)) {
-    body += `\n\n📌 **Đối chiếu với không gian 3D (${roomContext.roomName}):**\n`;
+  // Separate self-reported/room situation observations from document-grounded guidance
+  if (roomContext && (!isAskingObjects || !body.includes("Kết luận theo tình huống tự khai"))) {
+    const safeRoomName = inspectAndSanitizeUntrustedText(roomContext.roomName, 80).sanitizedText;
+    body += `\n\n📝 **Kết luận theo tình huống tự khai / dữ liệu phòng (${safeRoomName}):**\n`;
     if (roomContext.evidenceStatus === "PHOTO_DRAFT") {
-      body += "- Bản dựng ảnh chưa có số đo xác minh; chưa thể kết luận điểm an toàn hoặc số nguy cơ thực tế. Hãy bổ sung khảo sát.\n";
+      const msg = "Bản dựng ảnh chưa có số đo xác minh thực tế; chưa thể kết luận điểm an toàn hoặc số nguy cơ chính xác.";
+      body += `- ${msg}\n`;
+      selfReportedNotes.push(msg);
     } else {
-      body += `- Dữ liệu mô phỏng: **${roomContext.hazardCount}** nguy cơ theo quy tắc: ${roomContext.hazardTitles.join(", ") || "Không phát hiện theo dữ liệu đã nhập; không chứng nhận an toàn"}.\n`;
-      body += `- Cường độ ánh sáng mô phỏng: **${roomContext.lightingLux ?? "chưa xác định"} Lux**.\n`;
+      const hazardDesc =
+        roomContext.hazardTitles
+          .map((t) => inspectAndSanitizeUntrustedText(t, 80).sanitizedText)
+          .join(", ") || "Không phát hiện theo dữ liệu đã nhập; không chứng nhận an toàn";
+      const summaryLine = `Dữ liệu mô phỏng: ${roomContext.hazardCount} nguy cơ theo quy tắc (${hazardDesc}); độ sáng ${roomContext.lightingLux ?? "chưa xác định"} Lux.`;
+      body += `- ${summaryLine}\n`;
+      selfReportedNotes.push(summaryLine);
     }
+    if (roomContext.healthConditions && roomContext.healthConditions.length > 0) {
+      const safeConditions = roomContext.healthConditions
+        .map((c) => inspectAndSanitizeUntrustedText(c, 80).sanitizedText)
+        .join(", ");
+      const note = `Thông tin tình trạng tự khai/hồ sơ minh họa: ${safeConditions} (chỉ dùng để tham chiếu bối cảnh, không phải chẩn đoán y khoa).`;
+      body += `- ${note}\n`;
+      selfReportedNotes.push(note);
+    }
+  } else if (!roomContext && selfReportedNotes.length === 0) {
+    const safeQueryExcerpt = inspectAndSanitizeUntrustedText(query, 120).sanitizedText;
+    selfReportedNotes.push(`Ngữ cảnh người dùng nêu trong câu hỏi: "${safeQueryExcerpt}".`);
   }
 
   body += MEDICAL_DISCLAIMER;
 
-  const { verifiedAnswer, citations, warnings } = verifyAndFormatCitations(
+  const { verifiedAnswer, citations, sourceSupportMap, warnings } = verifyAndFormatCitations(
     body,
     retrievedChunks
   );
+
+  const usedChunkIds = citations.map((c) => c.chunkId);
+  const evidenceBreakdown: EvidenceSectionBreakdown = {
+    documentRecommendations: docRecommendations,
+    selfReportedSituationNotes: selfReportedNotes,
+  };
 
   return {
     answer: verifiedAnswer,
@@ -394,6 +453,9 @@ function generateDeterministicGroundedAnswer(
     modelName: "curated-evidence-engine-v2",
     suggestedFollowUps: suggestedFollowUps.slice(0, 3),
     warnings,
+    sourceSupportMap,
+    documentAuditTrail: buildDocumentVersionAuditTrail(retrievedChunks, usedChunkIds),
+    evidenceBreakdown,
   };
 }
 

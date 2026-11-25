@@ -1,9 +1,10 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { getActiveRegistrySources } from "@/lib/rag/documentRegistry";
 
 async function GETHandler() {
-  return NextResponse.json(CURATED_KNOWLEDGE_SOURCES);
+  const { activeSources } = getActiveRegistrySources({ approvalOnly: true });
+  return NextResponse.json(activeSources);
 }
 
 

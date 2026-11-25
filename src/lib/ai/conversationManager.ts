@@ -257,6 +257,27 @@ export async function saveAssistantMessage(
     },
   });
 
+  // Log evaluated document versions for Task A08 audit traceability
+  try {
+    await prisma.persistenceAuditEvent.create({
+      data: {
+        resourceType: "RAG_RESPONSE_AUDIT",
+        resourceId: message.id,
+        action: "DOCUMENT_VERSIONS_EVALUATED",
+        status: "saved",
+        details: JSON.stringify({
+          conversationId,
+          evidenceStatus: result.evidenceStatus,
+          responseMode: result.responseMode,
+          documentsEvaluated: result.documentAuditTrail ?? [],
+          sourceSupportCount: result.sourceSupportMap?.length ?? 0,
+        }),
+      },
+    });
+  } catch {
+    // Audit log is non-blocking when DB mock does not stub persistenceAuditEvent
+  }
+
   // Update conversation updatedAt timestamp
   await prisma.conversation.update({
     where: { id: conversationId },

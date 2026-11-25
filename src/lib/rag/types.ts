@@ -22,6 +22,13 @@ export type ResponseMode =
   | "REFUSAL_INSUFFICIENT"
   | "EMERGENCY_ESCALATION";
 
+export type DocumentApprovalStatus = "APPROVED" | "PENDING" | "REJECTED";
+
+export interface SourceSpan {
+  startOffset?: number;
+  endOffset?: number;
+}
+
 export interface RetrievedChunk {
   chunkId: string;
   documentId: string;
@@ -31,11 +38,16 @@ export interface RetrievedChunk {
   sectionTitle: string;
   chunkText: string;
   pageNumber?: number;
+  startOffset?: number;
+  endOffset?: number;
   score: number;
   citationIndex?: number;
   contentHash: string;
   publicationDate?: string;
   lastVerifiedAt?: string;
+  version?: string;
+  license?: string;
+  approvalStatus?: DocumentApprovalStatus;
 }
 
 export interface StructuredCitation {
@@ -49,8 +61,43 @@ export interface StructuredCitation {
   pageNumber?: number;
   supportingExcerpt: string;
   officialUrl: string;
+  accessLink?: string;
   publicationDate?: string;
   lastVerifiedAt?: string;
+  version?: string;
+  contentHash?: string;
+  license?: string;
+  sourceSpan?: SourceSpan;
+}
+
+export interface SourceSupportEntry {
+  citationNumber: number;
+  citationId: string;
+  documentId: string;
+  chunkId: string;
+  claimText: string;
+  supported: boolean;
+  overlapScore: number;
+  reason: string;
+  sourceSpan?: SourceSpan;
+}
+
+export interface DocumentVersionAuditEntry {
+  documentId: string;
+  documentTitle: string;
+  publisher: string;
+  version: string;
+  contentHash: string;
+  approvalStatus: DocumentApprovalStatus;
+  lastVerifiedAt?: string;
+  accessLink: string;
+  usedInAnswer: boolean;
+}
+
+export interface EvidenceSectionBreakdown {
+  documentRecommendations: string[];
+  selfReportedSituationNotes: string[];
+  abstentionGuidance?: string;
 }
 
 export interface SufficiencyEvaluationResult {
@@ -73,5 +120,8 @@ export interface GroundedGenerationResult {
   modelName: string;
   suggestedFollowUps: string[];
   warnings: string[];
+  sourceSupportMap?: SourceSupportEntry[];
+  documentAuditTrail?: DocumentVersionAuditEntry[];
+  evidenceBreakdown?: EvidenceSectionBreakdown;
 }
 

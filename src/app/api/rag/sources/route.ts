@@ -1,10 +1,10 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { listDocumentRegistryEntries } from "@/lib/rag/documentRegistry";
 
 async function GETHandler() {
   try {
-    const sourcesSummary = CURATED_KNOWLEDGE_SOURCES.map((src) => ({
+    const sourcesSummary = listDocumentRegistryEntries().map((src) => ({
       id: src.id,
       title: src.title,
       publisher: src.publisher || src.organization,
@@ -12,9 +12,14 @@ async function GETHandler() {
       publicationDate: src.publicationDate,
       lastVerifiedAt: src.lastVerifiedAt,
       language: src.language,
+      license: src.license,
+      version: src.version,
+      contentHash: src.contentHash,
       documentType: src.documentType,
       approvalStatus: src.approvalStatus,
       ingestionStatus: src.ingestionStatus,
+      isOutdated: src.isOutdated,
+      urlValid: src.urlValid,
       totalPassages: src.passages.length,
     }));
 

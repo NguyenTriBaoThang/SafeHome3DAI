@@ -7,7 +7,14 @@ import { evaluateEvidenceSufficiency } from "@/lib/rag/evidenceSufficiency";
 import { generateGroundedAnswer } from "@/lib/rag/groundedGenerator";
 import { verifyAndFormatCitations } from "@/lib/rag/citationVerifier";
 import { analyzeUserQuery, ConversationTurn } from "@/lib/rag/queryAnalysis";
-import { StructuredCitation, RetrievedChunk } from "@/lib/rag/types";
+import {
+  StructuredCitation,
+  RetrievedChunk,
+  SourceSupportEntry,
+  DocumentVersionAuditEntry,
+  EvidenceSectionBreakdown,
+} from "@/lib/rag/types";
+import { buildDocumentVersionAuditTrail } from "@/lib/rag/documentRegistry";
 import { RoomState } from "@/types";
 
 export interface CopilotChatOptions {
@@ -30,6 +37,9 @@ export interface CopilotChatResponse {
   suggestedFollowUps: string[];
   toolInvocations: ToolExecutionResult[];
   warnings?: string[];
+  sourceSupportMap?: SourceSupportEntry[];
+  documentAuditTrail?: DocumentVersionAuditEntry[];
+  evidenceBreakdown?: EvidenceSectionBreakdown;
 }
 
 export async function processCopilotChat(options: CopilotChatOptions): Promise<CopilotChatResponse> {
@@ -116,6 +126,19 @@ ${evidencePrompt || "Chưa tìm thấy tài liệu phù hợp."}
         suggestedFollowUps: ["Ưu tiên khắc phục nguy cơ nào trong phòng này?", "Chỉ cho tôi vị trí nguy cơ trên 3D."],
         toolInvocations,
         warnings: [...warnings, evaluation.coverageRationale],
+        sourceSupportMap: verified.sourceSupportMap,
+        documentAuditTrail: buildDocumentVersionAuditTrail(
+          retrievedChunks,
+          verified.citations.map((c) => c.chunkId)
+        ),
+        evidenceBreakdown: {
+          documentRecommendations: verified.citations.map(
+            (c) => `[${c.citationNumber}] ${c.sectionTitle} (${c.publisher})`
+          ),
+          selfReportedSituationNotes: [
+            `Phòng đang xem: ${activeRoom.name} (${activeRoom.hazards.length} nguy cơ mô phỏng)`,
+          ],
+        },
       };
     } catch {
       // Provider errors may contain request data or API keys; never log them.
@@ -158,6 +181,12 @@ ${evidencePrompt || "Chưa tìm thấy tài liệu phù hợp."}
       suggestedFollowUps: [],
       toolInvocations,
       warnings: [...warnings, evaluation.coverageRationale],
+      sourceSupportMap: [],
+      documentAuditTrail: buildDocumentVersionAuditTrail(retrievedChunks, []),
+      evidenceBreakdown: {
+        documentRecommendations: [],
+        selfReportedSituationNotes: observations.map((o) => o.message),
+      },
     };
   }
 
