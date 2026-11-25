@@ -155,10 +155,11 @@ export async function processRAGQuery(
 ): Promise<ChatMessage> {
   const retrieved = retrieveKnowledgePassages(query, 3);
 
+  // Server-only API credentials (client-exposed environment variables are forbidden)
   const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.OPENAI_API_KEY ||
-    process.env.NEXT_PUBLIC_AI_API_KEY;
+    typeof window === "undefined"
+      ? process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY
+      : undefined;
 
   if (apiKey && process.env.ENABLE_EXTERNAL_LLM === "true") {
     try {

@@ -14,6 +14,7 @@ import {
 } from "@/lib/privacy/consentService";
 import { getImageMaskingPolicy, signPrivateMediaUrl } from "@/lib/privacy/mediaSecurity";
 import { resolveAccountScopeId } from "@/lib/persistence/reliablePersistence";
+import { inspectAndSanitizeUntrustedText } from "@/lib/security/promptInjectionGuard";
 
 export const runtime = "nodejs";
 export const maxDuration = 150;
@@ -97,11 +98,13 @@ async function POSTHandler(
       throw new VisionProviderError("INVALID_IMAGE", "Dữ liệu ảnh base64 không hợp lệ.");
     }
 
+    const safeCaption = inspectAndSanitizeUntrustedText(body.caption || "", 500).sanitizedText;
+
     const result = await runVisionAnalysis(imageId, roomId, {
       mode,
       roomType,
       viewpoint: body.viewpoint,
-      caption: body.caption || "",
+      caption: safeCaption,
       imageBufferBase64: base64,
       demo,
     });
@@ -119,7 +122,7 @@ async function POSTHandler(
     await persistVisionAnalysis(
       result,
       Buffer.from(base64, "base64"),
-      body.caption || "",
+      safeCaption,
       roomType,
       body.viewpoint || "ENTRANCE"
     );

@@ -149,8 +149,8 @@ async function POSTHandler(request: Request) {
         success: false,
         persistenceStatus: "failed",
         persisted: false,
+        code: "DB_WRITE_FAILED",
         error: "Không thể lưu kết quả đánh giá vào cơ sở dữ liệu.",
-        details: error?.message,
       },
       { status: 503 }
     );

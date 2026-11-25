@@ -7,6 +7,8 @@ import {
   ConsentRevokedError,
 } from "@/lib/privacy/consentService";
 import { resolveAccountScopeId } from "@/lib/persistence/reliablePersistence";
+import { inspectAndSanitizeUntrustedText } from "@/lib/security/promptInjectionGuard";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 export const runtime = "nodejs";
 
@@ -92,7 +94,8 @@ async function POSTHandler(request: Request) {
       });
     }
 
-    const assessment = await analyzeItemHazardFromImage(buffer, fileName, mimeType, itemHint);
+    const safeItemHint = inspectAndSanitizeUntrustedText(itemHint, 200).sanitizedText;
+    const assessment = await analyzeItemHazardFromImage(buffer, fileName, mimeType, safeItemHint);
 
     return NextResponse.json({
       success: true,
@@ -106,10 +109,11 @@ async function POSTHandler(request: Request) {
       );
     }
     return NextResponse.json(
-      {
-        error: "Đã xảy ra lỗi trong quá trình thẩm định rủi ro vật dụng.",
-        details: error?.message || String(error),
-      },
+      buildSafeErrorPayload(
+        error,
+        "Đã xảy ra lỗi trong quá trình thẩm định rủi ro vật dụng.",
+        "ITEM_ASSESSMENT_FAILED"
+      ),
       { status: 500 }
     );
   }

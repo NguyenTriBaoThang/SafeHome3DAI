@@ -67,8 +67,8 @@ async function GETHandler(request: Request) {
       {
         success: false,
         persistenceStatus: "failed",
+        code: "DB_QUERY_FAILED",
         error: "Không thể truy cập cơ sở dữ liệu phòng. Chưa tải được dữ liệu thực tế.",
-        details: error?.message,
       },
       { status: 503 }
     );

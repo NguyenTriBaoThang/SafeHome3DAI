@@ -116,12 +116,12 @@ export async function generateGroundedAnswer(
     };
   }
 
-  // 4. Check External LLM configuration
+  // 4. Check External LLM configuration (strictly server-side secret variables)
   const enableExternalLLM = process.env.ENABLE_EXTERNAL_LLM === "true";
   const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.OPENAI_API_KEY ||
-    process.env.NEXT_PUBLIC_AI_API_KEY;
+    typeof window === "undefined"
+      ? process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY
+      : undefined;
 
   if (enableExternalLLM && apiKey) {
     try {
