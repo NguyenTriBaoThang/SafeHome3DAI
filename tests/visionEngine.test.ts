@@ -20,7 +20,13 @@ describe("SafeHome Vision Intelligence — Unit Tests", () => {
     });
 
     it("validates valid PNG magic bytes", () => {
-      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]);
+      // A07 hardening requires the full 8-byte signature + a valid IHDR chunk (not just magic bytes).
+      const pngBuffer = Buffer.alloc(33);
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(pngBuffer, 0);
+      pngBuffer.writeUInt32BE(13, 8);
+      pngBuffer.write("IHDR", 12, "ascii");
+      pngBuffer.writeUInt32BE(64, 16);
+      pngBuffer.writeUInt32BE(48, 20);
       const res = validateImageBuffer(pngBuffer);
       expect(res.isValid).toBe(true);
       expect(res.mimeType).toBe("image/png");
