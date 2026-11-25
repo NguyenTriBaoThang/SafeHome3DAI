@@ -193,6 +193,8 @@ Hệ thống thống nhất duy nhất 1 bộ quy tắc thẩm định chuẩn (
 | `src/app/api/**` | **Owner chính** (REST APIs, Auth, Validation) | Consumer |
 | `src/components/three/**` | Reviewer | **Owner chính** (Canvas, 3D Models, Shaders) |
 | `src/app/ai-vision/**` (UI) | Reviewer (Chỉ cấp API adapter) | **Owner chính** (Giao diện Studio, camera) |
+| `src/lib/vision/**` | Reviewer | **Owner chính** (Gemini adapter, schema output, fallback) |
+| `src/app/api/vision/**` | Reviewer (bắt buộc gắn; tự merge nếu quá 24h không phản hồi, kèm log test) | Được sửa trong phạm vi vision, **không đổi shape contract v1** |
 | `src/app/digital-twin/**` | Reviewer | **Owner chính** (Tương tác bản sao số) |
 | `src/stores/useSimulationStore.ts` | Đồng sở hữu (Phần tính toán risk) | **Owner chính** (Phần tương tác UI 3D) |
 
