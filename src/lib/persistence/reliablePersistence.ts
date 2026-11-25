@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+const randomUUID = () => globalThis.crypto.randomUUID();
 import { z } from "zod";
 import { prisma } from "@/lib/database/prisma";
 import { currentDatabaseScope } from "@/lib/database/scope";

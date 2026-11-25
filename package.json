@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval:rag:a09": "node scripts/run-rag-benchmark-a09.cjs",
+    "qa:gates": "node scripts/ci/quality-gates.cjs",
+    "typecheck": "tsc --noEmit",
     "dev:experience": "node scripts/run-experience.cjs dev",
     "build:experience": "node scripts/run-experience.cjs build",
     "start:experience": "node scripts/run-experience.cjs start",
