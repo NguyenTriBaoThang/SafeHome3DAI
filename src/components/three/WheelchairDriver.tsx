@@ -294,7 +294,8 @@ export const WheelchairDriver: React.FC<WheelchairDriverProps> = ({
       </mesh>
 
       {/* Live Ergonomic Clearance Badge */}
-      <Html position={[0, 1.52, 0]} center distanceFactor={10} className="pointer-events-none select-none">
+      {/* Không dùng distanceFactor: nhãn giữ kích thước cố định theo pixel, không phóng to khi camera focus gần. */}
+      <Html position={[0, 1.52, 0]} center zIndexRange={[10, 0]} className="pointer-events-none select-none">
         <div
           className={`px-2.5 py-1 rounded-full text-[10px] font-bold shadow-lg border whitespace-nowrap backdrop-blur-md ${
             blocked

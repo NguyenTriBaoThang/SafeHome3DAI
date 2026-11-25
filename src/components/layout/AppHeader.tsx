@@ -61,21 +61,21 @@ export const AppHeader: React.FC = () => {
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Brand */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 shrink-0">
           <Link href="/dashboard" className="flex items-center space-x-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shadow-teal-500/10 overflow-hidden border border-slate-200/80 p-0.5">
               <img src="/images/logo.png" alt="SafeHome 3D AI Logo" className="h-full w-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight text-slate-900">
+                <span className="text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap">
                   SafeHome <span className="text-teal-600">3D AI</span>
                 </span>
-                <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800">
+                <span className="hidden 2xl:inline rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800 whitespace-nowrap">
                   Mô hình phòng (mô phỏng gần đúng)
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
+              <p className="text-[11px] text-slate-500 font-medium hidden 2xl:block">
                 Nhà an toàn, tuổi già an tâm • Sàng lọc môi trường phòng ngừa té ngã
               </p>
             </div>
@@ -83,7 +83,7 @@ export const AppHeader: React.FC = () => {
         </div>
 
         {/* Center: Context-aware Navigation */}
-        <button className="text-xs text-slate-600 underline" onClick={async () => {
+        <button className="text-xs text-slate-600 underline whitespace-nowrap" onClick={async () => {
           const response = await fetch("/api/auth/logout", { method: "POST" });
           if (!response.ok) return;
           for (const key of Object.keys(localStorage)) if (key.startsWith("safehome:")) localStorage.removeItem(key);
@@ -91,7 +91,7 @@ export const AppHeader: React.FC = () => {
           window.location.assign("/sign-in");
         }}>Đăng xuất</button>
         {pathname === "/workflow" ? (
-          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
+          <div className="hidden 2xl:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
             <Compass className="h-4 w-4 text-teal-600 animate-spin-slow" />
             <span>Quy Trình Khảo Sát &amp; Đánh Giá An Toàn (7 Bước Khép Kín)</span>
           </div>
@@ -107,29 +107,29 @@ export const AppHeader: React.FC = () => {
             <span>{isPhotoDraft ? "Bản dựng ước lượng — chưa đánh giá thực trạng" : isPhotoVision ? "Ảnh cần xác nhận tại nhà" : "Chưa đánh giá"}</span>
           </div>
         ) : (
-        <div className="flex items-center space-x-2.5" data-testid="header-status-assessed">
+        <div className="flex items-center gap-2 min-w-0" data-testid="header-status-assessed">
           <div
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold",
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-bold whitespace-nowrap",
               status.unknownRules > 0 ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-slate-50 text-slate-700 border-slate-200"
             )}
             title="Chỉ số sàng lọc môi trường tham khảo, không phải kết luận an toàn hay dự báo té ngã"
           >
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             {status.screeningScore == null ? (
-              <span>Chưa thể đánh giá đầy đủ ({status.unknownRules} mục thiếu dữ liệu)</span>
+              <span>{status.stateLabel}: chưa đủ dữ liệu ({status.unknownRules} mục)</span>
             ) : (
-              <span>Chỉ số sàng lọc: {status.screeningScore}/100</span>
+              <span>{status.stateLabel}: {status.screeningScore}/100</span>
             )}
           </div>
 
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-xs font-semibold">
-            <span className="font-bold">{status.hazards}</span> nguy cơ đã ghi nhận
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-[11px] font-semibold whitespace-nowrap">
+            <span className="font-bold">{status.hazards}</span>&nbsp;nguy cơ
           </div>
 
           {status.lux ? (
-            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-xs font-semibold">
-              <span>Độ rọi đêm: {status.lux.value} Lux</span>
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-[11px] font-semibold whitespace-nowrap">
+              <span>Đêm {status.lux.value} Lux</span>
               <span
                 data-testid="header-lux-badge"
                 className={cn(
@@ -158,12 +158,12 @@ export const AppHeader: React.FC = () => {
             {isNightMode ? (
               <>
                 <Moon className="h-4 w-4 text-indigo-300" />
-                <span className="hidden xl:inline">Cảnh đêm (mô phỏng)</span>
+                <span className="hidden 2xl:inline">Cảnh đêm (mô phỏng)</span>
               </>
             ) : (
               <>
                 <Sun className="h-4 w-4 text-amber-600" />
-                <span className="hidden xl:inline">Cảnh ngày (mô phỏng)</span>
+                <span className="hidden 2xl:inline">Cảnh ngày (mô phỏng)</span>
               </>
             )}
           </button>

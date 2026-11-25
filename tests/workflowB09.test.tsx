@@ -3,7 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { evaluateRoomHazardsCanonical } from "@/lib/risk/ruleEngine";
 import { diffStoredSnapshots, type StoredRoomSnapshot } from "@/lib/risk/snapshotManager";
-import { deriveHeaderStatus } from "@/components/layout/headerStatus";
+import { deriveHeaderStatus, pickLatest } from "@/components/layout/headerStatus";
 import { createSnapshotClient } from "@/components/workflow/snapshotClient";
 import { buildComparisonView, buildStateCard, sanitizeClaim, safeWordingAllowed } from "@/components/workflow/reportGuard";
 import {
@@ -88,6 +88,24 @@ describe("B09 header: never shows sample numbers", () => {
     expect(get(mk("measured"))).toMatchObject({ source: "measured", label: "đã đo" });
     expect(get(mk("user_confirmed"))).toMatchObject({ source: "user_confirmed" });
     expect(get(mk("vision_estimated"))).toMatchObject({ label: "ước lượng AI" });
+  });
+});
+
+describe("B09 header never shows the simulated snapshot", () => {
+  const mk = (snapshotType: string, score: number, revision = 1, t = "2026-11-25T00:00:00.000Z") => ({
+    snapshotType, revision, createdAt: t, roomState: {}, provenanceMap: {},
+    canonicalAssessment: { findings: new Array(score === 70 ? 2 : 0).fill({}), heuristicSafetyScore: score, missingInputs: [] },
+  });
+  it("baseline 70 + proposed 100 (newer) -> header shows baseline 70 'Hiện trạng'", () => {
+    const st = deriveHeaderStatus(pickLatest([mk("BASELINE", 70, 1, "2026-11-25T01:00:00Z"), mk("PROPOSED_SCENARIO", 100, 1, "2026-11-25T02:00:00Z")]));
+    expect(st).toMatchObject({ kind: "assessed", stateLabel: "Hiện trạng", screeningScore: 70, hazards: 2 });
+  });
+  it("only proposed exists -> 'Chưa đánh giá'", () => {
+    expect(deriveHeaderStatus(pickLatest([mk("PROPOSED_SCENARIO", 100)]))).toEqual({ kind: "none", label: "Chưa đánh giá" });
+  });
+  it("with verified -> latest verified value labelled 'Đã xác minh'", () => {
+    const st = deriveHeaderStatus(pickLatest([mk("BASELINE", 70), mk("PROPOSED_SCENARIO", 100, 1, "2026-11-25T09:00:00Z"), mk("VERIFIED_POST_INTERVENTION", 90, 1), mk("VERIFIED_POST_INTERVENTION", 95, 2)]));
+    expect(st).toMatchObject({ stateLabel: "Đã xác minh", screeningScore: 95 });
   });
 });
 

@@ -30,6 +30,8 @@ export type HeaderStatus =
   | {
       kind: "assessed";
       snapshotType: string;
+      /** Nhãn trạng thái đang hiển thị: "Hiện trạng" hoặc "Đã xác minh". */
+      stateLabel: string;
       hazards: number;
       unknownRules: number;
       /** null khi còn thiếu dữ liệu: không đưa điểm ra như một kết luận. */
@@ -47,6 +49,7 @@ export function deriveHeaderStatus(latest: HeaderSnapshotInput | null | undefine
   return {
     kind: "assessed",
     snapshotType: latest.snapshotType,
+    stateLabel: latest.snapshotType === "VERIFIED_POST_INTERVENTION" ? "Đã xác minh" : "Hiện trạng",
     hazards: a.findings.length,
     unknownRules: a.missingInputs.length,
     screeningScore: a.missingInputs.length === 0 ? a.heuristicSafetyScore : null,
@@ -54,7 +57,12 @@ export function deriveHeaderStatus(latest: HeaderSnapshotInput | null | undefine
   };
 }
 
-/** Snapshot mới nhất để hiển thị: VERIFIED > PROPOSED > BASELINE theo thứ tự thời gian lưu. */
-export function pickLatest<T extends { createdAt: string }>(snaps: T[]): T | null {
-  return snaps.length ? [...snaps].sort((x, y) => x.createdAt.localeCompare(y.createdAt)).at(-1)! : null;
+/**
+ * Snapshot header được phép hiển thị: VERIFIED_POST_INTERVENTION (bản mới nhất) nếu có, nếu không thì BASELINE.
+ * PROPOSED_SCENARIO (mô phỏng) KHÔNG BAO GIỜ được chọn.
+ */
+export function pickLatest<T extends { createdAt: string; snapshotType?: string; revision?: number }>(snaps: T[]): T | null {
+  const newest = (type: string) =>
+    snaps.filter((x) => x.snapshotType === type).sort((a, b) => (a.revision ?? 0) - (b.revision ?? 0) || a.createdAt.localeCompare(b.createdAt)).at(-1);
+  return newest("VERIFIED_POST_INTERVENTION") ?? newest("BASELINE") ?? null;
 }
