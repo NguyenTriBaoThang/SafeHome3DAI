@@ -26,7 +26,7 @@ export function StepNav(props: {
         aria-busy={props.busy || undefined}
         className="min-h-[48px] px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-base sm:text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-70"
       >
-        {props.busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : props.nextIcon ?? <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+        {props.busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : props.nextIcon ?? <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />}
         <span>{props.busy ? props.busyLabel ?? "Đang xử lý…" : props.nextLabel}</span>
       </button>
     </div>
