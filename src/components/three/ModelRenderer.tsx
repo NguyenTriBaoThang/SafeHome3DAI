@@ -19,6 +19,23 @@ interface ModelRendererProps {
 }
 
 /**
+ * Per-object boundary so a missing/corrupted GLB file degrades gracefully to a procedural fallback
+ * instead of crashing the whole WebGL scene.
+ */
+class AssetErrorBoundary extends React.Component<
+  { fallback: React.ReactNode; children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
+/**
  * GLB Asset Loader with automatic cloning, shadow assignment, and material tuning.
  */
 function GLBModel({
@@ -130,24 +147,36 @@ export const ModelRenderer: React.FC<ModelRendererProps> = ({
         onClick(e);
       }}
     >
-      {/* 3D Model Rendering: Real GLB or Photorealistic Procedural PBR Model */}
-      {modelType === "bed" ? <Suspense fallback={null}><ArchitecturalBed dimensions={dimensions} /></Suspense> : modelType === "toilet" ? <ArchitecturalToilet dimensions={dimensions} /> : modelType === "sink" ? <ArchitecturalVanity dimensions={dimensions} /> : resolvedGlb ? (
-        <Suspense
-          fallback={
-            <mesh position={[0, dimensions.height * 0.5, 0]}>
-              <boxGeometry
-                args={[dimensions.width, dimensions.height, dimensions.length]}
-              />
-              <meshStandardMaterial color="#94a3b8" wireframe />
-            </mesh>
-          }
-        >
-          <GLBModel
-            glbPath={resolvedGlb}
-            assetId={assetId}
-            dimensions={dimensions}
-          />
-        </Suspense>
+      {/* 3D Model Rendering: Real GLB or Photorealistic Procedural PBR Model with Progressive Error Fallback */}
+      {modelType === "bed" ? (
+        <AssetErrorBoundary fallback={<ProceduralModelBody object={object} hasHazard={hasHazard} />}>
+          <Suspense fallback={<ProceduralModelBody object={object} hasHazard={hasHazard} />}>
+            <ArchitecturalBed dimensions={dimensions} />
+          </Suspense>
+        </AssetErrorBoundary>
+      ) : modelType === "toilet" ? (
+        <ArchitecturalToilet dimensions={dimensions} />
+      ) : modelType === "sink" ? (
+        <ArchitecturalVanity dimensions={dimensions} />
+      ) : resolvedGlb ? (
+        <AssetErrorBoundary fallback={<ProceduralModelBody object={object} hasHazard={hasHazard} />}>
+          <Suspense
+            fallback={
+              <mesh position={[0, dimensions.height * 0.5, 0]}>
+                <boxGeometry
+                  args={[dimensions.width, dimensions.height, dimensions.length]}
+                />
+                <meshStandardMaterial color="#94a3b8" wireframe />
+              </mesh>
+            }
+          >
+            <GLBModel
+              glbPath={resolvedGlb}
+              assetId={assetId}
+              dimensions={dimensions}
+            />
+          </Suspense>
+        </AssetErrorBoundary>
       ) : (
         <ProceduralModelBody object={object} hasHazard={hasHazard} />
       )}
