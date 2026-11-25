@@ -88,10 +88,10 @@ describe("SafeHome Risk Intelligence — Integration Tests", () => {
   });
 
   it("evaluates a 3D Digital Twin RoomState end-to-end", () => {
-    const bedroom3D = INITIAL_ROOMS[0]; // bedroom from mockRooms
+    const bedroom3D = INITIAL_ROOMS.find((room) => room.roomType === "BEDROOM");
     expect(bedroom3D).toBeDefined();
 
-    const snapshot = evaluateRoomHazards(bedroom3D);
+    const snapshot = evaluateRoomHazards(bedroom3D!);
     expect(snapshot.roomName).toContain("Phòng ngủ");
     expect(snapshot.totalRulesEvaluated).toBe(8);
     expect(snapshot.safetyScore).toBeGreaterThanOrEqual(10);
@@ -107,10 +107,10 @@ describe("SafeHome Risk Intelligence — Integration Tests", () => {
   });
 
   it("correctly handles bathroom 3D room state with wet floor and grab bars", () => {
-    const bathroom3D = INITIAL_ROOMS[1]; // bathroom from mockRooms
+    const bathroom3D = INITIAL_ROOMS.find((room) => room.roomType === "BATHROOM");
     expect(bathroom3D).toBeDefined();
 
-    const snapshot = evaluateRoomHazards(bathroom3D);
+    const snapshot = evaluateRoomHazards(bathroom3D!);
     expect(snapshot.roomType).toBe("BATHROOM");
 
     // Bathroom rules should NOT be NOT_APPLICABLE
