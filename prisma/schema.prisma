@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Project {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  homes       Home[]
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  dataPartition String   @default("REAL") // "REAL" | "DEMO"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  homes         Home[]
 }
 
 model Home {
@@ -23,30 +24,33 @@ model Home {
   name                  String
   address               String?
   targetResidentProfile String?  // e.g. "Người cao tuổi 75 tuổi, giảm thị lực, đi lại cần hỗ trợ"
+  dataPartition         String   @default("REAL") // "REAL" | "DEMO"
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   rooms                 Room[]
 }
 
 model Room {
-  id               String               @id @default(uuid())
-  homeId           String
-  home             Home                 @relation(fields: [homeId], references: [id], onDelete: Cascade)
-  name             String
-  roomType         String               // "BEDROOM" | "BATHROOM" | "LIVING_ROOM"
-  width            Float                @default(4.0)
-  length           Float                @default(5.0)
-  height           Float                @default(2.8)
-  floorMaterial    String               @default("WOOD") // "WOOD" | "CERAMIC_TILE" | "NON_SLIP_VINYL"
-  lightingLevel    Float                @default(150.0)  // Lux: e.g. 50 (dim/night), 150 (normal), 300 (bright)
-  isWet            Boolean              @default(false)
-  isSlipResistant  Boolean              @default(false)
-  grabBarsCount    Int                  @default(0)
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  sceneObjects     SceneObject[]
-  assessments      Assessment[]
-  scenarios        SimulationScenario[]
+  id                String               @id @default(uuid())
+  homeId            String
+  home              Home                 @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  name              String
+  roomType          String               // "BEDROOM" | "BATHROOM" | "LIVING_ROOM"
+  width             Float                @default(4.0)
+  length            Float                @default(5.0)
+  height            Float                @default(2.8)
+  floorMaterial     String               @default("WOOD") // "WOOD" | "CERAMIC_TILE" | "NON_SLIP_VINYL"
+  lightingLevel     Float                @default(150.0)  // Lux: e.g. 50 (dim/night), 150 (normal), 300 (bright)
+  isWet             Boolean              @default(false)
+  isSlipResistant   Boolean              @default(false)
+  grabBarsCount     Int                  @default(0)
+  dataPartition     String               @default("REAL") // "REAL" | "DEMO"
+  persistenceStatus String               @default("saved") // "saved" | "pending" | "failed"
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  sceneObjects      SceneObject[]
+  assessments       Assessment[]
+  scenarios         SimulationScenario[]
 }
 
 model SceneObject {
@@ -101,20 +105,23 @@ model SceneSnapshot {
 }
 
 model Assessment {
-  id               String             @id @default(uuid())
-  roomId           String
-  room             Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  scenarioId       String?
-  scenario         SimulationScenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
-  assessmentDate   DateTime           @default(now())
-  totalHazards     Int                @default(0)
-  resolvedHazards  Int                @default(0)
-  remainingHazards Int                @default(0)
-  newHazards       Int                @default(0)
-  safetyScore      Float              @default(70.0) // 0-100 heuristic index
-  status           String             @default("COMPLETED")
-  notes            String?
-  findings         HazardFinding[]
+  id                String             @id @default(uuid())
+  roomId            String
+  room              Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  scenarioId        String?
+  scenario          SimulationScenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+  assessmentDate    DateTime           @default(now())
+  totalHazards      Int                @default(0)
+  resolvedHazards   Int                @default(0)
+  remainingHazards  Int                @default(0)
+  newHazards        Int                @default(0)
+  safetyScore       Float              @default(70.0) // 0-100 heuristic index
+  status            String             @default("COMPLETED")
+  dataPartition     String             @default("REAL") // "REAL" | "DEMO"
+  persistenceStatus String             @default("saved") // "saved" | "pending" | "failed"
+  idempotencyKey    String?            @unique
+  notes             String?
+  findings          HazardFinding[]
 }
 
 model HazardFinding {
@@ -228,17 +235,19 @@ model AnswerCitation {
 // =====================================================================
 
 model HomeSurvey {
-  id              String             @id @default(uuid())
-  name            String             @default("Khảo sát không gian sống mới")
-  ownerId         String?
-  targetResident  String?            // e.g. "Người cao tuổi 75 tuổi, đi lại chậm"
-  status          String             @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "DRAFT"
-  consentGiven    Boolean            @default(true)
-  generalNotes    String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  rooms           SurveyRoom[]
-  auditEvents     SurveyAuditEvent[]
+  id                String             @id @default(uuid())
+  name              String             @default("Khảo sát không gian sống mới")
+  ownerId           String?
+  targetResident    String?            // e.g. "Người cao tuổi 75 tuổi, đi lại chậm"
+  status            String             @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED" | "DRAFT"
+  dataPartition     String             @default("REAL") // "REAL" | "DEMO"
+  persistenceStatus String             @default("saved") // "saved" | "pending" | "failed"
+  consentGiven      Boolean            @default(true)
+  generalNotes      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  rooms             SurveyRoom[]
+  auditEvents       SurveyAuditEvent[]
 }
 
 model SurveyRoom {
@@ -422,4 +431,40 @@ model VisionAuditEvent {
   newValue   String?
   actorId    String?  @default("USER")
   timestamp  DateTime @default(now())
+}
+
+model PersistenceAuditEvent {
+  id             String   @id @default(uuid())
+  accountId      String   @default("system")
+  dataPartition  String   @default("REAL") // "REAL" | "DEMO"
+  resourceType   String   // "ROOM" | "ASSESSMENT" | "SURVEY" | "SIMULATION" | "REPORT_EXPORT"
+  resourceId     String
+  roomId         String?
+  action         String   // "CREATED" | "UPDATED" | "DELETED" | "DUPLICATE_REPLAYED" | "WRITE_FAILED" | "DEMO_EXPORT_BLOCKED" | "CROSS_TENANT_BLOCKED"
+  status         String   // "saved" | "pending" | "failed" | "blocked"
+  idempotencyKey String?
+  details        String?
+  createdAt      DateTime @default(now())
+
+  @@index([accountId, roomId])
+  @@index([resourceId])
+}
+
+model ConsentRecord {
+  id                  String    @id @default(uuid())
+  accountId           String
+  consentVersion      String    @default("2026.1")
+  allowImageStorage   Boolean   @default(false)
+  allowThirdPartyAI   Boolean   @default(false) // Gemini VLM / External AI processing
+  allowResearchUse    Boolean   @default(false)
+  retainOriginalImage Boolean   @default(true)
+  retentionDays       Int       @default(30)
+  status              String    @default("GRANTED") // "GRANTED" | "REVOKED"
+  grantedAt           DateTime  @default(now())
+  revokedAt           DateTime?
+  revocationReason    String?
+  ipOrOrigin          String?
+  updatedAt           DateTime  @updatedAt
+
+  @@index([accountId, status])
 }

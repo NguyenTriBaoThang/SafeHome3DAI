@@ -2,10 +2,27 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/database/prisma";
+import {
+  assertConsentForAction,
+  ConsentRequiredError,
+  ConsentRevokedError,
+} from "@/lib/privacy/consentService";
+import { resolveAccountScopeId } from "@/lib/persistence/reliablePersistence";
 
 const PhotoUploadSchema = z.object({
-  fileUrl: z.string().url("URL ảnh không hợp lệ"),
-  caption: z.string().optional(),
+  // Enforce private storage URLs only — block public /uploads/vision/ or arbitrary external links
+  fileUrl: z
+    .string()
+    .min(1)
+    .refine(
+      (val) =>
+        val.startsWith("/api/vision/images/") &&
+        !val.includes("/uploads/vision/") &&
+        !val.startsWith("http"),
+      "Chỉ chấp nhận đường dẫn ảnh riêng tư nội bộ (/api/vision/images/...)"
+    ),
+  caption: z.string().max(1000).optional(),
+  consent: z.boolean().optional(),
   simulateVision: z.boolean().optional(),
 });
 
@@ -25,9 +42,26 @@ async function POSTHandler(
       );
     }
 
-    const { fileUrl, caption, simulateVision } = parseResult.data;
+    const { fileUrl, caption, consent, simulateVision } = parseResult.data;
 
-    // Optional simulated vision detections (flagged unconfirmed for safety)
+    // Verify room ownership inside the specified surveyId (prevents cross-survey IDOR)
+    const surveyRoom = await prisma.surveyRoom.findFirst({
+      where: { id: params.roomId, surveyId: params.id },
+    });
+    if (!surveyRoom) {
+      return NextResponse.json(
+        { error: "Không tìm thấy phòng thuộc hồ sơ khảo sát này." },
+        { status: 404 }
+      );
+    }
+
+    // Require image_storage consent
+    await assertConsentForAction({
+      accountId: resolveAccountScopeId(),
+      requiredScope: "image_storage",
+      requestConsentFlag: consent === true,
+    });
+
     let detectedObjects: string[] | null = null;
     if (simulateVision) {
       detectedObjects = [
@@ -50,18 +84,22 @@ async function POSTHandler(
       message: "Đã lưu ảnh phòng khảo sát thành công",
       photo: {
         ...photo,
-        detectedObjects: detectedObjects,
+        detectedObjects,
       },
     });
   } catch (error: any) {
-    console.error("Lỗi tải ảnh phòng:", error);
+    if (error instanceof ConsentRevokedError || error instanceof ConsentRequiredError) {
+      return NextResponse.json(
+        { success: false, code: error.code, error: error.message },
+        { status: error.statusCode }
+      );
+    }
     return NextResponse.json(
       { error: "Không thể lưu ảnh phòng", details: error.message },
       { status: 500 }
     );
   }
 }
-
 
 export const POST = withAccount(POSTHandler);
 export const dynamic = "force-dynamic";

@@ -391,7 +391,7 @@ export function adaptCanonicalToLegacySnapshot(
   return {
     id: canonical.assessmentId.replace(/^asmt-/, "snapshot-"),
     roomId: canonical.roomId,
-    roomName: rawInput?.roomName || "Không gian khảo sát",
+    roomName: rawInput?.roomName || rawInput?.name || "Không gian khảo sát",
     roomType: rawInput?.roomType || "BEDROOM",
     snapshotType: canonical.isBaseline ? "BASELINE" : "INTERVENTION",
     createdAt: canonical.createdAt,
