@@ -196,6 +196,7 @@ ${evidencePrompt || "Chưa tìm thấy tài liệu phù hợp."}
     intent: analysis.intent,
     evaluation,
     retrievedChunks,
+    isPromptInjection: analysis.isPromptInjection,
     roomContext: {
       evidenceStatus: activeRoom.evidenceStatus,
       roomId: activeRoom.id,

@@ -14,7 +14,7 @@ const UNTRUSTED_INJECTION_PATTERNS: Array<{ id: string; regex: RegExp }> = [
   { id: "DEVELOPER_JAILBREAK", regex: /(?:developer\s*mode|jailbreak|bật chế độ dev|you are now DAN)/i },
   { id: "SCORE_TAMPERING", regex: /(?:force|set|override)\s+(?:safety\s*)?score\s*(?:to|=|:)?\s*100/i },
   { id: "VI_SCORE_TAMPERING", regex: /(?:ép|đặt|gán|chỉnh)\s*(?:điểm\s*an\s*toàn|safety\s*score)\s*(?:thành|lên|=)?\s*100/i },
-  { id: "VI_IGNORE_RULES", regex: /(?:bỏ qua|phớt lờ|vô hiệu hóa)\s*(?:mọi\s*)?(?:chỉ dẫn|quy tắc|luật|hệ thống)/i },
+  { id: "VI_IGNORE_RULES", regex: /(?:bỏ qua|phớt lờ|vô hiệu hóa)\s*(?:mọi\s*|toàn bộ\s*|các\s*)?(?:chỉ dẫn|hướng dẫn|quy tắc|luật|hệ thống|tài liệu|nguồn|chứng cứ|bằng chứng)/i },
   { id: "SECRET_EXFILTRATION", regex: /(?:reveal|print|output|show|tiết lộ)\s*(?:the\s*)?(?:api[_\s]?key|gemini_api_key|secret|password|env)/i },
   { id: "MARKUP_SCRIPT_TAG", regex: /<\s*script\b[^>]*>/i },
 ];
