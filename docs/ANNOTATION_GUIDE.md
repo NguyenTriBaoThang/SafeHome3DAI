@@ -1,5 +1,7 @@
 # Hướng dẫn gán nhãn ảnh — 18 lớp và 8 nguy cơ
 
+> **Ảnh thật có consent (bộ kiểm thử khóa B02/B03):** dùng `docs/collaboration/B03_ANNOTATION_GUIDELINE.md` (4 trạng thái present/absent/uncertain/not_assessable, hai người gán độc lập). Tài liệu dưới đây áp dụng cho tập ảnh công khai qua Label Studio.
+
 ## Điều kiện và trạng thái
 
 Chỉ gán nhãn ảnh đã được người dùng Giữ, đủ metadata giấy phép và có checksum đúng trong snapshot chia tập đóng băng. Không dùng ảnh pending/reject/replace. Không chỉnh tập test sau khi đóng băng.
