@@ -1,7 +1,6 @@
 import { currentDatabaseScope } from "@/lib/database/scope";
 import { prisma } from "@/lib/database/prisma";
 import {
-  AssessmentInput,
   AssessmentSnapshot,
   AssessmentReport,
   BeforeAfterComparisonResult,
@@ -9,8 +8,20 @@ import {
 import { evaluateRoomHazards } from "./ruleEngine";
 import { compareAssessments } from "./comparisonEngine";
 import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import {
+  DataPartition,
+  PersistenceStatus,
+  assertRealFieldEvidenceForReport,
+  classifyDataPartition,
+  buildDemoBanner,
+} from "@/lib/persistence/demoBoundary";
+import {
+  persistAssessmentTransaction,
+  PersistenceWriteError,
+  ResourceNotFoundError,
+} from "@/lib/persistence/reliablePersistence";
 
-// In-memory snapshot cache for fast retrieval and demo/offline scenarios
+// In-memory snapshot cache for fast retrieval within the current account scope
 const snapshots = new Map<string, AssessmentSnapshot>();
 const scopedKey = (key: string) => `${currentDatabaseScope()?.id || "offline-test"}:${key}`;
 const snapshotMemoryStore = {
@@ -23,30 +34,68 @@ export function invalidateRoomAssessments(roomId: string) {
 }
 
 /**
- * Executes a full risk assessment on a room and persists findings to SQLite database if room exists.
+ * Executes a full risk assessment on a room and persists findings atomically to SQLite
+ * when the room exists (or fails explicitly if persistence is required or DB is down).
  */
-export async function runAndPersistAssessment(rawInput: any): Promise<AssessmentSnapshot & { persisted: boolean }> {
-  if (rawInput?.evidenceStatus === "PHOTO_DRAFT") throw new Error("Bản dựng ảnh cần bổ sung khảo sát trước khi đánh giá.");
-  const snapshot = evaluateRoomHazards(rawInput);
-  let persisted = false;
-  const dbRoom = await prisma.room.findUnique({ where: { id: snapshot.roomId } });
-  if (dbRoom) {
-    // Findings and the complete snapshot commit together. IDs remain readable after restart.
-    await prisma.assessment.create({ data: {
-      id: snapshot.id, roomId: dbRoom.id, totalHazards: snapshot.detectedCount, remainingHazards: snapshot.detectedCount,
-      safetyScore: snapshot.safetyScore, status: "COMPLETED",
-      notes: JSON.stringify({ format: "risk-snapshot-v1", snapshot }),
-      findings: { create: snapshot.findings.map(finding => ({
-        hazardType: finding.hazardType, title: finding.title, description: finding.description,
-        severityCategory: finding.severityCategory, detectionRuleId: finding.ruleId,
-        evidence: JSON.stringify(finding.evidence), recommendationText: finding.recommendationText,
-        targetObjectId: finding.targetObjectId || null, status: finding.status,
-      })) },
-    } });
-    persisted = true;
+export async function runAndPersistAssessment(
+  rawInput: any,
+  options?: { idempotencyKey?: string | null; requirePersistence?: boolean }
+): Promise<
+  AssessmentSnapshot & {
+    persisted: boolean;
+    persistenceStatus: PersistenceStatus;
+    dataPartition: DataPartition;
+    idempotentReplay?: boolean;
+    auditEventId?: string | null;
   }
+> {
+  if (rawInput?.evidenceStatus === "PHOTO_DRAFT") {
+    throw new Error("Bản dựng ảnh cần bổ sung khảo sát trước khi đánh giá.");
+  }
+  const snapshot = evaluateRoomHazards(rawInput);
+
+  let dbRoom;
+  try {
+    dbRoom = await prisma.room.findUnique({ where: { id: snapshot.roomId } });
+  } catch (err: any) {
+    // Never swallow DB outage and return fake persisted=false success
+    throw new PersistenceWriteError(
+      `Không thể kết nối cơ sở dữ liệu khi kiểm tra phòng: ${err?.message || "DB error"}`,
+      "DB_CONNECTION_FAILED",
+      503
+    );
+  }
+
+  if (dbRoom) {
+    const result = await persistAssessmentTransaction({
+      snapshot,
+      idempotencyKey: options?.idempotencyKey,
+    });
+    cacheAssessmentSnapshot(snapshot);
+    return {
+      ...snapshot,
+      persisted: result.persisted,
+      persistenceStatus: result.persistenceStatus,
+      dataPartition: result.dataPartition,
+      idempotentReplay: result.idempotentReplay,
+      auditEventId: result.auditEventId,
+    };
+  }
+
+  if (options?.requirePersistence) {
+    throw new ResourceNotFoundError(
+      `Không tìm thấy phòng "${snapshot.roomId}" trong cơ sở dữ liệu để lưu thẩm định.`
+    );
+  }
+
+  const partition = classifyDataPartition(rawInput || snapshot);
   cacheAssessmentSnapshot(snapshot);
-  return { ...snapshot, persisted };
+  return {
+    ...snapshot,
+    persisted: false,
+    persistenceStatus: "failed",
+    dataPartition: partition,
+  };
 }
 
 export async function loadAssessmentSnapshot(snapshotId: string): Promise<AssessmentSnapshot | null> {
@@ -87,7 +136,7 @@ export async function getLatestAssessmentForRoom(roomId: string): Promise<Assess
       return evaluated;
     }
   } catch {
-    // ignore
+    // ignore missing survey table / profile parse issues when probing
   }
 
   return null;
@@ -124,8 +173,16 @@ export function compareSnapshots(
 
 /**
  * Generates a comprehensive, explainable Assessment Report for printable and export views.
+ * Enforces Demo vs Real boundary: blocks exporting DEMO data when strictFieldEvidence=true.
  */
-export function generateAssessmentReport(snapshot: AssessmentSnapshot): AssessmentReport {
+export function generateAssessmentReport(
+  snapshot: AssessmentSnapshot,
+  options?: { strictFieldEvidence?: boolean; allowDemoPreview?: boolean; persisted?: boolean }
+): AssessmentReport {
+  const banner = options?.strictFieldEvidence
+    ? assertRealFieldEvidenceForReport(snapshot, { allowDemoPreview: options?.allowDemoPreview })
+    : buildDemoBanner(snapshot);
+
   return {
     meta: {
       reportId: `REP-${snapshot.id}`,
@@ -136,6 +193,10 @@ export function generateAssessmentReport(snapshot: AssessmentSnapshot): Assessme
       engineVersion: "SafeHome Risk Intelligence v1.0.0",
       disclaimer:
         "Báo cáo này được lập cho mục đích giáo dục, nâng cao nhận thức và hỗ trợ gia đình cải thiện môi trường sống. Hệ thống không đưa ra chẩn đoán y khoa và không thay thế cho đánh giá chuyên môn y tế.",
+      dataPartition: banner.dataPartition,
+      isDemo: banner.isDemo,
+      demoBanner: banner.bannerText,
+      persistenceStatus: options?.persisted === false ? "failed" : "saved",
     },
     summary: {
       safetyScore: snapshot.safetyScore,
@@ -158,4 +219,3 @@ export function generateAssessmentReport(snapshot: AssessmentSnapshot): Assessme
     })),
   };
 }
-
