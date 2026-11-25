@@ -92,6 +92,28 @@
   background: #94a3b8;
 }
 
+/* Focus nhìn thấy rõ cho bàn phím (WCAG 2.4.7 / 2.4.11); !important để thắng focus:outline-none của từng ô nhập */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #0f766e !important;
+  outline-offset: 2px !important;
+}
+
+/* Tôn trọng người dùng giảm chuyển động */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Glassmorphism styling */
 .glass-panel {
   background: rgba(255, 255, 255, 0.85);

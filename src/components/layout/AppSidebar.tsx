@@ -100,7 +100,7 @@ export const AppSidebar: React.FC = () => {
           <Link
             href="/workflow"
             className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-2xl text-xs font-bold transition-all shadow-md group border",
+              "w-full flex items-center justify-between p-3.5 rounded-2xl text-sm font-bold transition-all shadow-md group border",
               isWorkflowActive
                 ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white border-teal-500 shadow-teal-500/20 ring-2 ring-teal-400/30"
                 : "bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white border-transparent hover:shadow-teal-500/25"
@@ -111,8 +111,8 @@ export const AppSidebar: React.FC = () => {
                 <Compass className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-black tracking-tight">Hành trình 7 Bước AI</div>
-                <div className="text-[10px] text-teal-100 font-normal">
+                <div className="text-sm font-black tracking-tight">Hành trình 7 Bước AI</div>
+                <div className="text-xs text-teal-100 font-normal">
                   Gộp trọn gói Khảo sát ➔ 3D ➔ Đánh giá ➔ Mô phỏng ➔ Báo cáo
                 </div>
               </div>
@@ -123,7 +123,7 @@ export const AppSidebar: React.FC = () => {
 
         {/* Danh sách các phân hệ độc lập ngoài luồng 7 bước */}
         <div>
-          <div className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <div className="px-3 text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
             Phân hệ ứng dụng
           </div>
           <nav className="space-y-1">
@@ -138,7 +138,7 @@ export const AppSidebar: React.FC = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group",
+                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group",
                     isActive
                       ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
@@ -153,7 +153,7 @@ export const AppSidebar: React.FC = () => {
                           ? "text-teal-600"
                           : item.highlight
                           ? "text-teal-600"
-                          : "text-slate-400 group-hover:text-slate-700"
+                          : "text-slate-600 group-hover:text-slate-700"
                       )}
                     />
                     <span>{item.label}</span>
@@ -161,7 +161,7 @@ export const AppSidebar: React.FC = () => {
                   {item.badge && (
                     <span
                       className={cn(
-                        "px-1.5 py-0.5 rounded text-[10px] font-bold",
+                        "px-1.5 py-0.5 rounded text-xs font-bold",
                         isActive
                           ? "bg-teal-200/80 text-teal-900"
                           : item.highlight
@@ -182,7 +182,7 @@ export const AppSidebar: React.FC = () => {
         <div className="pt-2 border-t border-slate-100">
           <button
             onClick={() => setShowComponents(!showComponents)}
-            className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-600 transition"
+            className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-600 transition"
           >
             <span>Mở lẻ từng bước (Tùy chọn)</span>
             <ChevronDown
@@ -200,11 +200,11 @@ export const AppSidebar: React.FC = () => {
                     key={tool.href}
                     href={tool.href}
                     className={cn(
-                      "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+                      "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition text-slate-500 hover:text-slate-800 hover:bg-slate-50",
                       isActive && "font-bold text-teal-700 bg-teal-50"
                     )}
                   >
-                    <Icon className="h-3 w-3 text-slate-400" />
+                    <Icon className="h-3 w-3 text-slate-600" />
                     <span>{tool.label}</span>
                   </Link>
                 );
@@ -220,13 +220,13 @@ export const AppSidebar: React.FC = () => {
               <UserCheck className="h-3.5 w-3.5" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-800">
+              <div className="text-sm font-bold text-slate-800">
                 Gia đình của bạn
               </div>
-              <div className="text-[10px] text-slate-500">Hồ sơ khảo sát riêng</div>
+              <div className="text-xs text-slate-500">Hồ sơ khảo sát riêng</div>
             </div>
           </div>
-          <p className="text-[10px] text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
+          <p className="text-xs text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
             Thông tin người được khảo sát cần do gia đình cung cấp và xác nhận trong phần khảo sát tại nhà.
           </p>
         </div>
@@ -237,7 +237,7 @@ export const AppSidebar: React.FC = () => {
         <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80">
           <div className="flex items-start gap-1.5">
             <Info className="h-3.5 w-3.5 text-teal-600 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-slate-500 leading-normal">
+            <p className="text-xs text-slate-500 leading-normal">
               <strong>Tuyên bố y tế:</strong> Hệ thống phục vụ mục đích giáo dục
               và hoạch định cải tạo không gian sống an toàn, không thay thế cho
               chẩn đoán y khoa.
