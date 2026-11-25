@@ -2,7 +2,10 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Bắt đầu nạp dữ liệu mẫu SafeHome 3D AI...");
+  if (process.env.NODE_ENV === "production" && process.env.SAFEHOME_FORCE_DESTRUCTIVE_SEED !== "ALLOW_AT_OWN_RISK") {
+    throw new Error("BLOCKED: Không được phép chạy seed xóa dữ liệu trên môi trường production!");
+  }
+  console.log("🌱 Bắt đầu nạp dữ liệu mẫu SafeHome 3D AI (DEMO partition)...");
 
   // Clean up previous records if needed
   try {
@@ -85,12 +88,13 @@ async function main() {
     },
   });
 
-  // 2. Seed Project & Home
+  // 2. Seed Project & Home (DEMO partition)
   const project = await prisma.project.create({
     data: {
       id: "proj-safehome-vietnam",
       name: "Chương Trình Nhà Ở An Toàn Cho Người Cao Tuổi Việt Nam",
       description: "Ứng dụng Digital Twin 3D mô phỏng và loại bỏ nguy cơ ngã trong gia đình",
+      dataPartition: "DEMO",
       homes: {
         create: [
           {
@@ -98,6 +102,7 @@ async function main() {
             name: "Căn hộ mẫu - Bác Nam (75 tuổi)",
             address: "Quận Cầu Giấy, Hà Nội",
             targetResidentProfile: "Người cao tuổi 75 tuổi, giảm thị lực ban đêm, đi lại chậm, có tiền sử choáng váng nhẹ",
+            dataPartition: "DEMO",
           },
         ],
       },
@@ -116,6 +121,7 @@ async function main() {
       homeId: home.id,
       name: "Phòng ngủ người cao tuổi (Mô phỏng ban đêm)",
       roomType: "BEDROOM",
+      dataPartition: "DEMO",
       width: 4.5,
       length: 5.2,
       height: 2.8,
@@ -191,6 +197,7 @@ async function main() {
       homeId: home.id,
       name: "Phòng tắm & Nhà vệ sinh (Khu vực nguy cơ cao)",
       roomType: "BATHROOM",
+      dataPartition: "DEMO",
       width: 3.2,
       length: 3.6,
       height: 2.6,
@@ -242,6 +249,7 @@ async function main() {
       remainingHazards: 4,
       newHazards: 0,
       safetyScore: 54.0,
+      dataPartition: "DEMO",
       notes: "Đánh giá hiện trạng ban đầu: Phát hiện 4 nguy cơ té ngã tiềm ẩn trong phòng ngủ ban đêm.",
       findings: {
         create: [

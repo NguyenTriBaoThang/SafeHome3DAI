@@ -288,6 +288,10 @@ export interface AssessmentReport {
     roomType: string;
     engineVersion: string;
     disclaimer: string;
+    dataPartition?: "REAL" | "DEMO";
+    isDemo?: boolean;
+    demoBanner?: string | null;
+    persistenceStatus?: "saved" | "pending" | "failed";
   };
   summary: {
     safetyScore: number;

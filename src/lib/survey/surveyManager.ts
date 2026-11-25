@@ -475,6 +475,7 @@ export async function exportSurveyData(surveyId: string) {
   return {
     surveyId: survey.id,
     surveyName: survey.name,
+    dataPartition: survey.dataPartition,
     targetResident: survey.targetResident,
     status: survey.status,
     createdAt: survey.createdAt,
