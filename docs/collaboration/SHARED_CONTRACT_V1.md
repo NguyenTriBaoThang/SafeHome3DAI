@@ -169,16 +169,20 @@ interface BeforeAfterComparisonV1 {
 
 Hệ thống thống nhất duy nhất 1 bộ quy tắc thẩm định chuẩn (`RISK-001` đến `RISK-008`):
 
-| Mã Luật | Tên Mối Nguy | Mức Độ | Ngưỡng Kích Hoạt | Nguồn Tham Chiếu |
-| :--- | :--- | :--- | :--- | :--- |
-| **RISK-001** | Thảm trải sàn không cố định / cong mép | HIGH | `isSlipResistant == false` hoặc thảm rời lối đi | CDC STEADI, WHO 2021 |
-| **RISK-002** | Dây điện vắt ngang mặt sàn lối đi | HIGH | Dây điện hở trên lối đi | CDC STEADI |
-| **RISK-003** | Lối đi bị vật cản / hẹp dưới chuẩn | HIGH | Chiều rộng thông thủy `< 0.80 m` | ADA Standards, CDC |
-| **RISK-004** | Ánh sáng ban đêm không đạt chuẩn | HIGH | Độ rọi đêm `< 30 lux` hoặc thiếu đèn cảm ứng | WHO Age-Friendly |
-| **RISK-005** | Sàn nhà tắm trơn trượt / ngập nước | HIGH | Sàn gạch trơn dính nước không chống trượt | Bộ Y tế VN, CDC |
-| **RISK-006** | Thiếu thanh vịn tại bồn cầu và buồng tắm | HIGH | Nhà vệ sinh thiếu thanh vịn chịu lực | CDC STEADI, WHO |
-| **RISK-007** | Chiều cao mặt giường ngủ không phù hợp | MEDIUM | Mặt nệm `< 45 cm` hoặc `> 55 cm` | CDC Fall Prevention |
-| **RISK-008** | Gờ cửa / bậc tam cấp chênh cốt cao | MEDIUM | Bậc chênh lệch `> 1.5 cm` không có dốc thoải | ADA, CDC STEADI |
+> **Nguồn sự thật:** tên và logic luật lấy từ `src/lib/risk/riskRuleRegistry.ts`; ngưỡng số và nguồn tham chiếu lấy từ `src/lib/risk/thresholdConfig.ts`. Bảng dưới chỉ là mục lục, không lặp lại con số để tránh lệch với code. (Bản trước của bảng này ghi sai RISK-007 = chiều cao giường, RISK-008 = gờ cửa; đã sửa theo engine.)
+
+| Mã Luật | Tên Mối Nguy (theo registry) |
+| :--- | :--- |
+| **RISK-001** | Thảm trải sàn không cố định mép / có nguy cơ trượt dịch |
+| **RISK-002** | Dây điện hoặc cáp thiết bị vắt ngang lối đi thông thủy |
+| **RISK-003** | Vật cản lấn chiếm hành lang / thông thủy lối đi |
+| **RISK-004** | Độ chiếu sáng ban đêm không đủ an toàn |
+| **RISK-005** | Bề mặt sàn nhà tắm trơn trượt khi ướt |
+| **RISK-006** | Thiếu thanh tay vịn an toàn trong nhà vệ sinh |
+| **RISK-007** | Gờ bậc cửa chênh lệch cao độ tại lối vào nhà vệ sinh / phòng |
+| **RISK-008** | Tầm với công tắc đèn hoặc vật dụng thiết yếu khó tiếp cận |
+
+**Chiều cao mặt giường** (`bedSurfaceHeightCm`, 45–55 cm trong `thresholdConfig.ts`, trạng thái `REFERENCE_ONLY`) **không phải là luật**: hiện chỉ hiển thị, không vào điểm số. Nếu cần thành luật thì thêm mã mới (RISK-009), không dùng lại RISK-007.
 
 ---
 
