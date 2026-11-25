@@ -17,6 +17,8 @@ import {
   autoFixSceneGeometry,
   AutoFixResult,
 } from "@/lib/reconstruction/spatialValidationEngine";
+import type { MeasurementSourceType } from "@/lib/contracts/sharedContractV1";
+import { getSimulatedLightingConfig, type QualityPreset } from "@/lib/three/lightingModel";
 
 export interface ScenarioHistoryEntry {
   id: string;
@@ -48,6 +50,9 @@ interface SimulationStore {
   cameraFocusPoint: [number, number, number] | null;
   transformMode: "translate" | "rotate" | null;
   lightingPreset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO";
+  /** Render-only visual intensity scale for 3D scene lights (never physical lux). */
+  sceneLightingIntensitySimulated: number;
+  qualityPreset: QualityPreset;
 
   // Copilot 3D Action Bridge
   copilotPendingAction: Copilot3DAction | null;
@@ -75,6 +80,7 @@ interface SimulationStore {
   selectObject: (id: string | null) => void;
   setCameraPreset: (preset: "ISOMETRIC" | "TOP" | "FRONT" | "FREE" | "INTERIOR" | "WALKTHROUGH" | "SAFETY" | "COMPARISON") => void;
   setLightingPreset: (preset: "MORNING" | "AFTERNOON" | "NIGHT" | "STUDIO") => void;
+  setQualityPreset: (quality: QualityPreset) => void;
   focusOnLocation: (point: [number, number, number] | null) => void;
   setTransformMode: (mode: "translate" | "rotate" | null) => void;
 
@@ -92,7 +98,7 @@ interface SimulationStore {
   fixObject: (id: string) => void; // Quick fix: e.g. fix rug with anti-slip tape or tuck cable into wall trunking
   addSafetyDevice: (deviceType: "grab_bar_toilet" | "grab_bar_shower" | "anti_slip_mat" | "night_light") => void;
 
-  setLightingLevel: (lux: number) => void;
+  setLightingLevel: (lux: number, sourceType?: MeasurementSourceType) => void;
   setFloorWetness: (isWet: boolean) => void;
   setAntiSlip: (isSlip: boolean) => void;
   setGrabBarsCount: (count: number) => void;
@@ -153,6 +159,8 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     cameraFocusPoint: null,
     transformMode: "translate",
     lightingPreset: "MORNING",
+    sceneLightingIntensitySimulated: 1.05,
+    qualityPreset: "HIGH",
 
     showLabels: true,
     showHazardOverlay: true,
@@ -274,19 +282,16 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
     setCameraPreset: (preset) => set({ cameraPreset: preset }),
     setLightingPreset: (preset) => {
       const isNight = preset === "NIGHT";
-      const room = get().getCurrentRoom();
-      const updatedRooms = get().rooms.map((r) => {
-        if (r.id === room.id) {
-          return {
-            ...r,
-            lightingLevel: isNight ? 40 : preset === "MORNING" ? 320 : 250,
-          };
-        }
-        return r;
+      const cfg = getSimulatedLightingConfig(preset, isNight);
+      // B08: Changing Three.js render lighting only updates visual simulation intensity;
+      // it must NEVER overwrite actual or user-confirmed lux evidence on the room.
+      set({
+        lightingPreset: preset,
+        isNightMode: isNight,
+        sceneLightingIntensitySimulated: cfg.sceneLightingIntensitySimulated,
       });
-      set({ lightingPreset: preset, isNightMode: isNight, rooms: updatedRooms });
-      get().runSimulation();
     },
+    setQualityPreset: (qualityPreset) => set({ qualityPreset }),
     focusOnLocation: (point) => set({ cameraFocusPoint: point }),
     setTransformMode: (mode) => set({ transformMode: mode }),
 
@@ -301,18 +306,11 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
       set((s) => ({ transparentWalls: !s.transparentWalls })),
     toggleNightMode: () => {
       const newNight = !get().isNightMode;
-      const room = get().getCurrentRoom();
-      const updatedRooms = get().rooms.map((r) => {
-        if (r.id === room.id) {
-          return {
-            ...r,
-            lightingLevel: newNight ? 40 : 250,
-          };
-        }
-        return r;
+      const cfg = getSimulatedLightingConfig(get().lightingPreset, newNight);
+      set({
+        isNightMode: newNight,
+        sceneLightingIntensitySimulated: cfg.sceneLightingIntensitySimulated,
       });
-      set({ isNightMode: newNight, rooms: updatedRooms });
-      get().runSimulation();
     },
 
     updateObjectPosition: (id, pos) => {
@@ -525,11 +523,11 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
       get().runSimulation();
     },
 
-    setLightingLevel: (lux: number) => {
+    setLightingLevel: (lux: number, sourceType: MeasurementSourceType = "user_confirmed") => {
       const current = get().getCurrentRoom();
       const newUndo = [...get().undoStack, JSON.parse(JSON.stringify(current))].slice(-20);
       const updatedRooms = get().rooms.map((r) =>
-        r.id === current.id ? { ...r, lightingLevel: lux } : r
+        r.id === current.id ? { ...r, lightingLevel: lux, lightingProvenance: sourceType } : r
       );
       set({ rooms: updatedRooms, undoStack: newUndo, redoStack: [] });
       get().runSimulation();

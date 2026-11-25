@@ -107,7 +107,11 @@ export interface RoomState {
     height: number;
   };
   floorMaterial: "WOOD" | "CERAMIC_TILE" | "NON_SLIP_VINYL";
-  lightingLevel: number; // Lux
+  lightingLevel: number; // Lux (chỉ coi là đo thật khi lightingProvenance là measured/user_confirmed)
+  /** Nguồn gốc giá trị độ rọi phòng (A02/B08). Tách khỏi ánh sáng render 3D mô phỏng. */
+  lightingProvenance?: MeasurementSourceType;
+  /** Cường độ ánh sáng render 3D mô phỏng (hệ số Three.js, không phải lux vật lý). */
+  sceneLightingIntensitySimulated?: number;
   isWet: boolean;
   isSlipResistant: boolean;
   grabBarsCount: number;

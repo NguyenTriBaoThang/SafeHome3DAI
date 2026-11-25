@@ -26,7 +26,8 @@
 - [x] `npx tsc --noEmit` — Kiểm tra kiểu TypeScript không lỗi.
 - [x] `npm run eval:rag:a09` — Chạy offline 40 câu tiếng Việt (`retrievalHitAtK`, `groundedness`, `refusalRate`, `guardrailCompliance`, `promptInjectionBlockRate`).
 - [x] `npx next build` — Biên dịch production Next.js hoàn chỉnh (23/23 static pages & toàn bộ API routes sạch lỗi).
-- [ ] `npm run test:completion:http` & `npm run test:completion:browser` — Cần phối hợp B12 xác nhận E2E trình duyệt (desktop/mobile) trên trang 3D, RAG, Vision, workflow 7 bước, xóa/consent/lỗi backend và ghi video walkthrough 1 ca Before–After.
+- [x] `node scripts/completion/http-smoke.cjs` & `node scripts/completion/browser.cjs` — Kiểm thử E2E HTTP (`10/10` + `offline_backup_restore_real_sqlite`) và trình duyệt Chromium (`25/25` desktop & mobile, 0 exception) đạt hoàn toàn trên bản Release Candidate.
+- [ ] Video walkthrough thực tế 1 ca Before–After — Đã có kịch bản 3 phút & backup offline tại [B12_DEMO_SCRIPT_AND_QA_BANK.md](B12_DEMO_SCRIPT_AND_QA_BANK.md); chờ nhóm quay video mp4 thực tế.
 
 ---
 
@@ -34,6 +35,6 @@
 | Hạng mục | Người phụ trách | Trạng thái | Ghi chú |
 | :--- | :--- | :--- | :--- |
 | Backend API v1 (`/api/v1/snapshots/*`), Canonical Risk Engine, RAG & Guardrails | Thành viên 1 | Sẵn sàng | Xem `docs/api/before-after-snapshots-openapi-v1.yaml` & `src/data/beforeAfterFixturesB09.ts` |
-| Ký xác nhận E2E UX / 3D / Vision (desktop & mobile) & Demo Script chung | Thành viên 2 (B12) | **Chờ B12 ký xác nhận** | Không giả chữ ký; chỉ ký sau khi chạy cùng B12 |
+| Ký xác nhận E2E UX / 3D / Vision (desktop & mobile) & Demo Script chung | Thành viên 2 (B12) | **Chờ B12 ký xác nhận** | Đã hoàn tất Novelty Matrix ([B12_NOVELTY_MATRIX_AND_SOURCES.md](B12_NOVELTY_MATRIX_AND_SOURCES.md)), Demo Script & E2E 25/25; chờ nhóm duyệt & ký tay |
 | Video walkthrough 1 ca Before–After thực tế | Thành viên 1 & B12 | **Chờ ghi hình cùng B12** | Sử dụng kịch bản `B09_BEDROOM_BASELINE_INPUT -> PROPOSED_SCENARIO -> VERIFIED` |
 

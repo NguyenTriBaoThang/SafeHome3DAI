@@ -1,0 +1,181 @@
+{
+  "task": "B11",
+  "dataLabel": "REAL_FIELD_COLLECTION",
+  "status": "blocked_awaiting_field_data",
+  "sampleCounts": {
+    "hazardRecords": 0,
+    "pairedComparisons": 0,
+    "measuredDistancePairs": 0,
+    "participantsWithSus": 0
+  },
+  "tracks": {
+    "1_objectDetection": {
+      "note": "Track evaluated independently in B03/B05 scripts; never merged into hazard score.",
+      "status": "not_ready_without_locked_test"
+    },
+    "2_hazardScreening": {
+      "overall": {
+        "evaluableCount": 0,
+        "notAssessableTruthCount": 0,
+        "abstainedPredCount": 0,
+        "confusion": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "precision": null,
+        "recall": null,
+        "f1": null
+      },
+      "perRisk": {
+        "RISK-001": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-002": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-003": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-004": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-005": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-006": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-007": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        },
+        "RISK-008": {
+          "evaluableCount": 0,
+          "notAssessableTruthCount": 0,
+          "abstainedPredCount": 0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "tn": 0
+          },
+          "precision": null,
+          "recall": null,
+          "f1": null
+        }
+      },
+      "pairedDifferenceChecklistPlus3DMinusChecklistOnly": {
+        "n": 0,
+        "mean": null,
+        "ci95Low": null,
+        "ci95High": null,
+        "exploratoryWarning": true
+      }
+    },
+    "3_measurementMaeCm": {
+      "nPairs": 0,
+      "maeCm": null,
+      "ci": {
+        "n": 0,
+        "mean": null,
+        "ci95Low": null,
+        "ci95High": null,
+        "exploratoryWarning": true
+      }
+    },
+    "4_usabilityAndEducationalOutcome": {
+      "susMean": null,
+      "susCi": {
+        "n": 0,
+        "mean": null,
+        "ci95Low": null,
+        "ci95High": null,
+        "exploratoryWarning": true
+      },
+      "validSusCount": 0
+    }
+  },
+  "clinicalClaimsGuard": {
+    "fallRateReductionProven": false,
+    "clinicalDiagnosisSupported": false,
+    "note": "Short-term usability/hazard screening tests CANNOT claim clinical fall reduction."
+  }
+}

@@ -39,6 +39,14 @@ import { SceneObjectState, HazardFindingResult } from "@/types";
 import { describeObjectValues, isApproximateRoomModel, roomModelLabel, SOURCE_LABEL_VI } from "@/lib/reconstruction/sceneProvenance";
 import { WALL_MOUNTED_MODELS, CEILING_MOUNTED_MODELS, FLAT_FLOOR_MODELS } from "@/lib/reconstruction/spatialValidationEngine";
 import { RUG_LIFT_M } from "@/lib/reconstruction/scenePlacement";
+import { WebGLFallback } from "./WebGLBoundary";
+import {
+  QUALITY_PRESET_CONFIG,
+  getSimulatedLightingConfig,
+  resolveIlluminanceDisplay,
+  describeRoomDimensionsWithProvenance,
+  type QualityPreset,
+} from "@/lib/three/lightingModel";
 
 const REFERENCE_SAMPLE_BY_ROOM_TYPE: Record<string, { url: string; label: string }> = {
   BEDROOM: {
@@ -54,6 +62,14 @@ const REFERENCE_SAMPLE_BY_ROOM_TYPE: Record<string, { url: string; label: string
     label: "Ảnh kiến trúc tham chiếu Dollhouse",
   },
 };
+
+function ExposureSync({ exposure }: { exposure: number }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.toneMappingExposure = exposure;
+  }, [gl, exposure]);
+  return null;
+}
 
 /**
  * First-person keyboard & navigation controller for WASD walkthrough
@@ -323,6 +339,9 @@ export const RoomCanvas: React.FC = () => {
     isNightMode,
     lightingPreset,
     setLightingPreset,
+    sceneLightingIntensitySimulated,
+    qualityPreset,
+    setQualityPreset,
     currentAssessment,
     focusOnLocation,
     cameraPreset,
@@ -343,6 +362,10 @@ export const RoomCanvas: React.FC = () => {
   const [showSourceCompare, setShowSourceCompare] = useState(false);
   const [activeSourceIdx, setActiveSourceIdx] = useState(0);
   const [manualCompareImage, setManualCompareImage] = useState<{ url: string; label: string } | null>(null);
+  const [webglLost, setWebglLost] = useState(false);
+  const [webglSupported, setWebglSupported] = useState<boolean>(true);
+  const [canvasEpoch, setCanvasEpoch] = useState(0);
+  const removeCanvasListeners = useRef<(() => void) | null>(null);
   const compareFileInputRef = useRef<HTMLInputElement>(null);
   const wheelchairPadRef = useRef<WheelchairPadState>({
     fwd: false,
@@ -353,6 +376,22 @@ export const RoomCanvas: React.FC = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const room = getCurrentRoom();
+  const qualityCfg = QUALITY_PRESET_CONFIG[qualityPreset];
+  const simulatedLightCfg = getSimulatedLightingConfig(lightingPreset, isNightMode);
+  const illuminanceDisplay = resolveIlluminanceDisplay(room);
+  const dimensionsDisplay = describeRoomDimensionsWithProvenance(room);
+
+  useEffect(() => {
+    try {
+      const probe = document.createElement("canvas");
+      const ctx = probe.getContext("webgl2") || probe.getContext("webgl");
+      setWebglSupported(Boolean(ctx));
+      (ctx as WebGLRenderingContext | null)?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      setWebglSupported(false);
+    }
+    return () => removeCanvasListeners.current?.();
+  }, [canvasEpoch]);
   const isAccessibleSuite = room.id === "room-accessible-suite-01";
   const findings = currentAssessment?.findings || [];
   const persistedSourceImages = useMemo(
@@ -669,19 +708,58 @@ export const RoomCanvas: React.FC = () => {
 
       {/* --- RIGHT PANE: INTERACTIVE 3D WEBGL CANVAS --- */}
       <div className="relative flex-1 min-h-[320px] h-full">
+        {!webglSupported || webglLost ? (
+          <WebGLFallback
+            retry={() => {
+              setWebglLost(false);
+              setWebglSupported(true);
+              setCanvasEpoch((prev) => prev + 1);
+            }}
+          />
+        ) : (
         <Canvas
+          key={canvasEpoch}
           // Fill the viewer even when its height comes from a flex item/min-height.
           // A percentage-height Canvas in normal flow can fall back to 150px.
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        shadows
-        gl={{ preserveDrawingBuffer: true, antialias: true }}
-        camera={{ position: [5.2, 6.2, 5.8], fov: 38 }}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
-        onPointerMissed={() => {
-          selectObject(null);
-          setExpandedClusterId(null);
-        }}
-      >
+          shadows={qualityCfg.shadows}
+          dpr={qualityCfg.dpr}
+          gl={{
+            preserveDrawingBuffer: true,
+            antialias: qualityCfg.antialias,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            powerPreference: "high-performance",
+          }}
+          fallback={<WebGLFallback />}
+          onCreated={({ gl }) => {
+            gl.toneMappingExposure = simulatedLightCfg.toneMappingExposure;
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            const canvas = gl.domElement;
+            removeCanvasListeners.current?.();
+            const onLost = (event: Event) => {
+              event.preventDefault();
+              if (canvas.isConnected) setWebglLost(true);
+            };
+            const onRestored = () => {
+              if (!canvas.isConnected) return;
+              setWebglLost(false);
+              setCanvasEpoch((prev) => prev + 1);
+            };
+            canvas.addEventListener("webglcontextlost", onLost);
+            canvas.addEventListener("webglcontextrestored", onRestored);
+            removeCanvasListeners.current = () => {
+              canvas.removeEventListener("webglcontextlost", onLost);
+              canvas.removeEventListener("webglcontextrestored", onRestored);
+            };
+          }}
+          camera={{ position: [5.2, 6.2, 5.8], fov: 38 }}
+          className="w-full h-full cursor-grab active:cursor-grabbing"
+          onPointerMissed={() => {
+            selectObject(null);
+            setExpandedClusterId(null);
+          }}
+        >
+        <ExposureSync exposure={simulatedLightCfg.toneMappingExposure} />
         <CameraController fitTrigger={fitTrigger} />
 
         {isAccessibleSuite ? (
@@ -704,6 +782,8 @@ export const RoomCanvas: React.FC = () => {
             transparentWalls={transparentWalls}
             isNightMode={isNightMode}
             lightingPreset={lightingPreset}
+            quality={qualityPreset}
+            sceneLightingIntensitySimulated={sceneLightingIntensitySimulated}
           />
         )}
 
@@ -1058,6 +1138,7 @@ export const RoomCanvas: React.FC = () => {
           );
         })()}
         </Canvas>
+        )}
 
         {/* --- WHEELCHAIR MINI D-PAD & WASD HINT (WHEN WHEELCHAIR ACTIVE) --- */}
         {showWheelchair && cameraPreset !== "WALKTHROUGH" && (
@@ -1119,70 +1200,124 @@ export const RoomCanvas: React.FC = () => {
         )}
       </div>
 
-      {/* Provenance label: shown unless room size and every object are measured / user-confirmed. */}
-      <div
-        data-testid="room-model-label"
-        className={`absolute bottom-14 right-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-xs font-semibold border ${
-          isApproximateRoomModel(room) ? "bg-amber-950/80 text-amber-200 border-amber-700/70" : "bg-emerald-950/80 text-emerald-200 border-emerald-700/70"
-        }`}
-      >
-        {roomModelLabel(room)}
+      {/* Provenance labels (B08): room model, dimensions, simulated 3D lighting vs actual physical lux */}
+      <div className="absolute bottom-14 right-3 z-20 pointer-events-none flex flex-col items-end gap-1 max-w-[92%] sm:max-w-md">
+        <div
+          data-testid="room-model-label"
+          className={`rounded-lg px-2 py-1 text-xs font-semibold border ${
+            isApproximateRoomModel(room) ? "bg-amber-950/85 text-amber-200 border-amber-700/70" : "bg-emerald-950/85 text-emerald-200 border-emerald-700/70"
+          }`}
+        >
+          {roomModelLabel(room)} ·{" "}
+          <span data-testid="room-dimensions-badge">
+            {dimensionsDisplay.text} ({dimensionsDisplay.sourceLabelVi})
+          </span>
+        </div>
+        <div
+          data-testid="b08-lighting-provenance"
+          className="rounded-lg px-2.5 py-1 text-[11px] font-medium border bg-slate-950/85 text-slate-200 border-slate-700/80 flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 shadow"
+        >
+          <span data-testid="simulated-lighting-badge" className="text-sky-200">
+            3D: {simulatedLightCfg.labelVi} ({sceneLightingIntensitySimulated.toFixed(2)}×)
+          </span>
+          <span className="text-slate-600" aria-hidden="true">|</span>
+          <span
+            data-testid="actual-lux-badge"
+            className={
+              illuminanceDisplay.badgeTone === "measured"
+                ? "text-emerald-300 font-semibold"
+                : illuminanceDisplay.badgeTone === "estimated"
+                ? "text-amber-200"
+                : "text-slate-300"
+            }
+          >
+            {illuminanceDisplay.statusLabelVi}
+          </span>
+        </div>
       </div>
 
-      {/* --- TOP FLOATING TOOLBAR: CAMERA & LIGHTING PRESETS --- */}
-      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-20">
-        {/* Lighting Selector (Top-Left) */}
-        <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
+      {/* --- TOP FLOATING TOOLBAR: CAMERA, LIGHTING & QUALITY PRESETS --- */}
+      <div className="absolute top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
+        {/* Lighting & LOD Selector (Top-Left) */}
+        <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
           <span className="text-xs text-slate-300 font-medium px-1.5 hidden md:flex items-center gap-1">
             <Sun className="h-3.5 w-3.5 text-amber-400" />
-            <span>Ánh sáng:</span>
+            <span>Ánh sáng 3D:</span>
           </span>
           <button
+            type="button"
+            aria-pressed={lightingPreset === "MORNING"}
             onClick={() => setLightingPreset("MORNING")}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "MORNING"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
-            title="Ánh nắng sớm tự nhiên rọi qua cửa sổ"
+            title="Ánh sáng 3D nắng sớm mô phỏng (không thay đổi lux đo thật)"
           >
             <span>Nắng sớm</span>
           </button>
           <button
+            type="button"
+            aria-pressed={lightingPreset === "AFTERNOON"}
             onClick={() => setLightingPreset("AFTERNOON")}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "AFTERNOON"
-                ? "bg-sky-500 text-white font-bold shadow-sm"
+                ? "bg-sky-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
-            title="Ánh sáng ban ngày đều"
+            title="Ánh sáng 3D ban ngày mô phỏng (không thay đổi lux đo thật)"
           >
             <span>Ban ngày</span>
           </button>
           <button
+            type="button"
+            aria-pressed={lightingPreset === "NIGHT"}
             onClick={() => setLightingPreset("NIGHT")}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "NIGHT"
                 ? "bg-indigo-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
-            title="Mô phỏng ban đêm (Độ sáng <50 Lux)"
+            title="Ánh sáng 3D ban đêm mô phỏng (chỉ hiển thị render, không phải lux đo thật)"
           >
             <Moon className="h-3 w-3" />
             <span>Ban đêm</span>
           </button>
           <button
+            type="button"
+            aria-pressed={lightingPreset === "STUDIO"}
             onClick={() => setLightingPreset("STUDIO")}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
               lightingPreset === "STUDIO"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
-            title="Ánh sáng studio chuẩn thiết kế"
+            title="Ánh sáng 3D studio mô phỏng (không thay đổi lux đo thật)"
           >
             <Sparkles className="h-3 w-3" />
             <span>Studio</span>
           </button>
+
+          <span className="text-slate-600 px-0.5 hidden sm:inline" aria-hidden="true">|</span>
+          <div className="flex items-center gap-0.5" role="group" aria-label="Chất lượng đồ họa 3D (LOD)">
+            {(["LOW", "MEDIUM", "HIGH"] as QualityPreset[]).map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                aria-pressed={qualityPreset === preset}
+                onClick={() => setQualityPreset(preset)}
+                title={QUALITY_PRESET_CONFIG[preset].labelVi}
+                className={`min-h-[44px] sm:min-h-[34px] px-2 py-1 rounded-lg text-xs font-semibold transition ${
+                  qualityPreset === preset
+                    ? "bg-emerald-600 text-white font-bold shadow-sm"
+                    : "bg-slate-800/80 hover:bg-slate-700 text-slate-300"
+                }`}
+              >
+                {QUALITY_PRESET_CONFIG[preset].shortLabelVi}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Camera Views & Actions (Top-Right) */}

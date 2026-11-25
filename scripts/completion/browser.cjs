@@ -188,12 +188,14 @@ async function main() {
     await wait(`location.pathname==='/digital-twin' && document.querySelector('header')?.textContent.includes('Bản dựng ước lượng')`);
     assert.equal(await evaluate(`document.querySelector('header').textContent.includes('Điểm an toàn')`),false);
     pass('photo_to_3d_keeps_unknown_assessment_and_hides_safety_score');
+    if (!await evaluate(`Boolean(document.querySelector('a[href="/risk-assessment"]'))`)) await button('Mở lẻ từng bước');
     await click('a[href="/risk-assessment"]');
     await wait(`location.pathname==='/risk-assessment' && document.querySelector('[data-testid="risk-photo-draft"]')`);
     assert.equal(await evaluate(`document.querySelector('header').textContent.includes('Điểm an toàn')`),false);
     pass('risk_dashboard_does_not_score_photo_geometry');
     await click('a[href="/analytics"]');
     await wait(`location.pathname==='/analytics' && document.body.textContent.includes('Chưa thể đối sánh')`);
+    if (!await evaluate(`Boolean(document.querySelector('a[href="/reports"]'))`)) await button('Mở lẻ từng bước');
     await click('a[href="/reports"]');
     await wait(`location.pathname==='/reports' && document.body.textContent.includes('Chưa đánh giá')`);
     await send('Browser.setDownloadBehavior',{behavior:'deny'});
@@ -239,7 +241,7 @@ async function main() {
     fs.writeFileSync(path.join(output,'desktop.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
     fixtureOffline=true;
     await button('Phân tích lại'); await wait(`document.querySelector('[role="status"]')?.textContent.includes('Detector local chưa sẵn sàng')`);
-    await button('Vật thể'); await wait(`document.body.textContent.includes('Chưa có vật thể nào được nhận diện')`);
+    await button('Vật thể'); await wait(`document.querySelectorAll('[data-detection-id]').length===0 && (document.body.textContent.includes('Phân tích ảnh chưa thành công') || document.body.textContent.includes('Chưa có vật thể nào được nhận diện'))`);
     pass('inference_failure_clears_stale_visible_result');
     await click('button[title="Xóa ảnh này"]');
     await wait(`document.querySelector('[role="status"]')?.textContent.includes('Đã xóa ảnh')`);
