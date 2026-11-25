@@ -13,7 +13,7 @@
    - Một bức ảnh chụp bằng camera điện thoại thông thường không chứa thông tin chiều sâu đo đạc trực tiếp (depth maps) như cảm biến LiDAR hoặc Time-of-Flight (ToF).
    - Hệ thống giải bài toán bằng phép xấp xỉ quang học hình nón (camera ray projection) kết hợp với nhận dạng danh mục vật thể và kích thước danh định từ thư viện Asset Registry.
 2. **Sai số kích thước:**
-   - Sai số kích thước ước lượng từ 1 ảnh đơn có thể dao động trong khoảng $\pm 10 - 15\%$ nếu không có vật thể chuẩn tỷ lệ trong phòng.
+   - Sai số kích thước ước lượng từ 1 ảnh đơn: **sai số chưa được đo** (chưa có số liệu đối chiếu với phòng thực). Không có khoảng sai số nào được công bố. Xem `docs/collaboration/B06_3D_METHOD_AUDIT.md` (phương pháp, hằng số mã cứng và cách đo trên phòng thử nghiệm).
    - **Ranh giới:** Không tuyên bố bản dựng từ 1 ảnh là bản vẽ kỹ thuật kiến trúc $1:1$ khi người dùng chưa nhập kích thước phòng thực tế hoặc chưa đo đạc hiện trường.
    - **Giải pháp bắt buộc:** Cơ chế Human-in-the-Loop cho phép người dùng điều chỉnh kích thước phòng và kéo chỉnh đồ vật.
 
@@ -37,7 +37,7 @@
    - Người dùng có thể xóa thảm, di dời dây điện, gắn thêm thanh vịn trên mô hình 3D và thấy điểm số tăng lên tức thì.
 2. **Ngoài đời thực (`RESOLVED_IN_REAL_WORLD`):**
    - Sự an toàn chỉ thực sự đạt được khi gia đình hoặc thợ thi công đã thực tế dán keo mép thảm, nẹp dây điện vào tường hoặc khoan bắt vít thanh vịn chịu lực $\ge 150kg$ vào tường gạch/bê tông.
-   - Hệ thống bắt buộc người dùng bấm xác nhận đã hoàn thành cải tạo thực tế trước khi xuất chứng nhận an toàn phòng ngừa té ngã.
+   - Hệ thống bắt buộc người dùng bấm xác nhận đã hoàn thành cải tạo thực tế trước khi báo cáo ghi nhận hạng mục đó là đã xử lý ngoài đời thực. Báo cáo chỉ là tài liệu hỗ trợ sàng lọc, **không phải chứng nhận an toàn**; khi thiếu số đo hệ thống ghi "chưa thể đánh giá".
 
 ---
 

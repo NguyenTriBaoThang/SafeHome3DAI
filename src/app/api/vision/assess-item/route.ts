@@ -1,6 +1,10 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
-import { analyzeItemHazardFromImage } from "@/lib/vision/itemHazardAnalyzer";
+import {
+  analyzeItemHazardFromImage,
+  getDemoItemAssessment,
+  ItemAssessmentUnavailableError,
+} from "@/lib/vision/itemHazardAnalyzer";
 import {
   assertConsentForAction,
   ConsentRequiredError,
@@ -22,7 +26,6 @@ async function POSTHandler(request: Request) {
     let mimeType = "image/jpeg";
     let itemHint = "";
     let hasInlineConsent = consentHeader === "true";
-    let isPresetOnly = false;
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -52,9 +55,15 @@ async function POSTHandler(request: Request) {
         const cleanBase64 = body.imageBase64.replace(/^data:image\/\w+;base64,/, "");
         buffer = Buffer.from(cleanBase64, "base64");
       } else if (body.presetCategory) {
-        buffer = Buffer.from("preset-mock-image-data");
-        itemHint = body.presetCategory;
-        isPresetOnly = true;
+        // Explicit DEMO preset: no image, no provider call, response flagged demo:true.
+        const demo = typeof body.presetCategory === "string" ? getDemoItemAssessment(body.presetCategory) : null;
+        if (!demo) {
+          return NextResponse.json(
+            { success: false, error: "Mẫu minh họa không tồn tại." },
+            { status: 400 }
+          );
+        }
+        return NextResponse.json({ success: true, demo: true, assessment: demo });
       } else {
         return NextResponse.json(
           { error: "Thiếu dữ liệu hình ảnh base64 hoặc presetCategory." },
@@ -79,13 +88,13 @@ async function POSTHandler(request: Request) {
     }
 
     // Strict Consent Guard before external Gemini processing on real user photos
-    if (!isPresetOnly && process.env.GEMINI_API_KEY) {
+    if (process.env.GEMINI_API_KEY) {
       await assertConsentForAction({
         accountId: resolveAccountScopeId(),
         requiredScope: "third_party_ai",
         requestConsentFlag: hasInlineConsent,
       });
-    } else if (!isPresetOnly) {
+    } else {
       // Even without Gemini key, reject if user revoked consent
       await assertConsentForAction({
         accountId: resolveAccountScopeId(),
@@ -102,6 +111,12 @@ async function POSTHandler(request: Request) {
       assessment,
     });
   } catch (error: any) {
+    if (error instanceof ItemAssessmentUnavailableError) {
+      return NextResponse.json(
+        { success: false, code: error.code, status: "UNKNOWN", error: error.message },
+        { status: 503 }
+      );
+    }
     if (error instanceof ConsentRevokedError || error instanceof ConsentRequiredError) {
       return NextResponse.json(
         { success: false, code: error.code, error: error.message },

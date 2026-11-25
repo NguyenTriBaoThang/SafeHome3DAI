@@ -1,5 +1,6 @@
 import { SemanticSceneGraph } from "./sceneGraphTypes";
 import { RoomState, SceneObjectState, WalkingZone } from "@/types";
+import { normalizeRoomPlacement } from "./scenePlacement";
 
 /**
  * Converts a Semantic 3D Scene Graph into a live RoomState compatible with
@@ -31,6 +32,8 @@ export function convertSceneGraphToRoomState(
       surfaceColor: obj.surfaceColor,
       verified: obj.verified,
       confidence: obj.detectionConfidence,
+      provenance: obj.provenance,
+      detectionId: obj.sourceDetectionId,
       customProperties: {
         sourceImageId: obj.sourceImageId,
         sourceDetectionId: obj.sourceDetectionId,
@@ -74,8 +77,9 @@ export function convertSceneGraphToRoomState(
     });
   }
 
-  return {
+  return normalizeRoomPlacement({
     id: scene.sceneId,
+    dimensionProvenance: scene.dimensionProvenance,
     name:
       scene.roomType === "BEDROOM"
         ? `Phòng ngủ tái dựng AI (${scene.dimensions.width}m x ${scene.dimensions.length}m)`
@@ -97,5 +101,5 @@ export function convertSceneGraphToRoomState(
     walkingZones,
     objects,
     ...(scene.metadata?.sourceImages?.length ? { sourceImageUrls: scene.metadata.sourceImages } : {}),
-  };
+  });
 }

@@ -50,6 +50,9 @@ export const WALL_MOUNTED_MODELS = new Set([
   "curtain",
   "air_conditioner",
   "sconce",
+  "wall_lamp",
+  "light_switch",
+  "tv",
 ]);
 
 export const CEILING_MOUNTED_MODELS = new Set([
@@ -190,7 +193,9 @@ export function validateSceneGeometry(room: RoomState): SpatialValidationReport 
 
     // --- CHECK 3: Floor Snapping & Floating / Penetration ---
     if (!isWall && !isCeiling) {
-      const bottomY = obj.position[1];
+      // Items resting on a parent (lamp on nightstand, cable on rug) are measured from the parent's top.
+      const parent = obj.parentObjectId ? room.objects.find((p) => p.id === obj.parentObjectId) : undefined;
+      const bottomY = obj.position[1] - (parent ? getObjectWorldAABB(parent).maxY : 0);
 
       if (bottomY > floorTolerance) {
         issues.push({

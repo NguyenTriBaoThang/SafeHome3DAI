@@ -1,4 +1,3 @@
-import { ASSET_REGISTRY } from "@/data/assetRegistry";
 import { VisionDetection, NormalizedBoundingBox, ViewpointType } from "@/lib/vision/types";
 import {
   SemanticSceneGraph,
@@ -6,6 +5,11 @@ import {
   RoomEnvelopeDimensions,
 } from "./sceneGraphTypes";
 import { matchAssetForDetection } from "@/lib/assets/assetMatcher";
+import type { MeasurementSourceType } from "@/lib/contracts/sharedContractV1";
+import { makeObjectId } from "./sceneProvenance";
+
+// Shapes whose size below is a catalog constant, not derived from the bbox.
+const TEMPLATE_SIZED_KINDS = new Set(["light_switch", "wall_art", "ceiling_fan", "air_conditioner", "slat_partition", "stool"]);
 
 export interface ReconstructionConfig {
   roomType: "BEDROOM" | "BATHROOM" | "LIVING_ROOM";
@@ -17,6 +21,8 @@ export interface ReconstructionConfig {
     length?: number;
     height?: number;
   };
+  /** Per-axis override of the source of `manualDimensions` (default: given = user_confirmed, absent = simulated). */
+  dimensionSources?: Partial<Record<"width" | "length" | "height", MeasurementSourceType>>;
   floorMaterial?: "WOOD" | "CERAMIC_TILE" | "NON_SLIP_VINYL";
   sourceImageUrls?: string[];
   notes?: string;
@@ -84,6 +90,10 @@ export function reconstructSceneFromDetections(
     height: config.manualDimensions?.height || 2.8,
     unit: "m",
   };
+
+  const sourceOf = (axis: "width" | "length" | "height"): MeasurementSourceType =>
+    config.dimensionSources?.[axis] ?? (config.manualDimensions?.[axis] ? "user_confirmed" : "simulated");
+  const dimensionProvenance = { width: sourceOf("width"), length: sourceOf("length"), height: sourceOf("height") };
 
   const sceneId = `scene_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
   const halfW = dimensions.width / 2;
@@ -227,11 +237,7 @@ export function reconstructSceneFromDetections(
           extent.height = Math.min(dimensions.height - 0.08, Math.max(extent.height, heightFraction * dimensions.height * 1.65));
           y = dimensions.height - extent.height - 0.06;
         }
-        // Window GLB uses its registered nominal dimensions.
-        if (kind === "window") {
-          const nominal = ASSET_REGISTRY[matched.assetId]?.nominalDimensions || { width: 1.2, height: 1.5, length: 0.1 };
-          matched.scale = [extent.width / nominal.width, extent.height / nominal.height, extent.length / nominal.length];
-        }
+        // The renderer normalizes the GLB to `dimensions`; no extra instance scale (it would apply twice).
       } else if (kind === "light_switch") {
         extent.width = 0.09;
         extent.height = 0.12;
@@ -287,8 +293,6 @@ export function reconstructSceneFromDetections(
         extent.height = 0.015;
         extent.width = Math.max(1.8, Math.min(unproj.widthM, dimensions.width * 0.75));
         extent.length = Math.max(2.0, Math.min(unproj.lengthM, dimensions.length * 0.7));
-      } else if (kind === "lamp" && extent.height <= 0.75) {
-        y = det.bbox.yMax < 0.72 ? 0.55 : 0;
       }
       rotY = wall === "left" ? Math.PI / 2 : wall === "right" ? -Math.PI / 2 : 0;
       const limitX = Math.max(0, halfW - (side ? extent.length : extent.width) / 2 - 0.09);
@@ -326,15 +330,21 @@ export function reconstructSceneFromDetections(
       matched.modelType
     );
 
+    const geomSource =
+      matched.dimensionSource === "estimate" && !(resolvedWall && TEMPLATE_SIZED_KINDS.has(kind))
+        ? ("vision_estimated" as const)
+        : ("simulated" as const);
+
     objects.push({
-      id: `obj_${det.id}`,
+      id: makeObjectId(matched.modelType, det.id),
       category: matched.modelType.toUpperCase(),
       name: det.userLabel || det.originalLabel || matched.description,
       assetId: matched.assetId,
       glbPath: matched.glbPath,
       position: [x, y, z],
       rotation: [0, rotY, 0],
-      scale: matched.scale,
+      // `dimensions` already hold the final metre size; instance scale stays 1.
+      scale: [1, 1, 1],
       dimensions: matched.dimensions,
       surfaceColor: config.surfaceColors?.[det.id],
       detectionConfidence: det.confidence,
@@ -346,6 +356,7 @@ export function reconstructSceneFromDetections(
       riskIds: [],
       sourceDetectionId: det.id,
       sourceImageId: det.imageId,
+      provenance: { width: geomSource, length: geomSource, height: geomSource, position: "vision_estimated" },
     });
   }
 
@@ -420,6 +431,7 @@ export function reconstructSceneFromDetections(
     roomType: config.roomType,
     geometrySource: "ai_vision_reconstructed",
     dimensions,
+    dimensionProvenance,
     floorProperties: {
       material:
         config.floorMaterial || (isBathroom ? "CERAMIC_TILE" : "WOOD"),

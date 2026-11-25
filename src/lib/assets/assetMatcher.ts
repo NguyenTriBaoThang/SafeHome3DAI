@@ -21,7 +21,10 @@ export interface MatchedAssetResult {
     length: number;
     height: number;
   };
+  /** Template-to-estimate ratio. `dimensions` already includes it: do not apply it again at render time. */
   scale: [number, number, number];
+  /** "template" = nominal catalog size; "estimate" = resized from a bbox-derived estimate. */
+  dimensionSource: "template" | "estimate";
   materialVariant?: string;
   isProceduralFallback: boolean;
   matchScore: number;
@@ -178,6 +181,7 @@ export function matchAssetForDetection(
         length: Number((nom.length * scaleZ).toFixed(2)),
       },
       scale: [scaleX, scaleY, scaleZ],
+      dimensionSource: [scaleX, scaleY, scaleZ].some((v) => Math.abs(v - 1) > 0.005) ? "estimate" : "template",
       materialVariant: bestEntry.materialVariants[0]?.id,
       isProceduralFallback: false,
       matchScore: bestScore,
@@ -241,6 +245,10 @@ export function matchAssetForDetection(
     modelType: normCat,
     dimensions: finalDims,
     scale: [1, 1, 1],
+    dimensionSource:
+      finalDims.width !== defaultDims.width || finalDims.length !== defaultDims.length || finalDims.height !== defaultDims.height
+        ? "estimate"
+        : "template",
     isProceduralFallback: true,
     matchScore: 0.6,
     description: `Mô hình dựng hình học chi tiết PBR cho ${req.name || normCat}`,

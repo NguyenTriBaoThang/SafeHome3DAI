@@ -22,6 +22,18 @@ export type HazardType =
   | "CLUTTERED_PATH"
   | "DANGEROUS_OBJECT_PLACEMENT";
 
+import type { MeasurementSourceType } from "@/lib/contracts/sharedContractV1";
+
+export interface SceneObjectProvenance {
+  width: MeasurementSourceType;
+  length: MeasurementSourceType;
+  height: MeasurementSourceType;
+  /** Vị trí x,z trong phòng. */
+  position: MeasurementSourceType;
+  /** Chiều cao mặt nệm (cm), chỉ với giường. Tách khỏi `height` (tổng chiều cao). */
+  bedSurfaceHeight?: MeasurementSourceType;
+}
+
 export interface SceneObjectState {
   id: string;
   roomId: string;
@@ -43,6 +55,12 @@ export interface SceneObjectState {
   materialVariant?: string;
   confidence?: number;
   safetyRecommendation?: string;
+  /** Nguồn gốc từng giá trị hình học (enum A02). Thiếu = mẫu/mặc định = "simulated". */
+  provenance?: SceneObjectProvenance;
+  /** Id `det-*` của gợi ý thị giác đã sinh ra vật thể này (nếu có). */
+  detectionId?: string;
+  /** Vật thể đỡ bên dưới (bàn/tủ đầu giường). Đáy vật thể = đỉnh vật đỡ. */
+  parentObjectId?: string;
   isWalkwayObstacle?: boolean;
   isFixed?: boolean;
   isLoose?: boolean;
@@ -75,6 +93,8 @@ export interface WalkingZone {
 
 export interface RoomState {
   evidenceStatus?: "PHOTO_DRAFT";
+  /** Nguồn gốc kích thước phòng. Thiếu = mẫu/mặc định = "simulated". */
+  dimensionProvenance?: { width: MeasurementSourceType; length: MeasurementSourceType; height: MeasurementSourceType };
   sourceImageUrls?: string[];
   id: string;
   name: string;

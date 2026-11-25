@@ -40,7 +40,7 @@ import { ASSET_REGISTRY } from "@/data/assetRegistry";
 import { runEnvironmentalAssessment, calculateSafetyScore } from "@/features/risk-engine/rules";
 import { LiveCameraCaptureModal } from "@/components/camera/LiveCameraCaptureModal";
 
-// Photoreal Default Samples
+// Ảnh minh họa (DEMO): chỉ dùng khi người dùng chọn tab "Ảnh minh họa (DEMO)"; không phải phòng của người dùng.
 const SAMPLE_BEDROOM_IMG =
   "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=1200&auto=format&fit=crop";
 const SAMPLE_BATHROOM_IMG =
@@ -77,11 +77,11 @@ export const AiRoomScannerWizard: React.FC<{
 
   // Step 2: Media Input
   const [inputMode, setInputMode] = useState<"IMAGE" | "MULTI" | "VIDEO" | "SAMPLE" | "CAMERA">(
-    initialPhotoUrl ? "IMAGE" : "SAMPLE"
+    "IMAGE"
   );
   const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialPhotoUrl ? [initialPhotoUrl] : [SAMPLE_BEDROOM_IMG]
+    initialPhotoUrl ? [initialPhotoUrl] : []
   );
   const [selectedImgIndex, setSelectedImgIndex] = useState<number>(0);
   const [isProcessingVideo, setIsProcessingVideo] = useState<boolean>(false);
@@ -116,19 +116,19 @@ export const AiRoomScannerWizard: React.FC<{
     setRoomType(type);
     if (type === "BEDROOM") {
       setRoomName("Phòng ngủ người cao tuổi");
-      setImageUrls([SAMPLE_BEDROOM_IMG]);
+      setImageUrls([]);
       setRoomWidth(4.5);
       setRoomLength(5.0);
       setFloorMaterial("WOOD");
     } else if (type === "BATHROOM") {
       setRoomName("Phòng tắm & Nhà vệ sinh");
-      setImageUrls([SAMPLE_BATHROOM_IMG]);
+      setImageUrls([]);
       setRoomWidth(3.2);
       setRoomLength(3.6);
       setFloorMaterial("CERAMIC_TILE");
     } else {
       setRoomName("Phòng khách gia đình");
-      setImageUrls([SAMPLE_BEDROOM_IMG]);
+      setImageUrls([]);
       setRoomWidth(5.0);
       setRoomLength(6.0);
       setFloorMaterial("WOOD");
@@ -247,7 +247,8 @@ export const AiRoomScannerWizard: React.FC<{
 
   // Confirm Human Verification & Build 3D Scene
   const handleConfirmVerification = () => {
-    const confirmed = detections.filter(d => d.verificationStatus !== "REJECTED").map(d => ({ ...d, verificationStatus: "CONFIRMED" as const }));
+    // Only items the user explicitly accepted/edited enter the scene (CONTEXT.md: Xác nhận của người dùng).
+    const confirmed = detections.filter(d => d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED");
     const sceneGraph = reconstructSceneFromDetections(confirmed, {
       roomType,
       viewpoint,
@@ -260,11 +261,11 @@ export const AiRoomScannerWizard: React.FC<{
       },
       floorMaterial,
       sourceImageUrls: [sourceCompareUrlRef.current || imageUrls[selectedImgIndex]],
-      notes: `Tái dựng từ ảnh quét ${roomName}`,
+      notes: `Mô hình phòng (mô phỏng gần đúng) từ ảnh ${roomName}`,
     });
 
     const liveRoomState = convertSceneGraphToRoomState(sceneGraph);
-    liveRoomState.name = `${roomName} (AI Reconstructed)`;
+    liveRoomState.name = `${roomName} (mô phỏng gần đúng${inputMode === "SAMPLE" ? ", DEMO" : ""})`;
     liveRoomState.evidenceStatus = "PHOTO_DRAFT";
 
     // Load into Zustand store
@@ -292,17 +293,14 @@ export const AiRoomScannerWizard: React.FC<{
     setFirstCorner(null);
   };
 
-  const handleToggleDetection = (detId: string) => {
+  const setDetectionStatus = (detId: string, verificationStatus: VisionDetection["verificationStatus"]) => {
+    setDetections((prev) => prev.map((d) => (d.id === detId ? { ...d, verificationStatus } : d)));
+  };
+
+  // Explicit bulk action; every item is listed on screen and the label says what it does.
+  const acceptAllReviewed = () => {
     setDetections((prev) =>
-      prev.map((d) =>
-        d.id === detId
-          ? {
-              ...d,
-              verificationStatus:
-                d.verificationStatus === "REJECTED" ? "CONFIRMED" : "REJECTED",
-            }
-          : d
-      )
+      prev.map((d) => (d.verificationStatus === "PENDING_REVIEW" ? { ...d, verificationStatus: "CONFIRMED" } : d))
     );
   };
 
@@ -332,13 +330,13 @@ export const AiRoomScannerWizard: React.FC<{
           </div>
           <div>
             <h2 className="text-lg font-bold flex items-center gap-2">
-              <span>AI Room Scanner & Photorealistic 3D Reconstruction</span>
+              <span>Quét phòng bằng AI & Mô hình phòng (mô phỏng gần đúng)</span>
               <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
-                PBR Engine
+                Ước lượng
               </span>
             </h2>
             <p className="text-xs text-slate-300">
-              Quét hình ảnh phòng thực tế, nhận diện vật thể và tái dựng Digital Twin an toàn
+              Quét hình ảnh phòng thực tế, nhận diện vật thể (gợi ý AI, cần bạn xác nhận) và dựng mô hình phòng mô phỏng gần đúng
             </p>
           </div>
         </div>
@@ -380,7 +378,7 @@ export const AiRoomScannerWizard: React.FC<{
               Bước 1: Chọn không gian khảo sát
             </span>
             <h3 className="text-xl font-bold text-slate-900 mt-1">
-              Bạn muốn quét và tái dựng không gian nào?
+              Bạn muốn quét không gian nào?
             </h3>
             <p className="text-sm text-slate-500 mt-1">
               Hệ thống sẽ áp dụng bộ quy tắc an toàn y tế phù hợp. Toàn bộ nội thất và bố cục không gian sẽ được AI phân tích trực tiếp từ ảnh chụp thực tế ở bước tiếp theo.
@@ -463,7 +461,7 @@ export const AiRoomScannerWizard: React.FC<{
             {/* Room Name Input */}
             <div className="mt-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Đặt tên cho căn phòng tái dựng:
+                Đặt tên cho căn phòng:
               </label>
               <input
                 type="text"
@@ -519,7 +517,7 @@ export const AiRoomScannerWizard: React.FC<{
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                ★ Ảnh mẫu chuẩn
+                Ảnh minh họa (DEMO)
               </button>
               <button
                 type="button"
@@ -609,7 +607,11 @@ export const AiRoomScannerWizard: React.FC<{
                   alt="Ảnh phòng cần tái dựng"
                   className="w-full h-full object-cover"
                 />
-              ) : null}
+              ) : (
+                <p className="text-sm text-slate-300 p-6 text-center">
+                  Chưa có ảnh. Hãy chụp hoặc tải ảnh phòng của bạn lên.
+                </p>
+              )}
 
               {/* Viewpoint tag overlay */}
               <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-white border border-slate-700 flex items-center gap-1.5">
@@ -649,6 +651,11 @@ export const AiRoomScannerWizard: React.FC<{
               )}
             </div>
 
+            {inputMode === "SAMPLE" && (
+              <p role="status" className="mt-3 p-2 rounded-xl bg-amber-50 border border-amber-300 text-xs font-bold text-amber-900">
+                DEMO: đây là ảnh minh họa từ internet, không phải phòng của bạn. Kết quả chỉ để xem thử giao diện.
+              </p>
+            )}
             {scanError && <p role="alert" className="mt-3 text-sm text-rose-700">{scanError}</p>}
             {imageUrls.length > 1 && <p className="mt-2 text-sm">Chọn một góc ảnh phía trên để dựng bố cục.</p>}
             <label className="flex items-start gap-2 mt-3 text-sm"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} />Tôi đồng ý gửi ảnh đến nhà cung cấp AI đã cấu hình để nhận diện vật thể. Tránh ảnh có người hoặc thông tin riêng tư.</label>
@@ -674,7 +681,7 @@ export const AiRoomScannerWizard: React.FC<{
               className="px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md flex items-center gap-2 transition active:scale-95"
             >
               <Sparkles className="h-4 w-4" />
-              <span>Bắt đầu AI Phân tích & Tái dựng</span>
+              <span>Bắt đầu AI phân tích</span>
             </button>
           </div>
         </div>
@@ -769,9 +776,15 @@ export const AiRoomScannerWizard: React.FC<{
                 <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 max-h-[220px] overflow-y-auto">
                   <div className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between pb-1 border-b border-slate-200">
                     <span>Đồ nội thất nhận diện:</span>
-                    <span className="text-[10px] text-slate-400">Nhấn để bật/tắt</span>
+                    <span className="text-[10px] text-slate-400">Gợi ý AI: chọn Chấp nhận hoặc Loại cho từng mục</span>
                   </div>
 
+                  {detections.some(d => d.verificationStatus === "PENDING_REVIEW") && (
+                    <button type="button" onClick={acceptAllReviewed}
+                      className="w-full text-[11px] font-bold px-2 py-1 rounded-lg border border-teal-300 bg-white text-teal-800 hover:bg-teal-50">
+                      Chấp nhận tất cả gợi ý đã xem
+                    </button>
+                  )}
                   {detections.length === 0 && (
                     <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
                       <div className="font-bold flex items-center gap-1.5">
@@ -797,26 +810,37 @@ export const AiRoomScannerWizard: React.FC<{
                   )}
 
                   {detections.map((det) => {
-                    const isConfirmed = det.verificationStatus !== "REJECTED";
+                    const isConfirmed = det.verificationStatus === "CONFIRMED" || det.verificationStatus === "CORRECTED";
+                    const isRejected = det.verificationStatus === "REJECTED";
                     return (
                       <div
                         key={det.id}
                         className={`p-2 rounded-xl border flex items-center justify-between gap-2 transition ${
                           isConfirmed
                             ? "bg-white border-teal-200 shadow-sm"
-                            : "bg-slate-100/60 border-slate-200 opacity-50"
+                            : isRejected
+                              ? "bg-slate-100/60 border-slate-200 opacity-50"
+                              : "bg-amber-50/50 border-amber-200"
                         }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <button
-                            onClick={() => handleToggleDetection(det.id)}
-                            className={`w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold shrink-0 transition ${
-                              isConfirmed
-                                ? "bg-teal-600 text-white"
-                                : "border border-slate-300 text-transparent"
+                            type="button"
+                            onClick={() => setDetectionStatus(det.id, "CONFIRMED")}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 border ${
+                              isConfirmed ? "bg-teal-600 text-white border-teal-700" : "bg-white text-teal-700 border-teal-300"
                             }`}
                           >
-                            ✓
+                            {isConfirmed ? "Đã chấp nhận" : "Chấp nhận"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDetectionStatus(det.id, "REJECTED")}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 border ${
+                              isRejected ? "bg-rose-600 text-white border-rose-700" : "bg-white text-rose-700 border-rose-300"
+                            }`}
+                          >
+                            {isRejected ? "Đã loại" : "Loại"}
                           </button>
                           <select aria-label="Loại nội thất" value={det.originalLabel}
                             onChange={e => {
@@ -915,11 +939,11 @@ export const AiRoomScannerWizard: React.FC<{
               Chọn lại ảnh
             </button>
             <button
-              disabled={!detections.some(d => d.verificationStatus !== "REJECTED") || ![roomWidth, roomLength, roomHeight].every(n => n > 0)}
+              disabled={!detections.some(d => d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED") || ![roomWidth, roomLength, roomHeight].every(n => n > 0)}
               onClick={handleConfirmVerification}
               className="px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md flex items-center gap-2 transition active:scale-95"
             >
-              <span>Tạo Digital Twin 3D tương tác</span>
+              <span>Dựng mô hình phòng (mô phỏng gần đúng)</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -991,7 +1015,7 @@ export const AiRoomScannerWizard: React.FC<{
               <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm">
                   <CheckCircle2 className="h-5 w-5" />
-                  <span>Mô hình 3D Digital Twin</span>
+                  <span>Mô hình phòng (mô phỏng gần đúng)</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   Vị trí và kích thước nội thất được ước lượng từ ảnh và thông số phòng đã xác nhận.

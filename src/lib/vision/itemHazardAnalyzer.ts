@@ -10,7 +10,7 @@ import {
 // Pre-curated knowledge base for deterministic fall-hazard assessment
 const HEURISTIC_KNOWLEDGE: Record<
   string,
-  Omit<ItemHazardAssessment, "id" | "imageUrl" | "analyzedAt" | "modelProvider">
+  Omit<ItemHazardAssessment, "id" | "imageUrl" | "analyzedAt" | "modelProvider" | "demo">
 > = {
   rug: {
     itemName: "Thảm trải sàn nỉ/vải không có lớp bám chống trượt",
@@ -467,6 +467,14 @@ const HEURISTIC_KNOWLEDGE: Record<
  * Intelligent multimodal item fall hazard assessment.
  * Evaluates risk score (0-100), clinical rationale, pinpointed danger spots, and remediation.
  */
+export class ItemAssessmentUnavailableError extends Error {
+  public readonly code = "PROVIDER_UNAVAILABLE";
+  constructor(message: string) {
+    super(message);
+    this.name = "ItemAssessmentUnavailableError";
+  }
+}
+
 export async function analyzeItemHazardFromImage(
   imageBuffer: Buffer,
   fileName: string,
@@ -621,28 +629,29 @@ Trả về định dạng JSON thuần túy, không có markdown formatting hay 
     }
   }
 
-  // Fallback: Rule-based heuristic classifier based on hint, filename, or default category
-  const lowerName = `${fileName} ${itemHint || ""}`.toLowerCase();
-  let categoryKey = "rug";
-  if (lowerName.includes("dây") || lowerName.includes("cable") || lowerName.includes("cord") || lowerName.includes("cáp")) {
-    categoryKey = "electrical_cable";
-  } else if (lowerName.includes("ghế") || lowerName.includes("chair") || lowerName.includes("đôn") || lowerName.includes("stool")) {
-    categoryKey = "chair";
-  } else if (lowerName.includes("bậc") || lowerName.includes("gờ") || lowerName.includes("cửa") || lowerName.includes("step") || lowerName.includes("threshold")) {
-    categoryKey = "threshold_step";
-  } else if (lowerName.includes("bàn") || lowerName.includes("table") || lowerName.includes("desk")) {
-    categoryKey = "table";
-  }
+  // No Gemini result. Never invent a score/template from filename or hint (CONTEXT.md: "chưa xác định").
+  throw new ItemAssessmentUnavailableError(
+    apiKey
+      ? "Chưa xác định: dịch vụ AI không phản hồi hoặc trả kết quả không dùng được. Vui lòng thử lại sau hoặc dùng checklist thủ công."
+      : "Chưa xác định: dịch vụ AI chưa được cấu hình trên máy chủ, nên không thể thẩm định ảnh. Vui lòng dùng checklist thủ công."
+  );
+}
 
-  const baseTemplate = HEURISTIC_KNOWLEDGE[categoryKey] || HEURISTIC_KNOWLEDGE.rug;
-
+/**
+ * DEMO only: returns a fixed example for an explicit preset category. Never derived from a
+ * user photo, never calls Gemini, always flagged `demo: true`.
+ */
+export function getDemoItemAssessment(category: string): ItemHazardAssessment | null {
+  if (!Object.hasOwn(HEURISTIC_KNOWLEDGE, category)) return null;
+  const base = HEURISTIC_KNOWLEDGE[category];
   return {
-    id: assessmentId,
-    canonicalRuleId: getCanonicalRuleForItemCategory(baseTemplate.itemCategory || categoryKey),
-    ...baseTemplate,
-    imageUrl: imageBase64,
-    analyzedAt: now,
-    modelProvider: "SafeHome Clinical Intelligence Engine (CDC STEADI & WHO Rule-based)",
+    id: `item-demo-${category}-${Date.now()}`,
+    canonicalRuleId: getCanonicalRuleForItemCategory(base.itemCategory || category),
+    ...base,
+    imageUrl: "",
+    analyzedAt: new Date().toISOString(),
+    modelProvider: "DEMO — ví dụ minh họa cố định, không phải kết quả phân tích ảnh của bạn",
+    demo: true,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,37 +9,51 @@ import {
   Sun,
   Play,
   RotateCcw,
-  CheckCircle2,
   AlertTriangle,
   Compass,
   Camera,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { cn } from "@/lib/utils";
+import {
+  ACTIVE_ROOM_KEY,
+  SNAPSHOT_SAVED_EVENT,
+  deriveHeaderStatus,
+  luxIsMeasurement,
+  pickLatest,
+  type HeaderStatus,
+} from "./headerStatus";
 
 export const AppHeader: React.FC = () => {
   const pathname = usePathname();
   const isPhotoVision = pathname === "/ai-vision" || pathname === "/vision";
-  const {
-    isNightMode,
-    toggleNightMode,
-    currentAssessment,
-    runSimulation,
-    restoreBaseline,
-    getCurrentRoom,
-  } = useSimulationStore();
+  const { isNightMode, toggleNightMode, runSimulation, restoreBaseline, getCurrentRoom } = useSimulationStore();
   const isPhotoDraft = getCurrentRoom().evidenceStatus === "PHOTO_DRAFT";
-  const hasAssessment = currentAssessment?.safetyScore != null;
 
-  const hazardCount = currentAssessment?.findings.length ?? 0;
-  const safetyScore = currentAssessment?.safetyScore ?? 0;
-
-  const scoreBadgeColor =
-    safetyScore >= 80
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : safetyScore >= 60
-      ? "bg-amber-50 text-amber-700 border-amber-200"
-      : "bg-rose-50 text-rose-700 border-rose-200";
+  // Đánh giá gần nhất của phòng đang làm việc, đọc từ máy chủ (chỉ đúng tài khoản). Không dùng store mẫu.
+  const [status, setStatus] = useState<HeaderStatus>({ kind: "none", label: "Chưa đánh giá" });
+  const refresh = useCallback(async () => {
+    let room: string | null = null;
+    try { room = localStorage.getItem(ACTIVE_ROOM_KEY); } catch { /* chặn lưu trữ: coi như chưa có */ }
+    if (!room) return setStatus({ kind: "none", label: "Chưa đánh giá" });
+    try {
+      const res = await fetch(`/api/v1/snapshots?roomId=${encodeURIComponent(room)}`);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) return setStatus({ kind: "none", label: "Chưa đánh giá" });
+      setStatus(deriveHeaderStatus(pickLatest(json.data as any[])));
+    } catch {
+      setStatus({ kind: "none", label: "Chưa đánh giá" });
+    }
+  }, []);
+  useEffect(() => {
+    refresh();
+    window.addEventListener(SNAPSHOT_SAVED_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(SNAPSHOT_SAVED_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, [refresh, pathname]);
 
   if (pathname === "/experience" || pathname === "/sign-in") return null;
 
@@ -47,29 +61,29 @@ export const AppHeader: React.FC = () => {
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Brand */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 shrink-0">
           <Link href="/dashboard" className="flex items-center space-x-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shadow-teal-500/10 overflow-hidden border border-slate-200/80 p-0.5">
               <img src="/images/logo.png" alt="SafeHome 3D AI Logo" className="h-full w-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight text-slate-900">
+                <span className="text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap">
                   SafeHome <span className="text-teal-600">3D AI</span>
                 </span>
-                <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800">
-                  Digital Twin
+                <span className="hidden 2xl:inline rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800 whitespace-nowrap">
+                  Mô hình phòng (mô phỏng gần đúng)
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
-                Nhà an toàn, tuổi già an tâm • Bản sao số phòng ngừa té ngã
+              <p className="text-[11px] text-slate-500 font-medium hidden 2xl:block">
+                Nhà an toàn, tuổi già an tâm • Sàng lọc môi trường phòng ngừa té ngã
               </p>
             </div>
           </Link>
         </div>
 
         {/* Center: Context-aware Navigation */}
-        <button className="text-xs text-slate-600 underline" onClick={async () => {
+        <button className="text-xs text-slate-600 underline whitespace-nowrap" onClick={async () => {
           const response = await fetch("/api/auth/logout", { method: "POST" });
           if (!response.ok) return;
           for (const key of Object.keys(localStorage)) if (key.startsWith("safehome:")) localStorage.removeItem(key);
@@ -77,54 +91,63 @@ export const AppHeader: React.FC = () => {
           window.location.assign("/sign-in");
         }}>Đăng xuất</button>
         {pathname === "/workflow" ? (
-          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
+          <div className="hidden 2xl:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200/80 text-teal-800 text-xs font-bold shadow-xs">
             <Compass className="h-4 w-4 text-teal-600 animate-spin-slow" />
             <span>Quy Trình Khảo Sát &amp; Đánh Giá An Toàn (7 Bước Khép Kín)</span>
           </div>
         ) : null}
 
         {/* Real-time Status Badges & Quick Action Controls */}
-        {isPhotoVision || isPhotoDraft || !hasAssessment ? (
-          <div className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[10px] sm:text-xs text-amber-800 font-semibold">
+        {isPhotoVision || status.kind === "none" ? (
+          <div
+            data-testid="header-status-none"
+            className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[10px] sm:text-xs text-amber-800 font-semibold"
+          >
             <Camera className="h-4 w-4 shrink-0" />
-            <span>{isPhotoDraft ? "Bản dựng ước lượng — chưa đánh giá thực trạng" : isPhotoVision ? "Ảnh cần xác nhận tại nhà" : "Chưa đủ dữ liệu để đánh giá"}</span>
+            <span>{isPhotoDraft ? "Bản dựng ước lượng — chưa đánh giá thực trạng" : isPhotoVision ? "Ảnh cần xác nhận tại nhà" : "Chưa đánh giá"}</span>
           </div>
         ) : (
-        <div className="flex items-center space-x-2.5">
-          {/* Safety Score Indicator */}
+        <div className="flex items-center gap-2 min-w-0" data-testid="header-status-assessed">
           <div
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm transition-all",
-              scoreBadgeColor
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-bold whitespace-nowrap",
+              status.unknownRules > 0 ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-slate-50 text-slate-700 border-slate-200"
             )}
-            title="Chỉ số an toàn không gian sống (0-100)"
+            title="Chỉ số sàng lọc môi trường tham khảo, không phải kết luận an toàn hay dự báo té ngã"
           >
-            {safetyScore >= 80 ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            {status.screeningScore == null ? (
+              <span>{status.stateLabel}: chưa đủ dữ liệu ({status.unknownRules} mục)</span>
             ) : (
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <span>{status.stateLabel}: {status.screeningScore}/100</span>
             )}
-            <span>Điểm an toàn:</span>
-            <span className="text-sm font-black">{safetyScore}</span>/100
           </div>
 
-          {/* Hazard Count Pill */}
-          <div
-            className={cn(
-              "flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold",
-              hazardCount > 0
-                ? "bg-rose-50 text-rose-700 border-rose-200"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-            )}
-          >
-            <span className="h-2 w-2 rounded-full animate-pulse bg-rose-500" />
-            <span className="font-bold">{hazardCount}</span> nguy cơ
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-[11px] font-semibold whitespace-nowrap">
+            <span className="font-bold">{status.hazards}</span>&nbsp;nguy cơ
           </div>
+
+          {status.lux ? (
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-white text-slate-700 border-slate-200 text-[11px] font-semibold whitespace-nowrap">
+              <span>Đêm {status.lux.value} Lux</span>
+              <span
+                data-testid="header-lux-badge"
+                className={cn(
+                  "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                  luxIsMeasurement(status.lux.source) ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"
+                )}
+              >
+                {status.lux.label}
+              </span>
+            </div>
+          ) : (
+            <div className="px-2.5 py-1.5 rounded-xl border bg-white text-slate-500 border-slate-200 text-xs font-semibold">Độ rọi: chưa đo</div>
+          )}
 
           {/* Night / Day toggle */}
           <button
             onClick={toggleNightMode}
-            title={isNightMode ? "Chuyển sang chế độ ban ngày" : "Mô phỏng ban đêm (Độ rọi mờ)"}
+            title={isNightMode ? "Chuyển cảnh 3D sang ban ngày" : "Xem cảnh 3D ở chế độ ban đêm (chỉ là hiển thị, không phải số đo)"}
             className={cn(
               "p-2 rounded-xl border transition-all text-xs font-medium flex items-center gap-1.5",
               isNightMode
@@ -135,12 +158,12 @@ export const AppHeader: React.FC = () => {
             {isNightMode ? (
               <>
                 <Moon className="h-4 w-4 text-indigo-300" />
-                <span className="hidden xl:inline">Đêm (40 Lux)</span>
+                <span className="hidden 2xl:inline">Cảnh đêm (mô phỏng)</span>
               </>
             ) : (
               <>
                 <Sun className="h-4 w-4 text-amber-600" />
-                <span className="hidden xl:inline">Ngày (250 Lux)</span>
+                <span className="hidden 2xl:inline">Cảnh ngày (mô phỏng)</span>
               </>
             )}
           </button>

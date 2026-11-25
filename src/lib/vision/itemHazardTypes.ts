@@ -57,6 +57,8 @@ export interface ItemHazardAssessment {
   imageUrl: string;
   analyzedAt: string;
   modelProvider: string;
+  /** true = ví dụ minh họa cố định (DEMO), không phải kết quả phân tích ảnh. */
+  demo?: boolean;
   canonicalRuleId?: string; // Unified Risk Engine Rule Reference (Task A03, e.g. "RISK-001")
 }
 

@@ -60,7 +60,8 @@ describe("SafeHome Vision Intelligence — Integration Tests", () => {
     const rugFinding = snapshot.findings.find((f) => f.ruleId === "RISK-001");
     expect(rugFinding).toBeDefined();
     expect(rugFinding?.severityCategory).toBe("HIGH");
-    expect(rugFinding?.evidence.rationale).toContain("Người cao tuổi");
+    // A03 canonical rule text (RISK-001) names the missing anti-slip backing, not the age group.
+    expect(rugFinding?.evidence.rationale).toContain("không có lớp lót cao su");
 
     // 6. Generate 3D Scene Draft
     const sceneDraft = await createSceneDraftFromVision(roomId);

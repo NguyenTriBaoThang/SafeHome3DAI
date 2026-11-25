@@ -36,6 +36,9 @@ import {
   Upload,
 } from "lucide-react";
 import { SceneObjectState, HazardFindingResult } from "@/types";
+import { describeObjectValues, isApproximateRoomModel, roomModelLabel, SOURCE_LABEL_VI } from "@/lib/reconstruction/sceneProvenance";
+import { WALL_MOUNTED_MODELS, CEILING_MOUNTED_MODELS, FLAT_FLOOR_MODELS } from "@/lib/reconstruction/spatialValidationEngine";
+import { RUG_LIFT_M } from "@/lib/reconstruction/scenePlacement";
 
 const REFERENCE_SAMPLE_BY_ROOM_TYPE: Record<string, { url: string; label: string }> = {
   BEDROOM: {
@@ -846,11 +849,11 @@ export const RoomCanvas: React.FC = () => {
                     obj.position[2],
                   ]}
                   center
-                  distanceFactor={10}
+                  /* fixed pixel size: the inspector must stay readable at any zoom */
                   className="pointer-events-none select-none z-10"
                 >
                   <div className="flex flex-col items-center animate-fade-in pointer-events-auto">
-                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[150px] relative">
+                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[230px] relative">
                       <div className="text-[11px] font-bold text-sky-200 flex items-center justify-between gap-2">
                         <span>{obj.name}</span>
                         <button
@@ -863,15 +866,25 @@ export const RoomCanvas: React.FC = () => {
                           <X className="h-3 w-3" />
                         </button>
                       </div>
-                      <div className="text-[9px] text-slate-400 mt-0.5">
-                        {obj.dimensions.width.toFixed(2)}m ×{" "}
-                        {obj.dimensions.length.toFixed(2)}m ×{" "}
-                        {obj.dimensions.height.toFixed(2)}m
+                      <div className="mt-1 space-y-0.5 text-left" data-testid="object-inspector">
+                        {describeObjectValues(obj).map((row) => (
+                          <div key={row.key} className="flex items-center justify-between gap-2 text-[9px] text-slate-300">
+                            <span>{row.label}: <span className="text-white">{row.value}</span></span>
+                            <span
+                              data-source={row.source}
+                              className={`rounded px-1 py-px text-[8px] font-bold whitespace-nowrap ${
+                                row.source === "measured" || row.source === "user_confirmed" ? "bg-emerald-700 text-emerald-50" : row.source === "vision_estimated" ? "bg-amber-700 text-amber-50" : "bg-slate-600 text-slate-100"
+                              }`}
+                            >
+                              {SOURCE_LABEL_VI[row.source]}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                       {obj.verified && (
                         <div className="text-[9px] text-emerald-400 font-semibold mt-0.5 flex items-center justify-center gap-1">
                           <CheckCircle2 className="h-2.5 w-2.5" />
-                          <span>Đã xác minh AI Vision (98%)</span>
+                          <span>Gợi ý AI đã được người dùng xác nhận (vẫn là ước lượng)</span>
                         </div>
                       )}
                       {hasHazard && (
@@ -1022,18 +1035,10 @@ export const RoomCanvas: React.FC = () => {
                   const halfL = room.dimensions.length / 2;
                   const clampedX = Math.max(-halfW + 0.1, Math.min(halfW - 0.1, p.x));
                   const clampedZ = Math.max(-halfL + 0.1, Math.min(halfL - 0.1, p.z));
-                  const isElevated = [
-                    "grab_bar",
-                    "mirror",
-                    "wall_art",
-                    "window",
-                    "curtain",
-                    "air_conditioner",
-                    "ceiling_fan",
-                    "lamp",
-                  ].includes(selObj.modelType);
-                  const isFlatFloor = ["rug", "cable"].includes(selObj.modelType);
-                  const targetY = isElevated ? Number(p.y.toFixed(2)) : isFlatFloor ? 0.005 : 0;
+                  const m = selObj.modelType;
+                  const isElevated = WALL_MOUNTED_MODELS.has(m) || CEILING_MOUNTED_MODELS.has(m);
+                  const isFlatFloor = FLAT_FLOOR_MODELS.has(m);
+                  const targetY = isElevated ? Number(p.y.toFixed(2)) : isFlatFloor ? RUG_LIFT_M : selObj.parentObjectId ? selObj.position[1] : 0;
 
                   updateObjectPosition(selObj.id, [
                     Number(clampedX.toFixed(2)),
@@ -1108,6 +1113,16 @@ export const RoomCanvas: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Provenance label: shown unless room size and every object are measured / user-confirmed. */}
+      <div
+        data-testid="room-model-label"
+        className={`absolute bottom-14 right-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-[10px] font-semibold border ${
+          isApproximateRoomModel(room) ? "bg-amber-950/80 text-amber-200 border-amber-700/70" : "bg-emerald-950/80 text-emerald-200 border-emerald-700/70"
+        }`}
+      >
+        {roomModelLabel(room)}
       </div>
 
       {/* --- TOP FLOATING TOOLBAR: CAMERA & LIGHTING PRESETS --- */}

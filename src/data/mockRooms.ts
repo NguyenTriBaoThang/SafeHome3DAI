@@ -39,13 +39,16 @@ export const MOCK_BEDROOM_ROOM: RoomState = {
     {
       id: "obj-bed-01",
       roomId: "room-bedroom-01",
-      name: "Giường ngủ người cao tuổi (Cao 48cm)",
+      name: "Giường ngủ người cao tuổi (mặt nệm 48 cm, tổng cao 70 cm)",
       category: "FURNITURE",
       modelType: "bed",
       position: [0.7, 0, -1.1],
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
       dimensions: { width: 1.8, length: 2.0, height: 0.7 },
+      // Mattress top 48 cm vs 70 cm incl. headboard: two different values (A02). Both are template values.
+      customProperties: { bedSurfaceHeightCm: 48 },
+      provenance: { width: "simulated", length: "simulated", height: "simulated", position: "simulated", bedSurfaceHeight: "simulated" },
       isFixed: true,
     },
     {
@@ -69,7 +72,7 @@ export const MOCK_BEDROOM_ROOM: RoomState = {
       position: [-1.6, 0, 0.8],
       rotation: [0, Math.PI / 2, 0],
       scale: [1, 1, 1],
-      dimensions: { width: 0.7, length: 1.6, height: 2.0 },
+      dimensions: { width: 1.6, length: 0.7, height: 2.0 }, // length = depth against the wall (rotated 90 deg)
       isFixed: true,
     },
     {
