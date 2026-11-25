@@ -6,6 +6,7 @@ import {
   saveAssistantMessage,
   getRecentConversationTurns,
 } from "@/lib/ai/conversationManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(request: Request) {
   try {
@@ -133,7 +134,9 @@ async function POSTHandler(request: Request) {
     });
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: "Lỗi kết nối streaming Copilot", details: error.message }),
+      JSON.stringify(
+        buildSafeErrorPayload(error, "Lỗi kết nối streaming Copilot", "COPILOT_STREAM_ERROR")
+      ),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

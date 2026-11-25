@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-11-22T12:30:28.818Z",
+  "checked_at": "2026-11-25T23:09:35.347Z",
   "status": "passed",
-  "build_id": "R2tdyZb9GCFFl7TUv-R3r",
+  "build_id": "KxZUV1xVjJjcVfgEtZnOt",
   "checks": [
     {
       "name": "real_registration_creates_separate_family_databases",
@@ -44,6 +44,10 @@
       "status": "passed"
     },
     {
+      "name": "risk_dashboard_does_not_score_photo_geometry",
+      "status": "passed"
+    },
+    {
       "name": "analytics_and_exported_report_keep_photo_measurements_and_score_unknown",
       "status": "passed"
     },
@@ -77,6 +81,14 @@
     },
     {
       "name": "delete_button_removes_photo_persistently_and_reload_does_not_restore_it",
+      "status": "passed"
+    },
+    {
+      "name": "archive_opens_persisted_objects_after_reload_and_rejects_other_family",
+      "status": "passed"
+    },
+    {
+      "name": "authenticated_main_pages_render_without_runtime_errors",
       "status": "passed"
     },
     {

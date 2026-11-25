@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getQuestionById } from "@/lib/survey/questionBank";
 import { interpretVietnameseAnswer } from "@/lib/survey/nlpInterpreter";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const InterpretNLPSchema = z.object({
   questionId: z.string().min(1),
@@ -40,7 +41,7 @@ async function POSTHandler(request: Request) {
   } catch (error: any) {
     console.error("Lỗi thông dịch câu trả lời ngôn ngữ tự nhiên:", error);
     return NextResponse.json(
-      { error: "Lỗi xử lý ngôn ngữ tự nhiên", details: error.message },
+      buildSafeErrorPayload(error, "Lỗi xử lý ngôn ngữ tự nhiên", "SURVEY_NLP_ERROR"),
       { status: 500 }
     );
   }

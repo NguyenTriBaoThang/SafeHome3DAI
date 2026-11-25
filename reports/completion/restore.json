@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-22T12:29:05.704Z",
+  "checked_at": "2026-11-25T23:07:30.425Z",
   "status": "passed",
   "scope": "Actual disposable account and family SQLite databases restored after stopping Next; not a backup of user data."
 }

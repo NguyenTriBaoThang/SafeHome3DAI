@@ -2,6 +2,7 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createHomeSurvey, getSurveys } from "@/lib/survey/surveyManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const CreateSurveySchema = z.object({
   name: z.string().optional(),
@@ -21,7 +22,7 @@ async function GETHandler() {
   } catch (error: any) {
     console.error("Lỗi lấy danh sách khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể lấy danh sách khảo sát", details: error.message },
+      buildSafeErrorPayload(error, "Không thể lấy danh sách khảo sát", "SURVEY_LIST_ERROR"),
       { status: 500 }
     );
   }
@@ -48,7 +49,7 @@ async function POSTHandler(request: Request) {
   } catch (error: any) {
     console.error("Lỗi tạo khảo sát mới:", error);
     return NextResponse.json(
-      { error: "Không thể tạo khảo sát", details: error.message },
+      buildSafeErrorPayload(error, "Không thể tạo khảo sát", "SURVEY_CREATE_ERROR"),
       { status: 500 }
     );
   }

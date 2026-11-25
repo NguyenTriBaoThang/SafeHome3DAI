@@ -33,8 +33,8 @@
   <a href="./docs/audit/TEST_RESULTS.md">
     <img src="https://img.shields.io/badge/Vision_tests-npm_run_test%3Avision-blue?logo=vitest" alt="Vision contract tests"/>
   </a>
-  <img src="https://img.shields.io/badge/Next.js-14.2.5-black?logo=next.js" alt="Next.js 14"/>
-  <img src="https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react" alt="React 18"/>
+  <img src="https://img.shields.io/badge/Next.js-15.5.29-black?logo=next.js" alt="Next.js 15"/>
+  <img src="https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react" alt="React 19"/>
   <img src="https://img.shields.io/badge/TypeScript-5.4+-3178C6?logo=typescript" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Three.js-WebGL_3D-black?logo=threedotjs" alt="Three.js"/>
   <img src="https://img.shields.io/badge/Prisma-5.22.0-2D3748?logo=prisma" alt="Prisma"/>
@@ -137,7 +137,7 @@ Tất cả các phân hệ được xâu chuỗi liền mạch trong phân hệ 
 | :---: | :--- | :--- | :--- | :--- |
 | **01** | **Khảo Sát Thông Minh** | `/ai-guided-survey` | Khảo sát từng câu hỏi, hỗ trợ giọng nói / văn bản tiếng Việt | Dynamic Irrelevance Pruning, NLP tiếng Việt, True Denominator Progress |
 | **02** | **Thị Giác AI (Vision)** | `/ai-vision` | Quét ảnh phòng thực tế, nhận diện vật thể & thẩm định nguy cơ vật dụng | Magic Bytes validation, EXIF stripping, 18-class taxonomy, Hotspot pins H1..H4 |
-| **03** | **Bản Sao Số 3D** | `/digital-twin` | Tái hiện không gian số hóa tỉ lệ 1:1, điều khiển độ sáng & ma sát sàn | Three.js, React Three Fiber, Photorealistic Dollhouse, Smart Clustering <0.95m |
+| **03** | **Bản Sao Số 3D** | `/digital-twin` | Mô hình hóa 3D ước lượng bố cục (không khẳng định tái dựng 1:1 khi chưa đo), tách ánh sáng mô phỏng khỏi lux đo thật | Three.js, React Three Fiber, Photorealistic Dollhouse, Smart Clustering <0.95m |
 | **04** | **Đánh Giá Yếu Tố Môi Trường** | `/risk-assessment` | Điểm tham chiếu (0-100), lập danh sách mối nguy môi trường | Deterministic 8 Rules (tham chiếu WHO 2021 & CDC STEADI) |
 | **05** | **Mô Phỏng Kịch Bản** | `/scenario-simulator` | Thử nghiệm giả lập can thiệp (dán thảm, đèn cảm ứng, thanh vịn) | Real-time What-If Intervention Engine, 3D State Sync, Undo/Redo |
 | **06** | **Đối Chiếu Trước / Sau** | `/analytics` | Đối chiếu trước/sau giữa snapshot mô phỏng và hiện trạng đã kiểm chứng *(không tuyên bố giảm té ngã đã chứng minh)* | Reproducible Diff Matrix, Before–After API v1, Provenance Badges |
@@ -198,7 +198,7 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
 
 ```mermaid
 flowchart TB
-    subgraph Client["Tầng Giao Diện (Next.js 14 App Router · React 18 · Tailwind · Three.js)"]
+    subgraph Client["Tầng Giao Diện (Next.js 15 App Router · React 19 · Tailwind · Three.js)"]
         UI_Survey["AI Guided Survey\n(/ai-guided-survey)"]
         UI_Vision["AI Vision Studio\n(/ai-vision, /vision)"]
         UI_ItemModal["Item Hazard Assessment\n(Hotspots H1..H4 · CDC STEADI)"]
@@ -325,7 +325,7 @@ Dự án được cấu hình đầy đủ quy trình tự động hóa CI/CD v�
 ## 💻 8. Hướng Dẫn Cài Đặt & Chạy Local (Quickstart)
 
 ### Yêu Cầu Môi Trường
-- **Node.js**: Phiên bản 18.x trở lên (khuyên dùng Node.js 20 LTS).
+- **Node.js**: Phiên bản `>= 22.12.0` (theo `engines.node` trong `package.json`, CI chạy Node.js 22 LTS).
 - **NPM**: Phiên bản 9.x hoặc 10.x.
 - **Hệ điều hành**: Windows 10/11, macOS, hoặc Linux.
 

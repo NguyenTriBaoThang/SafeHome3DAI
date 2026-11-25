@@ -145,7 +145,7 @@ export default function AIAssistantPage() {
 
   // Load conversation messages when session changes
   useEffect(() => {
-    if (currentConversationId) {
+    if (currentConversationId && currentConversationId !== "default-session") {
       loadMessages(currentConversationId);
     }
   }, [currentConversationId]);
@@ -176,6 +176,7 @@ export default function AIAssistantPage() {
   };
 
   const loadMessages = async (convId: string) => {
+    if (!convId || convId === "default-session") return;
     try {
       const res = await fetch(`/api/ai/conversations/${convId}`);
       if (res.ok) {
