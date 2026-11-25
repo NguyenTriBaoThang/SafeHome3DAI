@@ -13,7 +13,8 @@ interface RoomEnvironmentProps {
   transparentWalls: boolean;
   isNightMode: boolean;
   lightingPreset?: "MORNING" | "AFTERNOON" | "DAYLIGHT" | "EVENING" | "NIGHT" | "STUDIO";
-  quality?: "LOW" | "HIGH";
+  quality?: "LOW" | "MEDIUM" | "HIGH";
+  sceneLightingIntensitySimulated?: number;
   cutaway?: boolean;
 }
 
@@ -204,6 +205,7 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
   isNightMode,
   lightingPreset = "MORNING",
   quality = "HIGH",
+  sceneLightingIntensitySimulated,
   cutaway = false,
 }) => {
   const isDollhouse =
@@ -214,7 +216,9 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
 
   const wallOpacity = cutaway ? 1 : transparentWalls ? 0.28 : 1.0;
   const activeLight = isNightMode ? "NIGHT" : lightingPreset === "DAYLIGHT" ? "AFTERNOON" : lightingPreset;
-  const shadowSize = quality === "LOW" ? 512 : 1024;
+  const shadowSize = quality === "LOW" ? 512 : quality === "MEDIUM" ? 768 : 1024;
+  const simScale = sceneLightingIntensitySimulated ?? (activeLight === "NIGHT" ? 0.35 : 1.0);
+  const shadowsEnabled = quality !== "LOW";
 
   return (
     <CutawayContext.Provider value={cutaway}><group>
@@ -226,10 +230,10 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
       </Environment>}
       {activeLight === "NIGHT" ? (
         <>
-          <ambientLight intensity={0.12} color="#1e1b4b" />
+          <ambientLight intensity={0.12 * (simScale / 0.35)} color="#1e1b4b" />
           <directionalLight
             position={[5, 8, 4]}
-            intensity={0.25}
+            intensity={0.25 * (simScale / 0.35)}
             color="#6366f1"
           />
           {/* Bedside Warm Night Lamps */}
@@ -238,14 +242,14 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
             intensity={1.8}
             distance={4.5}
             color="#fef08a"
-            castShadow
+            castShadow={shadowsEnabled}
           />
           <pointLight
             position={[-2.95, 0.8, 0.85]}
             intensity={1.8}
             distance={4.5}
             color="#fef08a"
-            castShadow
+            castShadow={shadowsEnabled}
           />
           {/* Bathroom Soft Vanity Light */}
           <pointLight
@@ -258,12 +262,12 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
       ) : activeLight === "MORNING" || activeLight === "EVENING" ? (
         <>
           {/* Warm Golden Morning Sunlight streaming from the rear window */}
-          <ambientLight intensity={0.65} color="#fdfbf7" />
+          <ambientLight intensity={0.65 * simScale} color="#fdfbf7" />
           <directionalLight
             position={[-6, 13, -8]}
-            intensity={activeLight === "EVENING" ? 1.1 : 1.85}
+            intensity={(activeLight === "EVENING" ? 1.1 : 1.85) * simScale}
             color={activeLight === "EVENING" ? "#ffcf99" : "#fff8e7"}
-            castShadow
+            castShadow={shadowsEnabled}
             shadow-mapSize={[shadowSize, shadowSize]}
             shadow-camera-left={-8}
             shadow-camera-right={8}
@@ -274,23 +278,23 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
           {/* Soft Sky Blue Bounce Light from Front-Right */}
           <directionalLight
             position={[8, 10, 6]}
-            intensity={0.45}
+            intensity={0.45 * simScale}
             color="#e0f2fe"
           />
           {/* Secondary Fill */}
           <hemisphereLight
-            args={["#fff8f0", "#94a3b8", 0.5]}
+            args={["#fff8f0", "#94a3b8", 0.5 * simScale]}
             position={[0, 10, 0]}
           />
         </>
       ) : activeLight === "AFTERNOON" ? (
         <>
-          <ambientLight intensity={0.75} color="#ffffff" />
+          <ambientLight intensity={0.75 * simScale} color="#ffffff" />
           <directionalLight
             position={[3, 15, 2]}
-            intensity={1.6}
+            intensity={1.6 * simScale}
             color="#ffffff"
-            castShadow
+            castShadow={shadowsEnabled}
             shadow-mapSize={[shadowSize, shadowSize]}
             shadow-camera-left={-7}
             shadow-camera-right={7}
@@ -299,24 +303,24 @@ export const RoomEnvironment: React.FC<RoomEnvironmentProps> = ({
           />
           <directionalLight
             position={[-6, 8, -5]}
-            intensity={0.4}
+            intensity={0.4 * simScale}
             color="#bfdbfe"
           />
         </>
       ) : (
         /* Neutral Studio Architectural Viz Lighting */
         <>
-          <ambientLight intensity={0.8} color="#ffffff" />
+          <ambientLight intensity={0.8 * simScale} color="#ffffff" />
           <directionalLight
             position={[8, 14, 8]}
-            intensity={1.2}
+            intensity={1.2 * simScale}
             color="#ffffff"
-            castShadow
+            castShadow={shadowsEnabled}
             shadow-mapSize={[shadowSize, shadowSize]}
           />
           <directionalLight
             position={[-8, 10, -6]}
-            intensity={0.6}
+            intensity={0.6 * simScale}
             color="#e2e8f0"
           />
         </>
