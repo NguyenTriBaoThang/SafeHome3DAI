@@ -55,6 +55,48 @@ export default function DigitalTwinPage() {
   const [activeZoneId, setActiveZoneId] = useState<string | null>(null);
   const [copilotToast, setCopilotToast] = useState<string | null>(null);
 
+  // Handle deep links from Decision Provenance / Findings (?roomId=...&objectId=...&findingId=...&snapshotId=...)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const paramRoomId = params.get("roomId");
+    const paramObjectId = params.get("objectId");
+    const paramFindingId = params.get("findingId");
+    const paramSnapshotId = params.get("snapshotId");
+
+    if (paramRoomId && rooms.some((r) => r.id === paramRoomId) && paramRoomId !== currentRoomId) {
+      switchRoom(paramRoomId);
+    }
+
+    if (paramObjectId) {
+      const res = executeCopilotAction({
+        action: "FOCUS_OBJECT",
+        targetId: paramObjectId,
+        roomId: paramRoomId || undefined,
+        timestamp: Date.now(),
+      });
+      if (res.success) {
+        setCopilotToast(
+          paramSnapshotId
+            ? `${res.message} (${paramSnapshotId})`
+            : res.message
+        );
+        setShowRevealIntro(false);
+      }
+    } else if (paramFindingId) {
+      const res = executeCopilotAction({
+        action: "HIGHLIGHT_RISK",
+        targetId: paramFindingId,
+        roomId: paramRoomId || undefined,
+        timestamp: Date.now(),
+      });
+      if (res.success) {
+        setCopilotToast(res.message);
+        setShowRevealIntro(false);
+      }
+    }
+  }, [rooms, currentRoomId, switchRoom, executeCopilotAction]);
+
   // Handle Copilot 3D Bridge pending actions
   useEffect(() => {
     if (copilotPendingAction) {

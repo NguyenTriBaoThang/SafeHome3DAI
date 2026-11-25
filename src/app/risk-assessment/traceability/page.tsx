@@ -128,11 +128,11 @@ export default function TraceabilityMapPage() {
               <Compass className="h-5 w-5" />
             </span>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Traceability Knowledge Map (Bản Đồ Truy Xuất Nguồn Gốc)
+              Rule-Based Decision Provenance (Truy Xuất Nguồn Gốc Quyết Định)
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 pl-9">
-            Minh bạch hóa toàn bộ chuỗi suy luận: Từ câu trả lời khảo sát $\rightarrow$ Quy tắc hình học $\rightarrow$ Mối nguy $\rightarrow$ Căn cứ y học $\rightarrow$ Khuyến nghị
+            Truy vết quy tắc xác định: Khảo sát / Đầu vào (sourceType) → Quy tắc RISK-XXX → Mối nguy → Tài liệu đã duyệt → Khuyến nghị (tách biệt với model explainability nội tại của Gemini)
           </p>
         </div>
 
