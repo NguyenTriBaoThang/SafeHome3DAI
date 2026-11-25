@@ -468,3 +468,27 @@ model ConsentRecord {
 
   @@index([accountId, status])
 }
+
+model RoomSnapshotRecord {
+  id                  String   @id
+  roomId              String
+  snapshotType        String   // "BASELINE" | "PROPOSED_SCENARIO" | "VERIFIED_POST_INTERVENTION"
+  revision            Int      @default(1)
+  parentSnapshotId    String?
+  ownerAccountId      String   @default("system")
+  assessmentVersion   String   @default("2026.1")
+  dataPartition       String   @default("REAL") // "REAL" | "DEMO"
+  snapshotHash        String
+  roomStateJson       String
+  provenanceJson      String?
+  assessmentJson      String
+  persistenceStatus   String   @default("saved")
+  idempotencyKey      String?  @unique
+  notes               String?
+  isImmutable         Boolean  @default(true)
+  createdAt           DateTime @default(now())
+
+  @@unique([roomId, snapshotType, revision])
+  @@index([ownerAccountId, roomId])
+  @@index([roomId, snapshotType])
+}
