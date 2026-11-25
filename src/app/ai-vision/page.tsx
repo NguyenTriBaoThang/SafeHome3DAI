@@ -89,6 +89,7 @@ export interface ImageAnalysisData {
 export default function AiVisionStudioPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const previewImgRef = useRef<HTMLImageElement | null>(null);
 
   const [activeRoomId, setActiveRoomId] = useState<string>("room-bedroom-01");
   const [activeRoomType, setActiveRoomType] = useState<"BEDROOM" | "BATHROOM">("BEDROOM");
@@ -404,11 +405,20 @@ export default function AiVisionStudioPage() {
   // Only confirmed objects enter a photo draft. Its geometry is not a measurement.
   const handleBuild3DFromImage = () => {
     try {
+      const imgEl = previewImgRef.current;
+      const imageAspect =
+        imgEl && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0
+          ? imgEl.naturalWidth / imgEl.naturalHeight
+          : 4 / 3;
       const draft = buildVerifiedPhotoDraft(
         detections,
         activeRoomType,
         selectedImage.caption || "Ảnh hiện trường",
-        selectedImage.fileUrl ? [selectedImage.fileUrl] : undefined
+        selectedImage.fileUrl ? [selectedImage.fileUrl] : undefined,
+        {
+          viewpoint: selectedImage.viewpoint || selectedViewpoint,
+          imageAspect,
+        }
       );
       useSimulationStore.getState().loadReconstructedRoom(draft);
       router.push("/digital-twin");
@@ -842,6 +852,7 @@ export default function AiVisionStudioPage() {
                 style={{ transform: `scale(${zoomLevel})` }}
               >
                 <img
+                  ref={previewImgRef}
                   src={selectedImage.fileUrl}
                   alt="Room Analysis"
                   className="max-h-[500px] w-auto object-contain block mx-auto select-none rounded-lg"
