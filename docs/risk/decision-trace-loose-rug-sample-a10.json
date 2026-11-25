@@ -1,0 +1,2115 @@
+{
+  "bundleVersion": "1.0.0",
+  "scenarioTitle": "Thảm rời chắn lối đi phòng ngủ — Trước và Sau xác nhận xử lý",
+  "explainabilityNotice": "Rule-based explainability / decision provenance from deterministic clinical risk rules (RISK-001..RISK-008) — NOT internal Gemini/LLM model explainability.",
+  "beforeConfirmed": {
+    "snapshotId": "snap-empirical-loose-rug-before",
+    "canonicalResult": {
+      "assessmentId": "asmt-room-bedroom-01-100180fb",
+      "roomId": "room-bedroom-01",
+      "scenarioId": null,
+      "isBaseline": true,
+      "findings": [
+        {
+          "id": "finding-risk001-room-bedroom-01",
+          "ruleId": "RISK-001",
+          "title": "Thảm trải sàn \"Thảm chân mép giường chắn lối đi\" chưa cố định chống trượt",
+          "description": "Tấm thảm tại vị trí \"Lối đi từ giường ra cửa\" không có lớp lót cao su chống xê dịch hoặc băng dính 2 mặt chuyên dụng cố định 4 mép.",
+          "severity": "HIGH",
+          "certainty": "CONFIRMED",
+          "requiresManualConfirmation": true,
+          "targetObjectId": "obj-rug-01",
+          "targetZone": "Lối đi từ giường ra cửa",
+          "inputProvenance": [
+            {
+              "field": "rugs.items.isSecured",
+              "sourceType": "user_confirmed",
+              "value": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có"
+            },
+            {
+              "field": "rugs.items.edgesCurled",
+              "sourceType": "user_confirmed",
+              "value": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có"
+            },
+            {
+              "field": "rugs.items.inWalkway",
+              "sourceType": "user_confirmed",
+              "value": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có"
+            }
+          ],
+          "recommendation": {
+            "title": "Cố định 4 mép thảm hoặc thay thế bằng thảm đế cao su",
+            "steps": [
+              "Bóc lớp nẹp hoặc dán dải băng dính 2 mặt chuyên dụng (carpet tape) dọc theo 4 cạnh thảm.",
+              "Đặt tấm lót lưới cao su chống trượt có kích thước vừa vặn bên dưới toàn bộ bề mặt thảm.",
+              "Nếu người cao tuổi sử dụng gậy chống hoặc khung tập đi, khuyến nghị cất bỏ thảm để mặt sàn bằng phẳng tuyệt đối."
+            ],
+            "estimatedCost": "50.000 - 150.000 VNĐ",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_CDC_STEADI_2023",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "id": "finding-risk004-room-bedroom-01",
+          "ruleId": "RISK-004",
+          "title": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+          "description": "Khu vực Phòng ngủ chính có độ rọi ban đêm đo được 40 Lux, không có đèn ngủ cảm biến dẫn đường đến nhà vệ sinh.",
+          "severity": "HIGH",
+          "certainty": "CONFIRMED",
+          "requiresManualConfirmation": true,
+          "targetObjectId": null,
+          "targetZone": null,
+          "inputProvenance": [
+            {
+              "field": "lighting.nighttimeLux",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            },
+            {
+              "field": "lighting.nightLightPresent",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            },
+            {
+              "field": "lighting.pathLightToBathroom",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            }
+          ],
+          "recommendation": {
+            "title": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+            "steps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "estimatedCost": "70.000 - 200.000 VNĐ / chiếc",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      "heuristicSafetyScore": 70,
+      "missingInputs": [],
+      "dataQuality": {
+        "measuredCount": 0,
+        "userConfirmedCount": 1,
+        "visionEstimatedCount": 0,
+        "simulatedCount": 0,
+        "unknownCount": 0
+      },
+      "ruleVersion": "2026.1",
+      "createdAt": "2026-11-25T09:00:00.000Z",
+      "ruleTrace": [
+        {
+          "ruleId": "RISK-001",
+          "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tấm thảm không cố định nằm trực tiếp trên luồng di chuyển chính, dễ bị quăn mép khi người cao tuổi lê gót chân.",
+          "evidence": {
+            "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+            "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+            "rationale": "Người cao tuổi có xu hướng nhấc chân thấp khi đi lại; mép thảm quăn hoặc thảm trượt dịch bất ngờ là nguyên nhân hàng đầu gây té ngã tại nhà.",
+            "sourceFields": [
+              "rugs.items.isSecured",
+              "rugs.items.edgesCurled",
+              "rugs.items.inWalkway"
+            ]
+          },
+          "supportingSources": [
+            "SRC_WHO_2021",
+            "SRC_CDC_STEADI_2023",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-002",
+          "ruleName": "Dây điện hoặc cáp thiết bị vắt ngang lối đi thông thủy",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Không có dây điện cắt ngang lối đi sinh hoạt.",
+          "evidence": {
+            "measuredValue": "Dây điện đi gọn gàng hoặc sát chân tường",
+            "threshold": "0 dây điện cắt ngang hành lang thông thủy",
+            "rationale": "Không có nguy cơ vấp ngón chân hoặc mắc gậy chống vào dây.",
+            "sourceFields": [
+              "cables.crossingWalkway"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-003",
+          "ruleName": "Vật cản lấn chiếm hành lang / thông thủy lối đi",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Lối đi thông thoáng đạt chuẩn thông thủy (1.00m >= 0.85m).",
+          "evidence": {
+            "measuredValue": "Khoảng thông thủy: 1.00m",
+            "threshold": "Tối thiểu >= 0.85m theo tiêu chuẩn CDC STEADI",
+            "rationale": "Đủ không gian cho người cao tuổi dùng gậy hoặc khung tập đi di chuyển thoải mái.",
+            "sourceFields": [
+              "obstacles.walkwayClearWidthM"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-004",
+          "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+          "evidence": {
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+            "sourceFields": [
+              "lighting.nighttimeLux",
+              "lighting.nightLightPresent",
+              "lighting.pathLightToBathroom"
+            ]
+          },
+          "supportingSources": [
+            "SRC_WHO_2021",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-005",
+          "ruleName": "Bề mặt sàn nhà tắm trơn trượt khi ướt",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Quy tắc sàn ướt nhà tắm không áp dụng cho không gian khô (Phòng ngủ chính).",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực có nước và độ ẩm cao (Nhà vệ sinh / Phòng tắm)",
+            "rationale": "Không gian khô không phát sinh trơn trượt do xà phòng hoặc nước đọng.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "supportingSources": [
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-006",
+          "ruleName": "Thiếu thanh tay vịn an toàn trong nhà vệ sinh",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Thanh tay vịn nhà vệ sinh không áp dụng cho không gian Phòng ngủ chính.",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực vệ sinh cá nhân và tắm",
+            "rationale": "Không có bồn cầu hay bồn tắm tại khu vực này.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "supportingSources": [
+            "SRC_WHO_2021"
+          ]
+        },
+        {
+          "ruleId": "RISK-007",
+          "ruleName": "Gờ bậc cửa chênh lệch cao độ tại lối vào nhà vệ sinh / phòng",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Cốt sàn phẳng hoặc gờ bậc cửa dưới 1.5cm đã được xử lý vát thoải an toàn.",
+          "evidence": {
+            "measuredValue": "Độ chênh: 0cm (hoặc đã có dốc thoải)",
+            "threshold": "<= 1.5cm",
+            "rationale": "Bàn chân người cao tuổi có thể lướt qua êm ái mà không bị cấn vấp.",
+            "sourceFields": [
+              "floor.levelDifferenceCm",
+              "floor.hasThresholdRamp"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-008",
+          "ruleName": "Tầm với công tắc đèn hoặc vật dụng thiết yếu khó tiếp cận",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Công tắc đèn và vật dụng thiết yếu nằm trong tầm với thoải mái từ mép giường.",
+          "evidence": {
+            "measuredValue": "Công tắc và đồ dùng thiết yếu cách giường <= 50cm",
+            "threshold": "<= 60cm từ tư thế nằm/ngồi",
+            "rationale": "Không cần rướn người hoặc đứng dậy trong đêm tối.",
+            "sourceFields": [
+              "accessibility.lightSwitchReachableFromBed"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        }
+      ],
+      "ruleEvaluations": [
+        {
+          "ruleId": "RISK-001",
+          "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tấm thảm không cố định nằm trực tiếp trên luồng di chuyển chính, dễ bị quăn mép khi người cao tuổi lê gót chân.",
+          "evidence": {
+            "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+            "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+            "rationale": "Người cao tuổi có xu hướng nhấc chân thấp khi đi lại; mép thảm quăn hoặc thảm trượt dịch bất ngờ là nguyên nhân hàng đầu gây té ngã tại nhà.",
+            "sourceFields": [
+              "rugs.items.isSecured",
+              "rugs.items.edgesCurled",
+              "rugs.items.inWalkway"
+            ],
+            "affectedObjectId": "obj-rug-01",
+            "affectedObjectName": "Thảm chân mép giường chắn lối đi"
+          },
+          "finding": {
+            "id": "finding-risk001-room-bedroom-01",
+            "ruleId": "RISK-001",
+            "title": "Thảm trải sàn \"Thảm chân mép giường chắn lối đi\" chưa cố định chống trượt",
+            "hazardType": "LOOSE_RUG",
+            "description": "Tấm thảm tại vị trí \"Lối đi từ giường ra cửa\" không có lớp lót cao su chống xê dịch hoặc băng dính 2 mặt chuyên dụng cố định 4 mép.",
+            "severityCategory": "HIGH",
+            "evidence": {
+              "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+              "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+              "rationale": "Người cao tuổi có xu hướng nhấc chân thấp khi đi lại; mép thảm quăn hoặc thảm trượt dịch bất ngờ là nguyên nhân hàng đầu gây té ngã tại nhà.",
+              "sourceFields": [
+                "rugs.items.isSecured",
+                "rugs.items.edgesCurled",
+                "rugs.items.inWalkway"
+              ],
+              "affectedObjectId": "obj-rug-01",
+              "affectedObjectName": "Thảm chân mép giường chắn lối đi"
+            },
+            "recommendationText": "Loại bỏ hoàn toàn thảm trang trí không cần thiết, hoặc sử dụng băng keo dán mép thảm chống xê dịch và bổ sung lớp lót cao su chống trượt bên dưới.",
+            "targetObjectId": "obj-rug-01",
+            "status": "ACTIVE",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_CDC_STEADI_2023",
+              "SRC_BYT_VN_2020"
+            ],
+            "traceabilityTrail": [
+              {
+                "stepIndex": 1,
+                "stage": "SURVEY_ANSWER",
+                "title": "Câu trả lời khảo sát thảm trải sàn",
+                "description": "Ghi nhận phòng có sử dụng thảm trải sàn và mép thảm chưa được dán cố định.",
+                "data": {
+                  "rugsPresent": true,
+                  "isSecured": false
+                }
+              },
+              {
+                "stepIndex": 2,
+                "stage": "ROOM_PROFILE_FIELD",
+                "title": "Thuộc tính hồ sơ RoomProfile.rugs",
+                "description": "Dữ liệu được chuẩn hóa vào trường rugs với trạng thái chưa cố định.",
+                "data": {
+                  "location": "Lối đi từ giường ra cửa",
+                  "inWalkway": true
+                }
+              },
+              {
+                "stepIndex": 3,
+                "stage": "DETECTION_RULE",
+                "title": "Quy tắc kiểm định RISK-001 v1.0.0",
+                "description": "Kích hoạt trạng thái DETECTED do vi phạm điều kiện mép thảm tự do.",
+                "data": {
+                  "ruleId": "RISK-001",
+                  "evaluatedState": "DETECTED"
+                }
+              },
+              {
+                "stepIndex": 4,
+                "stage": "PRIORITY_DECISION",
+                "title": "Xác định mức ưu tiên",
+                "description": "Mức ưu tiên CAO vì tấm thảm không cố định nằm trực tiếp trên luồng di chuyển chính, dễ bị quăn mép khi người cao tuổi lê gót chân.",
+                "data": {
+                  "priority": "HIGH"
+                }
+              },
+              {
+                "stepIndex": 5,
+                "stage": "EVIDENCE_SOURCE",
+                "title": "Căn cứ khoa học WHO & CDC STEADI",
+                "description": "Hướng dẫn phòng ngừa té ngã WHO 2021 mục 4.2 và CDC STEADI Home Assessment Checklist mục Rugs.",
+                "data": {
+                  "referenceIds": [
+                    "SRC_WHO_2021",
+                    "SRC_CDC_STEADI_2023"
+                  ]
+                }
+              }
+            ]
+          },
+          "recommendation": {
+            "id": "rec-risk001-room-bedroom-01",
+            "findingId": "finding-risk001-room-bedroom-01",
+            "title": "Cố định 4 mép thảm hoặc thay thế bằng thảm đế cao su",
+            "actionCategory": "SECURE_RUG",
+            "priority": "HIGH",
+            "practicalSteps": [
+              "Bóc lớp nẹp hoặc dán dải băng dính 2 mặt chuyên dụng (carpet tape) dọc theo 4 cạnh thảm.",
+              "Đặt tấm lót lưới cao su chống trượt có kích thước vừa vặn bên dưới toàn bộ bề mặt thảm.",
+              "Nếu người cao tuổi sử dụng gậy chống hoặc khung tập đi, khuyến nghị cất bỏ thảm để mặt sàn bằng phẳng tuyệt đối."
+            ],
+            "estimatedCost": "50.000 - 150.000 VNĐ",
+            "difficulty": "EASY_DIY",
+            "status": "PENDING",
+            "referenceIds": [
+              "SRC_CDC_STEADI_2023",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "supportingSourceIds": [
+            "SRC_WHO_2021",
+            "SRC_CDC_STEADI_2023",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-002",
+          "ruleName": "Dây điện hoặc cáp thiết bị vắt ngang lối đi thông thủy",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Không có dây điện cắt ngang lối đi sinh hoạt.",
+          "evidence": {
+            "measuredValue": "Dây điện đi gọn gàng hoặc sát chân tường",
+            "threshold": "0 dây điện cắt ngang hành lang thông thủy",
+            "rationale": "Không có nguy cơ vấp ngón chân hoặc mắc gậy chống vào dây.",
+            "sourceFields": [
+              "cables.crossingWalkway"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-003",
+          "ruleName": "Vật cản lấn chiếm hành lang / thông thủy lối đi",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Lối đi thông thoáng đạt chuẩn thông thủy (1.00m >= 0.85m).",
+          "evidence": {
+            "measuredValue": "Khoảng thông thủy: 1.00m",
+            "threshold": "Tối thiểu >= 0.85m theo tiêu chuẩn CDC STEADI",
+            "rationale": "Đủ không gian cho người cao tuổi dùng gậy hoặc khung tập đi di chuyển thoải mái.",
+            "sourceFields": [
+              "obstacles.walkwayClearWidthM"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-004",
+          "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+          "evidence": {
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+            "sourceFields": [
+              "lighting.nighttimeLux",
+              "lighting.nightLightPresent",
+              "lighting.pathLightToBathroom"
+            ]
+          },
+          "finding": {
+            "id": "finding-risk004-room-bedroom-01",
+            "ruleId": "RISK-004",
+            "title": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+            "hazardType": "POOR_LIGHTING",
+            "description": "Khu vực Phòng ngủ chính có độ rọi ban đêm đo được 40 Lux, không có đèn ngủ cảm biến dẫn đường đến nhà vệ sinh.",
+            "severityCategory": "HIGH",
+            "evidence": {
+              "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+              "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+              "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+              "sourceFields": [
+                "lighting.nighttimeLux",
+                "lighting.nightLightPresent",
+                "lighting.pathLightToBathroom"
+              ]
+            },
+            "recommendationText": "Lắp đèn ngủ LED cảm biến chuyển động tự động bật sáng khi đặt chân xuống sàn, bố trí dọc chân tường từ giường ngủ đến cửa nhà vệ sinh.",
+            "status": "ACTIVE",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ],
+            "traceabilityTrail": [
+              {
+                "stepIndex": 1,
+                "stage": "SURVEY_ANSWER",
+                "title": "Khảo sát chiếu sáng ban đêm",
+                "description": "Người dùng xác nhận phòng ngủ ban đêm tối, chưa có đèn ngủ hoặc đèn ngủ không đủ sáng lối đi WC.",
+                "data": {
+                  "nighttimeLux": 40,
+                  "hasNightLight": false,
+                  "hasPathLight": false
+                }
+              },
+              {
+                "stepIndex": 2,
+                "stage": "DETECTION_RULE",
+                "title": "Quy tắc RISK-004 kích hoạt",
+                "description": "Độ rọi ban đêm dưới ngưỡng khuyến nghị an toàn.",
+                "data": {
+                  "ruleId": "RISK-004",
+                  "state": "DETECTED"
+                }
+              },
+              {
+                "stepIndex": 3,
+                "stage": "PRIORITY_DECISION",
+                "title": "Mức ưu tiên CAO",
+                "description": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+                "data": {
+                  "priority": "HIGH"
+                }
+              }
+            ]
+          },
+          "recommendation": {
+            "id": "rec-risk004-room-bedroom-01",
+            "findingId": "finding-risk004-room-bedroom-01",
+            "title": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+            "actionCategory": "IMPROVE_LIGHTING",
+            "priority": "HIGH",
+            "practicalSteps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "estimatedCost": "70.000 - 200.000 VNĐ / chiếc",
+            "difficulty": "EASY_DIY",
+            "status": "PENDING",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "supportingSourceIds": [
+            "SRC_WHO_2021",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-005",
+          "ruleName": "Bề mặt sàn nhà tắm trơn trượt khi ướt",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Quy tắc sàn ướt nhà tắm không áp dụng cho không gian khô (Phòng ngủ chính).",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực có nước và độ ẩm cao (Nhà vệ sinh / Phòng tắm)",
+            "rationale": "Không gian khô không phát sinh trơn trượt do xà phòng hoặc nước đọng.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-006",
+          "ruleName": "Thiếu thanh tay vịn an toàn trong nhà vệ sinh",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Thanh tay vịn nhà vệ sinh không áp dụng cho không gian Phòng ngủ chính.",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực vệ sinh cá nhân và tắm",
+            "rationale": "Không có bồn cầu hay bồn tắm tại khu vực này.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_WHO_2021"
+          ]
+        },
+        {
+          "ruleId": "RISK-007",
+          "ruleName": "Gờ bậc cửa chênh lệch cao độ tại lối vào nhà vệ sinh / phòng",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Cốt sàn phẳng hoặc gờ bậc cửa dưới 1.5cm đã được xử lý vát thoải an toàn.",
+          "evidence": {
+            "measuredValue": "Độ chênh: 0cm (hoặc đã có dốc thoải)",
+            "threshold": "<= 1.5cm",
+            "rationale": "Bàn chân người cao tuổi có thể lướt qua êm ái mà không bị cấn vấp.",
+            "sourceFields": [
+              "floor.levelDifferenceCm",
+              "floor.hasThresholdRamp"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-008",
+          "ruleName": "Tầm với công tắc đèn hoặc vật dụng thiết yếu khó tiếp cận",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Công tắc đèn và vật dụng thiết yếu nằm trong tầm với thoải mái từ mép giường.",
+          "evidence": {
+            "measuredValue": "Công tắc và đồ dùng thiết yếu cách giường <= 50cm",
+            "threshold": "<= 60cm từ tư thế nằm/ngồi",
+            "rationale": "Không cần rướn người hoặc đứng dậy trong đêm tối.",
+            "sourceFields": [
+              "accessibility.lightSwitchReachableFromBed"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        }
+      ],
+      "clinicalDisclaimer": "Chỉ số an toàn môi trường vật lý (0-100) theo hướng dẫn CDC STEADI / WHO 2021. Không cấu thành chẩn đoán y khoa hoặc dự báo xác suất té ngã lâm sàng của cá nhân.",
+      "scoreCalculation": {
+        "score": 70,
+        "breakdown": {
+          "baseScore": 100,
+          "highPenaltyTotal": 30,
+          "mediumPenaltyTotal": 0,
+          "lowPenaltyTotal": 0,
+          "unverifiedPenaltyTotal": 0
+        },
+        "formulaText": "Score = 100 - (2 × 15) - (0 × 8) - (0 × 4) - (0 × 3) = 70/100",
+        "transparencyNotice": "Điểm số là 'Chỉ số tuân thủ rào cản môi trường vật lý' (0-100) theo hướng dẫn CDC STEADI & WHO 2021. Điểm số KHÔNG cấu thành chẩn đoán y khoa, KHÔNG dự báo xác suất té ngã cá thể và KHÔNG khẳng định giảm tỷ lệ tai nạn ngoài đời thực."
+      },
+      "thresholdConfigVersion": "2026.1"
+    },
+    "traces": [
+      {
+        "traceVersion": "1.0.0",
+        "traceId": "trace-snap-empirical-loose-rug-before-finding-risk001-room-bedroom-01",
+        "explainabilityType": "RULE_BASED_PROVENANCE",
+        "snapshotId": "snap-empirical-loose-rug-before",
+        "assessmentId": "asmt-room-bedroom-01-100180fb",
+        "roomId": "room-bedroom-01",
+        "objectLink": {
+          "objectId": "obj-rug-01",
+          "objectName": "Thảm chân mép giường chắn lối đi",
+          "roomId": "room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "hotspotHref": "/digital-twin?roomId=room-bedroom-01&findingId=finding-risk001-room-bedroom-01&snapshotId=snap-empirical-loose-rug-before&objectId=obj-rug-01"
+        },
+        "inputEvidence": [
+          {
+            "field": "rugs.items.isSecured",
+            "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+            "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "rugs.items.edgesCurled",
+            "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+            "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "rugs.items.inWalkway",
+            "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+            "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          }
+        ],
+        "sourceType": "user_confirmed",
+        "ruleId": "RISK-001",
+        "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+        "ruleVersion": "1.0.0",
+        "findingId": "finding-risk001-room-bedroom-01",
+        "findingTitle": "Thảm trải sàn \"Thảm chân mép giường chắn lối đi\" chưa cố định chống trượt",
+        "severity": "HIGH",
+        "certainty": "CONFIRMED",
+        "recommendationId": "rec-finding-risk001-room-bedroom-01",
+        "recommendationTitle": "Cố định 4 mép thảm hoặc thay thế bằng thảm đế cao su",
+        "recommendationSteps": [
+          "Bóc lớp nẹp hoặc dán dải băng dính 2 mặt chuyên dụng (carpet tape) dọc theo 4 cạnh thảm.",
+          "Đặt tấm lót lưới cao su chống trượt có kích thước vừa vặn bên dưới toàn bộ bề mặt thảm.",
+          "Nếu người cao tuổi sử dụng gậy chống hoặc khung tập đi, khuyến nghị cất bỏ thảm để mặt sàn bằng phẳng tuyệt đối."
+        ],
+        "citationIds": [
+          "SRC_WHO_2021:WHO_PASSAGE_01@v2.1",
+          "SRC_CDC_STEADI_2023:CDC_PASSAGE_01@v2023.1",
+          "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+        ],
+        "citations": [
+          {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_01@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Yếu tố môi trường - Thảm trải sàn và chướng ngại vật",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 34
+          },
+          {
+            "citationId": "SRC_CDC_STEADI_2023:CDC_PASSAGE_01@v2023.1",
+            "documentId": "SRC_CDC_STEADI_2023",
+            "publisher": "Centers for Disease Control and Prevention",
+            "documentTitle": "CDC STEADI - Check for Safety: A Home Fall Prevention Checklist for Older Adults",
+            "section": "Lối đi thông thoáng (Clear Walkways)",
+            "version": "2023.1",
+            "officialUrl": "https://www.cdc.gov/steadi/materials.html",
+            "pageNumber": 3
+          },
+          {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        ],
+        "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION",
+        "needsConfirmation": true,
+        "confirmationTooltip": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực."
+      },
+      {
+        "traceVersion": "1.0.0",
+        "traceId": "trace-snap-empirical-loose-rug-before-finding-risk004-room-bedroom-01",
+        "explainabilityType": "RULE_BASED_PROVENANCE",
+        "snapshotId": "snap-empirical-loose-rug-before",
+        "assessmentId": "asmt-room-bedroom-01-100180fb",
+        "roomId": "room-bedroom-01",
+        "objectLink": {
+          "objectId": null,
+          "objectName": null,
+          "roomId": "room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "hotspotHref": null
+        },
+        "inputEvidence": [
+          {
+            "field": "lighting.nighttimeLux",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "lighting.nightLightPresent",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "lighting.pathLightToBathroom",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          }
+        ],
+        "sourceType": "user_confirmed",
+        "ruleId": "RISK-004",
+        "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+        "ruleVersion": "1.0.0",
+        "findingId": "finding-risk004-room-bedroom-01",
+        "findingTitle": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+        "severity": "HIGH",
+        "certainty": "CONFIRMED",
+        "recommendationId": "rec-finding-risk004-room-bedroom-01",
+        "recommendationTitle": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+        "recommendationSteps": [
+          "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+          "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+          "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+        ],
+        "citationIds": [
+          "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+          "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+        ],
+        "citations": [
+          {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Chiếu sáng và thích ứng thị lực",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 42
+          },
+          {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        ],
+        "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION",
+        "needsConfirmation": true,
+        "confirmationTooltip": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực."
+      }
+    ],
+    "graph": {
+      "graphVersion": "1.0.0",
+      "explainabilityType": "RULE_BASED_PROVENANCE",
+      "roomId": "room-bedroom-01",
+      "roomName": "Phòng ngủ chính",
+      "snapshotId": "snap-empirical-loose-rug-before",
+      "nodes": [
+        {
+          "id": "node-room-snap-empirical-loose-rug-before",
+          "stage": "ROOM_SNAPSHOT",
+          "label": "Phòng ngủ chính",
+          "subtitle": "Snapshot snap-empirical-loose-rug-before",
+          "warningState": "NONE",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "details": {
+            "roomId": "room-bedroom-01",
+            "snapshotId": "snap-empirical-loose-rug-before",
+            "explainabilityType": "RULE_BASED_PROVENANCE",
+            "totalFindingsTraced": 2
+          }
+        },
+        {
+          "id": "node-obj-finding-risk001-room-bedroom-01",
+          "stage": "OBJECT_3D",
+          "label": "Thảm chân mép giường chắn lối đi",
+          "subtitle": "objectId: obj-rug-01",
+          "warningState": "NONE",
+          "badgeText": "Liên kết 3D",
+          "tooltipText": "Nhấn để mở vật thể obj-rug-01 trong Bản sao số 3D",
+          "hotspotHref": "/digital-twin?roomId=room-bedroom-01&findingId=finding-risk001-room-bedroom-01&snapshotId=snap-empirical-loose-rug-before&objectId=obj-rug-01",
+          "objectId": "obj-rug-01",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "details": {
+            "objectId": "obj-rug-01",
+            "objectName": "Thảm chân mép giường chắn lối đi",
+            "roomId": "room-bedroom-01",
+            "snapshotId": "snap-empirical-loose-rug-before",
+            "hotspotHref": "/digital-twin?roomId=room-bedroom-01&findingId=finding-risk001-room-bedroom-01&snapshotId=snap-empirical-loose-rug-before&objectId=obj-rug-01"
+          }
+        },
+        {
+          "id": "node-input-finding-risk001-room-bedroom-01",
+          "stage": "INPUT_EVIDENCE",
+          "label": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+          "subtitle": "Nguồn: user_confirmed",
+          "sourceType": "user_confirmed",
+          "warningState": "NONE",
+          "badgeText": "Đã xác nhận",
+          "tooltipText": "Dữ liệu đã xác nhận hoặc đo thực tế",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "inputEvidence": [
+              {
+                "field": "rugs.items.isSecured",
+                "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+                "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "rugs.items.edgesCurled",
+                "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+                "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "rugs.items.inWalkway",
+                "measuredValue": "Vị trí: Lối đi từ giường ra cửa, Cố định: Không, Mép quăn: Có",
+                "threshold": "Mép thảm phải dán cố định hoàn toàn hoặc sử dụng thảm có đế cao su chống trượt DCOF >= 0.42",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              }
+            ]
+          }
+        },
+        {
+          "id": "node-rule-finding-risk001-room-bedroom-01",
+          "stage": "RULE",
+          "label": "RISK-001 (v1.0.0)",
+          "subtitle": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+          "warningState": "NONE",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "ruleId": "RISK-001",
+            "ruleVersion": "1.0.0",
+            "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch"
+          }
+        },
+        {
+          "id": "node-finding-finding-risk001-room-bedroom-01",
+          "stage": "FINDING",
+          "label": "Thảm trải sàn \"Thảm chân mép giường chắn lối đi\" chưa cố định chống trượt",
+          "subtitle": "HIGH · CONFIRMED",
+          "warningState": "PROVISIONAL",
+          "badgeText": "Cần xác nhận",
+          "tooltipText": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực.",
+          "hotspotHref": "/digital-twin?roomId=room-bedroom-01&findingId=finding-risk001-room-bedroom-01&snapshotId=snap-empirical-loose-rug-before&objectId=obj-rug-01",
+          "objectId": "obj-rug-01",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "details": {
+            "findingId": "finding-risk001-room-bedroom-01",
+            "severity": "HIGH",
+            "certainty": "CONFIRMED",
+            "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION"
+          }
+        },
+        {
+          "id": "node-cit-finding-risk001-room-bedroom-01-SRC_WHO_2021",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "World Health Organization (v2.1)",
+          "subtitle": "Yếu tố môi trường - Thảm trải sàn và chướng ngại vật",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_01@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Yếu tố môi trường - Thảm trải sàn và chướng ngại vật",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 34
+          }
+        },
+        {
+          "id": "node-cit-finding-risk001-room-bedroom-01-SRC_CDC_STEADI_2023",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "Centers for Disease Control and Prevention (v2023.1)",
+          "subtitle": "Lối đi thông thoáng (Clear Walkways)",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_CDC_STEADI_2023:CDC_PASSAGE_01@v2023.1",
+            "documentId": "SRC_CDC_STEADI_2023",
+            "publisher": "Centers for Disease Control and Prevention",
+            "documentTitle": "CDC STEADI - Check for Safety: A Home Fall Prevention Checklist for Older Adults",
+            "section": "Lối đi thông thoáng (Clear Walkways)",
+            "version": "2023.1",
+            "officialUrl": "https://www.cdc.gov/steadi/materials.html",
+            "pageNumber": 3
+          }
+        },
+        {
+          "id": "node-cit-finding-risk001-room-bedroom-01-SRC_BYT_VN_2020",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "Bộ Y tế Việt Nam (v1.0)",
+          "subtitle": "Cải tạo môi trường nhà ở thân thiện với người già",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        },
+        {
+          "id": "node-rec-finding-risk001-room-bedroom-01",
+          "stage": "RECOMMENDATION",
+          "label": "Cố định 4 mép thảm hoặc thay thế bằng thảm đế cao su",
+          "subtitle": "3 bước xử lý",
+          "warningState": "NONE",
+          "badgeText": "Khuyến nghị",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk001-room-bedroom-01",
+          "details": {
+            "recommendationId": "rec-finding-risk001-room-bedroom-01",
+            "steps": [
+              "Bóc lớp nẹp hoặc dán dải băng dính 2 mặt chuyên dụng (carpet tape) dọc theo 4 cạnh thảm.",
+              "Đặt tấm lót lưới cao su chống trượt có kích thước vừa vặn bên dưới toàn bộ bề mặt thảm.",
+              "Nếu người cao tuổi sử dụng gậy chống hoặc khung tập đi, khuyến nghị cất bỏ thảm để mặt sàn bằng phẳng tuyệt đối."
+            ],
+            "citationIds": [
+              "SRC_WHO_2021:WHO_PASSAGE_01@v2.1",
+              "SRC_CDC_STEADI_2023:CDC_PASSAGE_01@v2023.1",
+              "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+            ]
+          }
+        },
+        {
+          "id": "node-obj-finding-risk004-room-bedroom-01",
+          "stage": "OBJECT_3D",
+          "label": "Không gian phòng",
+          "subtitle": "Quy tắc cấp phòng",
+          "warningState": "PROVISIONAL",
+          "badgeText": "Cấp phòng",
+          "tooltipText": "Nguy cơ cấp môi trường phòng (không gắn objectId riêng lẻ)",
+          "hotspotHref": null,
+          "objectId": null,
+          "findingId": "finding-risk004-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "details": {
+            "objectId": null,
+            "objectName": null,
+            "roomId": "room-bedroom-01",
+            "snapshotId": "snap-empirical-loose-rug-before",
+            "hotspotHref": null
+          }
+        },
+        {
+          "id": "node-input-finding-risk004-room-bedroom-01",
+          "stage": "INPUT_EVIDENCE",
+          "label": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+          "subtitle": "Nguồn: user_confirmed",
+          "sourceType": "user_confirmed",
+          "warningState": "NONE",
+          "badgeText": "Đã xác nhận",
+          "tooltipText": "Dữ liệu đã xác nhận hoặc đo thực tế",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "inputEvidence": [
+              {
+                "field": "lighting.nighttimeLux",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "lighting.nightLightPresent",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "lighting.pathLightToBathroom",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              }
+            ]
+          }
+        },
+        {
+          "id": "node-rule-finding-risk004-room-bedroom-01",
+          "stage": "RULE",
+          "label": "RISK-004 (v1.0.0)",
+          "subtitle": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "warningState": "NONE",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "ruleId": "RISK-004",
+            "ruleVersion": "1.0.0",
+            "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn"
+          }
+        },
+        {
+          "id": "node-finding-finding-risk004-room-bedroom-01",
+          "stage": "FINDING",
+          "label": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+          "subtitle": "HIGH · CONFIRMED",
+          "warningState": "PROVISIONAL",
+          "badgeText": "Cần xác nhận",
+          "tooltipText": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực.",
+          "hotspotHref": null,
+          "objectId": null,
+          "findingId": "finding-risk004-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "details": {
+            "findingId": "finding-risk004-room-bedroom-01",
+            "severity": "HIGH",
+            "certainty": "CONFIRMED",
+            "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION"
+          }
+        },
+        {
+          "id": "node-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "World Health Organization (v2.1)",
+          "subtitle": "Chiếu sáng và thích ứng thị lực",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Chiếu sáng và thích ứng thị lực",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 42
+          }
+        },
+        {
+          "id": "node-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "Bộ Y tế Việt Nam (v1.0)",
+          "subtitle": "Cải tạo môi trường nhà ở thân thiện với người già",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        },
+        {
+          "id": "node-rec-finding-risk004-room-bedroom-01",
+          "stage": "RECOMMENDATION",
+          "label": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+          "subtitle": "3 bước xử lý",
+          "warningState": "NONE",
+          "badgeText": "Khuyến nghị",
+          "snapshotId": "snap-empirical-loose-rug-before",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "recommendationId": "rec-finding-risk004-room-bedroom-01",
+            "steps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "citationIds": [
+              "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+              "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+            ]
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-room-finding-risk001-room-bedroom-01",
+          "source": "node-room-snap-empirical-loose-rug-before",
+          "target": "node-obj-finding-risk001-room-bedroom-01",
+          "relation": "contains"
+        },
+        {
+          "id": "e-obj-input-finding-risk001-room-bedroom-01",
+          "source": "node-obj-finding-risk001-room-bedroom-01",
+          "target": "node-input-finding-risk001-room-bedroom-01",
+          "relation": "evidences"
+        },
+        {
+          "id": "e-input-rule-finding-risk001-room-bedroom-01",
+          "source": "node-input-finding-risk001-room-bedroom-01",
+          "target": "node-rule-finding-risk001-room-bedroom-01",
+          "relation": "evaluates"
+        },
+        {
+          "id": "e-rule-finding-finding-risk001-room-bedroom-01",
+          "source": "node-rule-finding-risk001-room-bedroom-01",
+          "target": "node-finding-finding-risk001-room-bedroom-01",
+          "relation": "triggers"
+        },
+        {
+          "id": "e-finding-cit-finding-risk001-room-bedroom-01-SRC_WHO_2021",
+          "source": "node-finding-finding-risk001-room-bedroom-01",
+          "target": "node-cit-finding-risk001-room-bedroom-01-SRC_WHO_2021",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-cit-finding-risk001-room-bedroom-01-SRC_CDC_STEADI_2023",
+          "source": "node-finding-finding-risk001-room-bedroom-01",
+          "target": "node-cit-finding-risk001-room-bedroom-01-SRC_CDC_STEADI_2023",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-cit-finding-risk001-room-bedroom-01-SRC_BYT_VN_2020",
+          "source": "node-finding-finding-risk001-room-bedroom-01",
+          "target": "node-cit-finding-risk001-room-bedroom-01-SRC_BYT_VN_2020",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-rec-finding-risk001-room-bedroom-01",
+          "source": "node-finding-finding-risk001-room-bedroom-01",
+          "target": "node-rec-finding-risk001-room-bedroom-01",
+          "relation": "recommends"
+        },
+        {
+          "id": "e-room-finding-risk004-room-bedroom-01",
+          "source": "node-room-snap-empirical-loose-rug-before",
+          "target": "node-obj-finding-risk004-room-bedroom-01",
+          "relation": "contains"
+        },
+        {
+          "id": "e-obj-input-finding-risk004-room-bedroom-01",
+          "source": "node-obj-finding-risk004-room-bedroom-01",
+          "target": "node-input-finding-risk004-room-bedroom-01",
+          "relation": "evidences"
+        },
+        {
+          "id": "e-input-rule-finding-risk004-room-bedroom-01",
+          "source": "node-input-finding-risk004-room-bedroom-01",
+          "target": "node-rule-finding-risk004-room-bedroom-01",
+          "relation": "evaluates"
+        },
+        {
+          "id": "e-rule-finding-finding-risk004-room-bedroom-01",
+          "source": "node-rule-finding-risk004-room-bedroom-01",
+          "target": "node-finding-finding-risk004-room-bedroom-01",
+          "relation": "triggers"
+        },
+        {
+          "id": "e-finding-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-rec-finding-risk004-room-bedroom-01",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-rec-finding-risk004-room-bedroom-01",
+          "relation": "recommends"
+        }
+      ]
+    }
+  },
+  "afterVerified": {
+    "snapshotId": "snap-empirical-loose-rug-after",
+    "canonicalResult": {
+      "assessmentId": "asmt-room-bedroom-01-41b24d79",
+      "roomId": "room-bedroom-01",
+      "scenarioId": null,
+      "isBaseline": true,
+      "findings": [
+        {
+          "id": "finding-risk004-room-bedroom-01",
+          "ruleId": "RISK-004",
+          "title": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+          "description": "Khu vực Phòng ngủ chính có độ rọi ban đêm đo được 40 Lux, không có đèn ngủ cảm biến dẫn đường đến nhà vệ sinh.",
+          "severity": "HIGH",
+          "certainty": "CONFIRMED",
+          "requiresManualConfirmation": true,
+          "targetObjectId": null,
+          "targetZone": null,
+          "inputProvenance": [
+            {
+              "field": "lighting.nighttimeLux",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            },
+            {
+              "field": "lighting.nightLightPresent",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            },
+            {
+              "field": "lighting.pathLightToBathroom",
+              "sourceType": "user_confirmed",
+              "value": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không"
+            }
+          ],
+          "recommendation": {
+            "title": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+            "steps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "estimatedCost": "70.000 - 200.000 VNĐ / chiếc",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      "heuristicSafetyScore": 85,
+      "missingInputs": [],
+      "dataQuality": {
+        "measuredCount": 1,
+        "userConfirmedCount": 0,
+        "visionEstimatedCount": 0,
+        "simulatedCount": 0,
+        "unknownCount": 0
+      },
+      "ruleVersion": "2026.1",
+      "createdAt": "2026-11-25T09:30:00.000Z",
+      "ruleTrace": [
+        {
+          "ruleId": "RISK-001",
+          "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Tất cả thảm trải sàn đã được cố định mép và có lớp chống trượt an toàn.",
+          "evidence": {
+            "measuredValue": "Thảm đã cố định 4 mép, không có góc quăn",
+            "threshold": "Thảm cố định hoàn toàn vào bề mặt sàn",
+            "rationale": "Thảm phẳng, bám chắc sàn không gây vấp ngón chân.",
+            "sourceFields": [
+              "rugs.items.isSecured"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-002",
+          "ruleName": "Dây điện hoặc cáp thiết bị vắt ngang lối đi thông thủy",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Không có dây điện cắt ngang lối đi sinh hoạt.",
+          "evidence": {
+            "measuredValue": "Dây điện đi gọn gàng hoặc sát chân tường",
+            "threshold": "0 dây điện cắt ngang hành lang thông thủy",
+            "rationale": "Không có nguy cơ vấp ngón chân hoặc mắc gậy chống vào dây.",
+            "sourceFields": [
+              "cables.crossingWalkway"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-003",
+          "ruleName": "Vật cản lấn chiếm hành lang / thông thủy lối đi",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Lối đi thông thoáng đạt chuẩn thông thủy (1.00m >= 0.85m).",
+          "evidence": {
+            "measuredValue": "Khoảng thông thủy: 1.00m",
+            "threshold": "Tối thiểu >= 0.85m theo tiêu chuẩn CDC STEADI",
+            "rationale": "Đủ không gian cho người cao tuổi dùng gậy hoặc khung tập đi di chuyển thoải mái.",
+            "sourceFields": [
+              "obstacles.walkwayClearWidthM"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-004",
+          "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+          "evidence": {
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+            "sourceFields": [
+              "lighting.nighttimeLux",
+              "lighting.nightLightPresent",
+              "lighting.pathLightToBathroom"
+            ]
+          },
+          "supportingSources": [
+            "SRC_WHO_2021",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-005",
+          "ruleName": "Bề mặt sàn nhà tắm trơn trượt khi ướt",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Quy tắc sàn ướt nhà tắm không áp dụng cho không gian khô (Phòng ngủ chính).",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực có nước và độ ẩm cao (Nhà vệ sinh / Phòng tắm)",
+            "rationale": "Không gian khô không phát sinh trơn trượt do xà phòng hoặc nước đọng.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "supportingSources": [
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-006",
+          "ruleName": "Thiếu thanh tay vịn an toàn trong nhà vệ sinh",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Thanh tay vịn nhà vệ sinh không áp dụng cho không gian Phòng ngủ chính.",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực vệ sinh cá nhân và tắm",
+            "rationale": "Không có bồn cầu hay bồn tắm tại khu vực này.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "supportingSources": [
+            "SRC_WHO_2021"
+          ]
+        },
+        {
+          "ruleId": "RISK-007",
+          "ruleName": "Gờ bậc cửa chênh lệch cao độ tại lối vào nhà vệ sinh / phòng",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Cốt sàn phẳng hoặc gờ bậc cửa dưới 1.5cm đã được xử lý vát thoải an toàn.",
+          "evidence": {
+            "measuredValue": "Độ chênh: 0cm (hoặc đã có dốc thoải)",
+            "threshold": "<= 1.5cm",
+            "rationale": "Bàn chân người cao tuổi có thể lướt qua êm ái mà không bị cấn vấp.",
+            "sourceFields": [
+              "floor.levelDifferenceCm",
+              "floor.hasThresholdRamp"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-008",
+          "ruleName": "Tầm với công tắc đèn hoặc vật dụng thiết yếu khó tiếp cận",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Công tắc đèn và vật dụng thiết yếu nằm trong tầm với thoải mái từ mép giường.",
+          "evidence": {
+            "measuredValue": "Công tắc và đồ dùng thiết yếu cách giường <= 50cm",
+            "threshold": "<= 60cm từ tư thế nằm/ngồi",
+            "rationale": "Không cần rướn người hoặc đứng dậy trong đêm tối.",
+            "sourceFields": [
+              "accessibility.lightSwitchReachableFromBed"
+            ]
+          },
+          "supportingSources": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        }
+      ],
+      "ruleEvaluations": [
+        {
+          "ruleId": "RISK-001",
+          "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Tất cả thảm trải sàn đã được cố định mép và có lớp chống trượt an toàn.",
+          "evidence": {
+            "measuredValue": "Thảm đã cố định 4 mép, không có góc quăn",
+            "threshold": "Thảm cố định hoàn toàn vào bề mặt sàn",
+            "rationale": "Thảm phẳng, bám chắc sàn không gây vấp ngón chân.",
+            "sourceFields": [
+              "rugs.items.isSecured"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-002",
+          "ruleName": "Dây điện hoặc cáp thiết bị vắt ngang lối đi thông thủy",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Không có dây điện cắt ngang lối đi sinh hoạt.",
+          "evidence": {
+            "measuredValue": "Dây điện đi gọn gàng hoặc sát chân tường",
+            "threshold": "0 dây điện cắt ngang hành lang thông thủy",
+            "rationale": "Không có nguy cơ vấp ngón chân hoặc mắc gậy chống vào dây.",
+            "sourceFields": [
+              "cables.crossingWalkway"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-003",
+          "ruleName": "Vật cản lấn chiếm hành lang / thông thủy lối đi",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Lối đi thông thoáng đạt chuẩn thông thủy (1.00m >= 0.85m).",
+          "evidence": {
+            "measuredValue": "Khoảng thông thủy: 1.00m",
+            "threshold": "Tối thiểu >= 0.85m theo tiêu chuẩn CDC STEADI",
+            "rationale": "Đủ không gian cho người cao tuổi dùng gậy hoặc khung tập đi di chuyển thoải mái.",
+            "sourceFields": [
+              "obstacles.walkwayClearWidthM"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-004",
+          "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "version": "1.0.0",
+          "state": "DETECTED",
+          "priority": "HIGH",
+          "priorityRationale": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+          "evidence": {
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+            "sourceFields": [
+              "lighting.nighttimeLux",
+              "lighting.nightLightPresent",
+              "lighting.pathLightToBathroom"
+            ]
+          },
+          "finding": {
+            "id": "finding-risk004-room-bedroom-01",
+            "ruleId": "RISK-004",
+            "title": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+            "hazardType": "POOR_LIGHTING",
+            "description": "Khu vực Phòng ngủ chính có độ rọi ban đêm đo được 40 Lux, không có đèn ngủ cảm biến dẫn đường đến nhà vệ sinh.",
+            "severityCategory": "HIGH",
+            "evidence": {
+              "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+              "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+              "rationale": "Đồng tử người cao tuổi co giãn chậm, cần lượng ánh sáng gấp 3-4 lần người trẻ để nhận diện bậc thềm và chướng ngại vật trong đêm tối.",
+              "sourceFields": [
+                "lighting.nighttimeLux",
+                "lighting.nightLightPresent",
+                "lighting.pathLightToBathroom"
+              ]
+            },
+            "recommendationText": "Lắp đèn ngủ LED cảm biến chuyển động tự động bật sáng khi đặt chân xuống sàn, bố trí dọc chân tường từ giường ngủ đến cửa nhà vệ sinh.",
+            "status": "ACTIVE",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ],
+            "traceabilityTrail": [
+              {
+                "stepIndex": 1,
+                "stage": "SURVEY_ANSWER",
+                "title": "Khảo sát chiếu sáng ban đêm",
+                "description": "Người dùng xác nhận phòng ngủ ban đêm tối, chưa có đèn ngủ hoặc đèn ngủ không đủ sáng lối đi WC.",
+                "data": {
+                  "nighttimeLux": 40,
+                  "hasNightLight": false,
+                  "hasPathLight": false
+                }
+              },
+              {
+                "stepIndex": 2,
+                "stage": "DETECTION_RULE",
+                "title": "Quy tắc RISK-004 kích hoạt",
+                "description": "Độ rọi ban đêm dưới ngưỡng khuyến nghị an toàn.",
+                "data": {
+                  "ruleId": "RISK-004",
+                  "state": "DETECTED"
+                }
+              },
+              {
+                "stepIndex": 3,
+                "stage": "PRIORITY_DECISION",
+                "title": "Mức ưu tiên CAO",
+                "description": "Mức ưu tiên CAO vì tuyến đường từ giường đến nhà vệ sinh ban đêm hoàn toàn thiếu ánh sáng dẫn hướng, là thời điểm người cao tuổi dễ choáng ngợp và ngã nhất.",
+                "data": {
+                  "priority": "HIGH"
+                }
+              }
+            ]
+          },
+          "recommendation": {
+            "id": "rec-risk004-room-bedroom-01",
+            "findingId": "finding-risk004-room-bedroom-01",
+            "title": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+            "actionCategory": "IMPROVE_LIGHTING",
+            "priority": "HIGH",
+            "practicalSteps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "estimatedCost": "70.000 - 200.000 VNĐ / chiếc",
+            "difficulty": "EASY_DIY",
+            "status": "PENDING",
+            "referenceIds": [
+              "SRC_WHO_2021",
+              "SRC_BYT_VN_2020"
+            ]
+          },
+          "supportingSourceIds": [
+            "SRC_WHO_2021",
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-005",
+          "ruleName": "Bề mặt sàn nhà tắm trơn trượt khi ướt",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Quy tắc sàn ướt nhà tắm không áp dụng cho không gian khô (Phòng ngủ chính).",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực có nước và độ ẩm cao (Nhà vệ sinh / Phòng tắm)",
+            "rationale": "Không gian khô không phát sinh trơn trượt do xà phòng hoặc nước đọng.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_BYT_VN_2020"
+          ]
+        },
+        {
+          "ruleId": "RISK-006",
+          "ruleName": "Thiếu thanh tay vịn an toàn trong nhà vệ sinh",
+          "version": "1.0.0",
+          "state": "NOT_APPLICABLE",
+          "priority": "LOW",
+          "priorityRationale": "Thanh tay vịn nhà vệ sinh không áp dụng cho không gian Phòng ngủ chính.",
+          "evidence": {
+            "measuredValue": "Không áp dụng",
+            "threshold": "Chỉ kiểm định khu vực vệ sinh cá nhân và tắm",
+            "rationale": "Không có bồn cầu hay bồn tắm tại khu vực này.",
+            "sourceFields": [
+              "roomType"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_WHO_2021"
+          ]
+        },
+        {
+          "ruleId": "RISK-007",
+          "ruleName": "Gờ bậc cửa chênh lệch cao độ tại lối vào nhà vệ sinh / phòng",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Cốt sàn phẳng hoặc gờ bậc cửa dưới 1.5cm đã được xử lý vát thoải an toàn.",
+          "evidence": {
+            "measuredValue": "Độ chênh: 0cm (hoặc đã có dốc thoải)",
+            "threshold": "<= 1.5cm",
+            "rationale": "Bàn chân người cao tuổi có thể lướt qua êm ái mà không bị cấn vấp.",
+            "sourceFields": [
+              "floor.levelDifferenceCm",
+              "floor.hasThresholdRamp"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        },
+        {
+          "ruleId": "RISK-008",
+          "ruleName": "Tầm với công tắc đèn hoặc vật dụng thiết yếu khó tiếp cận",
+          "version": "1.0.0",
+          "state": "NOT_DETECTED",
+          "priority": "LOW",
+          "priorityRationale": "Công tắc đèn và vật dụng thiết yếu nằm trong tầm với thoải mái từ mép giường.",
+          "evidence": {
+            "measuredValue": "Công tắc và đồ dùng thiết yếu cách giường <= 50cm",
+            "threshold": "<= 60cm từ tư thế nằm/ngồi",
+            "rationale": "Không cần rướn người hoặc đứng dậy trong đêm tối.",
+            "sourceFields": [
+              "accessibility.lightSwitchReachableFromBed"
+            ]
+          },
+          "finding": null,
+          "recommendation": null,
+          "supportingSourceIds": [
+            "SRC_CDC_STEADI_2023"
+          ]
+        }
+      ],
+      "clinicalDisclaimer": "Chỉ số an toàn môi trường vật lý (0-100) theo hướng dẫn CDC STEADI / WHO 2021. Không cấu thành chẩn đoán y khoa hoặc dự báo xác suất té ngã lâm sàng của cá nhân.",
+      "scoreCalculation": {
+        "score": 85,
+        "breakdown": {
+          "baseScore": 100,
+          "highPenaltyTotal": 15,
+          "mediumPenaltyTotal": 0,
+          "lowPenaltyTotal": 0,
+          "unverifiedPenaltyTotal": 0
+        },
+        "formulaText": "Score = 100 - (1 × 15) - (0 × 8) - (0 × 4) - (0 × 3) = 85/100",
+        "transparencyNotice": "Điểm số là 'Chỉ số tuân thủ rào cản môi trường vật lý' (0-100) theo hướng dẫn CDC STEADI & WHO 2021. Điểm số KHÔNG cấu thành chẩn đoán y khoa, KHÔNG dự báo xác suất té ngã cá thể và KHÔNG khẳng định giảm tỷ lệ tai nạn ngoài đời thực."
+      },
+      "thresholdConfigVersion": "2026.1"
+    },
+    "traces": [
+      {
+        "traceVersion": "1.0.0",
+        "traceId": "trace-snap-empirical-loose-rug-after-finding-risk004-room-bedroom-01",
+        "explainabilityType": "RULE_BASED_PROVENANCE",
+        "snapshotId": "snap-empirical-loose-rug-after",
+        "assessmentId": "asmt-room-bedroom-01-41b24d79",
+        "roomId": "room-bedroom-01",
+        "objectLink": {
+          "objectId": null,
+          "objectName": null,
+          "roomId": "room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "hotspotHref": null
+        },
+        "inputEvidence": [
+          {
+            "field": "lighting.nighttimeLux",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "lighting.nightLightPresent",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          },
+          {
+            "field": "lighting.pathLightToBathroom",
+            "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+            "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+            "sourceType": "user_confirmed",
+            "certainty": "CONFIRMED",
+            "needsConfirmation": false,
+            "warningBadge": null,
+            "tooltipText": null
+          }
+        ],
+        "sourceType": "user_confirmed",
+        "ruleId": "RISK-004",
+        "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn",
+        "ruleVersion": "1.0.0",
+        "findingId": "finding-risk004-room-bedroom-01",
+        "findingTitle": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+        "severity": "HIGH",
+        "certainty": "CONFIRMED",
+        "recommendationId": "rec-finding-risk004-room-bedroom-01",
+        "recommendationTitle": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+        "recommendationSteps": [
+          "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+          "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+          "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+        ],
+        "citationIds": [
+          "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+          "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+        ],
+        "citations": [
+          {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Chiếu sáng và thích ứng thị lực",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 42
+          },
+          {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        ],
+        "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION",
+        "needsConfirmation": true,
+        "confirmationTooltip": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực."
+      }
+    ],
+    "graph": {
+      "graphVersion": "1.0.0",
+      "explainabilityType": "RULE_BASED_PROVENANCE",
+      "roomId": "room-bedroom-01",
+      "roomName": "Phòng ngủ chính",
+      "snapshotId": "snap-empirical-loose-rug-after",
+      "nodes": [
+        {
+          "id": "node-room-snap-empirical-loose-rug-after",
+          "stage": "ROOM_SNAPSHOT",
+          "label": "Phòng ngủ chính",
+          "subtitle": "Snapshot snap-empirical-loose-rug-after",
+          "warningState": "NONE",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "details": {
+            "roomId": "room-bedroom-01",
+            "snapshotId": "snap-empirical-loose-rug-after",
+            "explainabilityType": "RULE_BASED_PROVENANCE",
+            "totalFindingsTraced": 1
+          }
+        },
+        {
+          "id": "node-obj-finding-risk004-room-bedroom-01",
+          "stage": "OBJECT_3D",
+          "label": "Không gian phòng",
+          "subtitle": "Quy tắc cấp phòng",
+          "warningState": "PROVISIONAL",
+          "badgeText": "Cấp phòng",
+          "tooltipText": "Nguy cơ cấp môi trường phòng (không gắn objectId riêng lẻ)",
+          "hotspotHref": null,
+          "objectId": null,
+          "findingId": "finding-risk004-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "details": {
+            "objectId": null,
+            "objectName": null,
+            "roomId": "room-bedroom-01",
+            "snapshotId": "snap-empirical-loose-rug-after",
+            "hotspotHref": null
+          }
+        },
+        {
+          "id": "node-input-finding-risk004-room-bedroom-01",
+          "stage": "INPUT_EVIDENCE",
+          "label": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+          "subtitle": "Nguồn: user_confirmed",
+          "sourceType": "user_confirmed",
+          "warningState": "NONE",
+          "badgeText": "Đã xác nhận",
+          "tooltipText": "Dữ liệu đã xác nhận hoặc đo thực tế",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "inputEvidence": [
+              {
+                "field": "lighting.nighttimeLux",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "lighting.nightLightPresent",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              },
+              {
+                "field": "lighting.pathLightToBathroom",
+                "measuredValue": "Độ rọi ban đêm: 40 Lux, Đèn ngủ: Không, Đèn dẫn đường WC: Không",
+                "threshold": "Độ rọi tối thiểu >= 60-100 Lux khi di chuyển; có đèn ngủ vàng ấm dịu mắt (30-50 Lux)",
+                "sourceType": "user_confirmed",
+                "certainty": "CONFIRMED",
+                "needsConfirmation": false,
+                "warningBadge": null,
+                "tooltipText": null
+              }
+            ]
+          }
+        },
+        {
+          "id": "node-rule-finding-risk004-room-bedroom-01",
+          "stage": "RULE",
+          "label": "RISK-004 (v1.0.0)",
+          "subtitle": "Độ chiếu sáng ban đêm không đủ an toàn",
+          "warningState": "NONE",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "ruleId": "RISK-004",
+            "ruleVersion": "1.0.0",
+            "ruleName": "Độ chiếu sáng ban đêm không đủ an toàn"
+          }
+        },
+        {
+          "id": "node-finding-finding-risk004-room-bedroom-01",
+          "stage": "FINDING",
+          "label": "Ánh sáng ban đêm không đủ an toàn (40 Lux, thiếu đèn ngủ dẫn đường)",
+          "subtitle": "HIGH · CONFIRMED",
+          "warningState": "PROVISIONAL",
+          "badgeText": "Cần xác nhận",
+          "tooltipText": "Cần xác nhận thực tế tại hiện trường trước khi xem là số đo xác thực.",
+          "hotspotHref": null,
+          "objectId": null,
+          "findingId": "finding-risk004-room-bedroom-01",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "details": {
+            "findingId": "finding-risk004-room-bedroom-01",
+            "severity": "HIGH",
+            "certainty": "CONFIRMED",
+            "approvedStatus": "PROVISIONAL_NEEDS_CONFIRMATION"
+          }
+        },
+        {
+          "id": "node-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "World Health Organization (v2.1)",
+          "subtitle": "Chiếu sáng và thích ứng thị lực",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+            "documentId": "SRC_WHO_2021",
+            "publisher": "World Health Organization",
+            "documentTitle": "Step Safety: WHO Global Report on Falls Prevention in Older Age",
+            "section": "Chiếu sáng và thích ứng thị lực",
+            "version": "2.1",
+            "officialUrl": "https://www.who.int/publications/i/item/9789241563536",
+            "pageNumber": 42
+          }
+        },
+        {
+          "id": "node-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "stage": "EVIDENCE_SOURCE",
+          "label": "Bộ Y tế Việt Nam (v1.0)",
+          "subtitle": "Cải tạo môi trường nhà ở thân thiện với người già",
+          "warningState": "NONE",
+          "badgeText": "Nguồn đã duyệt",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "citationId": "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0",
+            "documentId": "SRC_BYT_VN_2020",
+            "publisher": "Bộ Y tế Việt Nam",
+            "documentTitle": "Hướng dẫn chăm sóc sức khỏe và phòng ngừa tai nạn thương tích ở người cao tuổi",
+            "section": "Cải tạo môi trường nhà ở thân thiện với người già",
+            "version": "1.0",
+            "officialUrl": "https://kcb.vn/tai-lieu-chuyen-mon/huong-dan-phong-ngua-nga-nguoi-cao-tuoi.html",
+            "pageNumber": 18
+          }
+        },
+        {
+          "id": "node-rec-finding-risk004-room-bedroom-01",
+          "stage": "RECOMMENDATION",
+          "label": "Bổ sung đèn ngủ cảm biến chuyển động dẫn hướng ban đêm",
+          "subtitle": "3 bước xử lý",
+          "warningState": "NONE",
+          "badgeText": "Khuyến nghị",
+          "snapshotId": "snap-empirical-loose-rug-after",
+          "findingId": "finding-risk004-room-bedroom-01",
+          "details": {
+            "recommendationId": "rec-finding-risk004-room-bedroom-01",
+            "steps": [
+              "Cắm 1 đèn ngủ cảm biến hồng ngoại tại ổ cắm cạnh chân giường ngủ.",
+              "Cắm thêm 1 đèn ngủ tự động bật sáng tại góc hành lang hoặc trước cửa nhà vệ sinh.",
+              "Lựa chọn ánh sáng vàng ấm (2700K - 3000K) chống chói mắt khi thức giấc giữa đêm."
+            ],
+            "citationIds": [
+              "SRC_WHO_2021:WHO_PASSAGE_02@v2.1",
+              "SRC_BYT_VN_2020:BYT_PASSAGE_01@v1.0"
+            ]
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-room-finding-risk004-room-bedroom-01",
+          "source": "node-room-snap-empirical-loose-rug-after",
+          "target": "node-obj-finding-risk004-room-bedroom-01",
+          "relation": "contains"
+        },
+        {
+          "id": "e-obj-input-finding-risk004-room-bedroom-01",
+          "source": "node-obj-finding-risk004-room-bedroom-01",
+          "target": "node-input-finding-risk004-room-bedroom-01",
+          "relation": "evidences"
+        },
+        {
+          "id": "e-input-rule-finding-risk004-room-bedroom-01",
+          "source": "node-input-finding-risk004-room-bedroom-01",
+          "target": "node-rule-finding-risk004-room-bedroom-01",
+          "relation": "evaluates"
+        },
+        {
+          "id": "e-rule-finding-finding-risk004-room-bedroom-01",
+          "source": "node-rule-finding-risk004-room-bedroom-01",
+          "target": "node-finding-finding-risk004-room-bedroom-01",
+          "relation": "triggers"
+        },
+        {
+          "id": "e-finding-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-cit-finding-risk004-room-bedroom-01-SRC_WHO_2021",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-cit-finding-risk004-room-bedroom-01-SRC_BYT_VN_2020",
+          "relation": "grounded_by"
+        },
+        {
+          "id": "e-finding-rec-finding-risk004-room-bedroom-01",
+          "source": "node-finding-finding-risk004-room-bedroom-01",
+          "target": "node-rec-finding-risk004-room-bedroom-01",
+          "relation": "recommends"
+        }
+      ]
+    },
+    "rugRuleEvaluation": {
+      "ruleId": "RISK-001",
+      "ruleName": "Thảm trải sàn không cố định mép / có nguy cơ trượt dịch",
+      "version": "1.0.0",
+      "state": "NOT_DETECTED",
+      "priority": "LOW",
+      "priorityRationale": "Tất cả thảm trải sàn đã được cố định mép và có lớp chống trượt an toàn.",
+      "evidence": {
+        "measuredValue": "Thảm đã cố định 4 mép, không có góc quăn",
+        "threshold": "Thảm cố định hoàn toàn vào bề mặt sàn",
+        "rationale": "Thảm phẳng, bám chắc sàn không gây vấp ngón chân.",
+        "sourceFields": [
+          "rugs.items.isSecured"
+        ]
+      },
+      "supportingSources": [
+        "SRC_CDC_STEADI_2023"
+      ]
+    }
+  }
+}

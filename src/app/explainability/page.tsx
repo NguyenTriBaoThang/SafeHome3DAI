@@ -26,9 +26,15 @@ import {
   FileCode,
 } from "lucide-react";
 import { useSimulationStore } from "@/stores/useSimulationStore";
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { getActiveRegistrySources } from "@/lib/rag/documentRegistry";
 import { ALL_VERSIONED_RULES } from "@/lib/risk/riskRuleRegistry";
-import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
+import { evaluateRoomHazards, evaluateRoomHazardsCanonical } from "@/lib/risk/ruleEngine";
+import {
+  buildDecisionGraphFromTraces,
+  buildDecisionTracesFromCanonical,
+  createLooseRugEmpiricalTrace,
+  DECISION_TRACE_VERSION,
+} from "@/lib/risk/decisionTrace";
 import { TraceabilityStep } from "@/lib/risk/types";
 import { cn } from "@/lib/utils";
 
@@ -59,14 +65,74 @@ export default function ExplainabilityPage() {
     useSimulationStore();
 
   const room = getCurrentRoom();
-  const findings = currentAssessment?.findings || [];
   const [activeTab, setActiveTab] = useState<"GRAPH" | "AUDIT">("GRAPH");
+  const [traceSourceMode, setTraceSourceMode] = useState<"ROOM" | "EMPIRICAL_RUG">("ROOM");
   const [selectedNodeData, setSelectedNodeData] = useState<any>(null);
 
   // Traceability Audit Trail State
   const snapshot = evaluateRoomHazards(room);
   const [selectedRuleId, setSelectedRuleId] = useState<string>("RISK-001");
   const [selectedStepIndex, setSelectedStepIndex] = useState<number>(0);
+
+  const objectNamesById = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const obj of room.objects || []) {
+      map[obj.id] = obj.name;
+    }
+    return map;
+  }, [room.objects]);
+
+  const activeTraceBundle = useMemo(() => {
+    if (traceSourceMode === "EMPIRICAL_RUG") {
+      const empirical = createLooseRugEmpiricalTrace();
+      return {
+        snapshotId: empirical.beforeConfirmed.snapshotId,
+        traces: empirical.beforeConfirmed.traces,
+        graph: empirical.beforeConfirmed.graph,
+        roomName: "Phòng ngủ chính (Mẫu thảm rời trước xử lý)",
+      };
+    }
+
+    const canonical = evaluateRoomHazardsCanonical(room);
+    const snapshotId = `snap-${canonical.assessmentId.replace(/^asmt-/, "")}`;
+    const traces = buildDecisionTracesFromCanonical(canonical, {
+      snapshotId,
+      objectNamesById,
+    });
+    const graph = buildDecisionGraphFromTraces(room.id, room.name, snapshotId, traces);
+    return {
+      snapshotId,
+      traces,
+      graph,
+      roomName: room.name,
+    };
+  }, [traceSourceMode, room, objectNamesById]);
+
+  const approvedSources = useMemo(
+    () => getActiveRegistrySources({ approvalOnly: true }).activeSources,
+    []
+  );
+
+  const handleExportTrace = () => {
+    const payload = {
+      traceVersion: DECISION_TRACE_VERSION,
+      explainabilityType: "RULE_BASED_PROVENANCE",
+      explainabilityNotice:
+        "Rule-based explainability / decision provenance từ động cơ quy tắc xác định (không phải lời giải thích nội tại của Gemini).",
+      snapshotId: activeTraceBundle.snapshotId,
+      roomName: activeTraceBundle.roomName,
+      traces: activeTraceBundle.traces,
+      graph: activeTraceBundle.graph,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `decision-trace-${activeTraceBundle.snapshotId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const selectedRule =
     ALL_VERSIONED_RULES.find((r) => r.id === selectedRuleId) ||
@@ -135,211 +201,108 @@ export default function ExplainabilityPage() {
 
   const activeStep = steps[selectedStepIndex] || steps[0];
 
-  // Generate real graph nodes and edges tracing the findings
+  // Generate deterministic ReactFlow graph from DecisionGraph (no hallucinated citation nodes)
   const { initialNodes, initialEdges } = useMemo(() => {
+    const graph = activeTraceBundle.graph;
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    // Root Room Node
-    nodes.push({
-      id: "node-room",
-      type: "input",
-      data: {
-        label: (
-          <div className="p-2 text-center">
-            <div className="font-bold text-xs text-teal-800">{room.name}</div>
-            <div className="text-[10px] text-slate-500 font-mono">
-              Không gian khảo sát 3D
-            </div>
-          </div>
-        ),
-      },
-      position: { x: 20, y: 150 },
-      style: {
-        background: "#ccfbf1",
-        border: "2px solid #0d9488",
-        borderRadius: "16px",
-        width: 180,
-      },
-    });
+    const stageX: Record<string, number> = {
+      ROOM_SNAPSHOT: 20,
+      OBJECT_3D: 230,
+      INPUT_EVIDENCE: 440,
+      RULE: 660,
+      FINDING: 870,
+      EVIDENCE_SOURCE: 1090,
+      RECOMMENDATION: 1320,
+    };
 
-    let yOffset = 20;
+    const findingRowMap = new Map<string, number>();
+    let rowIdx = 0;
+    for (const gn of graph.nodes) {
+      if (gn.findingId && !findingRowMap.has(gn.findingId)) {
+        findingRowMap.set(gn.findingId, rowIdx++);
+      }
+    }
 
-    findings.forEach((finding, idx) => {
-      const objId = `node-obj-${finding.id}`;
-      const propId = `node-prop-${finding.id}`;
-      const ruleId = `node-rule-${finding.id}`;
-      const findingId = `node-find-${finding.id}`;
-      const recId = `node-rec-${finding.id}`;
+    const citCountPerFinding = new Map<string, number>();
 
-      const y = yOffset;
-      yOffset += 160;
+    for (const gn of graph.nodes) {
+      const row = gn.findingId ? findingRowMap.get(gn.findingId) ?? 0 : 0;
+      let y = gn.stage === "ROOM_SNAPSHOT" ? 120 : 20 + row * 190;
+      if (gn.stage === "EVIDENCE_SOURCE" && gn.findingId) {
+        const sub = citCountPerFinding.get(gn.findingId) ?? 0;
+        citCountPerFinding.set(gn.findingId, sub + 1);
+        y += sub * 78;
+      }
 
-      // 1. Scene Object Node
+      const isWarning = gn.warningState === "PROVISIONAL" || gn.warningState === "UNKNOWN";
+      const borderColor = isWarning
+        ? "#d97706"
+        : gn.stage === "FINDING"
+        ? "#f43f5e"
+        : gn.stage === "EVIDENCE_SOURCE"
+        ? "#0284c7"
+        : gn.stage === "RECOMMENDATION"
+        ? "#10b981"
+        : "#0d9488";
+
       nodes.push({
-        id: objId,
+        id: gn.id,
+        type: gn.stage === "ROOM_SNAPSHOT" ? "input" : undefined,
         data: {
-          title: "Vật thể không gian",
+          title: gn.label,
+          stage: gn.stage,
+          warningState: gn.warningState,
+          badgeText: gn.badgeText,
+          tooltipText: gn.tooltipText,
+          hotspotHref: gn.hotspotHref,
+          objectId: gn.objectId,
+          findingId: gn.findingId,
+          snapshotId: gn.snapshotId,
+          details: gn.details,
           label: (
-            <div className="p-2 text-left">
-              <span className="text-[9px] font-bold text-slate-400 uppercase">1. Vật thể 3D</span>
-              <div className="font-bold text-xs text-slate-800 truncate">
-                {finding.evidence.affectedObjectName || finding.title}
+            <div className="p-2 text-left" title={gn.tooltipText || gn.subtitle}>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[9px] font-bold text-slate-500 uppercase">{gn.stage}</span>
+                {gn.badgeText && (
+                  <span
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-[9px] font-bold",
+                      isWarning ? "bg-amber-100 text-amber-800" : "bg-teal-50 text-teal-700"
+                    )}
+                  >
+                    {gn.badgeText}
+                  </span>
+                )}
               </div>
+              <div className="font-bold text-xs text-slate-900 truncate mt-0.5">{gn.label}</div>
+              <div className="text-[10px] text-slate-500 truncate">{gn.subtitle}</div>
             </div>
           ),
-          details: finding.evidence,
         },
-        position: { x: 240, y },
+        position: { x: stageX[gn.stage] ?? 20, y },
         style: {
-          background: "#ffffff",
-          border: "1.5px solid #cbd5e1",
+          background: isWarning ? "#fffbeb" : "#ffffff",
+          border: `${isWarning ? "2px dashed" : "1.5px solid"} ${borderColor}`,
           borderRadius: "12px",
-          width: 170,
+          width: 195,
         },
       });
+    }
 
+    for (const ge of graph.edges) {
       edges.push({
-        id: `e-room-${objId}`,
-        source: "node-room",
-        target: objId,
+        id: ge.id,
+        source: ge.source,
+        target: ge.target,
         animated: true,
-        style: { stroke: "#0d9488" },
+        style: { stroke: "#64748b" },
       });
-
-      // 2. Spatial Property Node
-      nodes.push({
-        id: propId,
-        data: {
-          title: "Đo đạc hình học",
-          label: (
-            <div className="p-2 text-left">
-              <span className="text-[9px] font-bold text-sky-500 uppercase">2. Đo đạc không gian</span>
-              <div className="font-bold text-xs text-slate-700 font-mono">
-                {finding.evidence.measuredValue?.toString().slice(0, 24)}...
-              </div>
-            </div>
-          ),
-          details: finding.evidence,
-        },
-        position: { x: 450, y },
-        style: {
-          background: "#f0f9ff",
-          border: "1.5px solid #0284c7",
-          borderRadius: "12px",
-          width: 180,
-        },
-      });
-
-      edges.push({
-        id: `e-${objId}-${propId}`,
-        source: objId,
-        target: propId,
-        animated: true,
-        style: { stroke: "#0284c7" },
-      });
-
-      // 3. Detection Rule Node
-      nodes.push({
-        id: ruleId,
-        data: {
-          title: "Quy tắc kiểm định",
-          label: (
-            <div className="p-2 text-left">
-              <span className="text-[9px] font-bold text-amber-500 uppercase">3. Quy chuẩn</span>
-              <div className="font-bold text-xs text-amber-900 font-mono">
-                {finding.detectionRuleId}
-              </div>
-            </div>
-          ),
-          details: { ruleId: finding.detectionRuleId, threshold: finding.evidence.threshold },
-        },
-        position: { x: 670, y },
-        style: {
-          background: "#fefce8",
-          border: "1.5px solid #eab308",
-          borderRadius: "12px",
-          width: 160,
-        },
-      });
-
-      edges.push({
-        id: `e-${propId}-${ruleId}`,
-        source: propId,
-        target: ruleId,
-        animated: true,
-        style: { stroke: "#eab308" },
-      });
-
-      // 4. Hazard Finding Node
-      nodes.push({
-        id: findingId,
-        data: {
-          title: "Kết luận nguy cơ",
-          label: (
-            <div className="p-2 text-left">
-              <span className="text-[9px] font-bold text-rose-500 uppercase">
-                4. Nguy cơ ({finding.severityCategory})
-              </span>
-              <div className="font-bold text-xs text-rose-700 truncate">
-                {finding.title}
-              </div>
-            </div>
-          ),
-          details: finding,
-        },
-        position: { x: 870, y },
-        style: {
-          background: "#fff1f2",
-          border: "1.5px solid #f43f5e",
-          borderRadius: "12px",
-          width: 170,
-        },
-      });
-
-      edges.push({
-        id: `e-${ruleId}-${findingId}`,
-        source: ruleId,
-        target: findingId,
-        animated: true,
-        style: { stroke: "#f43f5e" },
-      });
-
-      // 5. Actionable Recommendation Node
-      nodes.push({
-        id: recId,
-        data: {
-          title: "Khuyến nghị giải pháp",
-          label: (
-            <div className="p-2 text-left">
-              <span className="text-[9px] font-bold text-emerald-600 uppercase">5. Can thiệp</span>
-              <div className="font-bold text-xs text-emerald-800 truncate">
-                {finding.recommendationText.slice(0, 26)}...
-              </div>
-            </div>
-          ),
-          details: { recommendation: finding.recommendationText },
-        },
-        position: { x: 1080, y },
-        style: {
-          background: "#ecfdf5",
-          border: "1.5px solid #10b981",
-          borderRadius: "12px",
-          width: 180,
-        },
-      });
-
-      edges.push({
-        id: `e-${findingId}-${recId}`,
-        source: findingId,
-        target: recId,
-        animated: true,
-        style: { stroke: "#10b981" },
-      });
-    });
+    }
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [room, findings]);
+  }, [activeTraceBundle]);
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-slate-100">
@@ -351,15 +314,30 @@ export default function ExplainabilityPage() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-slate-900">
-              Giải Trình AI &amp; Nguồn Gốc Quyết Định (Explainable AI &amp; Audit Trail)
+              Rule-Based Explainability &amp; Decision Provenance (Truy Vết Quyết Định Theo Luật)
             </h1>
             <p className="text-[11px] text-slate-500">
-              Minh bạch 100% chuỗi suy luận: Vật thể 3D → Đo đạc → Quy tắc → Nguy cơ → Căn cứ Y học → Khuyến nghị
+              Truy vết quy tắc xác định: Vật thể → Đầu vào (sourceType) → Quy tắc phiên bản → Nguy cơ → Tài liệu đã duyệt → Khuyến nghị (tách biệt với model explainability nội tại của Gemini)
             </p>
           </div>
         </div>
 
-        {/* Tab switch buttons */}
+        {/* Mode & Tab Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() =>
+              setTraceSourceMode((m) => (m === "ROOM" ? "EMPIRICAL_RUG" : "ROOM"))
+            }
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700"
+          >
+            {traceSourceMode === "ROOM" ? "Xem mẫu thảm rời" : "Quay lại phòng hiện tại"}
+          </button>
+          <button
+            onClick={handleExportTrace}
+            className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-xs font-bold text-teal-800"
+          >
+            Xuất Trace JSON
+          </button>
         <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button
             onClick={() => setActiveTab("GRAPH")}
@@ -385,6 +363,7 @@ export default function ExplainabilityPage() {
             <Layers className="h-3.5 w-3.5" />
             <span>Truy Xuất Nguồn Gốc (Audit Trail)</span>
           </button>
+        </div>
         </div>
       </div>
 
@@ -414,9 +393,38 @@ export default function ExplainabilityPage() {
 
             {selectedNodeData ? (
               <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
-                <div className="font-bold text-teal-800 text-sm">
-                  {selectedNodeData.title || "Thông tin nút"}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-bold text-teal-800 text-sm">
+                    {selectedNodeData.title || "Thông tin nút"}
+                  </div>
+                  {selectedNodeData.badgeText && (
+                    <span
+                      title={selectedNodeData.tooltipText}
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] font-bold",
+                        selectedNodeData.warningState && selectedNodeData.warningState !== "NONE"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-teal-100 text-teal-800"
+                      )}
+                    >
+                      {selectedNodeData.badgeText}
+                    </span>
+                  )}
                 </div>
+                {selectedNodeData.tooltipText && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
+                    {selectedNodeData.tooltipText}
+                  </div>
+                )}
+                {selectedNodeData.hotspotHref && (
+                  <a
+                    href={selectedNodeData.hotspotHref}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-[11px] hover:bg-teal-700 transition"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>Mở điểm nóng 3D ({selectedNodeData.objectId})</span>
+                  </a>
+                )}
                 <div className="text-slate-600 space-y-2">
                   {selectedNodeData.details ? (
                     <pre className="text-[11px] bg-white p-2.5 rounded-xl border border-slate-200 overflow-x-auto font-mono text-slate-800 whitespace-pre-wrap">
@@ -429,21 +437,23 @@ export default function ExplainabilityPage() {
               </div>
             ) : (
               <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                Nhấp vào bất kỳ nút nào trên cây giải trình để xem chi tiết thông số đo đạc và căn cứ quy chuẩn.
+                Nhấp vào bất kỳ nút nào trên sơ đồ truy vết để xem nguồn gốc dữ liệu, trạng thái xác nhận và liên kết điểm nóng 3D.
               </div>
             )}
 
-            {/* Reference standards list */}
+            {/* Approved sources list (filtered by Task A08 registry) */}
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <h4 className="text-[11px] font-bold text-slate-600 uppercase">
-                Tài liệu chuẩn hóa liên kết
+                Tài liệu đã phê duyệt ({approvedSources.length})
               </h4>
-              {CURATED_KNOWLEDGE_SOURCES.map((src) => (
+              {approvedSources.map((src) => (
                 <div
                   key={src.id}
                   className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1"
                 >
-                  <div className="font-bold text-slate-800">{src.organization}</div>
+                  <div className="font-bold text-slate-800">
+                    {src.organization} (v{src.version})
+                  </div>
                   <div className="text-slate-500 text-[10px] line-clamp-1">{src.title}</div>
                 </div>
               ))}
@@ -603,10 +613,10 @@ export default function ExplainabilityPage() {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
                 <div className="flex items-center gap-1.5 text-teal-800 font-bold">
                   <CheckCircle2 className="h-3.5 w-3.5 text-teal-600" />
-                  <span>Chứng chỉ minh bạch kiểm định (Audit Traceable)</span>
+                  <span>Truy vết quyết định theo quy tắc (Rule-Based Provenance)</span>
                 </div>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Mọi kết luận của SafeHome 3D AI đều truy nguyên được từ câu hỏi hiện trường và tài liệu tiêu chuẩn, tuyệt đối không suy diễn ngẫu nhiên.
+                  Kết luận được truy vết từ dữ liệu đầu vào (sourceType) qua quy tắc xác định RISK-XXX và tài liệu đã phê duyệt — đây không phải lời giải thích nội tại của Gemini/LLM.
                 </p>
               </div>
             </div>

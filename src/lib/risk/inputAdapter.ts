@@ -305,6 +305,6 @@ export function normalizeRoomAssessmentInput(rawInput: any): AssessmentInput {
       essentialItemsReachableFromBed: true,
       emergencyCallReachable: false,
     },
-    sourceType: "HYBRID",
+    sourceType: (rawInput.sourceType as AssessmentInput["sourceType"]) || "HYBRID",
   };
 }

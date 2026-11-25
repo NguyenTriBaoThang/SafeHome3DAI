@@ -8,7 +8,7 @@
 
 <p align="center">
   <b>Hệ Sinh Thái Khảo Sát Thông Minh, Thị Giác Đa Phương Thức, Bản Sao Số 3D & Động Cơ Đánh Giá Nguy Cơ Té Ngã Chuẩn WHO/CDC Cho Người Cao Tuổi</b><br/>
-  <i>Adaptive Guided Survey · Multimodal AI Vision · Item Fall Hazard Assessment · 3D WebGL Digital Twin · Deterministic Clinical Risk Engine · Smart Marker Clustering · XAI Decision Graph · Grounded RAG Copilot · Photorealistic Dollhouse</i>
+  <i>Adaptive Guided Survey · Multimodal AI Vision · Item Fall Hazard Assessment · 3D WebGL Digital Twin · Deterministic Clinical Risk Engine · Smart Marker Clustering · Rule-Based Explainability (Decision Provenance) · Grounded RAG Copilot · Photorealistic Dollhouse</i>
 </p>
 
 <p align="center">
@@ -53,7 +53,7 @@
   &nbsp;•&nbsp;
   <a href="http://localhost:3000/ai-assistant"><strong>🤖 Trợ Lý AI RAG</strong></a>
   &nbsp;•&nbsp;
-  <a href="http://localhost:3000/explainability"><strong>🌳 Giải Trình AI (XAI)</strong></a>
+  <a href="http://localhost:3000/explainability"><strong>🌳 Truy Vết Quyết Định (Decision Provenance)</strong></a>
   &nbsp;•&nbsp;
   <a href="./ARCHITECTURE.md"><strong>📐 Sơ Đồ Kiến Trúc</strong></a>
   &nbsp;•&nbsp;
@@ -88,7 +88,7 @@ Hệ thống kết hợp:
 3. **Bản sao số 3D WebGL (Three.js)** với không gian kiến trúc photorealistic dollhouse, mô phỏng ánh sáng động (0 - 520 Lux), ma sát mặt sàn (sàn ướt/khô ráo) và thuật toán gom cụm nhãn thông minh (<0.95m).
 4. **Động cơ luật đánh giá nguy cơ (Deterministic Clinical Rules)** tham chiếu WHO 2021 & CDC STEADI. Kết quả phụ thuộc dữ liệu đầu vào đã được xác nhận; ảnh đơn chưa đủ để chấm điểm an toàn.
 5. **Trợ lý AI RAG có căn cứ (Grounded RAG Copilot)** với ngăn tra cứu bằng chứng 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG 8 tiêu chí) và trình định dạng văn bản y tế chuyên biệt.
-6. **Sơ đồ giải trình quyết định (XAI Decision Graph)** trực quan hóa cây suy luận từ phòng $\rightarrow$ vật thể $\rightarrow$ đo đạc $\rightarrow$ quy chuẩn $\rightarrow$ nguy cơ $\rightarrow$ can thiệp.
+6. **Truy vết quyết định theo quy tắc (Rule-Based Explainability / Decision Provenance)** trực quan hóa chuỗi truy nguyên: Vật thể $\rightarrow$ Dữ liệu đầu vào & nguồn gốc $\rightarrow$ Quy tắc phiên bản hóa $\rightarrow$ Mối nguy $\rightarrow$ Tài liệu đã phê duyệt $\rightarrow$ Khuyến nghị *(tách biệt với model explainability nội tại của Gemini/LLM)*.
 
 ---
 
@@ -115,17 +115,17 @@ Hệ sinh thái **SafeHome 3D AI** được triển khai trực tiếp với cá
 | <img src="./assets/images/screenshots/demo_05_item_hotspot_detail.jpg" alt="Chi Tiết Điểm Rủi Ro H1" width="100%"/> | <img src="./assets/images/screenshots/demo_04_item_hazard_assessment.jpg" alt="Định vị điểm ghim nguy cơ H1 H2 H3" width="100%"/> |
 | **Cơ chế chấn thương lâm sàng**: Phân tích lực va đập tập trung tại góc nhọn (Focal Blunt Impact) và lộ trình khắc phục chi phí thấp (~25.000đ). | **Tương tác trực quan**: Bấm trực tiếp lên ảnh để căn chỉnh vị trí ghim rủi ro, chuyển tiếp 1 chạm sang quét toàn bộ phòng hoặc hỏi trợ lý AI. |
 
-### 2.3. Trợ Lý AI SafeHome Copilot & Giải Trình Quyết Định Minh Bạch (XAI)
+### 2.3. Trợ Lý AI SafeHome Copilot & Truy Vết Quyết Định Theo Quy Tắc (Decision Provenance)
 
 | Trợ Lý AI SafeHome Copilot (`/ai-assistant`) | Ngăn Tra Cứu Bằng Chứng 4 Tab (`Evidence Drawer`) |
 | :---: | :---: |
 | <img src="./assets/images/screenshots/demo_06_ai_chat_assistant.jpg" alt="Trợ Lý AI SafeHome Copilot" width="100%"/> | <img src="./assets/images/screenshots/demo_07_rag_evidence_drawer.jpg" alt="Ngăn Tra Cứu Bằng Chứng Y Khoa" width="100%"/> |
 | **Hội thoại y học có dẫn chứng**: Tự động liên kết không gian 3D đang khảo sát, định dạng SafeHomeMarkdown và trích dẫn chuẩn [1] WHO, [2] NCOA, [3] BYT, [4] CDC. | **Tra cứu tài liệu gốc**: Hiển thị nguyên văn trích dẫn kiểm chứng từ WHO và Viện Lão khoa Quốc gia, điều khoản/số trang và đường dẫn cổng chính thức. |
 
-| Giải Trình AI & Nguồn Gốc Quyết Định (`/explainability`) |
+| Truy Vết Quyết Định & Nguồn Gốc Dữ Liệu (`/explainability`) |
 | :---: |
-| <img src="./assets/images/screenshots/demo_08_xai_decision_graph.jpg" alt="Giải Trình AI & Cây Quyết Định XAI" width="100%"/> |
-| **Cây suy luận ReactFlow**: Trực quan hóa chuỗi quyết định từ Vật thể 3D $\rightarrow$ Đo đạc không gian $\rightarrow$ Quy chuẩn y tế $\rightarrow$ Nguy cơ $\rightarrow$ Giải pháp can thiệp. |
+| <img src="./assets/images/screenshots/demo_08_xai_decision_graph.jpg" alt="Truy Vết Quyết Định Theo Luật (Rule-Based Decision Provenance)" width="100%"/> |
+| **Đồ thị Rule-Based Provenance**: Trực quan hóa chuỗi truy vết từ Vật thể 3D $\rightarrow$ Dữ liệu đầu vào (`sourceType`) $\rightarrow$ Quy tắc `RISK-XXX` $\rightarrow$ Mối nguy $\rightarrow$ Tài liệu đã phê duyệt $\rightarrow$ Khuyến nghị (không phải model explainability nội tại của Gemini). |
 
 ---
 
@@ -188,9 +188,9 @@ Phân hệ thẩm định nguy cơ đồ vật chuyên biệt theo chuẩn **CDC
   4. **Thẩm định RAG (Eval):** Báo cáo đánh giá RAG trực tiếp trên 8 tiêu chí khắt khe (Faithfulness, Answer Relevance, Context Recall, Medical Grounding,...).
 - **Cơ chế phòng vệ chống ảo giác (Evidence Fallback Active):** Phân định rạch ròi giữa câu trả lời có bằng chứng xác thực (`SUPPORTED`), bằng chứng một phần (`PARTIALLY_SUPPORTED`) và từ chối khẳng định khi thiếu số liệu kiểm chứng (`INSUFFICIENT_EVIDENCE`).
 
-### 3.5. Sơ Đồ Giải Trình Quyết Định & Truy Vết Y Khoa (XAI Decision Graph — `/explainability`)
-- **Hiển thị chuỗi suy luận:** Dùng đồ thị ReactFlow từ Phòng khảo sát $\rightarrow$ Vật thể 3D nhận diện $\rightarrow$ Số đo hình học $\rightarrow$ Điều khoản quy chuẩn y tế $\rightarrow$ Kết luận nguy cơ $\rightarrow$ Giải pháp can thiệp.
-- **Audit Trail:** Truy xuất toàn bộ nhật ký thay đổi trạng thái, ghi nhận đầy đủ người can thiệp, thời điểm và căn cứ y văn.
+### 3.5. Rule-Based Explainability & Decision Provenance (`/explainability`)
+- **Truy vết chuỗi quyết định theo quy tắc (Decision Provenance):** Dùng đồ thị ReactFlow từ Snapshot Phòng $\rightarrow$ Vật thể (`objectId`) $\rightarrow$ Bằng chứng đầu vào (`sourceType`, cờ `"Cần xác nhận"` cho `unknown`/`provisional`) $\rightarrow$ Quy tắc `RISK-XXX` $\rightarrow$ Mối nguy (`findingId`) $\rightarrow$ Nguồn tài liệu đã duyệt (ẩn nếu chưa kiểm chứng) $\rightarrow$ Khuyến nghị. Tách biệt hoàn toàn với *model explainability* nội tại của Gemini/LLM.
+- **Audit Trail:** Truy xuất phiên bản quy tắc, trạng thái nguồn và liên kết điểm nóng 3D bằng `objectId` / `roomId` / `snapshotId`.
 
 ---
 
@@ -205,7 +205,7 @@ flowchart TB
         UI_3D["3D Digital Twin\n(/digital-twin)"]
         UI_Sim["Kho Mô Phỏng 3D\n(/simulations)"]
         UI_Risk["Risk Assessment\n(/risk-assessment)"]
-        UI_XAI["Explainable AI Graph\n(/explainability)"]
+        UI_XAI["Decision Provenance Graph\n(/explainability)"]
         UI_RAG["AI RAG Copilot\n(/ai-assistant)"]
         UI_Workflow["Hành Trình 7 Bước\n(/workflow)"]
         UI_Docs["Cổng Tài Liệu Kỹ Thuật\n(docs-site : GitHub Pages)"]

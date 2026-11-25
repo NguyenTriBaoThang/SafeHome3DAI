@@ -1,9 +1,10 @@
 import { RiskFinding } from "./types";
-import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
+import { getActiveRegistrySources, validateOfficialSourceUrl } from "@/lib/rag/documentRegistry";
 
 export interface FindingExplanation {
   findingId: string;
   ruleId: string;
+  explainabilityType: "RULE_BASED_PROVENANCE";
   title: string;
   summary: string;
   clinicalRationale: string;
@@ -18,27 +19,42 @@ export interface FindingExplanation {
     section: string;
     officialUrl: string;
     supportingExcerpt: string;
+    version: string;
   }>;
-  evidenceConfidence: "HIGH" | "MEDIUM";
+  evidenceConfidence: "HIGH" | "MEDIUM" | "INSUFFICIENT";
+  requiresConfirmation: boolean;
+  confirmationTooltip: string | null;
   disclaimer: string;
 }
 
 /**
- * Deterministic AI + RAG explanation generator for Risk Intelligence findings.
- * Grounded in verified passages from WHO, CDC STEADI, and Bộ Y tế Việt Nam.
+ * Deterministic rule-based explainability & decision provenance generator.
+ * Grounded ONLY in APPROVED, non-outdated sources when supporting evidence exists.
+ * Never fabricates fallback citations when evidence is missing.
  */
 export function explainHazardFinding(finding: RiskFinding): FindingExplanation {
   const citations: FindingExplanation["citations"] = [];
   let citationIndex = 1;
 
-  // Retrieve relevant passages for this finding's referenceIds or rule
-  const matchedSources = CURATED_KNOWLEDGE_SOURCES.filter((src) =>
-    finding.referenceIds.includes(src.id)
+  const hasEvidence = Boolean(
+    finding.evidence &&
+      finding.evidence.measuredValue &&
+      finding.evidence.measuredValue !== "Chưa rõ" &&
+      (!finding.evidence.missingFields || finding.evidence.missingFields.length === 0)
   );
 
+  // Retrieve ONLY currently APPROVED, non-outdated sources matching referenceIds
+  const { activeSources } = getActiveRegistrySources({ approvalOnly: true });
+  const matchedSources = hasEvidence
+    ? activeSources.filter((src) => finding.referenceIds.includes(src.id))
+    : [];
+
   for (const source of matchedSources) {
-    const relevantPassages = source.passages.filter((p) => {
-      const matchRule = p.relatedRules.some(
+    const urlCheck = validateOfficialSourceUrl(source.officialUrl || source.url);
+    if (!urlCheck.valid) continue;
+
+    const relevantPassages = source.passages.filter((p) =>
+      p.relatedRules.some(
         (r) =>
           r.includes(finding.ruleId) ||
           r.includes(finding.hazardType) ||
@@ -48,9 +64,8 @@ export function explainHazardFinding(finding: RiskFinding): FindingExplanation {
           (finding.ruleId === "RISK-004" && r.includes("LIGHT")) ||
           (finding.ruleId === "RISK-005" && r.includes("WET")) ||
           (finding.ruleId === "RISK-006" && r.includes("GRAB"))
-      );
-      return matchRule;
-    });
+      )
+    );
 
     const chosenPassage = relevantPassages[0] || source.passages[0];
     if (chosenPassage) {
@@ -61,25 +76,11 @@ export function explainHazardFinding(finding: RiskFinding): FindingExplanation {
         documentTitle: source.title,
         publicationYear: source.publicationDate,
         section: chosenPassage.section,
-        officialUrl: source.officialUrl,
+        officialUrl: urlCheck.normalizedUrl,
         supportingExcerpt: chosenPassage.passageText,
+        version: source.version,
       });
     }
-  }
-
-  // Fallback citation if none matched
-  if (citations.length === 0) {
-    const defaultSrc = CURATED_KNOWLEDGE_SOURCES[0];
-    citations.push({
-      citationNumber: 1,
-      sourceId: defaultSrc.id,
-      organization: defaultSrc.organization,
-      documentTitle: defaultSrc.title,
-      publicationYear: defaultSrc.publicationDate,
-      section: "Phòng chống té ngã trong nhà ở người cao tuổi",
-      officialUrl: defaultSrc.officialUrl,
-      supportingExcerpt: defaultSrc.passages[0]?.passageText || "",
-    });
   }
 
   let clinicalRationale = "";
@@ -199,15 +200,21 @@ export function explainHazardFinding(finding: RiskFinding): FindingExplanation {
   return {
     findingId: finding.id,
     ruleId: finding.ruleId,
+    explainabilityType: "RULE_BASED_PROVENANCE",
     title: finding.title,
     summary,
     clinicalRationale,
     environmentalMechanism,
     actionableGuidance,
     citations,
-    evidenceConfidence: "HIGH",
+    evidenceConfidence: citations.length > 0 ? "HIGH" : hasEvidence ? "MEDIUM" : "INSUFFICIENT",
+    requiresConfirmation: !hasEvidence || citations.length === 0,
+    confirmationTooltip:
+      !hasEvidence || citations.length === 0
+        ? "Cần xác nhận thực tế tại hiện trường (thiếu bằng chứng hoặc nguồn kiểm chứng)."
+        : null,
     disclaimer:
-      "SafeHome 3D AI cung cấp phân tích hỗ trợ phòng ngừa rủi ro môi trường dựa trên tài liệu khuyến cáo y tế cộng đồng (WHO, CDC, Bộ Y Tế). Ứng dụng không đưa ra chẩn đoán y khoa, không thay thế cho đánh giá chuyên môn của bác sĩ hoặc chuyên viên trị liệu vật lý.",
+      "SafeHome 3D AI cung cấp truy vết quyết định theo quy tắc (rule-based explainability / decision provenance) tham chiếu tài liệu y tế cộng đồng (WHO, CDC, Bộ Y tế). Đây không phải lời giải thích nội tại của mô hình Gemini và không thay thế chẩn đoán y khoa.",
   };
 }
 
