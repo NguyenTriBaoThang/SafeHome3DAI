@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MeasurementSourceTypeSchema as SourceTypeSchema } from "@/lib/contracts/sharedContractV1";
 
 /**
  * Zod Schema for Semantic 3D Scene Object
@@ -28,6 +29,9 @@ export const SemanticSceneObjectSchema = z.object({
   riskIds: z.array(z.string()).default([]),
   sourceDetectionId: z.string().optional(),
   sourceImageId: z.string().optional(),
+  provenance: z.object({
+    width: SourceTypeSchema, length: SourceTypeSchema, height: SourceTypeSchema, position: SourceTypeSchema,
+  }).optional(),
 });
 
 export type SemanticSceneObject = z.infer<typeof SemanticSceneObjectSchema>;
@@ -57,6 +61,8 @@ export const SemanticSceneGraphSchema = z.object({
     "dollhouse_reference",
   ]),
   dimensions: RoomEnvelopeDimensionsSchema,
+  /** Per-axis source of the envelope size: user-entered = user_confirmed, defaults = simulated. */
+  dimensionProvenance: z.object({ width: SourceTypeSchema, length: SourceTypeSchema, height: SourceTypeSchema }).optional(),
   floorProperties: z.object({
     material: z.enum(["WOOD", "CERAMIC_TILE", "NON_SLIP_VINYL"]),
     isSlipResistant: z.boolean().default(false),
