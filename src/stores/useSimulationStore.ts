@@ -12,6 +12,7 @@ import {
   runEnvironmentalAssessment,
   calculateSafetyScore,
 } from "@/features/risk-engine/rules";
+import { getObjectProvenance } from "@/lib/reconstruction/sceneProvenance";
 import {
   autoFixSceneGeometry,
   AutoFixResult,
@@ -327,9 +328,17 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         if (room.id !== get().currentRoomId) return room;
         return {
           ...room,
-          objects: room.objects.map((obj) =>
-            obj.id === id ? { ...obj, position: clampedPos } : obj
-          ),
+          objects: room.objects.map((obj) => {
+            if (obj.id === id) {
+              return { ...obj, position: clampedPos, provenance: { ...getObjectProvenance(obj), position: "simulated" as const } };
+            }
+            // Items resting on the moved object (lamp on nightstand) travel with it.
+            if (obj.parentObjectId === id) {
+              const before = room.objects.find((o) => o.id === id)!.position;
+              return { ...obj, position: [obj.position[0] + clampedPos[0] - before[0], obj.position[1] + clampedPos[1] - before[1], obj.position[2] + clampedPos[2] - before[2]] as [number, number, number] };
+            }
+            return obj;
+          }),
         };
       });
       set({ rooms: updatedRooms });
@@ -353,9 +362,19 @@ export const useSimulationStore = create<SimulationStore>((set, get) => {
         if (room.id !== get().currentRoomId) return room;
         return {
           ...room,
-          objects: room.objects.map((obj) =>
-            obj.id === id ? { ...obj, ...updates } : obj
-          ),
+          objects: room.objects.map((obj) => {
+            if (obj.id !== id) return obj;
+            // Dimensions typed in by the user become user_confirmed; everything else keeps its source.
+            const p = getObjectProvenance(obj);
+            const d = updates.dimensions;
+            const provenance = d ? {
+              ...p,
+              ...(d.width !== obj.dimensions.width ? { width: "user_confirmed" as const } : {}),
+              ...(d.length !== obj.dimensions.length ? { length: "user_confirmed" as const } : {}),
+              ...(d.height !== obj.dimensions.height ? { height: "user_confirmed" as const } : {}),
+            } : p;
+            return { ...obj, ...updates, ...(updates.provenance ? {} : { provenance }) };
+          }),
         };
       });
       set({ rooms: updatedRooms });

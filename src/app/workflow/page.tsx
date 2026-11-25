@@ -37,6 +37,7 @@ import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
 import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
 import { normalizeRoomStateToAssessmentInput } from "@/lib/risk/inputAdapter";
 import { RiskFinding } from "@/lib/risk/types";
+import { buildVerifiedPhotoDraft } from "@/lib/vision/photoSceneDraft";
 import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
 import type { DetectionCategory, VisionClarificationQuestion, VisionDetection } from "@/lib/vision/types";
 import {
@@ -113,6 +114,12 @@ export default function WorkflowPage() {
 
   // Step 2: Collection State
   const [dimensions, setDimensions] = useState({ length: 4.5, width: 3.5, height: 2.8 });
+  // Axes the user actually typed. Untouched axes show template defaults (simulated), not facts.
+  const [touchedDims, setTouchedDims] = useState({ length: false, width: false, height: false });
+  const editDimension = (axis: "length" | "width" | "height", value: number) => {
+    setDimensions((prev) => ({ ...prev, [axis]: value }));
+    setTouchedDims((prev) => ({ ...prev, [axis]: true }));
+  };
   const [checklist, setChecklist] = useState({
     wetFloor: false,
     looseRug: true,
@@ -210,6 +217,7 @@ export default function WorkflowPage() {
 
   // Sync Room selection with Room Type & default dimensions
   useEffect(() => {
+    setTouchedDims({ length: false, width: false, height: false });
     if (roomType === "BATHROOM" && currentRoomId !== "room-bathroom-01") {
       switchRoom("room-bathroom-01");
       setDimensions({ length: 2.4, width: 1.8, height: 2.6 });
@@ -221,6 +229,55 @@ export default function WorkflowPage() {
       setDimensions({ length: 6.0, width: 5.4, height: 2.8 });
     }
   }, [roomType]);
+
+  // Step 4 scene: built from the detections the user accepted/edited in step 3; template room otherwise.
+  const acceptedDetections = visionDetections.filter(
+    (d) => d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED"
+  );
+  const [sceneSource, setSceneSource] = useState<"photo" | "template">("template");
+  const [sceneError, setSceneError] = useState<string | null>(null);
+  const [visionAspect, setVisionAspect] = useState<number | null>(null);
+  useEffect(() => {
+    if (!visionImageUrl) return setVisionAspect(null);
+    const img = new window.Image();
+    img.onload = () => img.naturalHeight > 0 && setVisionAspect(img.naturalWidth / img.naturalHeight);
+    img.src = visionImageUrl;
+  }, [visionImageUrl]);
+  useEffect(() => {
+    if (currentStep !== 4) return;
+    const store = useSimulationStore.getState();
+    if (acceptedDetections.length === 0) {
+      // Checklist path / step 3 skipped: show the template room, clearly labelled.
+      setSceneSource("template");
+      setSceneError(null);
+      const templateId = roomType === "BATHROOM" ? "room-bathroom-01" : roomType === "LIVINGROOM" ? "room-living-01" : "room-bedroom-01";
+      if (store.currentRoomId !== templateId) store.switchRoom(templateId);
+      return;
+    }
+    try {
+      const draft = buildVerifiedPhotoDraft(
+        visionDetections,
+        roomType === "LIVINGROOM" ? "LIVING_ROOM" : roomType,
+        "ảnh bước 3",
+        visionImageUrl ? [visionImageUrl] : undefined,
+        {
+          imageAspect: visionAspect ?? 4 / 3,
+          manualDimensions: { width: dimensions.width, length: dimensions.length, height: dimensions.height },
+          dimensionSources: {
+            width: touchedDims.width ? "user_confirmed" : "simulated",
+            length: touchedDims.length ? "user_confirmed" : "simulated",
+            height: touchedDims.height ? "user_confirmed" : "simulated",
+          },
+        }
+      );
+      store.loadReconstructedRoom(draft);
+      setSceneSource("photo");
+      setSceneError(null);
+    } catch (error) {
+      setSceneError(error instanceof Error ? error.message : "Không dựng được cảnh từ ảnh.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, visionDetections, visionAspect, dimensions, touchedDims, roomType]);
 
   // Run initial simulation if not run yet
   useEffect(() => {
@@ -708,7 +765,7 @@ export default function WorkflowPage() {
                       type="number"
                       step="0.1"
                       value={dimensions.length}
-                      onChange={(e) => setDimensions({ ...dimensions, length: parseFloat(e.target.value) || 4 })}
+                      onChange={(e) => editDimension("length", parseFloat(e.target.value) || 4)}
                       className="w-full mt-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                     />
                   </div>
@@ -718,7 +775,7 @@ export default function WorkflowPage() {
                       type="number"
                       step="0.1"
                       value={dimensions.width}
-                      onChange={(e) => setDimensions({ ...dimensions, width: parseFloat(e.target.value) || 3 })}
+                      onChange={(e) => editDimension("width", parseFloat(e.target.value) || 3)}
                       className="w-full mt-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                     />
                   </div>
@@ -728,7 +785,7 @@ export default function WorkflowPage() {
                       type="number"
                       step="0.1"
                       value={dimensions.height}
-                      onChange={(e) => setDimensions({ ...dimensions, height: parseFloat(e.target.value) || 2.8 })}
+                      onChange={(e) => editDimension("height", parseFloat(e.target.value) || 2.8)}
                       className="w-full mt-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800"
                     />
                   </div>
@@ -1147,6 +1204,28 @@ export default function WorkflowPage() {
               </div>
             </div>
 
+            <div
+              data-testid="scene-source-banner"
+              className={`rounded-xl border px-3 py-2 text-xs ${
+                sceneSource === "photo" ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-slate-50 border-slate-200 text-slate-700"
+              }`}
+            >
+              {sceneSource === "photo" ? (
+                <>
+                  <strong>Dựng từ {acceptedDetections.length} vật thể bạn đã chấp nhận/sửa ở bước 3.</strong> Vị trí và kích thước là{" "}
+                  <em>ước lượng từ ảnh</em>, không phải số đo; kích thước phòng
+                  {touchedDims.length || touchedDims.width || touchedDims.height ? " lấy từ số bạn nhập (các trục chưa nhập vẫn là mặc định mô phỏng)" : " là mặc định mô phỏng (bạn chưa nhập)"}.
+                  Vật thể bị loại không xuất hiện.
+                </>
+              ) : (
+                <>
+                  <strong>Phòng mẫu (template, mô phỏng).</strong> Chưa có vật thể nào từ ảnh được chấp nhận ở bước 3 (hoặc bạn dùng checklist), nên đây
+                  là bố cục mẫu, không phản ánh phòng thật.
+                </>
+              )}
+              {sceneError && <div className="mt-1 text-rose-700">{sceneError}</div>}
+            </div>
+
             {/* Embedded 3D Canvas with Non-Overlapping Clustered Markers */}
             <div className="h-[480px] w-full rounded-2xl overflow-hidden shadow-inner border border-slate-800">
               <RoomViewer />
@@ -1196,6 +1275,12 @@ export default function WorkflowPage() {
                 </div>
               </div>
             </div>
+
+            {currentRoom?.evidenceStatus === "PHOTO_DRAFT" && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Bản dựng từ ảnh chỉ ước lượng hình học. Hệ thống <strong>chưa thể đánh giá</strong> nguy cơ từ bản dựng này; cần số đo và xác nhận tại hiện trường.
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Findings List */}
