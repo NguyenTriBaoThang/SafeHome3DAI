@@ -16,6 +16,7 @@ import {
 import { ItemHazardCard } from "./ItemHazardCard";
 import type { ItemHazardAssessment } from "@/lib/vision/itemHazardTypes";
 import { SAMPLE_ITEM_PRESETS } from "@/lib/vision/itemHazardTypes";
+import { LiveCameraCaptureModal } from "@/components/camera/LiveCameraCaptureModal";
 
 interface ItemAssessmentModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [itemHint, setItemHint] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -51,6 +53,12 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCameraCapture = (file: File, url: string) => {
+    setSelectedFile(file);
+    setPreviewUrl(url);
+    setErrorMsg(null);
   };
 
   const handleAnalyzeUpload = async () => {
@@ -253,18 +261,32 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
                     />
                     <div className="text-xs text-teal-700 font-bold flex items-center justify-center gap-1">
                       <CheckCircle2 className="h-4 w-4" />
-                      <span>Đã chọn ảnh ({selectedFile?.name || "Ảnh tải lên"})</span>
+                      <span>Đã chọn ảnh ({selectedFile?.name || "Ảnh hiện trường"})</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      className="text-xs font-semibold text-slate-500 hover:text-slate-700 underline"
-                    >
-                      Chọn ảnh khác
-                    </button>
+                    <div className="flex items-center justify-center gap-4 pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline"
+                      >
+                        Chọn ảnh khác từ máy
+                      </button>
+                      <span className="text-slate-300">•</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCameraOpen(true);
+                        }}
+                        className="text-xs font-semibold text-teal-600 hover:text-teal-800 underline flex items-center gap-1"
+                      >
+                        <Camera className="h-3.5 w-3.5" />
+                        <span>Chụp lại bằng camera</span>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -278,6 +300,30 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
                       <p className="text-xs text-slate-500 mt-1">
                         Hỗ trợ PNG, JPG, JPEG, WEBP (tối đa 10MB)
                       </p>
+                    </div>
+                    <div className="pt-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCameraOpen(true);
+                        }}
+                        className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                      >
+                        <Camera className="h-4 w-4" />
+                        <span>Chụp trực tiếp bằng Camera</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>Tải ảnh từ máy</span>
+                      </button>
                     </div>
                   </>
                 )}
@@ -399,6 +445,15 @@ export const ItemAssessmentModal: React.FC<ItemAssessmentModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* Live Camera Capture Modal for Immediate Item Photography */}
+      <LiveCameraCaptureModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={handleCameraCapture}
+        title="Chụp ảnh vật dụng bằng Camera"
+        guidanceText="Đưa camera lại gần vật dụng (thảm, bậc thềm, dây điện), chụp rõ góc cạnh nguy cơ"
+      />
     </div>
   );
 };

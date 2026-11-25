@@ -49,6 +49,7 @@ import { createUnverifiedPhotoAssessment, type PhotoRiskAssessment } from "@/lib
 import type { AssessmentSnapshot } from "@/lib/risk/types";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { buildVerifiedPhotoDraft } from "@/lib/vision/photoSceneDraft";
+import { LiveCameraCaptureModal } from "@/components/camera/LiveCameraCaptureModal";
 
 // Default mock room images for instant zero-setup demonstration
 const DEFAULT_DEMO_BEDROOM =
@@ -65,11 +66,22 @@ export interface StudioImageItem {
   isCustom?: boolean;
 }
 
+export interface RiskCandidateSummary {
+  present: boolean | "unknown";
+  visible: boolean | "unknown";
+  applicable: boolean;
+  severity: string;
+  evidence: string;
+}
+
 export interface ImageAnalysisData {
   detections: VisionDetection[];
   observations: VisionObservation[];
   clarifications: VisionClarificationQuestion[];
   riskSnapshot: PhotoRiskAssessment | AssessmentSnapshot;
+  riskCandidates?: Record<string, RiskCandidateSummary>;
+  modelId?: string;
+  provider?: string;
   analyzedAt: string;
 }
 
@@ -77,6 +89,7 @@ export interface ImageAnalysisData {
 export default function AiVisionStudioPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const previewImgRef = useRef<HTMLImageElement | null>(null);
 
   const [activeRoomId, setActiveRoomId] = useState<string>("room-bedroom-01");
   const [activeRoomType, setActiveRoomType] = useState<"BEDROOM" | "BATHROOM">("BEDROOM");
@@ -104,6 +117,7 @@ export default function AiVisionStudioPage() {
   const [selectedDetectionId, setSelectedDetectionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"OBJECTS" | "CONCERNS" | "CLARIFY" | "RISK">("OBJECTS");
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<string>("Đã sẵn sàng");
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [imageConsent, setImageConsent] = useState(false);
@@ -117,9 +131,6 @@ export default function AiVisionStudioPage() {
 
   // Camera modal state
   const [cameraModalOpen, setCameraModalOpen] = useState<boolean>(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
-  const [cameraError, setCameraError] = useState<string | null>(null);
 
   // Edit Label Modal
   const [editModalDetection, setEditModalDetection] = useState<VisionDetection | null>(null);
@@ -134,6 +145,7 @@ export default function AiVisionStudioPage() {
   const [riskSnapshot, setRiskSnapshot] = useState<PhotoRiskAssessment | AssessmentSnapshot | null>(null);
 
   const selectedImage = images.find((img) => img.id === selectedImageId) || images[0];
+  const activeAnalysis = analysisByImage[selectedImageId];
 
   // Restore saved photos without calling inference again on page reload.
   useEffect(() => {
@@ -150,10 +162,15 @@ export default function AiVisionStudioPage() {
           for (const item of payload.data) if (item.latestAnalysis) cache[item.id] = {
             detections: item.latestAnalysis.detections, observations: item.latestAnalysis.observations,
             clarifications: item.latestAnalysis.clarifications,
-            riskSnapshot: createUnverifiedPhotoAssessment(activeRoomType, item.caption), analyzedAt: item.latestAnalysis.completedAt,
+            riskSnapshot: createUnverifiedPhotoAssessment(activeRoomType, item.caption),
+            riskCandidates: item.latestAnalysis.riskCandidates,
+            modelId: item.latestAnalysis.modelId,
+            provider: item.latestAnalysis.provider,
+            analyzedAt: item.latestAnalysis.completedAt,
           };
           setImages(saved); setSelectedImageId(saved[0].id); setAnalysisByImage(cache);
           const first = cache[saved[0].id];
+          setAnalysisError(null);
           setDetections(first?.detections || []); setObservations(first?.observations || []);
           setClarifications(first?.clarifications || []); setRiskSnapshot(first?.riskSnapshot || null);
           setSyncStatus("Đã khôi phục ảnh và kết quả đã lưu; không gọi lại AI.");
@@ -206,6 +223,7 @@ export default function AiVisionStudioPage() {
     captionPayload?: string
   ) => {
     setIsAnalyzing(true);
+    setAnalysisError(null);
     setDetections([]);
     setObservations([]);
     setClarifications([]);
@@ -231,8 +249,8 @@ export default function AiVisionStudioPage() {
         }),
         signal: AbortSignal.timeout(135000),
       });
-      const data = await res.json();
-      if (data.success && data.data) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success && data.data) {
         const newDets: VisionDetection[] = data.data.detections || [];
         const newObs: VisionObservation[] = data.data.observations || [];
         const newClars: VisionClarificationQuestion[] = data.data.clarifications || [];
@@ -245,6 +263,9 @@ export default function AiVisionStudioPage() {
           observations: newObs,
           clarifications: newClars,
           riskSnapshot: newRisk,
+          riskCandidates: data.data.riskCandidates,
+          modelId: data.data.modelId,
+          provider: data.data.provider,
           analyzedAt: new Date().toISOString(),
         };
 
@@ -257,11 +278,15 @@ export default function AiVisionStudioPage() {
           { ...image, fileUrl: data.image.fileUrl, base64: undefined } : image));
         setSyncStatus(`${data.data.modelId === "mock-demo-fallback-dataset" ? "Dữ liệu minh họa" : "Phân tích hoàn tất"}: ${newDets.length} vật thể; ${newRisk.needsVerificationCount} nguy cơ cần kiểm tra.`);
       } else {
-        setSyncStatus(data.error || "Không thể hoàn tất phân tích hình ảnh");
+        const msg = data?.error || `Không thể hoàn tất phân tích hình ảnh (HTTP ${res.status}).`;
+        setAnalysisError(msg);
+        setSyncStatus(msg);
       }
     } catch (err) {
       console.error(err);
-      setSyncStatus("Lỗi kết nối phân tích hình ảnh");
+      const msg = "Lỗi kết nối hoặc hết thời gian chờ khi phân tích hình ảnh.";
+      setAnalysisError(msg);
+      setSyncStatus(msg);
     } finally {
       setIsAnalyzing(false);
     }
@@ -271,6 +296,7 @@ export default function AiVisionStudioPage() {
   const handleSelectImage = (img: StudioImageItem) => {
     setSelectedImageId(img.id);
     setSelectedViewpoint(img.viewpoint);
+    setAnalysisError(null);
     if (analysisByImage[img.id]) {
       const cached = analysisByImage[img.id];
       setDetections(cached.detections);
@@ -288,7 +314,7 @@ export default function AiVisionStudioPage() {
     e.stopPropagation();
     try {
       const image = images.find(i => i.id === imgId);
-      if (image?.isCustom) {
+      if (image?.isCustom && image.fileUrl.startsWith("/api/vision/images/")) {
         const response = await fetch(`/api/vision/images/${encodeURIComponent(imgId)}`, { method: "DELETE" });
         const body = await response.json();
         if (!response.ok || !body.success) throw new Error(body.error || "Không xóa được ảnh.");
@@ -298,7 +324,7 @@ export default function AiVisionStudioPage() {
       if (!remaining.length) remaining.push({ id: "img-demo-bed", fileUrl: activeRoomType === "BEDROOM" ? DEFAULT_DEMO_BEDROOM : DEFAULT_DEMO_BATHROOM, viewpoint: "ENTRANCE", caption: "Ảnh minh họa", isCustom: false });
       setImages(remaining);
       if (selectedImageId === imgId) {
-        setSelectedImageId(remaining[0].id); setDetections([]); setObservations([]); setClarifications([]); setRiskSnapshot(null);
+        setSelectedImageId(remaining[0].id); setAnalysisError(null); setDetections([]); setObservations([]); setClarifications([]); setRiskSnapshot(null);
       }
       setSyncStatus("Đã xóa ảnh và thu hồi xác nhận phụ thuộc ảnh. Hãy đánh giá lại hồ sơ.");
     } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Không xóa được ảnh."); }
@@ -367,56 +393,33 @@ export default function AiVisionStudioPage() {
   };
 
   // Camera Capture
-  const handleStartCamera = async () => {
-    setCameraError(null);
+  const handleStartCamera = () => {
     setCameraModalOpen(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
-        audio: false,
-      });
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err: any) {
-      console.error("Camera access error:", err);
-      setCameraError(
-        "Không thể truy cập camera. Vui lòng kiểm tra quyền cấp phép trên trình duyệt hoặc sử dụng tính năng tải ảnh từ máy tính."
-      );
-    }
   };
 
-  const handleCaptureSnapshot = () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      handleCloseCamera();
-      const file = new File([blob], `camera_capture_${Date.now()}.jpg`, { type: "image/jpeg" });
-      processUploadFile(file);
-    }, "image/jpeg", 0.92);
-  };
-
-  const handleCloseCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop());
-      setCameraStream(null);
-    }
+  const handleLiveCameraCapture = (file: File) => {
+    processUploadFile(file);
     setCameraModalOpen(false);
   };
 
   // Only confirmed objects enter a photo draft. Its geometry is not a measurement.
   const handleBuild3DFromImage = () => {
     try {
-      const draft = buildVerifiedPhotoDraft(detections, activeRoomType, selectedImage.caption || "Ảnh hiện trường");
+      const imgEl = previewImgRef.current;
+      const imageAspect =
+        imgEl && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0
+          ? imgEl.naturalWidth / imgEl.naturalHeight
+          : 4 / 3;
+      const draft = buildVerifiedPhotoDraft(
+        detections,
+        activeRoomType,
+        selectedImage.caption || "Ảnh hiện trường",
+        selectedImage.fileUrl ? [selectedImage.fileUrl] : undefined,
+        {
+          viewpoint: selectedImage.viewpoint || selectedViewpoint,
+          imageAspect,
+        }
+      );
       useSimulationStore.getState().loadReconstructedRoom(draft);
       router.push("/digital-twin");
     } catch (error) { setSyncStatus(error instanceof Error ? error.message : "Chưa thể dựng 3D."); }
@@ -788,6 +791,24 @@ export default function AiVisionStudioPage() {
               </div>
             </div>
 
+            {/* Analysis Error Alert Banner */}
+            {analysisError && (
+              <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                  <span>{analysisError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType, selectedImage.base64, selectedImage.caption)}
+                  disabled={isAnalyzing}
+                  className="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shrink-0 transition"
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
+
             {/* Interactive Image Container with SVG Overlay & Drag-Drop */}
             <div
               onDragOver={(e) => {
@@ -831,6 +852,7 @@ export default function AiVisionStudioPage() {
                 style={{ transform: `scale(${zoomLevel})` }}
               >
                 <img
+                  ref={previewImgRef}
                   src={selectedImage.fileUrl}
                   alt="Room Analysis"
                   className="max-h-[500px] w-auto object-contain block mx-auto select-none rounded-lg"
@@ -1061,9 +1083,41 @@ export default function AiVisionStudioPage() {
             {activeTab === "OBJECTS" && (
               <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
                 {detections.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-xs">
-                    Chưa có vật thể nào được nhận diện.
-                  </div>
+                  analysisError ? (
+                    <div className="p-4 rounded-2xl border border-rose-200 bg-rose-50 text-xs text-rose-900 space-y-2">
+                      <div className="font-bold flex items-center gap-1.5 text-rose-800">
+                        <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                        <span>Phân tích ảnh chưa thành công</span>
+                      </div>
+                      <p className="text-[11px] text-rose-700 leading-relaxed">{analysisError}</p>
+                    </div>
+                  ) : activeAnalysis ? (
+                    <div className="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/60 text-xs text-amber-950 space-y-2">
+                      <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                        <Info className="h-4 w-4 text-amber-600 shrink-0" />
+                        <span>Đã quét ảnh ({activeAnalysis.modelId || "Gemini"}) — 0 đồ nội thất</span>
+                      </div>
+                      {activeAnalysis.riskCandidates && (
+                        <ul className="space-y-1 text-[11px] text-amber-900/90 list-disc pl-4">
+                          {Object.entries(activeAnalysis.riskCandidates)
+                            .filter(([, r]) => r.applicable && r.evidence)
+                            .slice(0, 4)
+                            .map(([id, r]) => (
+                              <li key={id}>
+                                <span className="font-semibold">{id}:</span> {r.evidence}
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                      <p className="text-[11px] text-amber-800 leading-relaxed pt-1 border-t border-amber-200/70">
+                        Ảnh chụp cần thấy rõ mặt sàn, giường/ghế/thảm/dây điện để AI vẽ khung bao. Bạn có thể chụp góc rộng hơn hoặc tự vẽ khung bao thủ công ở phía trên.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400 text-xs">
+                      Chưa có vật thể nào được nhận diện.
+                    </div>
+                  )
                 ) : (
                   detections.map((det) => {
                     const isSelected = det.id === selectedDetectionId;
@@ -1156,15 +1210,36 @@ export default function AiVisionStudioPage() {
             {activeTab === "CONCERNS" && (
               <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
                 {observations.length === 0 ? (
-                  <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 text-center space-y-2">
-                    <CheckCircle2 className="h-7 w-7 text-emerald-600 mx-auto" />
-                    <div className="font-bold text-xs text-emerald-900">
-                      Chưa có đề xuất nguy cơ từ ảnh
+                  activeAnalysis?.riskCandidates ? (
+                    <div className="space-y-2">
+                      {Object.entries(activeAnalysis.riskCandidates)
+                        .filter(([, r]) => r.applicable && r.evidence)
+                        .map(([id, r]) => (
+                          <div
+                            key={id}
+                            className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 text-xs space-y-1"
+                          >
+                            <div className="flex items-center justify-between font-bold text-amber-900">
+                              <span>{id}</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                                {r.visible === true ? "Quan sát được" : "Cần kiểm tra thực tế"}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-700 leading-relaxed">{r.evidence}</p>
+                          </div>
+                        ))}
                     </div>
-                    <p className="text-[11px] text-emerald-700 leading-relaxed">
-                      Hãy bổ sung khảo sát và kiểm tra thực tế để xác định mức độ an toàn.
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 text-center space-y-2">
+                      <CheckCircle2 className="h-7 w-7 text-emerald-600 mx-auto" />
+                      <div className="font-bold text-xs text-emerald-900">
+                        Chưa có đề xuất nguy cơ từ ảnh
+                      </div>
+                      <p className="text-[11px] text-emerald-700 leading-relaxed">
+                        Hãy bổ sung khảo sát và kiểm tra thực tế để xác định mức độ an toàn.
+                      </p>
+                    </div>
+                  )
                 ) : (
                   observations.map((obs) => (
                     <div
@@ -1389,68 +1464,14 @@ export default function AiVisionStudioPage() {
       {/* ============================================================= */}
       {/* MODAL 1: CAMERA LIVE CAPTURE VIEWFINDER                       */}
       {/* ============================================================= */}
-      {cameraModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-teal-600" />
-                <h3 className="text-sm font-bold text-slate-900">
-                  Chụp ảnh phòng từ Camera thiết bị
-                </h3>
-              </div>
-              <button
-                onClick={handleCloseCamera}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {cameraError ? (
-              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs space-y-2">
-                <div className="font-bold">Lỗi truy cập máy ảnh:</div>
-                <p>{cameraError}</p>
-              </div>
-            ) : (
-              <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 border-2 border-white/20 pointer-events-none rounded-2xl" />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] text-slate-500">
-                Góc chụp: <strong>{selectedViewpoint}</strong>
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCloseCamera}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
-                >
-                  Hủy bỏ
-                </button>
-                {!cameraError && (
-                  <button
-                    onClick={handleCaptureSnapshot}
-                    className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5"
-                  >
-                    <Camera className="h-3.5 w-3.5" />
-                    <span>Chụp ảnh ngay</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <LiveCameraCaptureModal
+        isOpen={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onCapture={handleLiveCameraCapture}
+        roomType={activeRoomType}
+        title="Chụp ảnh phòng từ Camera thiết bị"
+        guidanceText={`Góc chụp: ${selectedViewpoint}. Hướng camera bao quát toàn cảnh sàn nhà và lối đi.`}
+      />
 
       {/* ============================================================= */}
       {/* MODAL 2: EDIT / CORRECT OBJECT LABEL MODAL                    */}

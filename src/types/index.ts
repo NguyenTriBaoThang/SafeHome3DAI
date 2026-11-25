@@ -75,6 +75,7 @@ export interface WalkingZone {
 
 export interface RoomState {
   evidenceStatus?: "PHOTO_DRAFT";
+  sourceImageUrls?: string[];
   id: string;
   name: string;
   roomType: RoomType;

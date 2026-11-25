@@ -44,7 +44,11 @@ export function matchAssetForDetection(
     normCat = "side_table";
   } else if (normName.includes("đôn") || normName.includes("bench") || normCat === "bench") {
     normCat = "bench";
-  } else if (normName.includes("bàn trà") || normName.includes("coffee") || normCat === "coffee_table") {
+  } else if (
+    (normName.includes("bàn trà") && !normName.includes("bàn / bàn trà")) ||
+    normName.includes("coffee") ||
+    normCat === "coffee_table"
+  ) {
     normCat = "coffee_table";
   } else if (normName.includes("sofa") || normCat === "sofa") {
     normCat = "sofa";
@@ -60,6 +64,35 @@ export function matchAssetForDetection(
     normCat = "slat_partition";
   } else if (normName.includes("rèm") || normName.includes("curtain") || normCat === "curtain") {
     normCat = "curtain";
+  } else if (
+    normCat === "cabinet" &&
+    req.estimatedDimensions &&
+    req.estimatedDimensions.height <= 0.78 &&
+    req.estimatedDimensions.width >= 0.95 &&
+    (!normName.includes("tủ quần áo") || normName.includes("tủ quần áo / tủ đồ"))
+  ) {
+    // Wide, low sideboard / console along a wall reads as a media console rather than a tall chest.
+    normCat = "media_console";
+  } else if (
+    normCat === "table" &&
+    (normName.includes("trang điểm") ||
+      normName.includes("làm việc") ||
+      normName.includes("vanity") ||
+      normName.includes("desk") ||
+      (req.estimatedDimensions && req.estimatedDimensions.width >= 0.72))
+  ) {
+    normCat = "desk";
+  } else if (
+    normCat === "chair" &&
+    (normName.includes("đẩu") ||
+      normName.includes("stool") ||
+      (req.estimatedDimensions &&
+        req.estimatedDimensions.height <= 0.6 &&
+        req.estimatedDimensions.width <= 0.7))
+  ) {
+    normCat = "stool";
+  } else if (normCat === "electrical_cable") {
+    normCat = "cable";
   }
 
   // 1. Direct Category Mapping Candidates
@@ -86,6 +119,11 @@ export function matchAssetForDetection(
   };
 
   const candidateIds = categoryMap[normCat] || [];
+  // Prefer procedural chest/wardrobe sizing for compact cabinets unless tall enough for a full wardrobe.
+  if (normCat === "cabinet" && (!req.estimatedDimensions || req.estimatedDimensions.height <= 1.25)) {
+    candidateIds.length = 0;
+  }
+
   let bestEntry: AssetRegistryEntry | null = null;
   let bestScore = 0;
 
@@ -154,12 +192,18 @@ export function matchAssetForDetection(
   > = {
     rug: { width: 2.2, length: 2.8, height: 0.02 },
     cable: { width: 0.12, length: 1.4, height: 0.03 },
-    chair: { width: 0.55, length: 0.55, height: 0.85 },
+    chair: { width: 0.52, length: 0.52, height: 0.82 },
     coffee_table: { width: 1.25, length: 0.65, height: 0.42 },
     bench: { width: 1.25, length: 0.45, height: 0.44 },
-    stool: { width: 0.45, length: 0.45, height: 0.44 },
+    stool: { width: 0.42, length: 0.42, height: 0.44 },
+    desk: { width: 1.0, length: 0.48, height: 0.76 },
+    cabinet: { width: 0.82, length: 0.46, height: 0.86 },
+    light_switch: { width: 0.09, length: 0.02, height: 0.12 },
     box: { width: 0.5, length: 0.5, height: 0.45 },
-    lamp: { width: 0.35, length: 0.35, height: 1.5 },
+    lamp:
+      req.estimatedDimensions && req.estimatedDimensions.height <= 0.85
+        ? { width: 0.28, length: 0.28, height: 0.44 }
+        : { width: 0.35, length: 0.35, height: 1.48 },
     sofa: { width: 2.4, length: 0.92, height: 0.82 },
     media_console: { width: 1.8, length: 0.42, height: 0.48 },
     wall_art: { width: 1.5, length: 0.04, height: 0.85 },
@@ -170,11 +214,26 @@ export function matchAssetForDetection(
   };
 
   const defaultDims = fallbackDimensions[normCat] || {
-    width: 0.8,
-    length: 0.8,
-    height: 0.8,
+    width: 0.75,
+    length: 0.55,
+    height: 0.75,
   };
-  const finalDims = { ...defaultDims, ...req.estimatedDimensions, length: req.estimatedDimensions?.length ?? defaultDims.length };
+  const clampDim = (val: number | undefined, fallback: number, minScale = 0.7, maxScale = 1.45) => {
+    if (typeof val !== "number" || !Number.isFinite(val)) return fallback;
+    return Number(Math.max(fallback * minScale, Math.min(fallback * maxScale, val)).toFixed(2));
+  };
+  const finalDims =
+    normCat === "rug"
+      ? {
+          width: clampDim(req.estimatedDimensions?.width, defaultDims.width, 0.55, 1.5),
+          length: clampDim(req.estimatedDimensions?.length, defaultDims.length, 0.55, 1.4),
+          height: defaultDims.height,
+        }
+      : {
+          width: clampDim(req.estimatedDimensions?.width, defaultDims.width),
+          length: clampDim(req.estimatedDimensions?.length, defaultDims.length),
+          height: clampDim(req.estimatedDimensions?.height, defaultDims.height),
+        };
 
   return {
     assetId: `procedural_${normCat}`,
