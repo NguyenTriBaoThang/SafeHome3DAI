@@ -1,0 +1,66 @@
+[
+ {
+  "image_id": "IMG-FAKE-001",
+  "hazards": {
+   "RISK-002": {
+    "state": "present"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-002",
+  "hazards": {
+   "RISK-002": {
+    "state": "absent"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-003",
+  "hazards": {
+   "RISK-002": {
+    "state": "unknown"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-004",
+  "hazards": {
+   "RISK-002": {
+    "state": "present"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-005",
+  "hazards": {
+   "RISK-002": {
+    "state": "absent"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-006",
+  "hazards": {
+   "RISK-002": {
+    "state": "absent"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-007",
+  "hazards": {
+   "RISK-002": {
+    "state": "present"
+   }
+  }
+ },
+ {
+  "image_id": "IMG-FAKE-008",
+  "hazards": {
+   "RISK-002": {
+    "state": "absent"
+   }
+  }
+ }
+]

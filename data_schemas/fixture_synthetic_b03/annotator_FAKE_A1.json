@@ -1,0 +1,293 @@
+[
+ {
+  "image_id": "IMG-FAKE-001",
+  "household_id": "HH-FAKE-001",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-002": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": [
+   {
+    "class": "bed",
+    "bbox": [
+     0.1,
+     0.2,
+     0.8,
+     0.9
+    ],
+    "visibility": "full"
+   }
+  ]
+ },
+ {
+  "image_id": "IMG-FAKE-002",
+  "household_id": "HH-FAKE-001",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-002": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-003",
+  "household_id": "HH-FAKE-002",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-002": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-004",
+  "household_id": "HH-FAKE-002",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-002": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-005",
+  "household_id": "HH-FAKE-003",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "present",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-002": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-006",
+  "household_id": "HH-FAKE-003",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-002": {
+    "state": "absent",
+    "evidence_note": ""
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-007",
+  "household_id": "HH-FAKE-004",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "uncertain",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-002": {
+    "state": "uncertain",
+    "evidence_note": "fixture_synthetic"
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ },
+ {
+  "image_id": "IMG-FAKE-008",
+  "household_id": "HH-FAKE-004",
+  "room_type": "BEDROOM",
+  "annotator_id": "FAKE_A1",
+  "labeled_at": "2000-01-01",
+  "guideline_version": "1.0",
+  "hazards": {
+   "RISK-001": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-002": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-003": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-004": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-007": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   },
+   "RISK-008": {
+    "state": "not_assessable",
+    "evidence_note": ""
+   }
+  },
+  "objects": []
+ }
+]
