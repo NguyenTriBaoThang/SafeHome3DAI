@@ -62,7 +62,7 @@ export const AppHeader: React.FC = () => {
       <div className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 sm:px-6 py-1">
         {/* Brand */}
         <div className="flex items-center space-x-3 shrink-0">
-          <Link href="/dashboard" className="flex items-center space-x-2.5">
+          <Link href="/dashboard" className="flex min-h-[44px] items-center space-x-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md shadow-teal-500/10 overflow-hidden border border-slate-200/80 p-0.5">
               <img src="/images/logo.png" alt="SafeHome 3D AI Logo" className="h-full w-full object-contain" />
             </div>
