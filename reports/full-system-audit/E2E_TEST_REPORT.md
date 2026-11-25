@@ -85,3 +85,4 @@ Thực thi bằng `audit-browser-sweep.cjs` qua Edge CDP trên tài khoản đă
 ## 5. Kịch Bản Chưa Chạy Lại Trên Host Này
 
 - `npm run test:experience:browser` (`scripts/verify_cinematic_experience.cjs`): **SKIPPED / BLOCKED** do `node_modules/playwright` chưa được cài trong môi trường (script yêu cầu `process.env.PLAYWRIGHT_MODULE || 'playwright'`). Kết quả chạy trước đó được lưu tại `docs/EXPERIENCE_BROWSER_RESULTS.json`, còn khả năng render WebGL/không crash của `/experience` sau `npm ci` đã được xác nhận trực tiếp ở Sweep 17 route và `npm run test:experience` (`64/64 PASS`).
+

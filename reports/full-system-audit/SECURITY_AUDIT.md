@@ -34,3 +34,4 @@ Quét tĩnh toàn bộ `src/app/api/**/route.ts` ghi nhận **5 route chính đ�
 Theo mô hình kiến trúc hiện tại (`reports/completion/verification.json` & `RISK_REGISTER_AND_LIMITATIONS.md`):
 - Yêu cầu **1 Node server + ổ đĩa bền vững** (`SAFEHOME_PRIVATE_DIR`) cho cơ sở dữ liệu SQLite phân lập theo hộ.
 - Mỗi tài khoản tương ứng **1 hộ gia đình**; chưa hỗ trợ mời thành viên, xác minh email, khôi phục mật khẩu qua email hay MFA.
+

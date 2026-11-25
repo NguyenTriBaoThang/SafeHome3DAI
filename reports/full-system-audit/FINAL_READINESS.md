@@ -27,3 +27,4 @@
 | **11. Lưu Trữ Bền Vững & Sao Lưu / Phục Hồi SQLite** | **READY** | `http-smoke.cjs` (`offline_backup_restore_real_sqlite` PASS), `archive.test.ts` `1/1`, `dev.db` nguyên vẹn | Kiến trúc 1 Node + đĩa cục bộ (giới hạn mở rộng cụm) | **Có** |
 | **12. Giao Diện Responsive & Trải Nghiệm Người Dùng** | **READY** | `17/17` route desktop `1440px` & mobile `375px` đều `0 px` overflow, `0` ảnh vỡ, `0` crash | Một số nút phụ nhỏ `<36px` trên mobile (`/ai-vision`, `/digital-twin`, `/ai-assistant`) (`P3`) | **Có** |
 | **13. Đánh Giá Thực Địa & Chỉ Số Lâm Sàng (B11)** | **BLOCKED** | `evaluationProtocolB11` `2/2` kiểm tra pipeline báo cáo trung thực `blocked_awaiting_field_data` | `0` bản ghi thực địa, `0` SUS, `maeCm: null` | **Không thể tuyên bố lâm sàng** |
+

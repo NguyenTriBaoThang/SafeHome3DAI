@@ -39,3 +39,4 @@ Danh sách các hạng mục còn mở hoặc đang bị chặn (**không tự �
 
 9. **`ACCEPTED (P3)` — Runtime state của `documentRegistry.ts` nằm trên bộ nhớ (`R-06`):**
    - Phê duyệt/từ chối nguồn tri thức runtime không ghi xuống SQLite (sẽ reset về 4 nguồn mặc định khóa cứng khi khởi động lại server).
+

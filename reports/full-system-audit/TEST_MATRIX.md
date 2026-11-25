@@ -46,3 +46,4 @@ Tài liệu này tổng hợp toàn bộ kết quả chạy kiểm thử thực 
 | Các file unit/integration còn lại (`40` files) | 3D, RAG, Risk, Vision, Contracts, Survey | **PASS** | `7ms`–`121ms` | Ngoại trừ 1 test live key skipped trong `tests/geminiVision.test.ts` (3 pass, 1 skipped) |
 
 > **Tính toàn vẹn dữ liệu người dùng:** Hàm băm `prisma/dev.db` (`SHA-256 = 628A5FB1F1C29983203D7DBD381DF111B4DE1BBA0FA90E9DE2D4F5538DFFD6CA`) giữ nguyên bất biến sau tất cả các bài kiểm thử tự động, build và duyệt trình duyệt.
+

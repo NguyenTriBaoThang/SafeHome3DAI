@@ -44,3 +44,4 @@
 - **Giới hạn đã công bố:**
   - Bộ script `npm run test:experience:browser` (`scripts/verify_cinematic_experience.cjs`) chưa chạy lại trong phiên này vì môi trường không cài sẵn gói `playwright` (`node_modules/playwright` vắng mặt); tuyến `/experience` đã được xác nhận render khỏe (`textLen=2413`, `errors=[]`) trong Edge Headless Sweep.
   - Chỉ số trên là `requestAnimationFrame` giả lập trên host cục bộ, không thay thế đo FPS trên GPU điện thoại vật lý tầm trung.
+

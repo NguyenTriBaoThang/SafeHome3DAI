@@ -58,3 +58,4 @@
 | **11. Offline Backup / Restore SQLite** | **IMPLEMENTED** | `http-smoke.cjs` PASS `offline_backup_restore_real_sqlite`; `archive.test.ts` (1/1 pass). |
 | **12. Security & Quality Gates** | **IMPLEMENTED** (còn backlog `error.message` tuyến phụ) | `npm run qa:gates` (`301` files scanned, `59` protected routes, `0` failures), `securityHardeningA07.test.ts` (13/13 pass); đã chuẩn hóa `buildSafeErrorPayload` trên các route AI/RAG/Survey chính (`BUG-02`). |
 | **13. Clinical & Field Study Validation (B11)** | **NOT_VERIFIED / BLOCKED** | `reports/b11_evaluation_summary.json`: `status: "blocked_awaiting_field_data"`, `0` bản ghi hiện trường, `0` SUS, `maeCm: null`. |
+

@@ -61,3 +61,4 @@ Kết quả thực thi `npm run eval:rag:a09` sau chỉnh sửa (`task-8642`):
 
 - **Độ sẵn sàng phần mềm tích hợp AI:** Đạt chuẩn kỹ thuật (**không bịa số liệu, có fallback/abstain an toàn, có kiểm thử hợp đồng provider**).
 - **Độ sẵn sàng đánh giá AI (`AI EVALUATION READY`):** **`BLOCKED`** — thiếu tập test nhãn người thật (`0` ảnh verified) để đo mAP50 thật, chưa có ONNX RT-DETR, và chưa có kết quả human-grading cho Gemini Vision / Live RAG.
+
