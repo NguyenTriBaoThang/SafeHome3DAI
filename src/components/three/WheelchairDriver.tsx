@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, useAnimations, Html } from "@react-three/drei";
+import { useGLTF, useAnimations } from "@react-three/drei";
+import { Html } from "./SafeHtml";
 import * as THREE from "three";
 import { RoomState } from "@/types";
 import { canWalkTo } from "@/lib/experience/navigation";

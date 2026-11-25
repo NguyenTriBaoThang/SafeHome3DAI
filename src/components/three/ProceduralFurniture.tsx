@@ -575,20 +575,57 @@ export const ProceduralModelBody: React.FC<{
       );
 
     case "wardrobe":
-    case "cabinet":
       return (
         <group>
           <mesh position={[0, dimensions.height * 0.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[dimensions.width, dimensions.height, dimensions.length]} />
-            <meshStandardMaterial color="#5c3d2e" roughness={0.5} />
+            <meshStandardMaterial color="#8b6f56" roughness={0.55} />
           </mesh>
-          {/* Door seam accent */}
+          {/* Double door seam accent */}
           <mesh position={[0, dimensions.height * 0.5, dimensions.length * 0.51]}>
-            <boxGeometry args={[0.01, dimensions.height * 0.95, 0.02]} />
-            <meshStandardMaterial color="#1e293b" />
+            <boxGeometry args={[0.012, dimensions.height * 0.94, 0.02]} />
+            <meshStandardMaterial color="#3f2e21" />
           </mesh>
         </group>
       );
+
+    case "cabinet": {
+      const h = dimensions.height;
+      const w = dimensions.width;
+      const l = dimensions.length;
+      const drawerRows = h > 1.0 ? 4 : 3;
+      return (
+        <group>
+          {/* Main warm ivory-beige cabinet carcass */}
+          <mesh position={[0, h * 0.5, 0]} castShadow receiveShadow>
+            <boxGeometry args={[w, h, l]} />
+            <meshStandardMaterial color="#e7dfd3" roughness={0.52} />
+          </mesh>
+          {/* Natural oak top counter cap */}
+          <mesh position={[0, h - 0.02, 0]} castShadow receiveShadow>
+            <boxGeometry args={[w + 0.02, 0.04, l + 0.02]} />
+            <meshStandardMaterial color="#c4a484" roughness={0.45} />
+          </mesh>
+          {/* Front drawer/door panels + champagne handles */}
+          {Array.from({ length: drawerRows }).map((_, idx) => {
+            const bandH = (h - 0.1) / drawerRows;
+            const yCenter = 0.06 + bandH * (idx + 0.5);
+            return (
+              <group key={idx} position={[0, yCenter, l * 0.5 + 0.006]}>
+                <mesh castShadow>
+                  <boxGeometry args={[w * 0.9, bandH * 0.84, 0.014]} />
+                  <meshStandardMaterial color="#dfd5c6" roughness={0.48} />
+                </mesh>
+                <mesh position={[0, 0, 0.014]}>
+                  <boxGeometry args={[Math.min(0.18, w * 0.28), 0.016, 0.016]} />
+                  <meshStandardMaterial color="#b48a5a" roughness={0.3} metalness={0.5} />
+                </mesh>
+              </group>
+            );
+          })}
+        </group>
+      );
+    }
 
     case "cable":
       return (
@@ -759,6 +796,57 @@ export const ProceduralModelBody: React.FC<{
               </mesh>
             );
           })}
+        </group>
+      );
+
+    case "lamp": {
+      const h = dimensions.height;
+      const r = Math.min(dimensions.width, dimensions.length) * 0.45;
+      const isTableLamp = h <= 0.75;
+      const shadeRadiusTop = Math.max(0.08, r * 0.85);
+      const shadeRadiusBot = Math.max(0.11, r * 1.1);
+      const shadeH = isTableLamp ? h * 0.48 : Math.min(0.32, h * 0.22);
+      const shadeY = h - shadeH * 0.5;
+      const stemH = Math.max(0.1, h - shadeH * 0.85);
+      return (
+        <group>
+          {/* Ceramic / brushed metal base */}
+          <mesh position={[0, 0.025, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[Math.max(0.06, r * 0.52), Math.max(0.08, r * 0.65), 0.05, 24]} />
+            <meshStandardMaterial color={isTableLamp ? "#d6cfc4" : "#334155"} roughness={0.4} metalness={0.25} />
+          </mesh>
+          {/* Lamp body / stem */}
+          <mesh position={[0, stemH * 0.5 + 0.02, 0]} castShadow>
+            <cylinderGeometry
+              args={[
+                isTableLamp ? Math.max(0.03, r * 0.28) : 0.018,
+                isTableLamp ? Math.max(0.05, r * 0.42) : 0.024,
+                stemH,
+                20,
+              ]}
+            />
+            <meshStandardMaterial color={isTableLamp ? "#e7dfd3" : "#475569"} roughness={0.4} metalness={0.35} />
+          </mesh>
+          {/* Warm fabric shade */}
+          <mesh position={[0, shadeY, 0]} castShadow>
+            <cylinderGeometry args={[shadeRadiusTop, shadeRadiusBot, shadeH, 24, 1, false]} />
+            <meshStandardMaterial color="#faf5eb" emissive="#fef3c7" emissiveIntensity={0.45} roughness={0.65} />
+          </mesh>
+        </group>
+      );
+    }
+
+    case "light_switch":
+      return (
+        <group>
+          <mesh position={[0, 0, 0]} castShadow>
+            <boxGeometry args={[dimensions.width, dimensions.height, dimensions.length]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.3} />
+          </mesh>
+          <mesh position={[0, 0, dimensions.length * 0.55]}>
+            <boxGeometry args={[dimensions.width * 0.45, dimensions.height * 0.5, 0.012]} />
+            <meshStandardMaterial color="#e2e8f0" roughness={0.35} />
+          </mesh>
         </group>
       );
 

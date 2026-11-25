@@ -96,5 +96,6 @@ export function convertSceneGraphToRoomState(
     grabBarsCount,
     walkingZones,
     objects,
+    ...(scene.metadata?.sourceImages?.length ? { sourceImageUrls: scene.metadata.sourceImages } : {}),
   };
 }

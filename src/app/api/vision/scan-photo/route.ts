@@ -30,49 +30,13 @@ async function POSTHandler(request: Request) {
         }
         chunks.push(value);
       }
-    } finally {
-      reader.releaseLock();
-    }
-
-    const buffer = Buffer.concat(chunks);
-    const validation = validateImageBuffer(buffer);
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { error: validation.errorMessage || "Định dạng ảnh không hợp lệ.", code: "INVALID_IMAGE" },
-        { status: 400 }
-      );
-    }
-
-    // 2. Enforce strict consent BEFORE any bytes leave the server to Gemini or Vision provider
-    const providerMode = process.env.VISION_PROVIDER || "gemini";
-    const explicitConsentHeader = request.headers.get("X-SafeHome-Consent");
-
-    if (explicitConsentHeader === "false") {
-      throw new ConsentRequiredError(
-        "third_party_ai",
-        "Chưa có sự đồng ý gửi ảnh phân tích AI."
-      );
-    }
-
-    if (providerMode !== "local") {
-      await assertConsentForAction({
-        accountId: resolveAccountScopeId(),
-        requiredScope: "third_party_ai",
-        requestConsentFlag: explicitConsentHeader === "true",
-      });
-    } else {
-      await assertConsentForAction({
-        accountId: resolveAccountScopeId(),
-        requiredScope: "image_storage",
-        requestConsentFlag: true,
-      });
-    }
-
-    const result = await createVisionProvider().analyze(buffer);
-    return NextResponse.json({
-      ...result,
-      engine: result.provider === "gemini" ? "GEMINI_VLM" : "LOCAL_FINE_TUNED_DETECTOR",
-    });
+    } finally { reader.releaseLock(); }
+    const requestedRoomType = new URL(request.url).searchParams.get("roomType");
+    const roomType = requestedRoomType && ["BEDROOM", "BATHROOM", "LIVING_ROOM"].includes(requestedRoomType)
+      ? (requestedRoomType as "BEDROOM" | "BATHROOM" | "LIVING_ROOM")
+      : undefined;
+    const result = await createVisionProvider().analyze(Buffer.concat(chunks), undefined, roomType ? { roomType } : {});
+    return NextResponse.json({ ...result, engine: result.provider === "gemini" ? "GEMINI_VLM" : "LOCAL_FINE_TUNED_DETECTOR" });
   } catch (error) {
     if (error instanceof ConsentRevokedError || error instanceof ConsentRequiredError) {
       return NextResponse.json(

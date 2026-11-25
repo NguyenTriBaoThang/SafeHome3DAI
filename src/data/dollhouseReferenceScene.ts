@@ -13,6 +13,7 @@ export const PHOTOREALISTIC_DOLLHOUSE_ROOM: RoomState = {
   name: "Photorealistic Bedroom & Bathroom Dollhouse (Ảnh kiến trúc tham chiếu)",
   roomType: "DOLLHOUSE",
   layoutType: "DOLLHOUSE_MULTI_ZONE",
+  sourceImageUrls: ["/reference/reference_room.jpg"],
   zones: [
     {
       id: "zone-bedroom",
