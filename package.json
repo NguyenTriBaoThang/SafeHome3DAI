@@ -20,7 +20,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "test:vision": "vitest run --config vitest.experience.config.ts tests/visionProviders.test.ts tests/structuredGemini.test.ts tests/visionState.test.ts tests/visionProfile.test.ts tests/visionRoutes.test.ts tests/visionEngine.test.ts tests/visionIntegration.test.ts tests/geminiVision.test.ts",
+    "test:vision": "vitest run --config vitest.experience.config.ts tests/visionProviders.test.ts tests/structuredGemini.test.ts tests/visionState.test.ts tests/visionProfile.test.ts tests/visionRoutes.test.ts tests/visionEngine.test.ts tests/visionIntegration.test.ts tests/geminiVision.test.ts tests/workflowVision.test.ts tests/itemHazardAssessment.test.ts",
     "test:completion:http": "node scripts/completion/http-smoke.cjs",
     "test:completion:browser": "node scripts/completion/browser.cjs",
     "build:completion": "prisma generate && node scripts/run-experience.cjs build .scratch/completion-production",
