@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { createAccount, createSession, consumeLimit, sessionCookie } from "@/lib/auth/accounts";
+import { createAccount, createSession, consumeLimit, sessionCookie, familyDatabase } from "@/lib/auth/accounts";
 import { sameOrigin } from "@/lib/auth/withAccount";
 import { readBoundedBody, BodyLimitError } from "@/lib/http/body";
+import { accountScope } from "@/lib/auth/context";
+import { grantConsent, CURRENT_CONSENT_VERSION } from "@/lib/privacy/consentService";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
@@ -15,6 +17,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nhập email hợp lệ, mật khẩu 12–256 ký tự và đồng ý lưu dữ liệu gia đình." }, { status: 400 });
     }
     const account = await createAccount(email, body.password), token = await createSession(account.id);
+
+    // Record versioned consent preferences inside the new family's private database
+    const database = await familyDatabase(account.id);
+    await accountScope.run({ ...account, database }, async () => {
+      await grantConsent(
+        {
+          consentVersion: typeof body.consentVersion === "string" ? body.consentVersion : CURRENT_CONSENT_VERSION,
+          allowImageStorage: body.allowImageStorage !== false,
+          allowThirdPartyAI: body.allowThirdPartyAI !== false,
+          allowResearchUse: body.allowResearchUse === true,
+          retainOriginalImage: body.retainOriginalImage !== false,
+          retentionDays: typeof body.retentionDays === "number" ? body.retentionDays : 30,
+        },
+        { accountId: account.id, origin: request.headers.get("origin") }
+      );
+    });
+
     return NextResponse.json({ account }, { status: 201, headers: { "Set-Cookie": sessionCookie(token, request), "Cache-Control": "no-store" } });
   } catch (error) {
     return NextResponse.json({ error: "Không thể tạo tài khoản. Email có thể đã được sử dụng; hãy thử đăng nhập." }, { status: error instanceof BodyLimitError ? 413 : 409 });

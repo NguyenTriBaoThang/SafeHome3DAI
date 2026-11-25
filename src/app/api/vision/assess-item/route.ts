@@ -1,22 +1,32 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { analyzeItemHazardFromImage } from "@/lib/vision/itemHazardAnalyzer";
+import {
+  assertConsentForAction,
+  ConsentRequiredError,
+  ConsentRevokedError,
+} from "@/lib/privacy/consentService";
+import { resolveAccountScopeId } from "@/lib/persistence/reliablePersistence";
 
 export const runtime = "nodejs";
 
 async function POSTHandler(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";
+    const consentHeader = request.headers.get("X-SafeHome-Consent");
 
     let buffer: Buffer;
     let fileName = "uploaded-item.jpg";
     let mimeType = "image/jpeg";
     let itemHint = "";
+    let hasInlineConsent = consentHeader === "true";
+    let isPresetOnly = false;
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       const file = formData.get("image") as File | null;
       itemHint = (formData.get("itemHint") as string) || "";
+      if (formData.get("consent") === "true") hasInlineConsent = true;
 
       if (!file) {
         return NextResponse.json(
@@ -34,14 +44,15 @@ async function POSTHandler(request: Request) {
       itemHint = body.itemHint || "";
       fileName = body.fileName || "item-photo.jpg";
       mimeType = body.mimeType || "image/jpeg";
+      if (body.consent === true) hasInlineConsent = true;
 
       if (body.imageBase64) {
         const cleanBase64 = body.imageBase64.replace(/^data:image\/\w+;base64,/, "");
         buffer = Buffer.from(cleanBase64, "base64");
       } else if (body.presetCategory) {
-        // Mock buffer for presets
         buffer = Buffer.from("preset-mock-image-data");
         itemHint = body.presetCategory;
+        isPresetOnly = true;
       } else {
         return NextResponse.json(
           { error: "Thiếu dữ liệu hình ảnh base64 hoặc presetCategory." },
@@ -50,7 +61,10 @@ async function POSTHandler(request: Request) {
       }
     } else {
       return NextResponse.json(
-        { error: "Content-Type không được hỗ trợ. Vui lòng gửi multipart/form-data hoặc application/json." },
+        {
+          error:
+            "Content-Type không được hỗ trợ. Vui lòng gửi multipart/form-data hoặc application/json.",
+        },
         { status: 415 }
       );
     }
@@ -62,19 +76,35 @@ async function POSTHandler(request: Request) {
       );
     }
 
-    const assessment = await analyzeItemHazardFromImage(
-      buffer,
-      fileName,
-      mimeType,
-      itemHint
-    );
+    // Strict Consent Guard before external Gemini processing on real user photos
+    if (!isPresetOnly && process.env.GEMINI_API_KEY) {
+      await assertConsentForAction({
+        accountId: resolveAccountScopeId(),
+        requiredScope: "third_party_ai",
+        requestConsentFlag: hasInlineConsent,
+      });
+    } else if (!isPresetOnly) {
+      // Even without Gemini key, reject if user revoked consent
+      await assertConsentForAction({
+        accountId: resolveAccountScopeId(),
+        requiredScope: "image_storage",
+        requestConsentFlag: true,
+      });
+    }
+
+    const assessment = await analyzeItemHazardFromImage(buffer, fileName, mimeType, itemHint);
 
     return NextResponse.json({
       success: true,
       assessment,
     });
   } catch (error: any) {
-    console.error("[API assess-item] Error during item assessment:", error);
+    if (error instanceof ConsentRevokedError || error instanceof ConsentRequiredError) {
+      return NextResponse.json(
+        { success: false, code: error.code, error: error.message },
+        { status: error.statusCode }
+      );
+    }
     return NextResponse.json(
       {
         error: "Đã xảy ra lỗi trong quá trình thẩm định rủi ro vật dụng.",
@@ -84,7 +114,6 @@ async function POSTHandler(request: Request) {
     );
   }
 }
-
 
 export const POST = withAccount(POSTHandler);
 export const dynamic = "force-dynamic";

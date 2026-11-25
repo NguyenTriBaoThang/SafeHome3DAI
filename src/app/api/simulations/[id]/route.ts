@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { restoreSimulation, snapshotInclude } from "@/lib/simulations/persistence";
 import {
-  deleteRoomTransaction,
   ResourceNotFoundError,
   PersistenceWriteError,
 } from "@/lib/persistence/reliablePersistence";
+import { deleteRoomCascade } from "@/lib/privacy/accountDataDeletion";
 import { classifyDataPartition, buildDemoBanner } from "@/lib/persistence/demoBoundary";
 
 async function GETHandler(
@@ -39,12 +39,13 @@ async function DELETEHandler(
 ) {
   const params = await routeParams;
   try {
-    const deleted = await deleteRoomTransaction(params.id);
+    const deletionReport = await deleteRoomCascade(params.id);
     return NextResponse.json({
       success: true,
-      persistenceStatus: deleted.persistenceStatus,
-      auditEventId: deleted.auditEventId,
-      message: "Đã xóa phòng mô phỏng thành công",
+      persistenceStatus: "saved",
+      auditEventId: deletionReport.auditEventId,
+      deletionReport,
+      message: "Đã xóa phòng mô phỏng, ảnh riêng tư và bộ nhớ đệm thành công",
     });
   } catch (error: any) {
     if (error instanceof ResourceNotFoundError) {

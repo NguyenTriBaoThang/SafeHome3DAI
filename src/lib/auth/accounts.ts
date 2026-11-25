@@ -102,6 +102,15 @@ export function sessionCookie(token: string, request: Request) {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${token ? sessionAge / 1000 : 0}${secure ? "; Secure" : ""}`;
 }
 
+/** Disconnects a single tenant client safely before account deletion/cleanup. */
+export async function disconnectTenantDatabase(id: string) {
+  const client = tenantClients.get(id);
+  if (client) {
+    await client.$disconnect();
+    tenantClients.delete(id);
+  }
+}
+
 /** Maintenance/test shutdown; not exposed by any HTTP route. */
 export async function disconnectAccountStores() {
   await Promise.all([...tenantClients.values()].map(db => db.$disconnect()));

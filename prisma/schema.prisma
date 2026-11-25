@@ -449,3 +449,22 @@ model PersistenceAuditEvent {
   @@index([accountId, roomId])
   @@index([resourceId])
 }
+
+model ConsentRecord {
+  id                  String    @id @default(uuid())
+  accountId           String
+  consentVersion      String    @default("2026.1")
+  allowImageStorage   Boolean   @default(false)
+  allowThirdPartyAI   Boolean   @default(false) // Gemini VLM / External AI processing
+  allowResearchUse    Boolean   @default(false)
+  retainOriginalImage Boolean   @default(true)
+  retentionDays       Int       @default(30)
+  status              String    @default("GRANTED") // "GRANTED" | "REVOKED"
+  grantedAt           DateTime  @default(now())
+  revokedAt           DateTime?
+  revocationReason    String?
+  ipOrOrigin          String?
+  updatedAt           DateTime  @updatedAt
+
+  @@index([accountId, status])
+}
