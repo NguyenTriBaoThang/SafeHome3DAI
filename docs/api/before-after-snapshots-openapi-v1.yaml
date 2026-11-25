@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  title: SafeHome 3D AI — Before–After Snapshot & Comparison API v1
+  version: "1.0.0"
+  description: |
+    Versioned API for immutable room snapshots (BASELINE, PROPOSED_SCENARIO, VERIFIED_POST_INTERVENTION),
+    optimistic concurrency checks, canonical rule engine re-evaluation, rollback, and reproducible Before–After diffs.
+    Coordinates with Member 2 (B09) Before–After comparison views.
+paths:
+  /api/v1/snapshots:
+    get:
+      summary: List immutable snapshot revisions for a room (owner-scoped) or fetch one snapshot by snapshotId
+      parameters:
+        - name: roomId
+          in: query
+          schema:
+            type: string
+        - name: snapshotId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of snapshots or single StoredRoomSnapshot
+        "403":
+          description: Cross-tenant IDOR access blocked
+        "404":
+          description: Snapshot not found
+    post:
+      summary: Create and evaluate an immutable RoomSnapshot revision (BASELINE / PROPOSED_SCENARIO / VERIFIED_POST_INTERVENTION)
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [snapshotType, roomInput]
+              properties:
+                roomId:
+                  type: string
+                snapshotType:
+                  type: string
+                  enum: [BASELINE, PROPOSED_SCENARIO, VERIFIED_POST_INTERVENTION]
+                roomInput:
+                  type: object
+                provenanceMap:
+                  type: object
+                expectedRevision:
+                  type: integer
+                parentSnapshotId:
+                  type: string
+                  nullable: true
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Immutable snapshot created and persisted
+        "409":
+          description: Immutable baseline conflict or optimistic concurrency revision mismatch
+        "422":
+          description: Unverified PHOTO_DRAFT input rejected
+        "503":
+          description: Database write failed (persistenceStatus = failed)
+  /api/v1/snapshots/simulate:
+    post:
+      summary: Apply simulated 3D what-if patches onto a baseline snapshot without modifying baseline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [baselineSnapshotId, roomPatches]
+              properties:
+                baselineSnapshotId:
+                  type: string
+                roomPatches:
+                  type: object
+                expectedRevision:
+                  type: integer
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Simulated PROPOSED_SCENARIO revision persisted
+        "403":
+          description: Cross-tenant access blocked
+        "409":
+          description: Optimistic concurrency mismatch
+  /api/v1/snapshots/compare:
+    post:
+      summary: Reproducible Before–After diff classifying findings into RESOLVED, INCREASED, NEW, UNCHANGED, NEEDS_VERIFICATION
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [baselineSnapshotId, afterSnapshotId]
+              properties:
+                baselineSnapshotId:
+                  type: string
+                afterSnapshotId:
+                  type: string
+                format:
+                  type: string
+                  enum: [json, export]
+      responses:
+        "200":
+          description: ReproducibleBeforeAfterComparison JSON or downloadable export attachment
+  /api/v1/snapshots/rollback:
+    post:
+      summary: Rollback by creating a new superseding revision cloned from an earlier verified or simulated snapshot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetSnapshotId]
+              properties:
+                targetSnapshotId:
+                  type: string
+                targetSnapshotType:
+                  type: string
+                  enum: [PROPOSED_SCENARIO, VERIFIED_POST_INTERVENTION]
+                expectedRevision:
+                  type: integer
+                reason:
+                  type: string
+      responses:
+        "201":
+          description: New rolled-back revision persisted with PersistenceAuditEvent
+
