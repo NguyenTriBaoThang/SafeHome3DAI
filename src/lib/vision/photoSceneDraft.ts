@@ -1,6 +1,6 @@
 import type { RoomState, RoomType, AssessmentResult } from "@/types";
 import type { VisionDetection, ViewpointType } from "./types";
-import { reconstructSceneFromDetections } from "@/lib/reconstruction/spatialReconstructor";
+import { reconstructSceneFromDetections, type ReconstructionConfig } from "@/lib/reconstruction/spatialReconstructor";
 import { convertSceneGraphToRoomState } from "@/lib/reconstruction/sceneToRoomAdapter";
 
 export interface PhotoDraftOptions {
@@ -8,6 +8,8 @@ export interface PhotoDraftOptions {
   imageAspect?: number;
   floorMaterial?: RoomState["floorMaterial"];
   manualDimensions?: { width?: number; length?: number; height?: number };
+  /** Source per axis of `manualDimensions`: pass "simulated" for values the user never typed. */
+  dimensionSources?: ReconstructionConfig["dimensionSources"];
 }
 
 /** Coordinates and dimensions below are AI-estimated from photo geometry, never laser measurements. */
@@ -30,6 +32,7 @@ export function buildVerifiedPhotoDraft(
     imageAspect: options?.imageAspect ?? 4 / 3,
     floorMaterial: options?.floorMaterial,
     manualDimensions: options?.manualDimensions,
+    dimensionSources: options?.dimensionSources,
     sourceImageUrls,
   });
   const reconstructed = convertSceneGraphToRoomState(sceneGraph);
