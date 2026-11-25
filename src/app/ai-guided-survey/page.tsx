@@ -82,8 +82,10 @@ export default function AIGuidedSurveyPage() {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [exportData, setExportData] = useState<any>(null);
 
-  // Photo upload mock
-  const [photoUrlInput, setPhotoUrlInput] = useState<string>("");
+  // Real private image upload state (Task BUG-01 fix — no hardcoded mock simulateVision)
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoConsent, setPhotoConsent] = useState<boolean>(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState<boolean>(false);
 
   // Load Surveys List
@@ -366,27 +368,45 @@ export default function AIGuidedSurveyPage() {
     }
   };
 
-  // Mock Photo upload
+  // Real private photo upload -> /api/vision/images -> attach private fileUrl to survey room
   const handleUploadPhoto = async () => {
-    if (!activeSurvey || !activeRoomId || !photoUrlInput.trim()) return;
+    if (!activeSurvey || !activeRoomId || !photoFile) return;
+    if (!photoConsent) {
+      setPhotoError("Vui lòng xác nhận sự đồng ý lưu ảnh trong hồ sơ gia đình trước khi tải lên.");
+      return;
+    }
     setIsUploadingPhoto(true);
+    setPhotoError(null);
     try {
-      const res = await fetch(`/api/surveys/${activeSurvey.id}/rooms/${activeRoomId}/photos`, {
+      const formData = new FormData();
+      formData.append("file", photoFile);
+      formData.append("roomId", activeRoomId);
+      formData.append("consent", "true");
+      const uploadRes = await fetch("/api/vision/images", { method: "POST", body: formData });
+      const uploadJson = await uploadRes.json().catch(() => ({}));
+      if (!uploadRes.ok || !uploadJson.image?.fileUrl) {
+        setPhotoError(uploadJson.error || "Không thể tải ảnh lên kho riêng tư.");
+        return;
+      }
+
+      const attachRes = await fetch(`/api/surveys/${activeSurvey.id}/rooms/${activeRoomId}/photos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileUrl: photoUrlInput.trim(),
-          caption: "Ảnh chụp thực tế hiện trường",
-          simulateVision: true,
+          fileUrl: uploadJson.image.fileUrl,
+          caption: `Ảnh khảo sát thực tế (${photoFile.name})`,
+          consent: true,
         }),
       });
-      const json = await res.json();
-      if (json.success) {
-        setPhotoUrlInput("");
-        await loadRoomState(activeSurvey.id, activeRoomId);
+      const attachJson = await attachRes.json().catch(() => ({}));
+      if (!attachRes.ok || !attachJson.success) {
+        setPhotoError(attachJson.error || "Không thể đính kèm ảnh vào phòng khảo sát.");
+        return;
       }
+      setPhotoFile(null);
+      await loadRoomState(activeSurvey.id, activeRoomId);
     } catch (err) {
-      console.error("Lỗi tải ảnh:", err);
+      setPhotoError(err instanceof Error ? err.message : "Lỗi kết nối khi tải ảnh.");
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -1275,23 +1295,40 @@ export default function AIGuidedSurveyPage() {
                     Ảnh chụp phòng thực tế (Tùy chọn)
                   </div>
                   <p className="text-slate-500 text-[11px]">
-                    Hỗ trợ tải ảnh để AI Vision gợi ý vật thể và đối chiếu khảo sát.
+                    Tải ảnh từ máy (JPEG, PNG, WebP) vào kho riêng tư của tài khoản. Để phân tích vật thể bằng AI Vision cần chuyển sang trang Thị giác AI.
                   </p>
-                  <div className="mt-2.5 flex gap-2">
+                  <div className="mt-2.5 space-y-2">
                     <input
-                      type="url"
-                      placeholder="Dán link ảnh phòng..."
-                      value={photoUrlInput}
-                      onChange={(e) => setPhotoUrlInput(e.target.value)}
-                      className="flex-1 text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-label="Chọn tệp ảnh phòng thực tế"
+                      onChange={(e) => {
+                        setPhotoFile(e.target.files?.[0] || null);
+                        setPhotoError(null);
+                      }}
+                      className="block w-full text-xs text-slate-700 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-teal-50 file:text-teal-800 file:font-semibold"
                     />
+                    <label className="flex items-start gap-2 text-[11px] text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={photoConsent}
+                        onChange={(e) => setPhotoConsent(e.target.checked)}
+                        className="mt-0.5 rounded text-teal-600 focus:ring-teal-500"
+                      />
+                      <span>Tôi xác nhận có quyền sử dụng ảnh và đồng ý lưu trong hồ sơ khảo sát riêng tư.</span>
+                    </label>
+                    {photoError && (
+                      <div role="alert" className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5">
+                        {photoError}
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={handleUploadPhoto}
-                      disabled={!photoUrlInput.trim() || isUploadingPhoto}
-                      className="px-3 py-1.5 bg-teal-600 text-white font-medium rounded-lg text-xs hover:bg-teal-700 disabled:opacity-50"
+                      disabled={!photoFile || !photoConsent || isUploadingPhoto}
+                      className="w-full px-3 py-2 bg-teal-700 text-white font-medium rounded-lg text-xs hover:bg-teal-800 disabled:opacity-50"
                     >
-                      {isUploadingPhoto ? "Đang tải..." : "Thêm ảnh"}
+                      {isUploadingPhoto ? "Đang tải..." : "Tải ảnh vào phòng khảo sát"}
                     </button>
                   </div>
                 </div>

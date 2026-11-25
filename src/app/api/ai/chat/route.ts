@@ -7,6 +7,7 @@ import {
   saveAssistantMessage,
   getRecentConversationTurns,
 } from "@/lib/ai/conversationManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(request: Request) {
   try {
@@ -76,7 +77,7 @@ async function POSTHandler(request: Request) {
   } catch (error: any) {
     console.error("Lỗi xử lý AI Chat:", error);
     return NextResponse.json(
-      { error: "Lỗi nội bộ khi xử lý hội thoại SafeHome Copilot 2.0", details: error.message },
+      buildSafeErrorPayload(error, "Lỗi nội bộ khi xử lý hội thoại SafeHome Copilot 2.0", "COPILOT_CHAT_ERROR"),
       { status: 500 }
     );
   }

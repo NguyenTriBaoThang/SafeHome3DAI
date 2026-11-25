@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { processRAGQuery } from "@/lib/rag/engine";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(request: Request) {
   try {
@@ -18,7 +19,7 @@ async function POSTHandler(request: Request) {
     return NextResponse.json(message);
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Lỗi xử lý câu hỏi RAG", details: error.message },
+      buildSafeErrorPayload(error, "Lỗi xử lý câu hỏi RAG", "RAG_QUERY_ERROR"),
       { status: 500 }
     );
   }

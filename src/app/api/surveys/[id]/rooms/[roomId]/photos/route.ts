@@ -8,6 +8,7 @@ import {
   ConsentRevokedError,
 } from "@/lib/privacy/consentService";
 import { resolveAccountScopeId } from "@/lib/persistence/reliablePersistence";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const PhotoUploadSchema = z.object({
   // Enforce private storage URLs only — block public /uploads/vision/ or arbitrary external links
@@ -23,7 +24,6 @@ const PhotoUploadSchema = z.object({
     ),
   caption: z.string().max(1000).optional(),
   consent: z.boolean().optional(),
-  simulateVision: z.boolean().optional(),
 });
 
 async function POSTHandler(
@@ -42,7 +42,7 @@ async function POSTHandler(
       );
     }
 
-    const { fileUrl, caption, consent, simulateVision } = parseResult.data;
+    const { fileUrl, caption, consent } = parseResult.data;
 
     // Verify room ownership inside the specified surveyId (prevents cross-survey IDOR)
     const surveyRoom = await prisma.surveyRoom.findFirst({
@@ -62,12 +62,21 @@ async function POSTHandler(
       requestConsentFlag: consent === true,
     });
 
+    // Attach verified detections only if this private image already has a real persisted VisionAnalysis.
     let detectedObjects: string[] | null = null;
-    if (simulateVision) {
-      detectedObjects = [
-        "Phát hiện thảm trải sàn (Cần người dùng xác nhận đã cố định hay chưa)",
-        "Phát hiện ổ cắm điện gần giường ngủ",
-      ];
+    const imageMatch = fileUrl.match(/^\/api\/vision\/images\/([^/?#]+)\/file/);
+    if (imageMatch) {
+      const latestAnalysis = await prisma.visionAnalysis.findFirst({
+        where: { imageId: decodeURIComponent(imageMatch[1]) },
+        orderBy: { startedAt: "desc" },
+        include: { detections: true },
+      });
+      const verified = (latestAnalysis?.detections || []).filter((d) =>
+        d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED"
+      );
+      if (verified.length > 0) {
+        detectedObjects = verified.map((d) => d.userLabel || d.originalLabel || d.category);
+      }
     }
 
     const photo = await prisma.surveyRoomPhoto.create({
@@ -95,7 +104,7 @@ async function POSTHandler(
       );
     }
     return NextResponse.json(
-      { error: "Không thể lưu ảnh phòng", details: error.message },
+      buildSafeErrorPayload(error, "Không thể lưu ảnh phòng", "SURVEY_PHOTO_SAVE_FAILED"),
       { status: 500 }
     );
   }
