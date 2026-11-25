@@ -45,6 +45,9 @@ async function POSTHandler(request: Request) {
         modelName: copilotResult.modelName,
         suggestedFollowUps: copilotResult.suggestedFollowUps,
         warnings: copilotResult.warnings || [],
+        sourceSupportMap: copilotResult.sourceSupportMap,
+        documentAuditTrail: copilotResult.documentAuditTrail,
+        evidenceBreakdown: copilotResult.evidenceBreakdown,
       });
     } catch (e) {
       console.warn("DB persistence warning:", e);
@@ -110,6 +113,9 @@ async function POSTHandler(request: Request) {
               suggested_follow_ups: copilotResult.suggestedFollowUps,
               tool_invocations: copilotResult.toolInvocations,
               warnings: copilotResult.warnings,
+              source_support_map: copilotResult.sourceSupportMap,
+              document_audit_trail: copilotResult.documentAuditTrail,
+              evidence_breakdown: copilotResult.evidenceBreakdown,
             })}\n\n`
           )
         );

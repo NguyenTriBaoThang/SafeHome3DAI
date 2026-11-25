@@ -74,7 +74,7 @@ describe("SafeHome Copilot — Integration Tests", () => {
       documentId: "TEST_INGEST_01",
       title: "Tiêu chuẩn tay vịn hành lang nhà ở dưỡng lão",
       publisher: "Viện Kiến trúc Y tế",
-      officialUrl: "https://example.com/tay-vin",
+      officialUrl: "https://kcb.vn/tai-lieu-chuyen-mon/tay-vin-hanh-lang.html",
       publicationDate: "2024",
       rawText: `# Quy cách tay vịn
 Tay vịn hành lang cần có đường kính từ 32mm đến 38mm để người già dễ cầm nắm.
@@ -83,6 +83,7 @@ Khoảng hở giữa tay vịn và mặt tường tối thiểu là 40mm.`,
 
     const ingested = ingestDocument(docInput);
     expect(ingested.documentId).toBe("TEST_INGEST_01");
+    expect(ingested.approvalStatus).toBe("PENDING");
     expect(ingested.chunks.length).toBe(1);
     expect(ingested.chunks[0].chunkText).toContain("32mm");
   });

@@ -36,14 +36,15 @@ export function evaluateEvidenceSufficiency(
     };
   }
 
-  // 3. Check if no chunks retrieved
+  // 3. Check if no chunks retrieved (out of corpus, removed, or outdated)
   if (chunks.length === 0) {
     return {
       status: "INSUFFICIENT_EVIDENCE",
       intent,
       confidenceScore: 0.0,
-      coverageRationale: "Không tìm thấy đoạn văn nào trong kho tài liệu chuẩn đáp ứng câu hỏi này.",
-      missingElements: ["Tài liệu hướng dẫn chuyên môn phù hợp"],
+      coverageRationale:
+        "Hiện tại kho tài liệu đã thẩm định chưa đủ bằng chứng phù hợp (tài liệu không nằm trong phạm vi, đã hết hiệu lực hoặc đã được gỡ bỏ).",
+      missingElements: ["Tài liệu hướng dẫn chuyên môn còn hiệu lực và đã thẩm định phù hợp với câu hỏi"],
       isEmergency: false,
       isOutOfScope: false,
     };
