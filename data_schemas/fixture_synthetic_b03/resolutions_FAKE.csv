@@ -1,0 +1,3 @@
+image_id,risk,a1_state,a2_state,a1_note,a2_note,final_state,resolution_note
+IMG-FAKE-002,RISK-001,present,absent,fixture_synthetic,,uncertain,fixture
+IMG-FAKE-006,RISK-001,absent,present,,fixture_synthetic,present,fixture

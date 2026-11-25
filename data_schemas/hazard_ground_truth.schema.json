@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hazard_ground_truth.schema.json",
+  "title": "B03 - hazard_ground_truth.json (nhãn tham chiếu cuối: đồng thuận + hai nhãn thô + tham chiếu nhật ký bất đồng)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["guideline_version", "disagreement_log_ref", "images"],
+  "properties": {
+    "guideline_version": {"type": "string", "pattern": "^\\d+\\.\\d+$"},
+    "disagreement_log_ref": {"type": "string", "description": "Đường dẫn tới CSV nhật ký bất đồng (trong .private/, không commit)"},
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["image_id", "household_id", "room_type", "hazards"],
+        "properties": {
+          "image_id": {"type": "string"},
+          "household_id": {"type": "string"},
+          "room_type": {"enum": ["BEDROOM", "BATHROOM"]},
+          "hazards": {
+            "type": "object",
+            "propertyNames": {"pattern": "^RISK-00[1-8]$"},
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["final", "raw", "resolution"],
+              "properties": {
+                "final": {"enum": ["present", "absent", "uncertain", "not_assessable"]},
+                "raw": {"type": "object",
+                        "description": "annotator_id -> state; giữ cả hai nhãn thô",
+                        "additionalProperties": {"enum": ["present", "absent", "uncertain", "not_assessable"]}},
+                "resolution": {"enum": ["agreed", "discussed"]},
+                "resolution_note": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

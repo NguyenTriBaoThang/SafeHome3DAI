@@ -72,5 +72,6 @@ Một dòng cho mỗi ảnh (CSV/JSONL):
 | `split` | **luôn là `test`** (bộ kiểm thử khóa, xem `CONTEXT.md`) |
 | `reviewer` | Người review thứ hai (không phải người gán nhãn đầu) |
 | `private_path` | Đường dẫn tương đối trong `/.private/`; không để đường dẫn tuyệt đối/địa chỉ nhà |
+| `sha256` | Băm SHA-256 của file ảnh (64 ký tự hex); dùng để phát hiện ảnh trùng (thêm bởi B03, xem `data_schemas/manifest_template.csv`) |
 
 Quy tắc: rút đồng ý = xóa dòng + xóa file + ghi nhật ký; ảnh chưa qua bước xóa EXIF và kiểm "không có người/giấy tờ" thì không được có `private_path`.
