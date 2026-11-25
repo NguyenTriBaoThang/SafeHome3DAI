@@ -37,6 +37,15 @@ import { CURATED_KNOWLEDGE_SOURCES } from "@/data/curatedKnowledge";
 import { evaluateRoomHazards } from "@/lib/risk/ruleEngine";
 import { normalizeRoomStateToAssessmentInput } from "@/lib/risk/inputAdapter";
 import { RiskFinding } from "@/lib/risk/types";
+import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
+import type { DetectionCategory, VisionClarificationQuestion, VisionDetection } from "@/lib/vision/types";
+import {
+  averageConfidence,
+  bboxToPercentStyle,
+  initialWorkflowDetections,
+  patchWorkflowDetection,
+  runWorkflowVision,
+} from "@/lib/vision/workflowVision";
 
 // Workflow Steps
 const WORKFLOW_STEPS = [
@@ -112,22 +121,88 @@ export default function WorkflowPage() {
     thresholdStep: false,
     missingGrabBar: true,
   });
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([
-    "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=600&q=80",
-  ]);
+  // Step 3: Vision state. Starts empty: no detections, nothing confirmed, no stock photo.
+  const [visionFile, setVisionFile] = useState<File | null>(null);
+  const [visionImageUrl, setVisionImageUrl] = useState<string | null>(null);
+  const [visionConsent, setVisionConsent] = useState(false);
+  const [visionStatus, setVisionStatus] = useState<"idle" | "analyzing" | "done" | "no_consent" | "unknown">("idle");
+  const [visionMessage, setVisionMessage] = useState<string | null>(null);
+  const [visionDemo, setVisionDemo] = useState(false);
+  const [visionDetections, setVisionDetections] = useState<VisionDetection[]>(initialWorkflowDetections());
+  const [visionClarifications, setVisionClarifications] = useState<VisionClarificationQuestion[]>([]);
+  const [editingDetection, setEditingDetection] = useState<{ id: string; label: string; category: DetectionCategory } | null>(null);
 
-  // Step 3: Vision State
-  const [visionDetections, setVisionDetections] = useState([
-    { id: "det-1", label: "Giường ngủ", category: "bed", confidence: 0.94, confirmed: true },
-    { id: "det-2", label: "Tab đầu giường", category: "nightstand", confidence: 0.89, confirmed: true },
-    { id: "det-3", label: "Thảm trải sàn", category: "rug", confidence: 0.88, confirmed: true },
-    { id: "det-4", label: "Dây cắm sạc sàn", category: "electrical_cable", confidence: 0.82, confirmed: true },
-  ]);
-  const [clarificationAnswered, setClarificationAnswered] = useState<Record<string, string>>({
-    BED_006: "YES", // Có thảm
-    BED_007: "NO",  // Thảm CHƯA dán chống trượt
-    BED_008: "YES", // Có dây điện vắt ngang
-  });
+  const visionRoomId = `workflow-${surveyId}-${roomType.toLowerCase()}`;
+
+  const handleVisionFile = (file: File | undefined) => {
+    if (!file) return;
+    if (visionImageUrl) URL.revokeObjectURL(visionImageUrl);
+    setVisionFile(file);
+    setVisionImageUrl(URL.createObjectURL(file));
+    setVisionDetections(initialWorkflowDetections());
+    setVisionClarifications([]);
+    setVisionStatus("idle");
+    setVisionMessage(null);
+  };
+
+  const handleRunVision = async () => {
+    if (!visionFile) return;
+    setVisionStatus("analyzing");
+    setVisionMessage(null);
+    const outcome = await runWorkflowVision({
+      file: visionFile,
+      roomId: visionRoomId,
+      roomType,
+      consent: visionConsent,
+    });
+    if (outcome.kind === "ok") {
+      setVisionDetections(outcome.detections);
+      setVisionClarifications(outcome.clarifications);
+      setVisionDemo(outcome.demo);
+      setVisionStatus("done");
+    } else {
+      setVisionDetections([]);
+      setVisionClarifications([]);
+      setVisionStatus(outcome.kind);
+      setVisionMessage(outcome.message);
+    }
+  };
+
+  const handleDetectionAction = async (
+    det: VisionDetection,
+    body: { verificationStatus: "CONFIRMED" | "REJECTED" | "CORRECTED"; userLabel?: string; category?: DetectionCategory }
+  ) => {
+    try {
+      const saved = await patchWorkflowDetection(det.id, body);
+      setVisionDetections((prev) => prev.map((d) => (d.id === det.id ? { ...d, ...saved } : d)));
+      setEditingDetection(null);
+      setVisionMessage(null);
+    } catch (error) {
+      setVisionMessage(error instanceof Error ? error.message : "Không lưu được thao tác xác nhận.");
+    }
+  };
+
+  const handleAnswerClarification = async (q: VisionClarificationQuestion, value: string) => {
+    try {
+      const res = await fetch(`/api/vision/clarifications/${encodeURIComponent(q.id)}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answer: value }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) throw new Error(json?.error || "Không lưu được câu trả lời.");
+      setVisionClarifications((prev) =>
+        prev.map((x) => (x.id === q.id ? { ...x, status: "ANSWERED", userResponse: value } : x))
+      );
+    } catch (error) {
+      setVisionMessage(error instanceof Error ? error.message : "Không lưu được câu trả lời.");
+    }
+  };
+
+  const visionAvgConfidence = averageConfidence(visionDetections);
+  const confirmedCount = visionDetections.filter(
+    (d) => d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED"
+  ).length;
 
   // Step 5: Selected Finding & Explanation Modal
   const [selectedFinding, setSelectedFinding] = useState<any | null>(null);
@@ -663,19 +738,21 @@ export default function WorkflowPage() {
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider text-slate-400 mb-2">
                     2. Hình ảnh không gian khảo sát
                   </h3>
-                  <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-slate-50 transition cursor-pointer">
+                  <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center">
                     <Camera className="h-8 w-8 text-teal-600 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-slate-700">Tải ảnh hoặc mở camera chụp phòng</p>
-                    <p className="text-[11px] text-slate-400">Đã tự động loại bỏ EXIF GPS bảo mật y tế</p>
+                    <p className="text-xs font-bold text-slate-700">Ảnh phòng được tải ở Bước 3 (Thị giác AI)</p>
+                    <p className="text-[11px] text-slate-400">
+                      Chỉ gửi cho AI khi bạn đồng ý. Có thể bỏ qua và dùng checklist bên phải.
+                    </p>
                   </div>
-                  {uploadedPhotos.length > 0 && (
+                  {visionImageUrl && (
                     <div className="mt-3 flex items-center gap-3">
                       <img
-                        src={uploadedPhotos[0]}
-                        alt="Room Preview"
-                        className="h-20 w-32 object-cover rounded-xl border border-slate-200 shadow-sm"
+                        src={visionImageUrl}
+                        alt="Ảnh phòng đã chọn"
+                        className="h-20 w-32 object-contain bg-slate-900 rounded-xl border border-slate-200 shadow-sm"
                       />
-                      <span className="text-xs font-medium text-slate-500">Ảnh góc chụp từ cửa ra vào (Entrance)</span>
+                      <span className="text-xs font-medium text-slate-500">Ảnh bạn đã chọn ở Bước 3</span>
                     </div>
                   )}
                 </div>
@@ -777,120 +854,239 @@ export default function WorkflowPage() {
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Camera className="h-5 w-5 text-teal-600" />
-                <span>Bước 3: Phân Tích Thị Giác AI &amp; Human-in-the-Loop Verification</span>
+                <span>Bước 3: Gợi ý AI từ ảnh &amp; xác nhận của bạn</span>
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                AI quét ảnh chụp phòng, tự động phát hiện các thực thể và đưa ra câu hỏi xác minh có độ chính xác cao.
+                AI chỉ đưa ra gợi ý vật thể (ước lượng từ ảnh). Mỗi gợi ý chỉ được tính khi bạn chấp nhận, sửa hoặc loại.
+                Bạn có thể bỏ qua AI và dùng checklist ở Bước 2.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Photo Bounding Boxes Visualization */}
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-900 aspect-4/3 flex items-center justify-center">
-                <img
-                  src={uploadedPhotos[0]}
-                  alt="Vision Detection"
-                  className="w-full h-full object-cover opacity-85"
+              <div className="space-y-3">
+                <div className="relative rounded-2xl border border-slate-200 bg-slate-900 min-h-[240px] flex items-center justify-center p-2">
+                  {visionImageUrl ? (
+                    // Wrapper hugs the object-contain image so percent bboxes map onto the real picture.
+                    <div className="relative inline-block max-w-full">
+                      <img
+                        src={visionImageUrl}
+                        alt="Ảnh phòng cần phân tích"
+                        className="block max-h-[420px] max-w-full w-auto h-auto object-contain"
+                      />
+                      {visionStatus === "done" &&
+                        visionDetections
+                          .filter((d) => d.verificationStatus !== "REJECTED")
+                          .map((d) => {
+                            const accepted = d.verificationStatus === "CONFIRMED" || d.verificationStatus === "CORRECTED";
+                            return (
+                              <div
+                                key={d.id}
+                                style={bboxToPercentStyle(d.bbox)}
+                                className={`absolute border-2 pointer-events-none ${
+                                  accepted ? "border-emerald-400 bg-emerald-400/10" : "border-amber-400 bg-amber-400/10 border-dashed"
+                                }`}
+                              >
+                                <span className="absolute -top-4 left-0 bg-slate-800 text-white text-[9px] font-bold px-1 rounded whitespace-nowrap">
+                                  {d.userLabel || d.originalLabel}
+                                  {accepted ? "" : " (chờ xác nhận)"}
+                                </span>
+                              </div>
+                            );
+                          })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-300 text-center px-4">Chưa có ảnh. Chọn ảnh phòng của bạn bên dưới.</p>
+                  )}
+                </div>
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  aria-label="Chọn ảnh phòng"
+                  onChange={(e) => handleVisionFile(e.target.files?.[0])}
+                  className="block w-full text-xs"
                 />
-
-                {/* Simulated Bounding Boxes */}
-                <div className="absolute top-1/4 left-1/4 w-1/3 h-1/2 border-2 border-indigo-400 bg-indigo-500/10 rounded-lg pointer-events-none">
-                  <span className="absolute -top-3 left-1 bg-indigo-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    Giường ngủ (94%)
+                <label className="flex items-start gap-2 text-xs text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={visionConsent}
+                    onChange={(e) => setVisionConsent(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    Tôi đồng ý lưu ảnh và gửi ảnh tới nhà cung cấp AI bên thứ ba để nhận diện vật thể. Tránh ảnh có người
+                    hoặc thông tin riêng tư.
                   </span>
-                </div>
-
-                <div className="absolute bottom-6 left-1/3 w-1/4 h-1/4 border-2 border-amber-400 bg-amber-500/10 rounded-lg pointer-events-none">
-                  <span className="absolute -top-3 left-1 bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    Thảm sàn (88%)
-                  </span>
-                </div>
-
-                <div className="absolute bottom-2 right-1/4 w-1/4 h-10 border-2 border-rose-500 bg-rose-500/15 rounded pointer-events-none animate-pulse">
-                  <span className="absolute -top-3 left-1 bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    Dây điện sàn (82%)
-                  </span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRunVision}
+                    disabled={!visionFile || !visionConsent || visionStatus === "analyzing"}
+                    className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-xs"
+                  >
+                    {visionStatus === "analyzing" ? "Đang phân tích..." : visionStatus === "unknown" ? "Thử lại" : "Phân tích ảnh bằng AI"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
+                    className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50"
+                  >
+                    Bỏ qua AI, dùng checklist
+                  </button>
                 </div>
               </div>
 
-              {/* Detections List & Clarifications */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider text-slate-400">
-                    Thực thể nhận diện ({visionDetections.length})
+                {visionMessage && (
+                  <div role="alert" className="p-3 rounded-xl border border-amber-300 bg-amber-50 text-xs text-amber-900">
+                    {visionMessage}
+                    {visionStatus !== "idle" && visionStatus !== "done" && (
+                      <div className="mt-1 font-semibold">
+                        Kết quả nhận diện: chưa xác định. Không có vật thể nào được suy đoán thay cho AI.
+                      </div>
+                    )}
+                  </div>
+                )}
+                {visionDemo && (
+                  <div role="status" className="p-3 rounded-xl border border-amber-400 bg-amber-100 text-xs font-bold text-amber-900">
+                    DEMO: dữ liệu minh họa, không phải kết quả phân tích ảnh của bạn.
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Gợi ý AI ({visionDetections.length}) • đã xác nhận {confirmedCount}
                   </h3>
-                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-                    Độ tin cậy TB: 88.2%
-                  </span>
+                  {visionAvgConfidence !== null && (
+                    <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                      Điểm tham khảo của mô hình, chưa hiệu chuẩn: TB {(visionAvgConfidence * 100).toFixed(0)}%
+                    </span>
+                  )}
                 </div>
+
+                {visionStatus === "done" && visionDetections.length === 0 && (
+                  <p className="text-xs text-slate-500">AI không đề xuất vật thể nào. Hãy dùng checklist ở Bước 2.</p>
+                )}
 
                 <div className="space-y-2">
-                  {visionDetections.map((det) => (
-                    <div
-                      key={det.id}
-                      className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-teal-500" />
-                        <div>
-                          <div className="text-xs font-bold text-slate-800">{det.label}</div>
-                          <div className="text-[10px] text-slate-400">
-                            Loại: {det.category} • Confidence: {(det.confidence * 100).toFixed(0)}%
+                  {visionDetections.map((det) => {
+                    const accepted = det.verificationStatus === "CONFIRMED" || det.verificationStatus === "CORRECTED";
+                    const rejected = det.verificationStatus === "REJECTED";
+                    const editing = editingDetection?.id === det.id;
+                    return (
+                      <div key={det.id} className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <div className="text-xs font-bold text-slate-800">{det.userLabel || det.originalLabel}</div>
+                            <div className="text-[10px] text-slate-400">
+                              Điểm tham khảo của mô hình, chưa hiệu chuẩn: {(det.confidence * 100).toFixed(0)}% •{" "}
+                              {accepted ? "đã xác nhận" : rejected ? "đã loại" : "chờ xác nhận"}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleDetectionAction(det, { verificationStatus: "CONFIRMED" })}
+                              className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1"
+                            >
+                              <Check className="h-3 w-3" /> Chấp nhận
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditingDetection({ id: det.id, label: det.userLabel || det.originalLabel, category: det.category })
+                              }
+                              className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold"
+                            >
+                              Sửa nhãn
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDetectionAction(det, { verificationStatus: "REJECTED" })}
+                              className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-bold flex items-center gap-1"
+                            >
+                              <X className="h-3 w-3" /> Loại
+                            </button>
                           </div>
                         </div>
+                        {editing && editingDetection && (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <select
+                              aria-label="Loại vật thể"
+                              value={editingDetection.category}
+                              onChange={(e) =>
+                                setEditingDetection({
+                                  ...editingDetection,
+                                  category: e.target.value as DetectionCategory,
+                                  label: CATEGORY_TAXONOMY[e.target.value as DetectionCategory].vietnameseName,
+                                })
+                              }
+                              className="text-xs rounded border border-slate-300 px-1 py-1"
+                            >
+                              {Object.values(CATEGORY_TAXONOMY).map((c) => (
+                                <option key={c.category} value={c.category}>
+                                  {c.vietnameseName}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              aria-label="Nhãn"
+                              value={editingDetection.label}
+                              maxLength={200}
+                              onChange={(e) => setEditingDetection({ ...editingDetection, label: e.target.value })}
+                              className="text-xs rounded border border-slate-300 px-2 py-1 flex-1 min-w-[120px]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDetectionAction(det, {
+                                  verificationStatus: "CORRECTED",
+                                  userLabel: editingDetection.label,
+                                  category: editingDetection.category,
+                                })
+                              }
+                              className="px-2 py-1 rounded-lg bg-teal-600 text-white text-[10px] font-bold"
+                            >
+                              Lưu
+                            </button>
+                          </div>
+                        )}
                       </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => {
-                            setVisionDetections(
-                              visionDetections.map((d) => (d.id === det.id ? { ...d, confirmed: true } : d))
-                            );
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1 transition"
-                        >
-                          <Check className="h-3 w-3" /> Xác nhận
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
-                {/* Clarification Questions */}
-                <div className="pt-2 border-t border-slate-100">
-                  <div className="font-bold text-xs text-slate-800 mb-2 flex items-center gap-1.5">
-                    <HelpCircle className="h-4 w-4 text-teal-600" />
-                    <span>Câu hỏi làm rõ mức độ rủi ro (Clarification):</span>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-2">
-                    <p className="font-semibold text-amber-900">
-                      [BED_007] Thảm trải sàn cạnh giường có được dán keo hoặc băng dính chống trượt cố định xuống sàn chưa?
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setClarificationAnswered({ ...clarificationAnswered, BED_007: "YES" })}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition border ${
-                          clarificationAnswered["BED_007"] === "YES"
-                            ? "bg-emerald-600 text-white border-emerald-700"
-                            : "bg-white text-slate-700 border-slate-200"
-                        }`}
-                      >
-                        Đã dán cố định (An toàn)
-                      </button>
-                      <button
-                        onClick={() => setClarificationAnswered({ ...clarificationAnswered, BED_007: "NO" })}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition border ${
-                          clarificationAnswered["BED_007"] === "NO"
-                            ? "bg-rose-600 text-white border-rose-700"
-                            : "bg-white text-slate-700 border-slate-200"
-                        }`}
-                      >
-                        Chưa dán (Nguy cơ trượt)
-                      </button>
+                {visionClarifications.length > 0 && (
+                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <div className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <HelpCircle className="h-4 w-4 text-teal-600" />
+                      <span>Câu hỏi làm rõ (AI không tự trả lời thay bạn):</span>
                     </div>
+                    {visionClarifications.map((q) => (
+                      <div key={q.id} className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+                        <p className="font-semibold text-amber-900">{q.questionText}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {q.options.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              aria-pressed={q.userResponse === opt.value}
+                              onClick={() => handleAnswerClarification(q, opt.value)}
+                              className={`px-3 py-1 rounded-lg text-xs font-bold border ${
+                                q.userResponse === opt.value
+                                  ? "bg-teal-600 text-white border-teal-700"
+                                  : "bg-white text-slate-700 border-slate-200"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -905,7 +1101,7 @@ export default function WorkflowPage() {
                 onClick={handleNextStep}
                 className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center gap-2"
               >
-                <span>Dựng Không Gian 3D Digital Twin</span>
+                <span>Dựng mô hình phòng (mô phỏng gần đúng)</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -921,7 +1117,7 @@ export default function WorkflowPage() {
               <div>
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Box className="h-5 w-5 text-teal-600" />
-                  <span>Bước 4: Bản Sao Số 3D Không Gian Sống (Digital Twin)</span>
+                  <span>Bước 4: Mô hình phòng (mô phỏng gần đúng)</span>
                 </h2>
                 <p className="text-xs text-slate-500">
                   Không gian 3D được tự động dựng từ số đo và đồ vật đã xác nhận. Bạn có thể tương tác, xoay góc và thêm thiết bị an toàn.
