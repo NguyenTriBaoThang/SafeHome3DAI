@@ -58,8 +58,8 @@ async function POSTHandler(req: NextRequest) {
       prepared.mimeType === "image/png"
         ? "png"
         : prepared.mimeType === "image/webp"
-        ? "webp"
-        : "jpg";
+          ? "webp"
+          : "jpg";
     const stored = await saveImageFile(roomId, prepared.image, extension, id);
     saved = stored.filename;
 
