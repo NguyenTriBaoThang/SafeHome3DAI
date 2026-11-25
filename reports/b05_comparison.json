@@ -1,0 +1,105 @@
+{
+  "task": "B05",
+  "selectedBaseline": {
+    "family": "RT-DETR",
+    "checkpoint": "PekingU/rtdetr_r18vd",
+    "revision": "ac77a11ff0170a41b771c03264987f8ce2b0d753",
+    "license": "Apache-2.0",
+    "whyNotYoloDefault": "Ultralytics YOLOv8 uses AGPL-3.0 unless a commercial license is purchased; RT-DETR R18 (Apache-2.0, safetensors) fits academic/hospital deployment."
+  },
+  "readiness": {
+    "status": "not_ready",
+    "verifiedTrainImages": 0,
+    "verifiedValImages": 0,
+    "verifiedTestImages": 0,
+    "onnxArtifactPresent": false,
+    "blockers": [
+      "missing_human_verified_train_val_splits",
+      "missing_human_verified_locked_test_set",
+      "missing_finetuned_rtdetr_onnx_artifact"
+    ]
+  },
+  "ablationTracks": [
+    {
+      "stage": "1_object_only",
+      "description": "Raw detector output (objects + bboxes only; risk_supported=false; all non-visual risks stay unknown).",
+      "objectMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "map50": null
+      },
+      "hazardMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "stage": "2_plus_survey_confirmation",
+      "description": "Human accept/edit/reject + clarification answers (rug backing, wet floor, lux, corridor width).",
+      "objectMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "map50": null
+      },
+      "hazardMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "stage": "3_canonical_risk_rules",
+      "description": "Canonical Rule Engine (RISK-001..008) over confirmed objects + measured/confirmed room properties.",
+      "objectMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "map50": null
+      },
+      "hazardMetrics": {
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    }
+  ],
+  "providers": {
+    "gemini": {
+      "providerId": "gemini",
+      "mode": "cloud_vlm_server_proxy",
+      "status": "not_benchmarked_on_locked_test",
+      "costPerImageUsd": null,
+      "latency": {
+        "count": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "mean_ms": null
+      },
+      "unprocessedRate": null,
+      "silentFallbackAllowed": false
+    },
+    "local_rtdetr": {
+      "providerId": "local",
+      "mode": "fastapi_onnx_cpu",
+      "status": "not_ready",
+      "costPerImageUsd": null,
+      "latency": {
+        "count": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "mean_ms": null
+      },
+      "peakRamMb": null,
+      "unprocessedRate": null,
+      "silentFallbackAllowed": false
+    }
+  },
+  "policyGuards": {
+    "equatesObjectMapToHazardRecall": false,
+    "usesAiLabelsAsGroundTruth": false,
+    "note": "Exploratory 5-image / 38-image Wikimedia figures must NEVER be cited as locked test accuracy or fall-reduction evidence."
+  }
+}
