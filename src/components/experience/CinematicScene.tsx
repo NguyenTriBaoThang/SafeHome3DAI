@@ -1,7 +1,8 @@
 "use client";
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, createPortal, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { Html } from "@/components/three/SafeHtml";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import { RoomEnvironment } from "@/components/three/RoomEnvironment";

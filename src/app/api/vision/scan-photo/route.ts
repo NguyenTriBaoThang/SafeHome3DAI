@@ -25,7 +25,11 @@ async function POSTHandler(request: Request) {
         chunks.push(value);
       }
     } finally { reader.releaseLock(); }
-    const result = await createVisionProvider().analyze(Buffer.concat(chunks));
+    const requestedRoomType = new URL(request.url).searchParams.get("roomType");
+    const roomType = requestedRoomType && ["BEDROOM", "BATHROOM", "LIVING_ROOM"].includes(requestedRoomType)
+      ? (requestedRoomType as "BEDROOM" | "BATHROOM" | "LIVING_ROOM")
+      : undefined;
+    const result = await createVisionProvider().analyze(Buffer.concat(chunks), undefined, roomType ? { roomType } : {});
     return NextResponse.json({ ...result, engine: result.provider === "gemini" ? "GEMINI_VLM" : "LOCAL_FINE_TUNED_DETECTOR" });
   } catch (error) {
     const known = error instanceof VisionProviderError;

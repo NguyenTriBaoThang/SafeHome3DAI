@@ -43,7 +43,11 @@ export class GeminiProvider implements VisionProvider {
           referenceConfigId: STRUCTURED_CONFIG.reference_config_id, modelVersion: response.modelVersion,
           latencyMs: Math.round(performance.now() - started), objectThreshold: STRUCTURED_CONFIG.object_threshold } };
     } catch (error) {
-      if (error instanceof VisionProviderError) throw error;
+      if (error instanceof VisionProviderError) {
+        console.warn(`[GeminiProvider] ${error.code}:`, error.message);
+        throw error;
+      }
+      console.warn("[GeminiProvider] unexpected error:", error instanceof Error ? error.message : String(error));
       throw new VisionProviderError("PROVIDER_UNAVAILABLE", "Gemini không hoàn tất phân tích. Có thể thử lại hoặc duyệt thủ công.");
     }
   }

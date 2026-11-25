@@ -38,6 +38,7 @@ import { sampleSurfaceColors } from "@/lib/reconstruction/sampleSurfaceColors";
 import { extractKeyframesFromVideo } from "@/lib/vision/videoProcessor";
 import { ASSET_REGISTRY } from "@/data/assetRegistry";
 import { runEnvironmentalAssessment, calculateSafetyScore } from "@/features/risk-engine/rules";
+import { LiveCameraCaptureModal } from "@/components/camera/LiveCameraCaptureModal";
 
 // Photoreal Default Samples
 const SAMPLE_BEDROOM_IMG =
@@ -75,15 +76,17 @@ export const AiRoomScannerWizard: React.FC<{
   );
 
   // Step 2: Media Input
-  const [inputMode, setInputMode] = useState<"IMAGE" | "MULTI" | "VIDEO" | "SAMPLE">(
+  const [inputMode, setInputMode] = useState<"IMAGE" | "MULTI" | "VIDEO" | "SAMPLE" | "CAMERA">(
     initialPhotoUrl ? "IMAGE" : "SAMPLE"
   );
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialPhotoUrl ? [initialPhotoUrl] : [SAMPLE_BEDROOM_IMG]
   );
   const [selectedImgIndex, setSelectedImgIndex] = useState<number>(0);
   const [isProcessingVideo, setIsProcessingVideo] = useState<boolean>(false);
   const photoPixels = useRef<ImageData | null>(null);
+  const sourceCompareUrlRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,6 +99,7 @@ export const AiRoomScannerWizard: React.FC<{
 
   // Step 4: Human Verification Data
   const [detections, setDetections] = useState<VisionDetection[]>([]);
+  const [riskCandidates, setRiskCandidates] = useState<Record<string, { present: boolean | "unknown"; visible: boolean | "unknown"; applicable: boolean; severity: string; evidence: string }> | null>(null);
   const [addingObject, setAddingObject] = useState(false);
   const [firstCorner, setFirstCorner] = useState<{ x: number; y: number } | null>(null);
   const [roomWidth, setRoomWidth] = useState<number>(4.5);
@@ -105,7 +109,6 @@ export const AiRoomScannerWizard: React.FC<{
   const [viewpoint, setViewpoint] = useState<ViewpointType>("ENTRANCE");
 
   // Reconstructed Scene & Assessment
-  const [showSourcePhoto, setShowSourcePhoto] = useState(false);
   const [reconstructedRoomId, setReconstructedRoomId] = useState<string | null>(null);
 
   // Handle Space Switch
@@ -144,6 +147,13 @@ export const AiRoomScannerWizard: React.FC<{
     setImageUrls(urls);
     setSelectedImgIndex(0);
     setInputMode(files.length > 1 ? "MULTI" : "IMAGE");
+  };
+
+  // Handle Camera Capture
+  const handleCameraCapture = (_file: File, previewUrl: string) => {
+    setImageUrls([previewUrl]);
+    setSelectedImgIndex(0);
+    setInputMode("CAMERA");
   };
 
   // Upload Video & Extract Frames
@@ -186,16 +196,37 @@ export const AiRoomScannerWizard: React.FC<{
       if (!context) throw new Error("Không thể đọc ảnh trên trình duyệt.");
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       photoPixels.current = context.getImageData(0, 0, canvas.width, canvas.height);
+      if (url.startsWith("blob:")) {
+        const previewScale = Math.min(1, 640 / Math.max(canvas.width, canvas.height));
+        const thumbCanvas = document.createElement("canvas");
+        thumbCanvas.width = Math.max(1, Math.round(canvas.width * previewScale));
+        thumbCanvas.height = Math.max(1, Math.round(canvas.height * previewScale));
+        const thumbCtx = thumbCanvas.getContext("2d");
+        if (thumbCtx) {
+          thumbCtx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+          sourceCompareUrlRef.current = thumbCanvas.toDataURL("image/jpeg", 0.72);
+        } else {
+          sourceCompareUrlRef.current = url;
+        }
+      } else {
+        sourceCompareUrlRef.current = url;
+      }
       const jpeg = await new Promise<Blob>((resolve, reject) => canvas.toBlob(
         blob => blob ? resolve(blob) : reject(new Error("Không thể chuyển đổi ảnh.")), "image/jpeg", 0.92
       ));
       setInferenceStage("Đang nhận diện nội thất trong ảnh. Lần đầu máy chủ cần tải mô hình.");
-      const response = await fetch("/api/vision/scan-photo", { method: "POST", body: jpeg });
-      if (!response.ok) throw new Error("Phân tích ảnh thất bại. Kiểm tra kết nối máy chủ rồi thử lại.");
-      const result = await response.json();
+      const response = await fetch(`/api/vision/scan-photo?roomType=${encodeURIComponent(roomType)}`, {
+        method: "POST",
+        body: jpeg,
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result) {
+        throw new Error(result?.error || "Phân tích ảnh thất bại. Kiểm tra kết nối máy chủ rồi thử lại.");
+      }
       setAddingObject(false);
       setFirstCorner(null);
-      setDetections(result.detections);
+      setDetections(result.detections || []);
+      setRiskCandidates(result.riskCandidates || null);
       if (result.floorMaterial) {
         setFloorMaterial(result.floorMaterial);
       }
@@ -228,7 +259,7 @@ export const AiRoomScannerWizard: React.FC<{
         height: roomHeight,
       },
       floorMaterial,
-      sourceImageUrls: [imageUrls[selectedImgIndex]],
+      sourceImageUrls: [sourceCompareUrlRef.current || imageUrls[selectedImgIndex]],
       notes: `Tái dựng từ ảnh quét ${roomName}`,
     });
 
@@ -479,7 +510,7 @@ export const AiRoomScannerWizard: React.FC<{
             </div>
 
             {/* Upload Modes Tabs */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-4 bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 onClick={() => { setInputMode("SAMPLE"); setSelectedImgIndex(0); setImageUrls([roomType === "BATHROOM" ? SAMPLE_BATHROOM_IMG : SAMPLE_BEDROOM_IMG]); }}
                 className={`py-2 px-3 text-xs font-bold rounded-xl transition ${
@@ -489,6 +520,21 @@ export const AiRoomScannerWizard: React.FC<{
                 }`}
               >
                 ★ Ảnh mẫu chuẩn
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInputMode("CAMERA");
+                  setIsCameraModalOpen(true);
+                }}
+                className={`py-2 px-3 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
+                  inputMode === "CAMERA"
+                    ? "bg-white text-teal-700 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Camera className="h-3.5 w-3.5 text-teal-600" />
+                <span>Chụp từ máy ảnh</span>
               </button>
               <button
                 onClick={() => {
@@ -570,6 +616,18 @@ export const AiRoomScannerWizard: React.FC<{
                 <Camera className="h-3.5 w-3.5 text-teal-400" />
                 <span>Góc chụp: {viewpoint === "ENTRANCE" ? "Từ cửa nhìn vào" : "Góc chéo phòng"}</span>
               </div>
+
+              {/* Camera retake shortcut if captured via camera */}
+              {inputMode === "CAMERA" && (
+                <button
+                  type="button"
+                  onClick={() => setIsCameraModalOpen(true)}
+                  className="absolute top-3 right-3 bg-slate-950/80 hover:bg-slate-900 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-teal-300 border border-teal-500/40 flex items-center gap-1.5 transition shadow-sm"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                  <span>Chụp lại góc khác</span>
+                </button>
+              )}
 
               {/* Multi-image thumbnail strip */}
               {imageUrls.length > 1 && (
@@ -713,6 +771,30 @@ export const AiRoomScannerWizard: React.FC<{
                     <span>Đồ nội thất nhận diện:</span>
                     <span className="text-[10px] text-slate-400">Nhấn để bật/tắt</span>
                   </div>
+
+                  {detections.length === 0 && (
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+                      <div className="font-bold flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                        <span>AI chưa thấy vật thể thuộc 18 nhóm nội thất trong ảnh</span>
+                      </div>
+                      {riskCandidates && (
+                        <ul className="text-[11px] text-amber-800 space-y-0.5 list-disc pl-4">
+                          {Object.entries(riskCandidates)
+                            .filter(([, r]) => r.applicable && r.evidence)
+                            .slice(0, 3)
+                            .map(([id, r]) => (
+                              <li key={id}>
+                                <span className="font-semibold">{id}:</span> {r.evidence}
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                      <p className="text-[11px] text-amber-700">
+                        Hãy bấm <strong>+ Đánh dấu đồ vật trên ảnh</strong> ở bên trái hoặc bấm <strong>Chọn lại ảnh</strong> để chụp rộng toàn cảnh phòng hơn.
+                      </p>
+                    </div>
+                  )}
 
                   {detections.map((det) => {
                     const isConfirmed = det.verificationStatus !== "REJECTED";
@@ -860,20 +942,13 @@ export const AiRoomScannerWizard: React.FC<{
             </div>
 
             <div className="text-[11px] text-slate-500 font-medium flex items-center gap-2">
-              <button type="button" aria-pressed={showSourcePhoto} onClick={() => setShowSourcePhoto(!showSourcePhoto)}
-                className="px-3 py-1.5 border rounded-lg bg-white text-teal-800 font-semibold">
-                {showSourcePhoto ? "Ẩn ảnh gốc" : "Đối chiếu ảnh gốc"}
-              </button>
+              <span>Dùng nút Đối chiếu ảnh trên khung 3D để so với ảnh gốc</span>
             </div>
           </div>
 
           {/* 3D Canvas */}
-          <div className={showSourcePhoto ? "grid md:grid-cols-2" : ""}>
-            {showSourcePhoto && <img src={imageUrls[selectedImgIndex]} alt="Ảnh phòng đã dùng để dựng mô hình"
-              className="w-full h-56 md:h-[clamp(500px,65vh,820px)] object-contain bg-slate-900" />}
-            <div className="relative h-[clamp(500px,65vh,820px)] min-w-0">
-              <RoomViewer />
-            </div>
+          <div className="relative h-[clamp(500px,65vh,820px)] min-w-0">
+            <RoomViewer />
           </div>
 
           {/* Bottom Bar */}
@@ -981,6 +1056,16 @@ export const AiRoomScannerWizard: React.FC<{
           </div>
         </div>
       )}
+
+      {/* Live Camera Capture Modal for Direct Room Photography */}
+      <LiveCameraCaptureModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onCapture={handleCameraCapture}
+        roomType={roomType}
+        title={`Chụp ảnh phòng từ Camera (${roomName})`}
+        guidanceText="Đứng tại cửa hoặc góc phòng, hướng camera lấy trọn mặt sàn và các lối đi lại"
+      />
     </div>
   );
 };

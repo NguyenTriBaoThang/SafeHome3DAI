@@ -3,7 +3,12 @@ import type { VisionDetection } from "./types";
 import { CATEGORY_TAXONOMY } from "./taxonomy";
 
 /** Coordinates and dimensions below are rendering placeholders, never measurements. */
-export function buildVerifiedPhotoDraft(detections: VisionDetection[], roomType: RoomType, caption: string): RoomState {
+export function buildVerifiedPhotoDraft(
+  detections: VisionDetection[],
+  roomType: RoomType,
+  caption: string,
+  sourceImageUrls?: string[]
+): RoomState {
   const verified = detections.filter(d => ["CONFIRMED", "CORRECTED"].includes(d.verificationStatus));
   if (!verified.length) throw new Error("Hãy xác nhận ít nhất một vật thể trước khi dựng 3D.");
   const id = `photo-draft-${crypto.randomUUID()}`;
@@ -15,6 +20,7 @@ export function buildVerifiedPhotoDraft(detections: VisionDetection[], roomType:
     customProperties: { sourceDetectionId: d.id, geometryEstimated: true },
   }));
   return { id, name: `Bản dựng ước lượng: ${caption || "Ảnh hiện trường"}`, roomType, evidenceStatus: "PHOTO_DRAFT",
+    ...(sourceImageUrls?.length ? { sourceImageUrls } : {}),
     dimensions: { width: 4.5, length: 4, height: 2.8 }, floorMaterial: "WOOD", lightingLevel: 200,
     isWet: false, isSlipResistant: false, grabBarsCount: 0, walkingZones: [], objects };
 }

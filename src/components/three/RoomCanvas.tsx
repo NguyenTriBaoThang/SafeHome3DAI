@@ -2,7 +2,8 @@
 
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, TransformControls } from "@react-three/drei";
+import { OrbitControls, TransformControls } from "@react-three/drei";
+import { Html } from "./SafeHtml";
 import * as THREE from "three";
 import { useSimulationStore } from "@/stores/useSimulationStore";
 import { RoomEnvironment } from "./RoomEnvironment";
@@ -31,8 +32,25 @@ import {
   ShieldAlert,
   Move,
   RotateCw,
+  Image as ImageIcon,
+  Upload,
 } from "lucide-react";
 import { SceneObjectState, HazardFindingResult } from "@/types";
+
+const REFERENCE_SAMPLE_BY_ROOM_TYPE: Record<string, { url: string; label: string }> = {
+  BEDROOM: {
+    url: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=1200&auto=format&fit=crop",
+    label: "Ảnh mẫu phòng ngủ chuẩn (SafeHome)",
+  },
+  BATHROOM: {
+    url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200&auto=format&fit=crop",
+    label: "Ảnh mẫu phòng tắm chuẩn (SafeHome)",
+  },
+  DOLLHOUSE: {
+    url: "/reference/reference_room.jpg",
+    label: "Ảnh kiến trúc tham chiếu Dollhouse",
+  },
+};
 
 /**
  * First-person keyboard & navigation controller for WASD walkthrough
@@ -319,6 +337,10 @@ export const RoomCanvas: React.FC = () => {
   );
   const [fitTrigger, setFitTrigger] = useState(0);
   const [showWheelchair, setShowWheelchair] = useState(true);
+  const [showSourceCompare, setShowSourceCompare] = useState(false);
+  const [activeSourceIdx, setActiveSourceIdx] = useState(0);
+  const [manualCompareImage, setManualCompareImage] = useState<{ url: string; label: string } | null>(null);
+  const compareFileInputRef = useRef<HTMLInputElement>(null);
   const wheelchairPadRef = useRef<WheelchairPadState>({
     fwd: false,
     back: false,
@@ -330,12 +352,29 @@ export const RoomCanvas: React.FC = () => {
   const room = getCurrentRoom();
   const isAccessibleSuite = room.id === "room-accessible-suite-01";
   const findings = currentAssessment?.findings || [];
+  const persistedSourceImages = useMemo(
+    () => (room.sourceImageUrls || []).filter((url): url is string => Boolean(url && !url.startsWith("blob:")))
+      .concat((room.sourceImageUrls || []).filter((url) => Boolean(url && url.startsWith("blob:")))),
+    [room.sourceImageUrls]
+  );
+  const referenceSample = REFERENCE_SAMPLE_BY_ROOM_TYPE[room.roomType];
+
+  useEffect(() => {
+    return () => {
+      if (manualCompareImage?.url.startsWith("blob:")) {
+        URL.revokeObjectURL(manualCompareImage.url);
+      }
+    };
+  }, [manualCompareImage]);
 
   // Auto-fit room when room ID changes
   useEffect(() => {
     setFitTrigger((prev) => prev + 1);
     selectObject(null);
     setExpandedClusterId(null);
+    setShowSourceCompare(false);
+    setActiveSourceIdx(0);
+    setManualCompareImage(null);
     if (room.id === "room-accessible-suite-01") {
       setShowWheelchair(true);
     }
@@ -501,15 +540,136 @@ export const RoomCanvas: React.FC = () => {
     }
   };
 
+  const activeSourceUrl =
+    manualCompareImage?.url || persistedSourceImages[activeSourceIdx] || persistedSourceImages[0] || null;
+  const activeSourceLabel = manualCompareImage
+    ? manualCompareImage.label
+    : room.id === "room-photoreal-dollhouse-01"
+    ? "Ảnh kiến trúc tham chiếu"
+    : "Ảnh gốc dùng dựng mô hình 3D";
+
+  const handleSelectCompareFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setManualCompareImage({ url, label: `Ảnh đối chiếu: ${file.name}` });
+    e.target.value = "";
+  };
+
   return (
     <div
       ref={canvasContainerRef}
-      className="relative w-full h-full min-h-[500px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none"
+      className="relative w-full h-full min-h-[500px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none flex flex-col md:flex-row"
     >
-      <Canvas
-        // Fill the viewer even when its height comes from a flex item/min-height.
-        // A percentage-height Canvas in normal flow can fall back to 150px.
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+      <input
+        ref={compareFileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleSelectCompareFile}
+      />
+
+      {/* --- LEFT COMPARISON PANE: SOURCE / REFERENCE PHOTO --- */}
+      {showSourceCompare && (
+        <div className="w-full md:w-[44%] h-[250px] md:h-full pt-16 pb-16 px-3 bg-slate-950/95 border-b md:border-b-0 md:border-r border-slate-700/80 flex flex-col gap-2 z-10 shrink-0">
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <ImageIcon className="h-3.5 w-3.5 text-teal-400 shrink-0" />
+              <span className="font-bold text-slate-100 truncate">
+                {activeSourceUrl ? activeSourceLabel : "Đối chiếu ảnh mẫu / ảnh gốc"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => compareFileInputRef.current?.click()}
+                className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-semibold flex items-center gap-1 transition"
+                title="Chọn ảnh khác từ máy để đối chiếu"
+              >
+                <Upload className="h-3 w-3 text-teal-400" />
+                <span>Chọn ảnh</span>
+              </button>
+              {manualCompareImage && persistedSourceImages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setManualCompareImage(null)}
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-semibold transition"
+                >
+                  Ảnh gốc
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowSourceCompare(false)}
+                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                aria-label="Đóng đối chiếu ảnh"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {activeSourceUrl ? (
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-slate-800 bg-black flex items-center justify-center">
+              <img
+                src={activeSourceUrl}
+                alt={activeSourceLabel}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="flex-1 min-h-0 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 flex flex-col items-center justify-center text-center gap-2.5 text-xs text-slate-300">
+              <ImageIcon className="h-7 w-7 text-slate-500" />
+              <p className="text-[11px] text-slate-400 max-w-xs leading-relaxed">
+                Phòng này chưa lưu kèm URL ảnh gốc. Bạn có thể chọn ảnh từ máy hoặc xem ảnh mẫu tham chiếu để đối chiếu bố cục.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => compareFileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Chọn ảnh từ máy</span>
+                </button>
+                {referenceSample && (
+                  <button
+                    type="button"
+                    onClick={() => setManualCompareImage(referenceSample)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-semibold transition"
+                  >
+                    Xem ảnh mẫu tham chiếu
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!manualCompareImage && persistedSourceImages.length > 1 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-0.5">
+              {persistedSourceImages.map((src, idx) => (
+                <button
+                  key={`${src.slice(0, 32)}-${idx}`}
+                  type="button"
+                  onClick={() => setActiveSourceIdx(idx)}
+                  className={`h-10 w-14 rounded-lg overflow-hidden border-2 shrink-0 transition ${
+                    idx === activeSourceIdx ? "border-teal-400" : "border-slate-700 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img src={src} alt={`Ảnh nguồn ${idx + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* --- RIGHT PANE: INTERACTIVE 3D WEBGL CANVAS --- */}
+      <div className="relative flex-1 min-h-[320px] h-full">
+        <Canvas
+          // Fill the viewer even when its height comes from a flex item/min-height.
+          // A percentage-height Canvas in normal flow can fall back to 150px.
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
         shadows
         gl={{ preserveDrawingBuffer: true, antialias: true }}
         camera={{ position: [5.2, 6.2, 5.8], fov: 38 }}
@@ -892,10 +1052,66 @@ export const RoomCanvas: React.FC = () => {
             />
           );
         })()}
-      </Canvas>
+        </Canvas>
+
+        {/* --- WHEELCHAIR MINI D-PAD & WASD HINT (WHEN WHEELCHAIR ACTIVE) --- */}
+        {showWheelchair && cameraPreset !== "WALKTHROUGH" && (
+          <div className="absolute bottom-16 left-3 z-20 flex items-end gap-2 pointer-events-auto">
+            <div className="grid grid-cols-3 gap-1 p-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 shadow-xl">
+              <div />
+              <button
+                onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
+                onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
+                onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                title="Tiến (W / ↑)"
+              >
+                ▲
+              </button>
+              <div />
+              <button
+                onPointerDown={() => { wheelchairPadRef.current.left = true; }}
+                onPointerUp={() => { wheelchairPadRef.current.left = false; }}
+                onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                title="Trái (A / ←)"
+              >
+                ◀
+              </button>
+              <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
+                ♿
+              </div>
+              <button
+                onPointerDown={() => { wheelchairPadRef.current.right = true; }}
+                onPointerUp={() => { wheelchairPadRef.current.right = false; }}
+                onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                title="Phải (D / →)"
+              >
+                ▶
+              </button>
+              <div />
+              <button
+                onPointerDown={() => { wheelchairPadRef.current.back = true; }}
+                onPointerUp={() => { wheelchairPadRef.current.back = false; }}
+                onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
+                title="Lùi (S / ↓)"
+              >
+                ▼
+              </button>
+              <div />
+            </div>
+            <div className="hidden sm:block px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10.5px] text-slate-200 shadow-lg">
+              <div className="font-bold text-emerald-300">Lái xe lăn kiểm định Ø1.5m</div>
+              <div className="text-slate-400">Phím <kbd className="px-1 bg-slate-800 rounded text-white">WASD</kbd> / Mũi tên • <kbd className="px-1 bg-slate-800 rounded text-white">Shift</kbd> nhanh</div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* --- TOP FLOATING TOOLBAR: CAMERA & LIGHTING PRESETS --- */}
-      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-20">
         {/* Lighting Selector (Top-Left) */}
         <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
           <span className="text-[11px] text-slate-400 font-medium px-1.5 hidden md:flex items-center gap-1">
@@ -1059,6 +1275,20 @@ export const RoomCanvas: React.FC = () => {
             <span className="hidden sm:inline">Xe lăn 3D</span>
           </button>
           <button
+            type="button"
+            aria-pressed={showSourceCompare}
+            onClick={() => setShowSourceCompare((v) => !v)}
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+              showSourceCompare
+                ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Đối chiếu trực tiếp mô hình 3D với ảnh mẫu / ảnh gốc"
+          >
+            <ImageIcon className="h-3 w-3" />
+            <span className="hidden sm:inline">Đối chiếu ảnh</span>
+          </button>
+          <button
             onClick={handleFitRoom}
             className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold transition flex items-center gap-1"
             title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
@@ -1077,63 +1307,8 @@ export const RoomCanvas: React.FC = () => {
         </div>
       </div>
 
-      {/* --- WHEELCHAIR MINI D-PAD & WASD HINT (WHEN WHEELCHAIR ACTIVE) --- */}
-      {showWheelchair && cameraPreset !== "WALKTHROUGH" && (
-        <div className="absolute bottom-16 left-3 z-20 flex items-end gap-2 pointer-events-auto">
-          <div className="grid grid-cols-3 gap-1 p-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 shadow-xl">
-            <div />
-            <button
-              onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
-              onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
-              onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-              title="Tiến (W / ↑)"
-            >
-              ▲
-            </button>
-            <div />
-            <button
-              onPointerDown={() => { wheelchairPadRef.current.left = true; }}
-              onPointerUp={() => { wheelchairPadRef.current.left = false; }}
-              onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-              title="Trái (A / ←)"
-            >
-              ◀
-            </button>
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
-              ♿
-            </div>
-            <button
-              onPointerDown={() => { wheelchairPadRef.current.right = true; }}
-              onPointerUp={() => { wheelchairPadRef.current.right = false; }}
-              onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-              title="Phải (D / →)"
-            >
-              ▶
-            </button>
-            <div />
-            <button
-              onPointerDown={() => { wheelchairPadRef.current.back = true; }}
-              onPointerUp={() => { wheelchairPadRef.current.back = false; }}
-              onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-              title="Lùi (S / ↓)"
-            >
-              ▼
-            </button>
-            <div />
-          </div>
-          <div className="hidden sm:block px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10.5px] text-slate-200 shadow-lg">
-            <div className="font-bold text-emerald-300">Lái xe lăn kiểm định Ø1.5m</div>
-            <div className="text-slate-400">Phím <kbd className="px-1 bg-slate-800 rounded text-white">WASD</kbd> / Mũi tên • <kbd className="px-1 bg-slate-800 rounded text-white">Shift</kbd> nhanh</div>
-          </div>
-        </div>
-      )}
-
       {/* --- BOTTOM FLOATING TOOLBAR: TOGGLES & LEGEND --- */}
-      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
         <div className="flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700/60 pointer-events-auto shadow-lg text-xs text-white">
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input
