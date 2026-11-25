@@ -849,11 +849,11 @@ export const RoomCanvas: React.FC = () => {
                     obj.position[2],
                   ]}
                   center
-                  distanceFactor={10}
+                  /* fixed pixel size: the inspector must stay readable at any zoom */
                   className="pointer-events-none select-none z-10"
                 >
                   <div className="flex flex-col items-center animate-fade-in pointer-events-auto">
-                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[150px] relative">
+                    <div className="px-3 py-1.5 rounded-xl bg-slate-900/95 text-white border border-sky-400 backdrop-blur-md shadow-2xl text-center min-w-[230px] relative">
                       <div className="text-[11px] font-bold text-sky-200 flex items-center justify-between gap-2">
                         <span>{obj.name}</span>
                         <button
@@ -1118,7 +1118,7 @@ export const RoomCanvas: React.FC = () => {
       {/* Provenance label: shown unless room size and every object are measured / user-confirmed. */}
       <div
         data-testid="room-model-label"
-        className={`absolute top-14 left-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-[10px] font-semibold border ${
+        className={`absolute bottom-14 right-3 z-20 pointer-events-none rounded-lg px-2 py-1 text-[10px] font-semibold border ${
           isApproximateRoomModel(room) ? "bg-amber-950/80 text-amber-200 border-amber-700/70" : "bg-emerald-950/80 text-emerald-200 border-emerald-700/70"
         }`}
       >
