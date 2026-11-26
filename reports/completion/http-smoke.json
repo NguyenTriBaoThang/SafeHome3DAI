@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-11-26T00:16:18.212Z",
-  "build_id": "vgiY5zRPo6rywrCdub_H7",
-  "build_directory": ".next",
+  "checked_at": "2026-11-26T01:28:01.360Z",
+  "build_id": "rqE08cRQo2TpHeHKwxx4L",
+  "build_directory": ".scratch/completion-production",
   "checks": [
     {
       "name": "anonymous_api_rejected",

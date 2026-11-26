@@ -194,7 +194,7 @@ export default function DigitalTwinPage() {
                     switchRoom(r.id);
                     setActiveZoneId(null);
                   }}
-                  className={`min-h-11 sm:min-h-0 px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                  className={`min-h-11 sm:min-h-[auto] px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
                     isSelected
                       ? "bg-white text-teal-700 shadow-sm font-bold border border-slate-200/60"
                       : "text-slate-600 hover:text-slate-900"
@@ -209,7 +209,7 @@ export default function DigitalTwinPage() {
             })}
             <Link
               href="/simulations"
-              className="min-h-11 sm:min-h-0 px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:text-teal-700 hover:bg-slate-200/60 transition flex items-center gap-1 border border-dashed border-slate-300 ml-1"
+              className="min-h-11 sm:min-h-[auto] px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-500 hover:text-teal-700 hover:bg-slate-200/60 transition flex items-center gap-1 border border-dashed border-slate-300 ml-1"
               title="Quản lý toàn bộ các phòng trong Kho Mô Phỏng 3D"
             >
               <Layers className="h-3 w-3 text-teal-600" />
@@ -223,7 +223,7 @@ export default function DigitalTwinPage() {
           {/* Flagship Cinematic Tour Route Button */}
           <Link
             href="/experience"
-            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 via-sky-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition active:scale-95 border border-teal-400/30"
+            className="min-h-11 sm:min-h-[auto] px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 via-sky-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition active:scale-95 border border-teal-400/30"
             title="Mở hành trình trải nghiệm 3D Cinematic Storytelling tương tác toàn màn hình"
           >
             <Compass className="h-3.5 w-3.5 text-amber-300 animate-pulse" />
@@ -233,7 +233,7 @@ export default function DigitalTwinPage() {
           {/* AI Room Scanner Button */}
           <button
             onClick={() => setShowScannerModal(true)}
-            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl border border-teal-300 bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-xs flex items-center gap-1.5 transition shadow-sm active:scale-95"
+            className="min-h-11 sm:min-h-[auto] px-3.5 py-1.5 rounded-xl border border-teal-300 bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-xs flex items-center gap-1.5 transition shadow-sm active:scale-95"
             title="Quét ảnh phòng thực tế để tự động nhận diện và dựng mô hình 3D"
           >
             <Sparkles className="h-3.5 w-3.5 text-teal-600" />
@@ -243,7 +243,7 @@ export default function DigitalTwinPage() {
           {/* Reference Image Button */}
           <button
             onClick={() => setShowReferenceModal(true)}
-            className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50/80 hover:bg-amber-100 text-amber-800 font-semibold text-xs flex items-center gap-1.5 transition"
+            className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50/80 hover:bg-amber-100 text-amber-800 font-semibold text-xs flex items-center gap-1.5 transition"
             title="Mở ảnh kiến trúc tham chiếu để so sánh đối chiếu với mô hình 3D"
           >
             <ImageIcon className="h-3.5 w-3.5 text-amber-600" />
@@ -259,7 +259,7 @@ export default function DigitalTwinPage() {
 
           <button
             onClick={handleSave}
-            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition active:scale-95"
+            className="min-h-11 sm:min-h-[auto] px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition active:scale-95"
             title="Lưu lại cấu hình phòng hiện tại vào danh sách kịch bản"
           >
             <Save className="h-3.5 w-3.5" />
@@ -268,7 +268,7 @@ export default function DigitalTwinPage() {
 
           <button
             onClick={restoreBaseline}
-            className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex items-center gap-1.5 transition"
+            className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex items-center gap-1.5 transition"
             title="Khôi phục trạng thái ban đầu"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -290,7 +290,7 @@ export default function DigitalTwinPage() {
               </span>
               <button
                 onClick={() => handleSelectZone(null)}
-                className={`min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
+                className={`min-h-11 sm:min-h-[auto] px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                   activeZoneId === null
                     ? "bg-teal-600 text-white font-bold shadow-xs"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -304,7 +304,7 @@ export default function DigitalTwinPage() {
                   <button
                     key={z.id}
                     onClick={() => handleSelectZone(z.id)}
-                    className={`min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 flex items-center gap-1.5 ${
+                    className={`min-h-11 sm:min-h-[auto] px-2.5 py-1 rounded-lg text-xs font-semibold transition shrink-0 flex items-center gap-1.5 ${
                       isActive
                         ? "bg-teal-600 text-white font-bold shadow-xs"
                         : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -346,7 +346,7 @@ export default function DigitalTwinPage() {
                   </div>
                   <button
                     onClick={() => setShowRevealIntro(false)}
-                    className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition shrink-0"
+                    className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition shrink-0"
                     aria-label="Bỏ qua giới thiệu (Skip Intro)"
                     title="Bỏ qua giới thiệu (Skip Intro)"
                   >
@@ -363,7 +363,7 @@ export default function DigitalTwinPage() {
                         setCameraPreset("ISOMETRIC");
                         setShowRevealIntro(false);
                       }}
-                      className="min-h-11 sm:min-h-0 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5"
+                      className="min-h-11 sm:min-h-[auto] px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       <span>Khám phá ngôi nhà</span>
@@ -374,14 +374,14 @@ export default function DigitalTwinPage() {
                         setCameraPreset("SAFETY");
                         setShowRevealIntro(false);
                       }}
-                      className="min-h-11 sm:min-h-0 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5"
+                      className="min-h-11 sm:min-h-[auto] px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5"
                     >
                       <ShieldAlert className="h-3.5 w-3.5" />
                       <span>Xem nguy cơ</span>
                     </button>
                     <Link
                       href="/workflow"
-                      className="min-h-11 sm:min-h-0 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl text-xs transition flex items-center gap-1.5"
+                      className="min-h-11 sm:min-h-[auto] px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl text-xs transition flex items-center gap-1.5"
                     >
                       <span>Bắt đầu đánh giá</span>
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -390,7 +390,7 @@ export default function DigitalTwinPage() {
 
                   <button
                     onClick={() => setShowRevealIntro(false)}
-                    className="min-h-11 sm:min-h-0 text-[11px] text-slate-400 hover:text-slate-200 underline font-medium"
+                    className="min-h-11 sm:min-h-[auto] text-[11px] text-slate-400 hover:text-slate-200 underline font-medium"
                   >
                     Bỏ qua giới thiệu
                   </button>
@@ -412,7 +412,7 @@ export default function DigitalTwinPage() {
                   </div>
                   <button
                     onClick={() => handleSelectZone(null)}
-                    className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                    className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -484,7 +484,7 @@ export default function DigitalTwinPage() {
               </div>
               <button
                 onClick={() => setShowReferenceModal(false)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -505,7 +505,7 @@ export default function DigitalTwinPage() {
               </span>
               <button
                 onClick={() => setShowReferenceModal(false)}
-                className="min-h-11 sm:min-h-0 px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition"
+                className="min-h-11 sm:min-h-[auto] px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition"
               >
                 Quay lại không gian 3D
               </button>
@@ -520,7 +520,7 @@ export default function DigitalTwinPage() {
           <div className="max-w-5xl w-full relative my-auto">
             <button
               onClick={() => setShowScannerModal(false)}
-              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+              className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
             >
               <X className="h-5 w-5" />
             </button>

@@ -639,7 +639,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
         <div className="p-3 border-b border-slate-100">
           <button
             onClick={createNewConversation}
-            className="min-h-11 sm:min-h-0 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold rounded-xl text-xs shadow-sm transition active:scale-95"
+            className="min-h-11 sm:min-h-[auto] w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold rounded-xl text-xs shadow-sm transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Cuộc trò chuyện mới</span>
@@ -655,7 +655,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
               placeholder="Tìm kiếm hội thoại..."
               value={searchConvQuery}
               onChange={(e) => setSearchConvQuery(e.target.value)}
-              className="min-h-11 sm:min-h-0 w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="min-h-11 sm:min-h-[auto] w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
           </div>
         </div>
@@ -683,7 +683,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                 </div>
                 <button
                   onClick={(e) => handleDeleteConversation(c.id, e)}
-                  className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 opacity-0 group-hover:opacity-100 p-1 hover:text-rose-600 transition shrink-0"
+                  className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] opacity-0 group-hover:opacity-100 p-1 hover:text-rose-600 transition shrink-0"
                   aria-label="Xóa hội thoại"
                   title="Xóa hội thoại"
                 >
@@ -725,10 +725,10 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                     value={activeTitle}
                     onChange={(e) => setActiveTitle(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSaveRename()}
-                    className="min-h-11 sm:min-h-0 text-xs font-bold px-2 py-0.5 border border-teal-300 rounded focus:outline-none"
+                    className="min-h-11 sm:min-h-[auto] text-xs font-bold px-2 py-0.5 border border-teal-300 rounded focus:outline-none"
                     autoFocus
                   />
-                  <button onClick={handleSaveRename} className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 hover:text-teal-600">
+                  <button onClick={handleSaveRename} className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 hover:text-teal-600">
                     <Check className="h-3.5 w-3.5 text-teal-600" />
                   </button>
                 </div>
@@ -737,7 +737,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                   <h2 className="text-xs font-bold text-slate-800 truncate">{activeTitle}</h2>
                   <button
                     onClick={() => setIsEditingTitle(true)}
-                    className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 text-slate-400 hover:text-slate-600"
+                    className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 text-slate-400 hover:text-slate-600"
                     aria-label="Đổi tên hội thoại"
                     title="Đổi tên hội thoại"
                   >
@@ -762,7 +762,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             <select
               value={currentRoomId}
               onChange={(e) => switchRoom(e.target.value)}
-              className="min-h-11 sm:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="min-h-11 sm:min-h-[auto] text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500"
             >
               {rooms.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -774,7 +774,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             {/* Direct Digital Twin Shortcut */}
             <Link
               href="/digital-twin"
-              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1 transition"
+              className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1 transition"
               title="Mở Bản sao số 3D"
             >
               <Box className="h-3.5 w-3.5 text-teal-600" />
@@ -784,7 +784,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             {/* Toggle Right Inspector */}
             <button
               onClick={() => setRightPanelOpen((prev) => !prev)}
-              className={`min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
+              className={`min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
                 rightPanelOpen
                   ? "bg-teal-50 text-teal-700 border-teal-200"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
@@ -853,7 +853,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                                   setRightPanelOpen(true);
                                   setActiveRightTab("evidence");
                                 }}
-                                className="min-h-11 sm:min-h-0 px-2 py-0.5 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-md text-[10px] font-bold text-teal-700 flex items-center gap-1 transition shadow-2xs"
+                                className="min-h-11 sm:min-h-[auto] px-2 py-0.5 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-md text-[10px] font-bold text-teal-700 flex items-center gap-1 transition shadow-2xs"
                                 title={`${c.publisher}: ${c.documentTitle}`}
                               >
                                 <span>[{c.citationNumber}] {c.publisher}</span>
@@ -887,7 +887,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                                 {t.clientAction && (
                                   <button
                                     onClick={() => handleNavigateTo3D(t)}
-                                    className="min-h-11 sm:min-h-0 px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] rounded-lg shadow-xs flex items-center gap-1 transition shrink-0"
+                                    className="min-h-11 sm:min-h-[auto] px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] rounded-lg shadow-xs flex items-center gap-1 transition shrink-0"
                                   >
                                     <span>{t.clientAction.type === "NAVIGATE" ? "Mở phân hệ" : "Mở trên 3D"}</span>
                                     <ArrowRight className="h-3 w-3" />
@@ -906,7 +906,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                     <div className="flex items-center gap-2 text-[10px] text-slate-400 px-1">
                       <button
                         onClick={() => handleCopy(msg.id, msg.content)}
-                        className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 hover:text-slate-600 flex items-center justify-center gap-1 transition"
+                        className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] hover:text-slate-600 flex items-center justify-center gap-1 transition"
                       >
                         {copiedId === msg.id ? (
                           <>
@@ -925,7 +925,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
 
                       <button
                         onClick={() => handleSpeakAnswer(msg.id, msg.content)}
-                        className={`min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 hover:text-slate-600 flex items-center justify-center gap-1 transition ${
+                        className={`min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] hover:text-slate-600 flex items-center justify-center gap-1 transition ${
                           speakingMsgId === msg.id ? "text-teal-600 font-bold" : ""
                         }`}
                         title="Đọc to câu trả lời bằng giọng nói tiếng Việt"
@@ -947,7 +947,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
 
                       <button
                         onClick={() => handleSendMessage(messages[messages.length - 2]?.content)}
-                        className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 hover:text-slate-600 flex items-center justify-center gap-1 transition"
+                        className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] hover:text-slate-600 flex items-center justify-center gap-1 transition"
                         title="Tạo lại câu trả lời"
                       >
                         <RotateCcw className="h-3 w-3" />
@@ -963,7 +963,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                         <button
                           key={pIdx}
                           onClick={() => handleSendMessage(prompt)}
-                          className="min-h-11 sm:min-h-0 px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300 text-slate-600 rounded-full text-[11px] font-medium border border-slate-200/80 transition shadow-2xs"
+                          className="min-h-11 sm:min-h-[auto] px-2.5 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300 text-slate-600 rounded-full text-[11px] font-medium border border-slate-200/80 transition shadow-2xs"
                         >
                           {prompt}
                         </button>
@@ -1008,7 +1008,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
               </div>
               <button
                 onClick={() => setAttachedImage(null)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 hover:text-rose-600 transition"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 hover:text-rose-600 transition"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -1028,7 +1028,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             {/* Attach Image Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 text-slate-400 hover:text-teal-600 hover:bg-slate-200/60 rounded-xl transition"
+              className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-2 text-slate-400 hover:text-teal-600 hover:bg-slate-200/60 rounded-xl transition"
               title="Đính kèm ảnh đồ vật hoặc căn phòng để AI phân tích"
             >
               <Camera className="h-4 w-4" />
@@ -1037,7 +1037,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             {/* Voice Input Button */}
             <button
               onClick={handleToggleVoice}
-              className={`min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 rounded-xl transition ${
+              className={`min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-2 rounded-xl transition ${
                 isListening
                   ? "bg-rose-600 text-white animate-pulse"
                   : "text-slate-400 hover:text-teal-600 hover:bg-slate-200/60"
@@ -1071,7 +1071,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             {isLoading ? (
               <button
                 onClick={handleStopGeneration}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-xs transition"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-xs transition"
                 title="Dừng tạo câu trả lời"
               >
                 <StopCircle className="h-4 w-4 text-rose-400" />
@@ -1080,7 +1080,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputQuery.trim() && !attachedImage}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 text-white rounded-xl shadow-xs transition disabled:cursor-not-allowed"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-2 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 text-white rounded-xl shadow-xs transition disabled:cursor-not-allowed"
                 title="Gửi câu hỏi"
               >
                 <Send className="h-4 w-4" />
@@ -1105,7 +1105,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setActiveRightTab("evidence")}
-                className={`min-h-11 sm:min-h-0 px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                className={`min-h-11 sm:min-h-[auto] px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
                   activeRightTab === "evidence"
                     ? "bg-teal-50 text-teal-700 border border-teal-200"
                     : "text-slate-600 hover:bg-slate-100"
@@ -1115,7 +1115,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
               </button>
               <button
                 onClick={() => setActiveRightTab("objects")}
-                className={`min-h-11 sm:min-h-0 px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                className={`min-h-11 sm:min-h-[auto] px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
                   activeRightTab === "objects"
                     ? "bg-teal-50 text-teal-700 border border-teal-200"
                     : "text-slate-600 hover:bg-slate-100"
@@ -1125,7 +1125,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
               </button>
               <button
                 onClick={() => setActiveRightTab("sources")}
-                className={`min-h-11 sm:min-h-0 px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                className={`min-h-11 sm:min-h-[auto] px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
                   activeRightTab === "sources"
                     ? "bg-teal-50 text-teal-700 border border-teal-200"
                     : "text-slate-600 hover:bg-slate-100"
@@ -1137,7 +1137,7 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
 
             <button
               onClick={() => setRightPanelOpen(false)}
-              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
+              className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600"
             >
               <X className="h-4 w-4" />
             </button>
