@@ -9,6 +9,19 @@ const output = path.join(process.cwd(), 'docs/images/experience');
 const results = [];
 const errors = [], failedAssets = [];
 let browser;
+// Hard cap so a stuck page can never hang CI; exits non-zero.
+setTimeout(() => { console.error('Hard timeout exceeded'); process.exit(2); }, Number(process.env.SAFEHOME_BROWSER_TIMEOUT_MS || 900000)).unref();
+// Same fixture credentials/flow as scripts/completion/browser.cjs (register, else login via the real auth API).
+const email = process.env.SAFEHOME_BROWSER_EMAIL || 'a@browser-fixture.invalid';
+const password = process.env.SAFEHOME_BROWSER_PASSWORD || 'Browser-fixture-password-2026!';
+async function signIn() {
+  for (const route of ['register', 'login']) {
+    const response = await fetch(base + '/api/auth/' + route, { method: 'POST', headers: { 'Content-Type': 'application/json', origin: base }, body: JSON.stringify({ email, password, consent: true }) });
+    const cookie = response.headers.get('set-cookie');
+    if (response.ok && cookie) { const [name, ...value] = cookie.split(';')[0].split('='); return { name, value: value.join('='), url: base }; }
+  }
+  throw new Error('Cannot register or sign in with the fixture account');
+}
 let previousScore, nextScore;
 const delay = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
 async function check(name, run) {
@@ -31,8 +44,10 @@ async function score(page) { return Number((await page.getByTestId('safety-score
 async function screenshot(page, name) { await page.screenshot({ path: path.join(output, name), animations: 'disabled' }); }
 (async () => {
   fs.mkdirSync(output, { recursive: true });
-  browser = await chromium.launch({ headless: true, ...(process.env.SAFEHOME_BROWSER_EXECUTABLE ? { executablePath: process.env.SAFEHOME_BROWSER_EXECUTABLE } : {}) });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1 });
+  browser = await chromium.launch({ headless: true, args: process.env.SAFEHOME_BROWSER_SWIFTSHADER ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : [], ...(process.env.SAFEHOME_BROWSER_EXECUTABLE ? { executablePath: process.env.SAFEHOME_BROWSER_EXECUTABLE } : {}) });
+  const session = await signIn();
+  const newContext = async options => { const created = await browser.newContext(options); await created.addCookies([session]); return created; };
+  const context = await newContext({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1 });
   context.setDefaultNavigationTimeout(180000);
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
@@ -156,7 +171,7 @@ async function screenshot(page, name) { await page.screenshot({ path: path.join(
     await screenshot(page, '05-workspace-comparison.png');
   });
   await check('Mobile touch layout, rendering and chapter navigation', async () => {
-    const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    const mobile = await newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
     mobile.setDefaultNavigationTimeout(180000);
     const tab = await mobile.newPage(); await tab.goto(base + '/experience', { waitUntil: 'domcontentloaded' }); await ready(tab);
     assert.equal(await tab.getByLabel('Chất lượng đồ họa').inputValue(), 'LOW');
@@ -169,7 +184,7 @@ async function screenshot(page, name) { await page.screenshot({ path: path.join(
     await mobile.close(); return { viewport: '390x844', horizontalPageOverflow: overflow };
   });
   await check('Reduced-motion accessibility', async () => {
-    const reduced = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+    const reduced = await newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
     reduced.setDefaultNavigationTimeout(180000);
     const tab = await reduced.newPage(); await tab.goto(base + '/experience', { waitUntil: 'domcontentloaded' }); await ready(tab);
     assert(await tab.getByRole('button', { name: 'Phát hành trình', exact: true }).isDisabled());
@@ -177,7 +192,7 @@ async function screenshot(page, name) { await page.screenshot({ path: path.join(
     await chapter(tab, 3); await reduced.close();
   });
   await check('WebGL unavailable fallback remains useful', async () => {
-    const noGL = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const noGL = await newContext({ viewport: { width: 1280, height: 900 } });
     noGL.setDefaultNavigationTimeout(180000);
     await noGL.addInitScript(() => {
       const original = HTMLCanvasElement.prototype.getContext;

@@ -31,8 +31,8 @@ Danh sách các hạng mục còn mở hoặc đang bị chặn (**không tự �
 6. **`DONE (P2)` — Thiếu `eslint` trong `devDependencies` (`R-05`):**
    - Đã cài `eslint@9` + `eslint-config-next@15.5.29`, thêm `eslint.config.mjs` (flat config), script `"lint": "eslint ."`. `npm run lint` exit 0: 0 error, ~790 warning (các rule nhiễu như `no-explicit-any`, `no-unused-vars` được hạ xuống `warn`, chưa dọn).
 
-7. **`PARTIAL (P3)` — `npm run test:experience:browser`:**
-   - Đã cài `playwright` + chromium; script chạy được nhưng cả 4 check FAIL vì `/experience` bị middleware chuyển hướng sang `/sign-in` (script chưa có bước đăng nhập). Cần bổ sung đăng nhập/cookie phiên cho script trước khi dùng làm chốt chặn. `npm run test:experience` (`64/64 PASS`) vẫn là xác minh chính.
+7. **`DONE (P3)` — `npm run test:experience:browser`:**
+   - Đã cài `playwright` + chromium, script tự đăng ký/đăng nhập tài khoản fixture qua API auth (cùng tài khoản mặc định với `scripts/completion/browser.cjs`, ghi đè bằng `SAFEHOME_BROWSER_EMAIL`/`SAFEHOME_BROWSER_PASSWORD`) và có hard timeout (`SAFEHOME_BROWSER_TIMEOUT_MS`, mặc định 15 phút, thoát mã 2). Kết quả trên `next start`: 15/15 PASS. Lưu ý: trên `next dev` check "Keyboard chapter navigation" FAIL do overlay dev của Next chặn click, nên chạy với bản build production.
 
 8. **`OPEN (P3)` — Kích thước vùng chạm nút nhỏ trên Mobile (`< 36px`):**
    - Tuy cả 17/17 route đạt `mobileOverflowPx = 0`, một số màn hình phụ có mật độ điều khiển dày chứa nút nhỏ `< 36px` trên màn `375x844` (đặc biệt `/ai-vision`: `30` nút, `/digital-twin`: `26` nút, `/ai-assistant`: `14` nút, `/risk-assessment`: `9` nút, `/experience`: `8` nút). Nên mở rộng hit-area / padding đạt chuẩn `>= 36–44px`.
