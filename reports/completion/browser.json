@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-11-26T00:17:43.485Z",
+  "checked_at": "2026-11-26T01:38:50.262Z",
   "status": "passed",
-  "build_id": "vgiY5zRPo6rywrCdub_H7",
+  "build_id": "rqE08cRQo2TpHeHKwxx4L",
   "checks": [
     {
       "name": "real_registration_creates_separate_family_databases",
