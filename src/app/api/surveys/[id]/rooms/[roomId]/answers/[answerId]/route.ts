@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/database/prisma";
 import { saveRoomAnswer } from "@/lib/survey/surveyManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const PatchAnswerSchema = z.object({
   value: z.any(),
@@ -51,7 +52,7 @@ async function PATCHHandler(
   } catch (error: any) {
     console.error("Lỗi cập nhật câu trả lời:", error);
     return NextResponse.json(
-      { error: "Không thể cập nhật câu trả lời", details: error.message },
+      buildSafeErrorPayload(error, "Không thể cập nhật câu trả lời", "SURVEYS_ROOMS_ANSWERS_ERROR"),
       { status: 500 }
     );
   }

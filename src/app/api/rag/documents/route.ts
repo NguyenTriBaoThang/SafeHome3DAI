@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ingestDocument } from "@/lib/rag/ingestion";
 import { registerDocumentForReview } from "@/lib/rag/documentRegistry";
 import { prisma } from "@/lib/database/prisma";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(request: Request) {
   try {
@@ -107,7 +108,7 @@ async function POSTHandler(request: Request) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Lỗi nạp tài liệu", details: error.message },
+      buildSafeErrorPayload(error, "Lỗi nạp tài liệu", "RAG_DOCUMENTS_ERROR"),
       { status: 400 }
     );
   }

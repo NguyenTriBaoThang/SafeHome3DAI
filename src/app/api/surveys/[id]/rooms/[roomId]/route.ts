@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getRoomSurveyState } from "@/lib/survey/surveyManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -16,7 +17,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy trạng thái phòng khảo sát:", error);
     return NextResponse.json(
-      { error: "Không tìm thấy phòng khảo sát", details: error.message },
+      buildSafeErrorPayload(error, "Không tìm thấy phòng khảo sát", "SURVEYS_ROOMS_ERROR"),
       { status: 404 }
     );
   }

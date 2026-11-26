@@ -5,6 +5,7 @@ import {
   deleteConversation,
   renameConversation,
 } from "@/lib/ai/conversationManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -21,7 +22,7 @@ async function GETHandler(
     }
     return NextResponse.json(conv);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "AI_CONVERSATIONS_ERROR"), { status: 500 });
   }
 }
 
@@ -34,7 +35,7 @@ async function DELETEHandler(
     await deleteConversation(params.id);
     return NextResponse.json({ success: true, message: "Đã xóa cuộc trò chuyện" });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "AI_CONVERSATIONS_ERROR"), { status: 500 });
   }
 }
 
@@ -51,7 +52,7 @@ async function PATCHHandler(
     await renameConversation(params.id, body.title);
     return NextResponse.json({ success: true, title: body.title });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "AI_CONVERSATIONS_ERROR"), { status: 500 });
   }
 }
 

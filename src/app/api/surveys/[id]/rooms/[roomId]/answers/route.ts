@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { saveRoomAnswer } from "@/lib/survey/surveyManager";
 import { AnswerSource, ConfirmationStatus } from "@/lib/survey/types";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const SubmitAnswerSchema = z.object({
   questionId: z.string().min(1, "Question ID không được để trống"),
@@ -56,7 +57,7 @@ async function POSTHandler(
   } catch (error: any) {
     console.error("Lỗi lưu câu trả lời khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể lưu câu trả lời", details: error.message },
+      buildSafeErrorPayload(error, "Không thể lưu câu trả lời", "SURVEYS_ROOMS_ANSWERS_ERROR"),
       { status: 500 }
     );
   }

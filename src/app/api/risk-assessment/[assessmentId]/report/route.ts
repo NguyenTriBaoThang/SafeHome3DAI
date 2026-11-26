@@ -6,6 +6,7 @@ import {
 } from "@/lib/risk/assessmentManager";
 import { DemoDataExportBlockedError } from "@/lib/persistence/demoBoundary";
 import { recordAuditEventBestEffort } from "@/lib/persistence/reliablePersistence";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   req: NextRequest,
@@ -45,7 +46,7 @@ async function GETHandler(
       );
     }
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "RISKASSESSMENT_REPORT_ERROR"),
       { status: 500 }
     );
   }

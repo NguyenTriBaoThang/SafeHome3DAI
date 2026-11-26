@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(
   request: Request,
@@ -29,7 +30,7 @@ async function POSTHandler(
       reindexedAt: new Date().toISOString(),
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_DOCUMENTS_REINDEX_ERROR"), { status: 500 });
   }
 }
 
@@ -44,7 +45,7 @@ async function DELETEHandler(
     });
     return NextResponse.json({ success: true, message: `Đã xóa tài liệu ${params.id}` });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_DOCUMENTS_REINDEX_ERROR"), { status: 500 });
   }
 }
 

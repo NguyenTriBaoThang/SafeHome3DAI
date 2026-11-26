@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { listDocumentRegistryEntries } from "@/lib/rag/documentRegistry";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler() {
   try {
@@ -25,7 +26,7 @@ async function GETHandler() {
 
     return NextResponse.json(sourcesSummary);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_SOURCES_ERROR"), { status: 500 });
   }
 }
 

@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getRoomSurveyState } from "@/lib/survey/surveyManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -17,7 +18,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy danh sách nguy cơ khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể lấy danh sách nguy cơ", details: error.message },
+      buildSafeErrorPayload(error, "Không thể lấy danh sách nguy cơ", "SURVEYS_ROOMS_FINDINGS_ERROR"),
       { status: 500 }
     );
   }

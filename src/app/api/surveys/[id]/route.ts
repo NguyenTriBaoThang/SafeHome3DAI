@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getSurveyById, deleteSurvey } from "@/lib/survey/surveyManager";
 import { authorizeObjectAccess, AuthorizationError } from "@/lib/auth/authorization";
 import { resolveAccountScopeId, recordAuditEventBestEffort } from "@/lib/persistence/reliablePersistence";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   _request: Request,
@@ -35,7 +36,7 @@ async function GETHandler(
       return NextResponse.json({ success: false, code: error.code, error: error.message }, { status: 403 });
     }
     return NextResponse.json(
-      { error: "Lỗi hệ thống khi tải khảo sát", details: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống khi tải khảo sát", "SURVEYS_ERROR"),
       { status: 500 }
     );
   }
@@ -80,7 +81,7 @@ async function DELETEHandler(
       return NextResponse.json({ success: false, code: error.code, error: error.message }, { status: 403 });
     }
     return NextResponse.json(
-      { error: "Không thể xóa khảo sát", details: error.message },
+      buildSafeErrorPayload(error, "Không thể xóa khảo sát", "SURVEYS_ERROR"),
       { status: 500 }
     );
   }
