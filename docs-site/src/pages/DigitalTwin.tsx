@@ -15,31 +15,30 @@ export default function DigitalTwin() {
         <section className="card">
           <div className="card-title">
             <Home size={18} color="var(--primary-hover)" />
-            <span>Mô Hình Photorealistic Dollhouse (/digital-twin)</span>
+            <span>Mô Hình Photorealistic Dollhouse (/digital-twin) &amp; Tour /experience</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Không gian kiến trúc tham chiếu mô phỏng chi tiết phòng ngủ và nhà vệ sinh khép kín của người cao tuổi:
+            Không gian kiến trúc tham chiếu mô phỏng phòng ngủ và nhà vệ sinh khép kín kèm phân hệ trải nghiệm 6 chương <strong>/experience</strong>:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>6 Chế độ góc nhìn:</strong> Dollhouse toàn cảnh, Tầm mắt người già, Mặt bằng 2D, Walkthrough đi dạo, Tự căn chỉnh (Fit) và Chụp ảnh màn hình (Snapshot).</li>
-            <li><strong>Tương tác vật thể:</strong> Bấm chọn bất kỳ đồ nội thất nào trong 3D để xem thông số kỹ thuật, chiều cao nệm, kiểm tra rủi ro.</li>
-            <li><strong>Hành lang di chuyển an toàn:</strong> Trực quan hóa luồng giao thông từ giường đến cửa ra vào và toilet.</li>
+            <li><strong>Đa chế độ góc nhìn:</strong> Dollhouse, Tầm mắt / Nội thất, Mặt bằng 2D, Đi bộ (Walkthrough), Nguy cơ và So sánh Trước/Sau.</li>
+            <li><strong>Đặt &amp; bám vật thể (<code className="inline">scenePlacement.ts</code>):</strong> Tự động kẹp biên phòng, bám tường theo hướng quay và tựa mặt phẳng cho đèn/cáp.</li>
+            <li><strong>Phục hồi WebGL (<code className="inline">WebGLBoundary</code>):</strong> Nếu trình duyệt không khởi tạo được WebGL, giao diện chuyển mượt sang bảng dữ liệu phòng &amp; nguy cơ.</li>
           </ul>
         </section>
 
         <section className="card">
           <div className="card-title">
             <Sun size={18} color="var(--warning)" />
-            <span>Studio Chiếu Sáng & Ma Sát Sàn Động</span>
+            <span>Tách Bạch Ánh Sáng Hiển Thị 3D &amp; Độ Chất Lượng (B08)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Mô phỏng tức thì các điều kiện rủi ro cao theo tiêu chuẩn y khoa:
+            Quản lý qua <code className="inline">src/lib/three/lightingModel.ts</code> để tránh nhầm lẫn giữa đồ họa WebGL và số đo lux thực tế:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Chế độ ánh sáng đặt trước:</strong> Hoàng hôn, Ban ngày (250 Lux), Ban đêm (40 Lux — ngưỡng nguy cơ ngã), Studio (320 Lux).</li>
-            <li><strong>Thanh trượt độ rọi (Lux):</strong> Điều chỉnh liên tục từ 0 đến 520 Lux.</li>
-            <li><strong>Mô phỏng mặt sàn trơn:</strong> Bật/tắt trạng thái Sàn khô ráo vs Sàn ướt.</li>
-            <li><strong>Bổ sung thiết bị chống ngã:</strong> Bật/tắt thanh vịn bồn cầu, thanh vịn vòi sen, thảm cao su chống trượt giác hút.</li>
+            <li><strong>Preset hiển thị 3D (Sáng sớm, Ban ngày, Chiều ấm, Ban đêm, Studio):</strong> Chỉ điều chỉnh cường độ ánh sáng &amp; tone mapping trong Three.js, không ghi đè điểm an toàn hay dữ liệu đo lux thật.</li>
+            <li><strong>Cấu hình chất lượng (LOW / MEDIUM / HIGH):</strong> Tùy biến DPR, shadows và PBR Environment cho máy cấu hình thấp và mobile.</li>
+            <li><strong>Bản dựng từ ảnh (<code className="inline">PHOTO_DRAFT</code>):</strong> Gắn nhãn ước lượng gần đúng, yêu cầu đo đạc tại nhà trước khi chấm điểm rủi ro.</li>
           </ul>
         </section>
       </div>

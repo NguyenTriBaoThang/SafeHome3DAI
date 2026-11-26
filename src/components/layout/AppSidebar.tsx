@@ -92,28 +92,28 @@ export const AppSidebar: React.FC = () => {
   if (pathname === "/experience" || pathname === "/sign-in") return null;
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
+    <aside className="w-64 h-full overflow-hidden border-r border-slate-200 bg-white flex flex-col justify-between shrink-0 hidden lg:flex">
       {/* Navigation Links */}
-      <div className="p-3.5 space-y-4 overflow-y-auto max-h-[calc(100vh-9rem)]">
+      <div className="p-3 space-y-2.5 flex-1 min-h-0 overflow-y-auto">
         {/* 1 Nút Gom Toàn Bộ Quy Trình: Hành trình 7 Bước AI */}
         <div>
           <Link
             href="/workflow"
             className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-2xl text-sm font-bold transition-all shadow-md group border",
+              "w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold transition-all shadow-md group border",
               isWorkflowActive
                 ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white border-teal-500 shadow-teal-500/20 ring-2 ring-teal-400/30"
                 : "bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-600 hover:to-sky-700 text-white border-transparent hover:shadow-teal-500/25"
             )}
           >
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs shrink-0">
-                <Compass className="h-5 w-5" />
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs shrink-0">
+                <Compass className="h-4 w-4" />
               </div>
               <div className="text-left">
                 <div className="text-sm font-black tracking-tight">Hành trình 7 Bước AI</div>
-                <div className="text-xs text-teal-100 font-normal">
-                  Gộp trọn gói Khảo sát ➔ 3D ➔ Đánh giá ➔ Mô phỏng ➔ Báo cáo
+                <div className="text-[11px] text-teal-100 font-normal leading-snug">
+                  Khảo sát ➔ 3D ➔ Đánh giá ➔ Mô phỏng ➔ Báo cáo
                 </div>
               </div>
             </div>
@@ -123,10 +123,10 @@ export const AppSidebar: React.FC = () => {
 
         {/* Danh sách các phân hệ độc lập ngoài luồng 7 bước */}
         <div>
-          <div className="px-3 text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+          <div className="px-3 text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
             Phân hệ ứng dụng
           </div>
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             {EXTERNAL_MODULES.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -138,7 +138,7 @@ export const AppSidebar: React.FC = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group",
+                    "flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold transition-all group",
                     isActive
                       ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",

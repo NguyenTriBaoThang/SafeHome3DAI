@@ -636,9 +636,18 @@ export default function AiVisionStudioPage() {
             <div className="grid grid-cols-2 gap-2 pt-1">
               <label
                 htmlFor="vision-file-upload-input"
-                className="cursor-pointer px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                onClick={() => {
+                  if (!imageConsent) {
+                    setSyncStatus("Vui lòng tích đồng ý xử lý ảnh phía trên trước khi tải ảnh.");
+                  }
+                }}
+                className={`px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs ${
+                  imageConsent
+                    ? "cursor-pointer bg-teal-50 hover:bg-teal-100 text-teal-800 border-teal-200"
+                    : "cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200"
+                }`}
               >
-                <Upload className="h-3.5 w-3.5 text-teal-600" />
+                <Upload className={`h-3.5 w-3.5 ${imageConsent ? "text-teal-600" : "text-slate-400"}`} />
                 <span>Tải ảnh</span>
                 <input
                   id="vision-file-upload-input"
@@ -654,7 +663,7 @@ export default function AiVisionStudioPage() {
               <button
                 onClick={handleStartCamera}
                 disabled={!imageConsent}
-                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed"
               >
                 <Camera className="h-3.5 w-3.5 text-indigo-600" />
                 <span>Mở Camera</span>

@@ -5,9 +5,9 @@ export default function XAI() {
   return (
     <div className="page">
       <div>
-        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Explainable AI (XAI) & SafeHome Copilot</h1>
+        <h1 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem' }}>Rule-Based Decision Provenance &amp; SafeHome Copilot</h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Hệ thống giải trình quyết định AI minh bạch qua đồ thị ReactFlow và trợ lý hỏi đáp có căn cứ y khoa (Grounded RAG) kèm ngăn tra cứu bằng chứng 4 tab.
+          Truy vết quyết định theo quy tắc qua đồ thị ReactFlow (tách biệt với model explainability nội tại của Gemini/LLM) và trợ lý hỏi đáp có căn cứ y khoa (Grounded RAG) kèm ngăn tra cứu bằng chứng 4 tab.
         </p>
       </div>
 
@@ -15,7 +15,7 @@ export default function XAI() {
         <section className="card">
           <div className="card-title">
             <GitPullRequest size={18} color="var(--primary-hover)" />
-            <span>Sơ Đồ Giải Trình Quyết Định (/explainability)</span>
+            <span>Đồ Thị Truy Xuất Nguồn Gốc Quyết Định (/explainability)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
             Ứng dụng công nghệ React Flow (@xyflow/react), hệ thống vẽ sơ đồ trực quan từng bước suy luận dẫn đến cảnh báo nguy cơ:
@@ -86,10 +86,10 @@ export default function XAI() {
           <div style={{ background: 'var(--bg-elevated)', padding: '1rem', borderRadius: '6px' }}>
             <h4 style={{ color: '#fff', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <CheckCircle2 size={16} color="var(--success)" />
-              <span>Đối chiếu trước/sau</span>
+              <span>Đối chiếu Snapshot Trước / Sau</span>
             </h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-              Biểu đồ Radar so sánh định lượng tỷ lệ giảm nguy cơ ngã giữa hiện trạng ban đầu và sau khi hoàn thành can thiệp.
+              Biểu đồ &amp; API v1 so sánh trạng thái yếu tố môi trường giữa snapshot Baseline và sau cải tạo (chưa tuyên bố giảm tỷ lệ ngã lâm sàng).
             </p>
           </div>
 

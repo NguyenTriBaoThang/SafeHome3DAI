@@ -21,9 +21,9 @@ export default function Vision() {
             Ngăn chặn mã độc đội lốt file ảnh và tấn công giả mạo đuôi file (MIME spoofing):
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Kiểm tra Magic Bytes:</strong> Đọc trực tiếp byte header của buffer (JPEG: <code className="inline">FF D8 FF</code>, PNG: <code className="inline">89 50 4E 47</code>, WEBP: <code className="inline">52 49 46 46</code>).</li>
-            <li><strong>Giới hạn an toàn:</strong> Giới hạn dung lượng tối đa 10MB, độ phân giải tối đa 4096 &times; 4096 px.</li>
-            <li><strong>Lưu trữ biệt lập:</strong> Lưu trong thư mục tĩnh bảo vệ, tạo hash ngẫu nhiên không lộ tên file gốc.</li>
+            <li><strong>Kiểm tra Magic Bytes:</strong> Đọc byte header của buffer (JPEG: <code className="inline">FF D8 FF</code>, PNG: <code className="inline">89 50 4E 47</code>, WebP: <code className="inline">52 49 46 46</code>).</li>
+            <li><strong>Camera trực tiếp (<code className="inline">LiveCameraCaptureModal</code>):</strong> Hỗ trợ mở camera qua <code className="inline">getUserMedia</code>, đổi máy ảnh trước/sau và cảnh báo thiếu sáng (&lt;50 Lux giả lập khung hình).</li>
+            <li><strong>Lưu trữ riêng tư theo hộ:</strong> Lưu trong thư mục <code className="inline">SAFEHOME_PRIVATE_DIR</code> (tối đa 10MB/ảnh), chỉ truy xuất qua phiên/chữ ký HMAC và yêu cầu đồng ý <code className="inline">ConsentRecord</code>.</li>
           </ul>
         </section>
 
@@ -81,61 +81,55 @@ export default function Vision() {
           <span>Quy Trình Nhận Diện Vật Thể & Lưới Phân Loại (Taxonomy 18 Lớp)</span>
         </div>
         <p style={{ color: 'var(--text-muted)' }}>
-          Hệ thống ánh xạ trực tiếp các vật thể nhận diện được từ mô hình thị giác thành 18 phân lớp đối tượng liên quan trực tiếp đến an toàn ngã:
+          Định nghĩa chuẩn tại <code className="inline">src/lib/vision/taxonomy.ts</code> gồm 18 phân lớp: <code className="inline">bed</code>, <code className="inline">chair</code>, <code className="inline">table</code>, <code className="inline">cabinet</code>, <code className="inline">nightstand</code>, <code className="inline">door</code>, <code className="inline">toilet</code>, <code className="inline">sink</code>, <code className="inline">bathtub</code>, <code className="inline">sofa</code>, <code className="inline">rug</code>, <code className="inline">electrical_cable</code>, <code className="inline">grab_bar</code>, <code className="inline">obstacle_route</code>, <code className="inline">threshold_step</code>, <code className="inline">lamp</code>, <code className="inline">light_switch</code>, <code className="inline">other</code>.
         </p>
 
         <div className="table-wrap" style={{ marginTop: '0.75rem' }}>
           <table>
             <thead>
               <tr>
-                <th>Lớp đối tượng nhận diện</th>
-                <th>Phân loại rủi ro</th>
-                <th>Quy tắc đánh giá kích hoạt</th>
-                <th>Hành động đề xuất y tế</th>
+                <th>Lớp đối tượng chuẩn (taxonomy.ts)</th>
+                <th>Tính chất</th>
+                <th>Quy tắc liên kết</th>
+                <th>Nguyên tắc xử lý dữ liệu</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code className="inline">rug / loose_carpet</code></td>
-                <td><span className="badge badge-danger">High Risk</span></td>
-                <td><code className="inline">RUG_NO_GRIP</code></td>
-                <td>Loại bỏ hoặc dán keo chống trượt 2 mặt chuyên dụng</td>
+                <td><code className="inline">rug</code></td>
+                <td><span className="badge badge-danger">Risk Candidate</span></td>
+                <td><code className="inline">RISK-001</code></td>
+                <td>Cần xác nhận độ bám/dán cố định mép thảm tại nhà</td>
               </tr>
               <tr>
-                <td><code className="inline">bed / mattress</code></td>
-                <td><span className="badge badge-warning">Medium Risk</span></td>
-                <td><code className="inline">BED_HEIGHT_UNSAFE</code></td>
-                <td>Đo đạc kiểm tra chiều cao an toàn 45-50cm</td>
+                <td><code className="inline">electrical_cable</code></td>
+                <td><span className="badge badge-danger">Risk Candidate</span></td>
+                <td><code className="inline">RISK-002</code></td>
+                <td>Kiểm tra dây vắt ngang lối đi hay đã luồn nẹp sát tường</td>
               </tr>
               <tr>
-                <td><code className="inline">electrical_cord / wire</code></td>
-                <td><span className="badge badge-danger">High Risk</span></td>
-                <td><code className="inline">CLUTTER_ON_FLOOR</code></td>
-                <td>Nẹp dây điện men theo chân tường, giải phóng lối đi</td>
+                <td><code className="inline">obstacle_route</code> / <code className="inline">threshold_step</code></td>
+                <td><span className="badge badge-warning">Measurement Req</span></td>
+                <td><code className="inline">RISK-003</code> / <code className="inline">RISK-007</code></td>
+                <td>Không tự suy chiều rộng lối đi hay độ cao gờ từ một ảnh đơn</td>
               </tr>
               <tr>
-                <td><code className="inline">clutter / shoes / boxes</code></td>
-                <td><span className="badge badge-danger">High Risk</span></td>
-                <td><code className="inline">CLUTTER_ON_FLOOR</code></td>
-                <td>Dọn dẹp vật cản trên hành lang di chuyển ban đêm</td>
+                <td><code className="inline">bed</code> / <code className="inline">table</code></td>
+                <td><span className="badge badge-partial">Review Required</span></td>
+                <td><code className="inline">RISK-007</code> / <code className="inline">RISK-008</code></td>
+                <td>Kiểm tra chiều cao mặt nệm thực tế (45–55 cm) &amp; góc cạnh</td>
               </tr>
               <tr>
-                <td><code className="inline">table / sharp_corners</code></td>
-                <td><span className="badge badge-danger">High Risk</span></td>
-                <td><code className="inline">PATH_OBSTRUCTION</code></td>
-                <td>Bọc đệm silicon bo tròn góc nhọn, dịch chuyển sát tường</td>
-              </tr>
-              <tr>
-                <td><code className="inline">grab_bar / rail</code></td>
+                <td><code className="inline">grab_bar</code></td>
                 <td><span className="badge badge-success">Protective</span></td>
-                <td><code className="inline">NO_BATH_GRAB_BAR (Phủ định)</code></td>
-                <td>Ghi nhận yếu tố bảo vệ đã có</td>
+                <td><code className="inline">RISK-006</code></td>
+                <td>Xác nhận đủ vị trí bồn cầu, vòi sen và khả năng chịu tải thực tế</td>
               </tr>
               <tr>
-                <td><code className="inline">nightlight / lamp</code></td>
-                <td><span className="badge badge-success">Protective</span></td>
-                <td><code className="inline">NO_NIGHT_LIGHT (Phủ định)</code></td>
-                <td>Ghi nhận hệ thống chiếu sáng ban đêm</td>
+                <td><code className="inline">lamp</code> / <code className="inline">light_switch</code></td>
+                <td><span className="badge badge-partial">No Lux Guessing</span></td>
+                <td><code className="inline">RISK-004</code> / <code className="inline">RISK-008</code></td>
+                <td>Không tự suy độ sáng Lux hay tầm với ban đêm chỉ từ việc nhìn thấy đèn/công tắc</td>
               </tr>
             </tbody>
           </table>

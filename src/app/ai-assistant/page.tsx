@@ -743,11 +743,11 @@ Tôi kết nối trực tiếp với **Bản sao số 3D** căn nhà và kho tri
                   </button>
                 </div>
               )}
-              <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                <span>SafeHome AI Agent</span>
-                <span>•</span>
-                <span className="text-teal-600 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="text-[10px] text-slate-400 flex items-center gap-2 min-w-0">
+                <span className="shrink-0">SafeHome AI Agent</span>
+                <span className="shrink-0">•</span>
+                <span className="text-teal-600 font-semibold inline-flex items-center gap-1 whitespace-nowrap truncate max-w-[260px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   Đang đồng bộ 3D ({room.name.split("(")[0].trim()})
                 </span>
               </div>

@@ -74,8 +74,8 @@ export default function ApiReference() {
         lead={`${total} production endpoints powering Computer Vision, Item Hazard Assessment, Deterministic Risk Evaluation, Adaptive Surveying, and Clinical RAG Copilot.`}
       />
 
-      <Callout tone="note" title="Production Standards & Type Safety">
-        Endpoints are implemented via Next.js App Router Route Handlers (<code>src/app/api/**/*.ts</code>). All incoming request bodies are validated against runtime Zod schemas with TypeScript type inference. Database mutations are managed through Prisma ORM across 16 relational models.
+      <Callout tone="note" title="Production Standards, Account Guard & Type Safety">
+        Hệ thống gồm <code>63</code> App Router endpoints (<code>src/app/api/**/*.ts</code>): <code>4</code> route xác thực công khai (<code>/api/auth/*</code>) và <code>59</code> route nghiệp vụ được bảo vệ bằng <code>withAccount()</code>, kiểm tra đồng ý <code>ConsentRecord</code> và validate đầu vào qua Zod + 31 Prisma models trên SQLite tách theo hộ gia đình.
       </Callout>
 
       <div className="filters">

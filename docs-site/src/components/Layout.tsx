@@ -148,9 +148,9 @@ export function Layout({ path, children }: { path: string; children: ReactNode }
             <div className="sidebar-footer hide-sm">
               <div className="sys-status">
                 <span className="status-dot"></span>
-                <span>109 Vitest Tests (100% Passed)</span>
+                <span>57 Vitest Suites · 486 Passed</span>
               </div>
-              <div className="sys-sub">WHO 2021 & CDC STEADI Standard</div>
+              <div className="sys-sub">WHO 2021 &amp; CDC STEADI Screening</div>
             </div>
           </div>
         </aside>
@@ -166,10 +166,10 @@ export function Layout({ path, children }: { path: string; children: ReactNode }
 
           <footer className="footer">
             <p>
-              <strong>SafeHome 3D AI — Technical Documentation Portal.</strong> Toàn bộ nội dung được đồng bộ thực tế từ mã nguồn hệ thống. Dữ liệu y khoa tuân thủ các hướng dẫn lâm sàng chính thức của WHO 2021 và CDC STEADI.
+              <strong>SafeHome 3D AI — Technical Documentation Portal.</strong> Toàn bộ nội dung đồng bộ từ mã nguồn hiện tại (Next.js 15, React 19, Three.js, Prisma 5.22). Công cụ hỗ trợ sàng lọc yếu tố môi trường, không thay thế chẩn đoán lâm sàng.
             </p>
             <p className="mono dim" style={{ marginTop: 6, fontSize: '0.82rem' }}>
-              Static GitHub Pages · Zero Cloud Leakage · 109 Verified Vitest Tests (100% Pass Rate) · 16 Prisma Models
+              Static GitHub Pages · Per-Household SQLite · 57 Vitest Suites (486 Passed) · 31 Prisma Models · 63 APIs
             </p>
           </footer>
         </div>

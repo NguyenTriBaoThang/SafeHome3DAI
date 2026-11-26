@@ -1,41 +1,28 @@
-# KIẾN TRÚC HỆ THỐNG SAU CẢI TIẾN (UPDATED SYSTEM ARCHITECTURE)
-### SafeHome 3D AI — Nền Tảng An Toàn Không Gian Sống Hợp Nhất
+# KIẾN TRÚC HỆ THỐNG HIỆN TẠI (UPDATED SYSTEM ARCHITECTURE)
+### SafeHome 3D AI — Nền Tảng Hỗ Trợ Sàng Lọc Nguy Cơ & Không Gian Sống An Toàn
 
-Tài liệu này tổng hợp toàn bộ các cải tiến kiến trúc đã được triển khai trong dự án SafeHome 3D AI để chuyển đổi từ một tập hợp các module rời rạc thành một sản phẩm khép kín, hoạt động ổn định và sẵn sàng sản xuất.
+Tài liệu này tổng hợp kiến trúc hiện hành của SafeHome 3D AI sau các chu kỳ hoàn thiện hệ thống (A01–A12, B01–B12 và đợt Kiểm toán Toàn Hệ thống 11/2026).
 
 ---
 
 ## 1. Cải Tiến Kiến Trúc Cốt Lõi (Key Architectural Upgrades)
 
-### 1.1 Hợp Nhất Quy Trình Trải Nghiệm (Unified End-to-End Guided Workflow)
-- **Trước**: Người dùng phải tự tìm đường giữa 11 trang giao diện khác nhau (Khảo sát, Thị giác AI, Digital Twin, Simulator, Risk, XAI, Báo cáo...) mà không có trình tự rõ ràng.
-- **Sau**: Xây dựng tuyến hành trình chính tại `/workflow` gồm **7 Bước Khép Kín** có máy trạng thái (State Machine):
-  1. Khởi tạo hồ sơ khảo sát & Thể trạng người cao tuổi.
-  2. Thu thập kích thước, ảnh chụp và checklist nguy cơ.
-  3. Phân tích Thị giác AI & Xác minh nhãn (Human-in-the-Loop).
-  4. Tự động tổng hợp và dựng Bản sao số 3D (Digital Twin).
-  5. Thẩm định nguy cơ bằng 8 Quy tắc xác định (CDC STEADI & WHO 2021).
-  6. Mô phỏng can thiệp cải tạo môi trường (What-if Scenario).
-  7. Ma trận so sánh Trước/Sau và Xuất kế hoạch hành động thực tế (PDF/JSON).
+### 1.1. Cô Lập Tài Khoản Hộ Gia Đình & Bảo Mật API (A06–A07)
+- Xác thực bắt buộc qua `/sign-in` (`accounts.db` với mật khẩu băm có salt); mỗi tài khoản gia đình sở hữu **database SQLite (`31` Prisma models) và kho ảnh riêng trong `SAFEHOME_PRIVATE_DIR`**.
+- Toàn bộ **59 business API routes** được bảo vệ bằng `withAccount()`, kiểm tra sở hữu tài nguyên (chống IDOR) và chặn mặc định (`default-deny`) truyền ảnh ra AI bên thứ ba nếu thiếu `ConsentRecord`.
 
-### 1.2 Giải Quyết Triệt Để Lỗi Chồng Chéo Nhãn 3D (3D Label Clustering System)
-- **Trước**: Trong `RoomCanvas.tsx`, tất cả vật thể đều hiển thị đồng thời cả huy hiệu cảnh báo nguy cơ và nhãn tên đồ vật, dẫn đến tình trạng các nhãn đè lên nhau tại góc phòng có nhiều đồ nội thất (giường, tab, thảm, dây điện).
-- **Sau**:
-  - Tự động gom cụm (Clustering) các cảnh báo nguy cơ nằm trong bán kính `< 0.95m` thành một cụm duy nhất (ví dụ: `[ ⚠️ 2 Mối nguy ]`).
-  - Mặc định ẩn nhãn văn bản của các vật thể không có nguy cơ để không gian 3D luôn thoáng đãng.
-  - Khi người dùng nhấp chọn hoặc di chuột qua, hiển thị thẻ thông tin nổi bật với hoạt ảnh mượt mà.
-  - Đồng bộ nhấp chọn danh sách nguy cơ bên ngoài -> Camera 3D tự động focus mượt mà tới tâm của vật cản.
+### 1.2. Hợp Nhất Quy Trình 7 Bước (`/workflow`) & Tour Cinematic (`/experience`)
+- Tuyến hành trình `/workflow` kết nối 7 bước tuần tự: Hồ sơ khảo sát ➔ Thu thập dữ liệu ➔ Thị giác AI + HITL ➔ Bản sao số 3D ➔ Đánh giá nguy cơ ➔ Mô phỏng What-If ➔ So sánh Trước/Sau & Báo cáo PDF/JSON.
+- Phân hệ `/experience` cung cấp trải nghiệm tour 3D WebGL `6` chương (`Dollhouse`, `Mặt bằng`, `Nội thất`, `Đi bộ`, `Nguy cơ`, `So sánh Trước/Sau`), tích hợp `WebGLBoundary` fallback khi WebGL không khả dụng.
 
-### 1.3 Tái Cấu Trúc Điều Hướng (Navigation Hierarchy)
-- **Thanh menu chính (Primary Journey)**: Rút gọn còn 5 mục chủ đạo:
-  1. `Tổng quan & Chỉ số` (`/dashboard`)
-  2. `Hành trình an toàn (7 Bước AI)` (`/workflow`)
-  3. `Bản sao số 3D` (`/digital-twin`)
-  4. `Mô phỏng can thiệp` (`/scenario-simulator`)
-  5. `Báo cáo an toàn` (`/reports`)
-- **Nhóm công cụ chuyên sâu (Advanced Tools)**: Được đưa vào ngăn kéo có thể thu gọn (Collapsible Drawer), giữ nguyên 100% tính năng cho chuyên viên mà không làm rối người dùng phổ thông.
+### 1.3. Thị Giác Đa Tầng & Chụp Camera Trực Tiếp (`LiveCameraCaptureModal`)
+- `/ai-vision` và `/vision` (`AiRoomScannerWizard`) hỗ trợ tải ảnh nhị phân (`JPG/PNG/WebP`), hoặc chụp trực tiếp từ camera thiết bị thông qua `LiveCameraCaptureModal` (`getUserMedia`, đổi camera, cảnh báo ánh sáng yếu `< 50 Lux`).
+- Loại bỏ các nhánh trả về phát hiện giả (`simulateVision`), phân tách rõ `PHOTO_DRAFT` (chỉ ước lượng hình học, không sinh điểm an toàn lâm sàng khi thiếu khảo sát xác nhận).
 
-### 1.4 Đồng Bộ Hóa Cơ Sở Dữ Liệu Thực Tế (Real Persistence API)
-- Tạo API endpoints `/api/workflow/save-state` và `/api/workflow/state/[id]`.
-- Mọi dữ liệu khảo sát, đồ vật 3D, kịch bản cải tạo và đánh giá rủi ro đều được lưu vào cơ sở dữ liệu SQLite (`prisma/dev.db`), cho phép người dùng tải lại trang (reload) hoặc tiếp tục công việc bất kỳ lúc nào mà không bị mất dữ liệu.
+### 1.4. Tách Bạch Ánh Sáng 3D, Gom Cụm Nhãn & Decision Provenance
+- Trong `RoomCanvas.tsx`, hệ thống tự động gom cụm cảnh báo nguy cơ trong bán kính `< 0.95m` để chống đè chữ.
+- `lightingModel.ts` tách riêng ánh sáng hiển thị Three.js mô phỏng khỏi số đo lux vật lý thực tế.
+- Chuỗi giải trình ở `/explainability` và `/risk-assessment/traceability` chuẩn hóa thành **Rule-Based Explainability / Decision Provenance** (tách biệt với model explainability nội tại của LLM).
 
+### 1.5. Ranh Giới DEMO vs REAL & Lưu Trữ Bền Vững
+- `POST /api/workflow/save-state` chủ đích trả HTTP `410 DEMO_WORKFLOW` để chặn ghi dữ liệu demo lẫn vào hồ sơ thật; toàn bộ dữ liệu thật của hộ gia đình được lưu bền vững qua Prisma transaction vào SQLite riêng của hộ (không ghi vào `prisma/dev.db` mẫu), kết hợp `RoomSnapshotRecord` (`v1`) bất biến cho đối chiếu Before/After.

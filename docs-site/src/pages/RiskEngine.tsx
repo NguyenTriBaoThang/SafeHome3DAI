@@ -148,8 +148,8 @@ export default function RiskEngine() {
       />
 
       {/* Principle Callout */}
-      <Callout tone="note" title="Nguyên Tắc Thiết Kế: Y Học Chứng Cứ Tất Định (Deterministic Clinical Logic)">
-        Trong an toàn môi trường sống cho người cao tuổi, <strong>điểm nguy cơ và vi phạm vật lý không bao giờ được tạo ra ngẫu nhiên bởi xác suất từ ngữ của LLM</strong>. Toàn bộ logic đánh giá rủi ro của SafeHome 3D AI được mã hóa bằng hàm thuần túy (pure functions) tại <Src path="src/lib/risk/riskRuleRegistry.ts" /> và được kiểm định bằng 109 automated tests (100% pass rate).
+      <Callout tone="note" title="Nguyên Tắc Thiết Kế: Quy Tắc Tất Định & Chờ Thẩm Định Lâm Sàng (PENDING_CLINICAL_REVIEW)">
+        Trong an toàn môi trường sống cho người cao tuổi, <strong>cảnh báo nguy cơ không được sinh ngẫu nhiên bởi LLM</strong>. Logic đánh giá được mã hóa bằng hàm thuần túy tại <Src path="src/lib/risk/riskRuleRegistry.ts" /> với bộ ngưỡng phiên bản <Src path="thresholdConfig.ts (v2026.1)" /> hiện giữ trạng thái <code className="mono">PENDING_CLINICAL_REVIEW</code>; ứng dụng hỗ trợ sàng lọc yếu tố môi trường, không thay thế chẩn đoán y khoa.
       </Callout>
 
       {/* Safety Score Formula Section */}
@@ -262,18 +262,18 @@ export default function RiskEngine() {
         <div className="card">
           <h3 style={{ color: 'var(--cyan)', marginTop: 0 }}>Trước can thiệp (Baseline Hiện Trạng)</h3>
           <ul style={{ paddingLeft: '1.2rem', color: 'var(--muted)', display: 'grid', gap: '0.4rem' }}>
-            <li>Điểm an toàn: <span style={{ color: 'var(--red)', fontWeight: 700 }}>28 / 100</span> (Nguy cơ rất cao).</li>
-            <li>Ghi nhận 4 yếu tố nguy cơ (thảm lỏng, dây điện, thiếu ánh sáng, sàn ướt).</li>
-            <li>Tỷ lệ người cao tuổi nguy cơ vấp ngã ban đêm: <strong>Rất cao (74%)</strong>.</li>
+            <li>Điểm tham chiếu mô phỏng: <span style={{ color: 'var(--red)', fontWeight: 700 }}>28 / 100</span> (cần ưu tiên cải thiện).</li>
+            <li>Ghi nhận 4 yếu tố môi trường (thảm lỏng, dây điện, thiếu ánh sáng, sàn ướt).</li>
+            <li>Lưu thành snapshot bất biến <code className="mono">BASELINE</code> qua API v1 để đối chiếu.</li>
           </ul>
         </div>
 
         <div className="card" style={{ borderColor: 'var(--green)' }}>
-          <h3 style={{ color: 'var(--green)', marginTop: 0 }}>Sau can thiệp mô phỏng (Simulated Safe Space)</h3>
+          <h3 style={{ color: 'var(--green)', marginTop: 0 }}>Sau can thiệp mô phỏng (Proposed / Post Snapshot)</h3>
           <ul style={{ paddingLeft: '1.2rem', color: 'var(--muted)', display: 'grid', gap: '0.4rem' }}>
-            <li>Điểm an toàn: <span style={{ color: 'var(--green)', fontWeight: 700 }}>100 / 100</span> (+72 điểm hồi phục).</li>
-            <li>Khắc phục triệt để 100% vi phạm chuẩn y tế WHO & CDC.</li>
-            <li>Chi phí thực tế ước tính: <strong>~480.000 VNĐ</strong> (băng dính thảm + kẹp dây + đèn LED cảm ứng).</li>
+            <li>Điểm tham chiếu mô phỏng: <span style={{ color: 'var(--green)', fontWeight: 700 }}>100 / 100</span> (+72 điểm hồi phục).</li>
+            <li>Nếu thiếu dữ liệu đo đạc hậu kiểm thực tế, hệ thống giữ kết luận <em>&quot;chưa thể đánh giá&quot;</em>.</li>
+            <li>Chi phí vật tư tham khảo: <strong>~480.000 VNĐ</strong> (băng dính thảm + kẹp dây + đèn LED cảm ứng).</li>
           </ul>
         </div>
       </div>

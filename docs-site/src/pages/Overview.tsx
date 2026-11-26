@@ -119,9 +119,9 @@ export default function Overview() {
         <div className="card" style={{ borderLeft: '4px solid var(--cyan)', background: 'var(--panel2)' }}>
           <div className="card-head" style={{ marginBottom: 14 }}>
             <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <ShieldCheck size={20} color="var(--cyan)" /> Ảnh Chụp Dự Án Đã Kiểm Chứng (Verified Project Snapshot)
+              <ShieldCheck size={20} color="var(--cyan)" /> Ảnh Chụp Dự Án Đã Kiểm Chứng (Verified Software Snapshot)
             </h2>
-            <span className="mono dim small">Cập nhật: 2026-11-20 · Production Ready</span>
+            <span className="mono dim small">Cập nhật: 2026-11-26 · Software Ready (ML &amp; Clinical Validation Blocked)</span>
           </div>
           <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
             <div>
@@ -129,8 +129,8 @@ export default function Overview() {
                 <CheckCircle2 size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--green)' }} /> Bộ Kiểm Thử Tự Động
               </p>
               <p style={{ margin: 0, fontWeight: 700, color: '#fff' }}>
-                109 / 109 Tests Passed (0 Fail)<br />
-                <span className="small dim" style={{ color: 'var(--green)' }}>20 Test Suites · 100% Pass Rate</span>
+                486 / 487 Vitest + 81 Python ML + E2E<br />
+                <span className="small dim" style={{ color: 'var(--green)' }}>57 Vitest Suites (1 Live Skip) · Next 15 · React 19</span>
               </p>
             </div>
             <div>
@@ -138,26 +138,26 @@ export default function Overview() {
                 <Database size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--cyan)' }} /> Cơ Sở Dữ Liệu Prisma
               </p>
               <p style={{ margin: 0, fontWeight: 700, color: '#fff' }}>
-                16 Mô Hình Dữ Liệu Quan Hệ<br />
-                <span className="small dim">SQLite (dev) / PostgreSQL (prod) · AuditEvent</span>
+                31 Mô Hình Dữ Liệu Quan Hệ<br />
+                <span className="small dim">SQLite tách biệt theo từng hộ · RoomSnapshot v1</span>
               </p>
             </div>
             <div>
               <p className="mono dim" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                <Cpu size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--amber)' }} /> Động Cơ Y Khoa Tất Định
+                <Cpu size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--amber)' }} /> Động Cơ Quy Tắc Tham Chiếu
               </p>
               <p style={{ margin: 0, fontWeight: 700, color: '#fff' }}>
-                8 Quy Tắc Lâm Sàng Chuẩn Mực<br />
-                <span className="small dim">WHO 2021 & CDC STEADI · 0 Hallucination</span>
+                8 Quy Tắc RISK-001..008<br />
+                <span className="small dim">WHO 2021 &amp; CDC STEADI · PENDING_CLINICAL_REVIEW</span>
               </p>
             </div>
             <div>
               <p className="mono dim" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                <Layers size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--blue)' }} /> Bản Sao Số 3D & Thị Giác
+                <Layers size={13} style={{ display: 'inline', verticalAlign: '-1px', color: 'var(--blue)' }} /> Bản Sao Số 3D, Camera &amp; Tour
               </p>
               <p style={{ margin: 0, fontWeight: 700, color: '#fff' }}>
-                Photorealistic Dollhouse 3D<br />
-                <span className="small dim">Thị giác đa tầng & Gom cụm nhãn &lt; 0.95m</span>
+                Dollhouse 3D &amp; Tour /experience<br />
+                <span className="small dim">Live Camera (getUserMedia) · Gom cụm nhãn &lt; 0.95m</span>
               </p>
             </div>
           </div>
@@ -214,15 +214,15 @@ export default function Overview() {
             <dt>Nhu cầu cốt lõi:</dt>
             <dd>Cần công cụ lượng giá an toàn môi trường sống khách quan dựa trên cẩm nang y học chứng cứ chính thức (Evidence-based).</dd>
             <dt>Giải pháp SafeHome 3D AI:</dt>
-            <dd>Động cơ tất định 100% tuân thủ cẩm nang WHO 2021 & CDC STEADI, sơ đồ giải trình quyết định XAI minh bạch, không hộp đen.</dd>
+            <dd>Động cơ tất định tham chiếu cẩm nang WHO 2021 &amp; CDC STEADI, sơ đồ truy vết quyết định (Decision Provenance) minh bạch theo luật.</dd>
           </div>
 
           <div className="role">
             <h3>Kỹ Sư & Đội Ngũ Cải Tạo Nhà Cửa</h3>
             <dt>Nhu cầu cốt lõi:</dt>
-            <dd>Cần số đo kỹ thuật chính xác (chiều cao nệm, độ rọi Lux, vị trí lắp đặt thanh vịn) để lên bản vẽ thi công.</dd>
+            <dd>Cần số đo kỹ thuật xác nhận tại nhà (chiều cao nệm, độ rọi Lux, vị trí lắp đặt thanh vịn) để lên phương án cải tạo.</dd>
             <dt>Giải pháp SafeHome 3D AI:</dt>
-            <dd>Bản sao số 3D tỷ lệ 1:1, xuất báo cáo danh mục vật tư cần chuẩn bị và hướng dẫn thi công đạt chuẩn công thái học.</dd>
+            <dd>Bản sao số 3D ước lượng bố cục kết hợp đo đạc xác nhận, xuất báo cáo danh mục vật tư cần chuẩn bị và hướng dẫn thi công.</dd>
           </div>
         </div>
       </section>
@@ -233,7 +233,7 @@ export default function Overview() {
           <span style={{ color: 'var(--cyan)' }}>■</span> Hình Ảnh & Giao Diện Thực Nghiệm (Visual System Walkthrough)
         </h2>
         <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: '1.2rem' }}>
-          Khám phá hệ sinh thái SafeHome 3D AI qua ảnh chụp thực tế từ các phân hệ đang vận hành: Bảng điều khiển môi trường, Bản sao 3D Photorealistic Dollhouse, Thị giác AI, Thẩm định rủi ro vật dụng CDC STEADI và Cây phả hệ quyết định XAI. Bấm vào từng ảnh để phóng to.
+          Khám phá hệ sinh thái SafeHome 3D AI qua ảnh chụp từ các phân hệ vận hành: Bảng điều khiển môi trường, Bản sao 3D Photorealistic Dollhouse, Thị giác AI &amp; Camera, Thẩm định rủi ro vật dụng CDC STEADI và Đồ thị Decision Provenance. Bấm vào từng ảnh để phóng to.
         </p>
         <VisualGallery />
       </section>
@@ -263,10 +263,10 @@ export default function Overview() {
           <div className="card">
             <div className="card-head">
               <span className="badge badge-verified">Bước 03</span>
-              <span className="mono dim small">/digital-twin</span>
+              <span className="mono dim small">/digital-twin · /experience</span>
             </div>
-            <h3 style={{ marginTop: '0.6rem' }}>Bản Sao Số 3D</h3>
-            <p>Không gian kiến trúc Photorealistic Dollhouse, studio điều khiển ánh sáng 4 chế độ (0-520 Lux) và thuật toán gom cụm nhãn &lt; 0.95m.</p>
+            <h3 style={{ marginTop: '0.6rem' }}>Bản Sao Số 3D &amp; Tour</h3>
+            <p>Không gian Photorealistic Dollhouse &amp; tour /experience, ánh sáng 3D tách biệt khỏi lux đo thật và gom cụm nhãn &lt; 0.95m.</p>
           </div>
 
           <div className="card">
@@ -274,8 +274,8 @@ export default function Overview() {
               <span className="badge badge-verified">Bước 04</span>
               <span className="mono dim small">/risk-assessment</span>
             </div>
-            <h3 style={{ marginTop: '0.6rem' }}>Đánh Giá Nguy Cơ Lâm Sàng</h3>
-            <p>Chấm điểm an toàn tất định 100% từ 0 đến 100 theo 8 quy tắc lâm sàng WHO 2021 và CDC STEADI, phân tầng ưu tiên xử lý trong 24-48h.</p>
+            <h3 style={{ marginTop: '0.6rem' }}>Đánh Giá Yếu Tố Môi Trường</h3>
+            <p>Chấm điểm tham chiếu tất định theo 8 quy tắc RISK-001..008 (WHO/CDC STEADI, PENDING_CLINICAL_REVIEW); ảnh đơn giữ trạng thái chưa đánh giá.</p>
           </div>
 
           <div className="card">
@@ -293,7 +293,7 @@ export default function Overview() {
               <span className="mono dim small">/analytics</span>
             </div>
             <h3 style={{ marginTop: '0.6rem' }}>Phân Tích Trước / Sau</h3>
-            <p>Biểu đồ Radar so sánh 5 chiều an toàn không gian, tính toán Delta Score và định lượng phần trăm nguy cơ té ngã đã được triệt tiêu.</p>
+            <p>Đối chiếu snapshot Trước/Sau bất biến theo từng chỉ số không gian, không tuyên bố giảm tỷ lệ ngã lâm sàng khi chưa có thử nghiệm thực địa.</p>
           </div>
 
           <div className="card">

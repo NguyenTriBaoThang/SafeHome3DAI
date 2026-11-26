@@ -22,14 +22,63 @@ export interface EndpointGroup {
 
 export const API_GROUPS: EndpointGroup[] = [
   {
-    id: 'vision',
-    title: '1. AI Vision & Item Hazard Assessment',
+    id: 'auth',
+    title: '0. Multi-Tenant Account AuthN & Consent',
     endpoints: [
       {
         method: 'POST',
-        path: '/api/vision/assess-item',
-        summary: 'Assess specific home item or piece of furniture from uploaded image (CDC STEADI risk scoring + pinpoint hotspots H1..H4).',
+        path: '/api/auth/login',
+        summary: 'Authenticate household account against salted PBKDF2/scrypt credentials in .private/accounts.db.',
         access: 'public',
+        source: 'src/app/api/auth/login/route.ts',
+        request: `{ "email": "family@example.com", "password": "••••••••" }`,
+        response: `{ "account": { "id": "acc_...", "email": "family@example.com" } }`
+      },
+      {
+        method: 'GET',
+        path: '/api/auth/me',
+        summary: 'Inspect current authenticated household session.',
+        access: 'public',
+        source: 'src/app/api/auth/me/route.ts'
+      }
+    ]
+  },
+  {
+    id: 'vision',
+    title: '1. AI Vision, Private Media & Item Hazard Assessment',
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/api/vision/images',
+        summary: 'Upload private room image (multipart JPEG/PNG/WebP <= 10MB, requires ConsentRecord & session) to household private store.',
+        access: 'session',
+        source: 'src/app/api/vision/images/route.ts',
+        response: `{
+  "success": true,
+  "image": {
+    "id": "img-user-1795...",
+    "fileUrl": "/api/vision/images/img-user-1795.../file"
+  }
+}`
+      },
+      {
+        method: 'POST',
+        path: '/api/vision/images/[imageId]/analyze',
+        summary: 'Analyze uploaded or demo image via structured Gemini/Local detector, producing 18-class detections & clarification questions.',
+        access: 'session',
+        source: 'src/app/api/vision/images/[imageId]/analyze/route.ts',
+        request: `{
+  "roomId": "room-bedroom-01",
+  "roomType": "BEDROOM",
+  "viewpoint": "ENTRANCE",
+  "consent": true
+}`
+      },
+      {
+        method: 'POST',
+        path: '/api/vision/assess-item',
+        summary: 'Assess specific home item from uploaded image (CDC STEADI reference + hotspots H1..H4).',
+        access: 'session',
         source: 'src/app/api/vision/assess-item/route.ts',
         request: `{
   "image": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
@@ -131,8 +180,8 @@ export const API_GROUPS: EndpointGroup[] = [
       {
         method: 'POST',
         path: '/api/risk-assessment/evaluate',
-        summary: 'Execute all 8 deterministic WHO/CDC rules against a room state, computing S = max(0, 100 - sum(Penalties)).',
-        access: 'public',
+        summary: 'Execute all 8 canonical RISK-001..008 rules against verified room measurements (returns HTTP 422 NEEDS_VERIFICATION for PHOTO_DRAFT).',
+        access: 'session',
         source: 'src/app/api/risk-assessment/evaluate/route.ts',
         request: `{
   "roomId": "room_elderly_bed_01",
@@ -150,64 +199,37 @@ export const API_GROUPS: EndpointGroup[] = [
   "totalPenalties": 70,
   "findings": [
     {
-      "ruleId": "RULE_RUG_01",
+      "ruleId": "RISK-001",
       "severity": "HIGH",
       "penalty": 20,
-      "title": "Thảm trơn trượt không cố định",
-      "mechanism": "Thảm trải sàn thiếu lớp chống trượt tại luồng di chuyển chính",
+      "title": "Thảm trải sàn không cố định mép",
       "citation": "CDC STEADI Environmental Checklist (p.2)"
-    },
-    {
-      "ruleId": "RULE_LIGHT_03",
-      "severity": "HIGH",
-      "penalty": 20,
-      "title": "Độ rọi ban đêm không đạt chuẩn (<50 Lux)",
-      "mechanism": "Cường độ ánh sáng ban đêm 40 Lux gây suy giảm thị lực chiều sâu",
-      "citation": "WHO Global Report on Fall Prevention (Sec 3.2)"
-    },
-    {
-      "ruleId": "RULE_CABLE_02",
-      "severity": "HIGH",
-      "penalty": 15,
-      "title": "Dây điện vắt ngang lối đi",
-      "mechanism": "Dây nguồn sạc nằm ngang hành lang gây móc vướng bàn chân",
-      "citation": "CDC STEADI Fall Prevention Checklist"
-    },
-    {
-      "ruleId": "RULE_BED_05",
-      "severity": "MEDIUM",
-      "penalty": 15,
-      "title": "Mặt nệm giường quá thấp (<45cm)",
-      "mechanism": "Chiều cao 42cm gây gập góc gối nhọn khi đứng dậy",
-      "citation": "CDC STEADI Knee Biomechanics Guidelines"
     }
   ]
 }`
       },
       {
         method: 'POST',
-        path: '/api/risk-assessment/compare',
-        summary: 'Compare Baseline vs Simulated intervention safety metrics, showing Delta score and recovered points.',
-        access: 'public',
-        source: 'src/app/api/risk-assessment/compare/route.ts',
+        path: '/api/v1/snapshots/compare',
+        summary: 'Compare immutable RoomSnapshotRecord v1 (BASELINE vs PROPOSED_SCENARIO or VERIFIED_POST_INTERVENTION).',
+        access: 'session',
+        source: 'src/app/api/v1/snapshots/compare/route.ts',
         request: `{
-  "baselineAssessmentId": "asm_baseline_01",
-  "simulatedAssessmentId": "asm_sim_after_01"
+  "baselineSnapshotId": "snap-baseline-01",
+  "targetSnapshotId": "snap-post-01"
 }`,
         response: `{
   "baselineScore": 28,
-  "simulatedScore": 100,
-  "scoreImprovement": 72,
-  "resolvedHazards": ["RULE_RUG_01", "RULE_LIGHT_03", "RULE_CABLE_02", "RULE_BATH_GRAB_04"],
-  "remediationCostVND": 480000,
-  "paybackSummary": "Giảm 72% nguy cơ ngã chỉ với can thiệp thảm chống trượt, kẹp dây điện và đèn cảm ứng 320 Lux."
+  "targetScore": 100,
+  "delta": 72,
+  "verdict": "IMPROVED_VERIFIED"
 }`
       },
       {
         method: 'GET',
         path: '/api/risk-assessment/findings/[findingId]/explain',
-        summary: 'Return full clinical audit trail, mathematical trigger formula, and exact medical textbook reference.',
-        access: 'public',
+        summary: 'Return decision provenance trace, threshold source & medical guideline citation.',
+        access: 'session',
         source: 'src/app/api/risk-assessment/findings/[findingId]/explain/route.ts',
         response: `{
   "findingId": "find_rug_01",
@@ -232,7 +254,7 @@ export const API_GROUPS: EndpointGroup[] = [
         method: 'POST',
         path: '/api/ai/chat',
         summary: 'Ask clinical assistant with guaranteed WHO/CDC citations and verified 3D context linking.',
-        access: 'public',
+        access: 'session',
         source: 'src/app/api/ai/chat/route.ts',
         request: `{
   "message": "Tại sao thảm trải sàn không cố định lại nguy hiểm cho người già?",
@@ -264,7 +286,7 @@ export const API_GROUPS: EndpointGroup[] = [
         method: 'GET',
         path: '/api/rag/sources',
         summary: 'List indexed medical fall prevention standards and knowledge chunks.',
-        access: 'public',
+        access: 'session',
         source: 'src/app/api/rag/sources/route.ts',
         response: `{
   "sources": [
@@ -285,7 +307,7 @@ export const API_GROUPS: EndpointGroup[] = [
         method: 'POST',
         path: '/api/surveys/interpret-nlp',
         summary: 'Extract structured home dimensions and hazard states from freeform Vietnamese speech or text.',
-        access: 'public',
+        access: 'session',
         source: 'src/app/api/surveys/interpret-nlp/route.ts',
         request: `{
   "input": "Phòng ngủ dài 4 mét 2, rộng khoảng 3 mét rưỡi. Có cái thảm dưới chân giường nhưng không có băng keo cố định gì cả.",
@@ -311,7 +333,7 @@ export const API_GROUPS: EndpointGroup[] = [
         method: 'GET',
         path: '/api/surveys/[id]/rooms/[roomId]/next-question',
         summary: 'Dynamically compute the next unpruned question based on adaptive DAG dependency graph.',
-        access: 'public',
+        access: 'session',
         source: 'src/app/api/surveys/[id]/rooms/[roomId]/next-question/route.ts',
         response: `{
   "nextQuestion": {
@@ -336,7 +358,7 @@ export const API_GROUPS: EndpointGroup[] = [
         method: 'GET',
         path: '/api/simulations',
         summary: 'List saved 3D room scenes and simulation variants with photorealistic metadata.',
-        access: 'public',
+        access: 'session',
         source: 'src/app/api/simulations/route.ts',
         response: `{
   "simulations": [

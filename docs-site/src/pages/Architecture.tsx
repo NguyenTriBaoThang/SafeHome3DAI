@@ -32,7 +32,7 @@ export default function Architecture() {
       </Callout>
 
       <section>
-        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '1rem' }}>Các Mô Hình Dữ Liệu Lõi (Prisma Database Schema)</h2>
+        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '1rem' }}>Các Mô Hình Dữ Liệu Lõi (31 Models · Prisma 5.22)</h2>
         <div className="table-wrap">
           <table>
             <thead>
@@ -45,58 +45,40 @@ export default function Architecture() {
             </thead>
             <tbody>
               <tr>
-                <td><code className="inline">Room</code></td>
-                <td>Hồ sơ không gian phòng (phòng ngủ, vệ sinh, khách)</td>
-                <td>1:N Object3D, 1:N SurveySession, 1:N RiskAssessment</td>
-                <td>Lưu kích thước vật lý (dài, rộng, cao, cửa sổ/cửa đi)</td>
+                <td><code className="inline">Room</code> &amp; <code className="inline">SceneObject</code></td>
+                <td>Hồ sơ phòng &amp; vật thể số hóa 3D</td>
+                <td>1:N SceneObject, 1:N SimulationScenario, 1:N Assessment</td>
+                <td>Lưu kích thước phòng, vật liệu sàn, vị trí/góc xoay &amp; measurement provenance</td>
               </tr>
               <tr>
-                <td><code className="inline">Object3D</code></td>
-                <td>Vật thể trong phòng số hóa 3D</td>
-                <td>N:1 Room, 1:N RiskFinding</td>
-                <td>Lưu tọa độ thực x, y, z và thông số bề mặt</td>
+                <td><code className="inline">HomeSurvey</code> &amp; <code className="inline">SurveyRoom</code></td>
+                <td>Phiên khảo sát thích ứng theo phòng</td>
+                <td>1:N SurveyAnswer, 1:1 SurveyRoomProfile, 1:N SurveyRoomPhoto</td>
+                <td>Theo dõi tiến độ (true denominator) &amp; hủy câu con lỗi thời (Stale Invalidation)</td>
               </tr>
               <tr>
-                <td><code className="inline">SurveySession</code></td>
-                <td>Phiên khảo sát câu hỏi thông minh</td>
-                <td>N:1 Room, 1:N SurveyAnswer</td>
-                <td>Theo dõi tiến độ thích ứng (% mẫu số thực)</td>
+                <td><code className="inline">RoomImage</code> &amp; <code className="inline">VisionAnalysis</code></td>
+                <td>Ảnh hộ gia đình riêng tư &amp; phiên AI Vision</td>
+                <td>1:N ObjectDetection, 1:N VisionObservation, 1:N VisionClarification</td>
+                <td>Lưu tách riêng trong SAFEHOME_PRIVATE_DIR, phục vụ qua HMAC signed/session URL</td>
               </tr>
               <tr>
-                <td><code className="inline">SurveyAnswer</code></td>
-                <td>Câu trả lời của người dùng hoặc NLP trích xuất</td>
-                <td>N:1 SurveySession</td>
-                <td>Lưu giá trị, đơn vị đo và dấu vết hủy phụ thuộc</td>
+                <td><code className="inline">Assessment</code> &amp; <code className="inline">HazardFinding</code></td>
+                <td>Thẩm định môi trường theo RISK-001..008</td>
+                <td>N:1 Room, 1:N Recommendation</td>
+                <td>Tách rõ dataPartition (REAL/DEMO), idempotencyKey &amp; persistenceStatus</td>
               </tr>
               <tr>
-                <td><code className="inline">VisionAnalysis</code></td>
-                <td>Kết quả quét ảnh thị giác máy tính</td>
-                <td>N:1 Room, 1:N VisionDetectedObject</td>
-                <td>Định danh ảnh, URL đã lọc EXIF, trạng thái duyệt</td>
+                <td><code className="inline">RoomSnapshotRecord</code></td>
+                <td>Snapshot bất biến Before / After v1</td>
+                <td>N:1 Room (BASELINE / PROPOSED / POST)</td>
+                <td>Phục vụ so sánh Before/After &amp; rollback có kiểm soát xung đột đồng thời</td>
               </tr>
               <tr>
-                <td><code className="inline">RiskAssessment</code></td>
-                <td>Bản đánh giá nguy cơ y khoa chuẩn hóa</td>
-                <td>N:1 Room, 1:N RiskFinding, 1:1 ActionPlan</td>
-                <td>Chấm điểm an toàn tổng thể (0-100), phân hạng rủi ro</td>
-              </tr>
-              <tr>
-                <td><code className="inline">RiskFinding</code></td>
-                <td>Mối nguy cụ thể vi phạm quy tắc lâm sàng</td>
-                <td>N:1 RiskAssessment, N:1 Object3D</td>
-                <td>Mã quy tắc, mức ưu tiên (CRITICAL, HIGH, MEDIUM)</td>
-              </tr>
-              <tr>
-                <td><code className="inline">Simulation</code></td>
-                <td>Kịch bản mô phỏng 3D đã lưu</td>
-                <td>N:1 Room</td>
-                <td>Lưu cấu hình can thiệp trước/sau trong kho lưu trữ</td>
-              </tr>
-              <tr>
-                <td><code className="inline">AuditEvent</code></td>
-                <td>Nhật ký kiểm toán biến đổi trạng thái y tế</td>
-                <td>Hệ thống</td>
-                <td>Ghi lại thời điểm sửa câu hỏi, hủy nguy cơ cũ</td>
+                <td><code className="inline">ConsentRecord</code> &amp; <code className="inline">*AuditEvent</code></td>
+                <td>Đồng ý xử lý dữ liệu &amp; nhật ký kiểm toán</td>
+                <td>Hệ thống hộ gia đình cô lập</td>
+                <td>Default-deny Gemini khi thiếu consent, ghi vết Persistence / Vision / Survey audit</td>
               </tr>
             </tbody>
           </table>
@@ -107,15 +89,15 @@ export default function Architecture() {
         <div className="card">
           <div className="card-title">
             <Lock size={18} color="var(--primary-hover)" />
-            <span>Tiêu Chuẩn Bảo Mật & Quyền Riêng Tư (Privacy First)</span>
+            <span>Tiêu Chuẩn Bảo Mật, Cô Lập Hộ &amp; Quyền Riêng Tư</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Dữ liệu không gian sống và hình ảnh gia đình là thông tin nhạy cảm cao:
+            Dữ liệu không gian sống và hình ảnh gia đình được cô lập theo tài khoản qua <strong>withAccount()</strong> trên toàn bộ 59 API nghiệp vụ:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Loại bỏ EXIF GPS:</strong> Toàn bộ metadata vị trí địa lý, thiết bị chụp ảnh bị cắt gọt tại gateway.</li>
-            <li><strong>Chống tệp độc hại:</strong> Kiểm tra Magic Bytes hex header trước khi ghi đĩa hoặc xử lý.</li>
-            <li><strong>Chủ quyền dữ liệu:</strong> Toàn bộ cơ sở dữ liệu có thể vận hành On-Premise hoặc SQLite cục bộ.</li>
+            <li><strong>Cắt bỏ APP1/EXIF &amp; Magic Bytes:</strong> Kiểm tra byte header (JPEG/PNG/WebP &le; 10MB) và xóa metadata EXIF trước suy luận/lưu trữ.</li>
+            <li><strong>SQLite riêng từng hộ gia đình:</strong> Định danh trong <code className="inline">.private/accounts.db</code>, dữ liệu &amp; ảnh riêng trong <code className="inline">SAFEHOME_PRIVATE_DIR</code>.</li>
+            <li><strong>Chặn mặc định AI bên thứ ba:</strong> Chỉ gửi ảnh sang Gemini khi có <code className="inline">ConsentRecord</code> hiệu lực; hỗ trợ xóa dây chuyền toàn bộ phòng/tài khoản.</li>
           </ul>
         </div>
 
@@ -125,33 +107,38 @@ export default function Architecture() {
             <span>Đảm Bảo Tính Nhất Quán Trạng Thái (State Integrity)</span>
           </div>
           <p style={{ color: 'var(--text-muted)' }}>
-            Khi người dùng cập nhật dữ liệu ở bất kỳ bước nào:
+            Khi người dùng cập nhật hoặc thu hồi bằng chứng:
           </p>
           <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <li><strong>Stale Invalidation:</strong> Đổi câu trả lời gốc lập tức kích hoạt hủy câu trả lời con và nguy cơ liên quan.</li>
-            <li><strong>Đồng bộ 3D tức thì:</strong> Tọa độ vật thể và nguy cơ tự động cập nhật lại nhãn trong canvas Three.js.</li>
-            <li><strong>Audit Trail:</strong> Mọi biến động trạng thái y tế đều được ghi vết vĩnh viễn trong <code className="inline">AuditEvent</code>.</li>
+            <li><strong>Stale Invalidation &amp; Retraction:</strong> Sửa câu trả lời về <code className="inline">unknown</code> hoặc xóa ảnh sẽ thu hồi các <code className="inline">VisionRoomFact</code> &amp; nguy cơ phụ thuộc.</li>
+            <li><strong>Snapshot Bất Biến v1:</strong> Baseline gốc không bao giờ bị ghi đè khi chạy kịch bản mô phỏng hoặc hậu kiểm.</li>
+            <li><strong>Audit Trail:</strong> Ghi vết đầy đủ trong <code className="inline">PersistenceAuditEvent</code>, <code className="inline">VisionAuditEvent</code> và <code className="inline">SurveyAuditEvent</code>.</li>
           </ul>
         </div>
       </section>
 
       <section style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '0.8rem' }}>Ví Dụ Cấu Hình Mô Hình Dữ Liệu Prisma</h2>
+        <h2 style={{ fontSize: '1.4rem', color: '#fff', marginBottom: '0.8rem' }}>Lược Đồ Prisma (Trích Từ 31 Models Thực Tế)</h2>
         <CodeBlock
           label="prisma/schema.prisma"
           code={`model Room {
-  id          String   @id @default(uuid())
-  name        String
-  type        String   // BEDROOM, BATHROOM, LIVING_ROOM
-  length      Float    // meters
-  width       Float    // meters
-  height      Float    // meters
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  homeId          String
+  name            String
+  roomType        String   // BEDROOM, BATHROOM, LIVING_ROOM
+  width           Float    // meters
+  length          Float    // meters
+  height          Float    // meters
+  floorMaterial   String
+  lightingLevel   Float?
+  isWet           Boolean  @default(false)
+  isSlipResistant Boolean  @default(true)
+  grabBarsCount   Int      @default(0)
 
-  objects     Object3D[]
-  surveys     SurveySession[]
-  assessments RiskAssessment[]
+  sceneObjects SceneObject[]
+  scenarios    SimulationScenario[]
+  assessments  Assessment[]
+  snapshots    RoomSnapshotRecord[]
 }`}
         />
       </section>

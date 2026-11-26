@@ -121,8 +121,8 @@ export default function Survey() {
           <ul style={{ paddingLeft: '1.2rem', color: 'var(--muted)', display: 'grid', gap: '0.4rem', fontSize: '0.9rem' }}>
             <li>Đổi câu trả lời từ <em>"Có thảm"</em> sang <em>"Không có thảm"</em>.</li>
             <li>Động cơ tự động tìm và <strong>xóa câu trả lời phụ thuộc cũ</strong> (<code className="mono">BED_007</code>) trong database.</li>
-            <li>Vô hiệu hóa mối nguy <code className="mono">RISK-001</code> tương ứng, ngăn chặn cảnh báo rác y tế.</li>
-            <li>Ghi nhận nhật ký kiểm toán trong bảng <code className="mono">AuditEvent</code>.</li>
+            <li>Vô hiệu hóa mối nguy <code className="mono">RISK-001</code> tương ứng, ngăn chặn cảnh báo sai.</li>
+            <li>Ghi nhận nhật ký kiểm toán trong bảng <code className="mono">SurveyAuditEvent</code> (và <code className="mono">PersistenceAuditEvent</code>).</li>
           </ul>
         </div>
       </div>

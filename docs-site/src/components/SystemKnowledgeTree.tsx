@@ -104,12 +104,12 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     tierColor: '#22d3ee',
     title: 'Bản Sao Số 3D WebGL (Three.js)',
     icon: 'Box',
-    subtitle: 'Photorealistic Dollhouse, Studio 0-520 Lux',
-    tech: 'Three.js · React Three Fiber · PBR Shaders · OrbitControls',
+    subtitle: 'Photorealistic Dollhouse & Tour /experience',
+    tech: 'Three.js · React Three Fiber 9 · lightingModel.ts · OrbitControls',
     sourcePath: 'src/data/dollhouseReferenceScene.ts',
-    clinicalStandard: 'WHO Environmental Illumination Standards (Threshold <50 Lux)',
-    testSuite: 'tests/dollhouseReferenceScene.test.ts (5 tests passed)',
-    description: 'Không gian phòng ngủ và nhà vệ sinh khép kín tỷ lệ 1:1. Tích hợp 4 chế độ ánh sáng (Nắng sớm, Ban ngày, Đêm 40 Lux nguy hiểm, Studio 320 Lux) và chuyển đổi ma sát mặt sàn khô ráo vs trơn ướt.',
+    clinicalStandard: 'Tách bạch ánh sáng hiển thị 3D khỏi số đo lux vật lý (B08)',
+    testSuite: 'npm run test:experience (9 suites, 64 passed)',
+    description: 'Không gian phòng ngủ và nhà vệ sinh khép kín ước lượng bố cục (không khẳng định tỷ lệ 1:1 khi chưa đo thực tế). Tích hợp preset ánh sáng mô phỏng và phục hồi WebGLBoundary.',
     tags: ['Three.js', 'Dollhouse', 'Lighting Studio'],
     streams: ['stream-1'],
     upstream: ['Tọa độ phòng & mesh 3D Dollhouse'],
@@ -189,7 +189,7 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     tags: ['WHO 2021', 'CDC STEADI', 'ADA Barrier-free'],
     streams: ['stream-1', 'stream-2'],
     upstream: ['Spatial Validation Engine', 'Smart Marker Clustering', 'Stale Purger'],
-    downstream: ['Deterministic Risk Engine', 'Cây Phả Hệ Quyết Định (XAI)']
+    downstream: ['Deterministic Risk Engine', 'Đồ Thị Decision Provenance']
   },
   {
     id: 'rag-knowledge',
@@ -199,31 +199,31 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     title: 'Chỉ Mục Vector Y Khoa RAG',
     icon: 'FileText',
     subtitle: 'WHO 2021, NCOA, Bộ Y Tế Việt Nam',
-    tech: 'Vector Similarity · Grounded Retrieval · Citation Grounding',
+    tech: 'Field-Boosted Retrieval · Whitelist Verification · Guardrails A09',
     sourcePath: 'src/lib/rag/retrieval.ts',
     clinicalStandard: 'Cẩm nang phòng ngừa tai nạn thương tích Bộ Y Tế & NCOA',
-    testSuite: 'tests/ragEngine.test.ts (4 tests passed)',
-    description: 'Kho tri thức chuyên sâu gồm 114 đoạn trích y khoa chuẩn mực được lập chỉ mục vector, phục vụ truy vấn thời gian thực cho trợ lý AI Copilot kèm số trang và liên kết cổng thông tin chính thống.',
-    tags: ['Vector Chunks', 'Ministry of Health', 'NCOA'],
+    testSuite: 'eval:rag:a09 (40/40 OFFLINE_DETERMINISTIC PRELIMINARY)',
+    description: 'Kho tri thức y khoa chuẩn mực được lập chỉ mục từ nguồn được phê duyệt, phục vụ truy vấn thời gian thực cho trợ lý AI Copilot kèm trích dẫn kiểm chứng.',
+    tags: ['Curated Sources', 'Ministry of Health', 'NCOA'],
     streams: ['stream-3'],
     upstream: ['Spatial Validation Engine'],
     downstream: ['Trợ Lý AI SafeHome Copilot']
   },
 
-  // Tier 4: Deterministic Reasoning & XAI
+  // Tier 4: Deterministic Reasoning & Decision Provenance
   {
     id: 'risk-engine',
     tier: 4,
-    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & XAI',
+    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & PROVENANCE',
     tierColor: '#f87171',
-    title: 'Deterministic Risk Engine',
+    title: 'Canonical Risk Engine',
     icon: 'Activity',
-    subtitle: 'S = max(0, 100 - ∑P) · 0% Ảo giác',
-    tech: 'Deterministic Penalty Formulation · Risk Classification',
+    subtitle: 'RISK-001..008 · PENDING_CLINICAL_REVIEW',
+    tech: 'Deterministic Penalty Formulation · Threshold Config v2026.1',
     sourcePath: 'src/lib/risk/ruleEngine.ts',
-    clinicalStandard: 'Y học chứng cứ tất định (Zero Hallucination Guarantee)',
-    testSuite: 'tests/riskEngine.test.ts (11 tests passed)',
-    description: 'Công thức toán học tất định tính toán điểm an toàn (0 - 100) và phân tầng rủi ro lâm sàng: An toàn cao (80-100), Trung bình (60-79), Nguy cơ cao (0-59). Không dựa vào xác suất sinh từ của LLM.',
+    clinicalStandard: 'Công cụ sàng lọc yếu tố môi trường (không thay thế chẩn đoán)',
+    testSuite: 'tests/riskEngine.test.ts & clinicalThresholdReview.test.ts',
+    description: 'Công thức toán học tất định tính toán điểm tham chiếu (0 - 100) với bộ ngưỡng chuẩn hóa trong thresholdConfig.ts đang chờ thẩm định chuyên gia y tế.',
     tags: ['Pure Math', 'Zero Hallucination', 'Score 0-100'],
     streams: ['stream-1', 'stream-2'],
     upstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng'],
@@ -232,7 +232,7 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
   {
     id: 'rag-copilot',
     tier: 4,
-    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & XAI',
+    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & PROVENANCE',
     tierColor: '#f87171',
     title: 'Trợ Lý AI SafeHome Copilot',
     icon: 'Sparkles',
@@ -241,7 +241,7 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     sourcePath: 'src/lib/rag/groundedGenerator.ts',
     clinicalStandard: 'Nguyên tắc an toàn y tế và tuyên bố trách nhiệm',
     testSuite: 'tests/copilotEngine.test.ts (10 tests passed)',
-    description: 'Hội thoại y học thông minh: tự động liên kết trạng thái phòng 3D đang khảo sát, gắn thẻ trích dẫn [1]..[4] và cung cấp ngăn tra cứu 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG 8 tiêu chí).',
+    description: 'Hội thoại y học thông minh: tự động liên kết trạng thái phòng 3D đang khảo sát, gắn thẻ trích dẫn [1]..[4] và cung cấp ngăn tra cứu 4 tab (Bằng chứng, Vật dụng, Kho nguồn, Thẩm định RAG).',
     tags: ['Grounded RAG', '4-Tab Drawer', '3D Context'],
     streams: ['stream-3'],
     upstream: ['Chỉ Mục Vector Y Khoa RAG'],
@@ -250,17 +250,17 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
   {
     id: 'xai-tree',
     tier: 4,
-    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & XAI',
+    tierName: 'TẦNG 4: SUY LUẬN TẤT ĐỊNH & PROVENANCE',
     tierColor: '#f87171',
-    title: 'Cây Phả Hệ Quyết Định (XAI Graph)',
+    title: 'Rule-Based Decision Provenance',
     icon: 'GitFork',
-    subtitle: 'Minh bạch chuỗi nhân quả 100% không hộp đen',
+    subtitle: 'Truy xuất chuỗi nguồn gốc quyết định theo quy tắc',
     tech: 'ReactFlow Interactive DAG · Traceability Inspector',
     sourcePath: 'src/app/explainability/page.tsx',
-    clinicalStandard: 'Tiêu chuẩn minh bạch AI trong chăm sóc sức khỏe (WHO XAI)',
-    testSuite: 'tests/copilotIntegration.test.ts (4 tests passed)',
-    description: 'Trực quan hóa đường suy luận: Không gian phòng → Vật thể 3D → Số đo hình học → Quy chuẩn y tế → Nguy cơ cảnh báo → Đề xuất can thiệp. Bấm vào bất kỳ node nào để xem căn cứ pháp lý và y văn.',
-    tags: ['ReactFlow', 'Explainable AI', 'No Black Box'],
+    clinicalStandard: 'Truy vết nguồn gốc dữ liệu & quy tắc (tách biệt với Gemini explainability)',
+    testSuite: 'tests/decisionTraceabilityA10.test.ts (5 tests passed)',
+    description: 'Trực quan hóa đường suy luận: Snapshot Phòng → Vật thể 3D → Đầu vào (sourceType) → Quy tắc RISK-XXX → Mối nguy → Tài liệu đã duyệt → Khuyến nghị.',
+    tags: ['ReactFlow', 'Decision Provenance', 'Traceable'],
     streams: ['stream-1', 'stream-2', 'stream-3'],
     upstream: ['Bảng Đăng Ký 8 Quy Tắc Lâm Sàng'],
     downstream: ['Prisma Relational Store & Audit']
@@ -274,15 +274,15 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     tierColor: '#34d399',
     title: 'Mô Phỏng Can Thiệp (What-If)',
     icon: 'Sliders',
-    subtitle: 'Thử nghiệm phương án cải tạo & Undo/Redo',
-    tech: 'Intervention Engine · 3D Scene State Sync · Delta KPI',
+    subtitle: 'Thử nghiệm phương án cải tạo & Snapshot v1',
+    tech: 'Intervention Engine · Immutable RoomSnapshotRecord · Undo/Redo',
     sourcePath: 'src/lib/risk/comparisonEngine.ts',
     clinicalStandard: 'Phác đồ can thiệp môi trường vật lý (Environmental Modifications)',
-    testSuite: 'tests/simulationUndoRedo.test.ts (3 tests passed)',
-    description: 'Cho phép người dùng thử nghiệm can thiệp ảo (thêm thanh vịn, dán băng dính thảm, kẹp dây điện, tăng độ sáng 320 Lux) để xem ngay điểm an toàn hồi phục (từ 28 lên 100) trước khi tốn tiền mua sắm thật.',
-    tags: ['What-If', 'Undo/Redo', '+72 Points Recovery'],
+    testSuite: 'tests/simulationUndoRedo.test.ts & beforeAfterSnapshotsA11.test.ts',
+    description: 'Cho phép thử nghiệm can thiệp ảo (thêm thanh vịn, dán băng dính thảm, kẹp dây điện, tăng sáng) và đối chiếu snapshot bất biến Trước/Sau.',
+    tags: ['What-If', 'Undo/Redo', 'Snapshots v1'],
     streams: ['stream-1'],
-    upstream: ['Deterministic Risk Engine'],
+    upstream: ['Canonical Risk Engine'],
     downstream: ['Báo cáo PDF & Kế hoạch thi công']
   },
   {
@@ -290,18 +290,18 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     tier: 5,
     tierName: 'TẦNG 5: CAN THIỆP & LƯU TRỮ',
     tierColor: '#34d399',
-    title: 'Prisma Relational Store & Audit',
+    title: 'Prisma Per-Household SQLite & Audit',
     icon: 'Database',
-    subtitle: '16 Bảng dữ liệu quan hệ & AuditEvent Store',
-    tech: 'Prisma ORM · SQLite (Dev) · PostgreSQL (Prod) · PDF Exporter',
+    subtitle: '31 Prisma Models · Cô lập từng hộ gia đình',
+    tech: 'Prisma 5.22 · Isolated Household SQLite · Offline Backup/Restore',
     sourcePath: 'src/lib/database/prisma.ts',
-    clinicalStandard: 'Chuẩn bảo mật dữ liệu sức khỏe và nhật ký kiểm toán',
-    testSuite: 'tests/workflowIntegration.test.ts (1 test passed)',
-    description: 'Hệ thống quản lý 16 models quan hệ đồng bộ (Room, Object3D, SurveySession, RiskAssessment, AuditEvent,...). Lưu trữ toàn bộ lịch sử biến đổi trạng thái y tế và xuất báo cáo PDF chuẩn in ấn.',
-    tags: ['16 Models', 'Prisma ORM', 'Audit Trail'],
+    clinicalStandard: 'Cô lập dữ liệu hộ gia đình & nhật ký PersistenceAuditEvent',
+    testSuite: 'tests/reliablePersistenceDemoBoundary.test.ts (9 tests passed)',
+    description: 'Quản lý 31 models quan hệ tách riêng theo từng tài khoản dưới SAFEHOME_PRIVATE_DIR (Room, SceneObject, HomeSurvey, RoomImage, Assessment, RoomSnapshotRecord, ConsentRecord,...).',
+    tags: ['31 Models', 'Per-Household SQLite', 'Audit Trail'],
     streams: ['stream-1', 'stream-2', 'stream-3'],
-    upstream: ['Trợ Lý AI SafeHome Copilot', 'Cây Phả Hệ Quyết Định (XAI)'],
-    downstream: ['Hồ sơ an toàn người cao tuổi bất biến']
+    upstream: ['Trợ Lý AI SafeHome Copilot', 'Rule-Based Decision Provenance'],
+    downstream: ['Hồ sơ an toàn gia đình bất biến']
   }
 ]
 
@@ -332,14 +332,14 @@ const CONDUITS_T2_T3: ConduitEdge[] = [
 
 const CONDUITS_T3_T4: ConduitEdge[] = [
   { id: 'c-rr-re', fromNode: 'risk-registry', toNode: 'risk-engine', fallbackY1: 120, fallbackY2: 80, stream: 'stream-1', label: '8 Quy tắc ➔ Trừ điểm phạt tất định S = max(0, 100 - ∑P)', color: '#fbbf24' },
-  { id: 'c-rr-xai', fromNode: 'risk-registry', toNode: 'xai-tree', fallbackY1: 120, fallbackY2: 400, stream: 'stream-2', label: 'Căn cứ quy chuẩn ➔ Cây phả hệ nhân quả XAI', color: '#fbbf24' },
-  { id: 'c-rag-cop', fromNode: 'rag-knowledge', toNode: 'rag-copilot', fallbackY1: 360, fallbackY2: 240, stream: 'stream-3', label: '114 Chunks y văn ➔ Hội thoại có trích dẫn [1]..[4]', color: '#fbbf24' }
+  { id: 'c-rr-xai', fromNode: 'risk-registry', toNode: 'xai-tree', fallbackY1: 120, fallbackY2: 400, stream: 'stream-2', label: 'Căn cứ quy chuẩn ➔ Rule-Based Decision Provenance', color: '#fbbf24' },
+  { id: 'c-rag-cop', fromNode: 'rag-knowledge', toNode: 'rag-copilot', fallbackY1: 360, fallbackY2: 240, stream: 'stream-3', label: 'Nguồn y văn WHO/CDC/BYT ➔ Hội thoại có trích dẫn [1]..[4]', color: '#fbbf24' }
 ]
 
 const CONDUITS_T4_T5: ConduitEdge[] = [
-  { id: 'c-re-sim', fromNode: 'risk-engine', toNode: 'scenario-simulator', fallbackY1: 80, fallbackY2: 120, stream: 'stream-1', label: 'Điểm số 28/100 ➔ Mô phỏng can thiệp What-If (+72 điểm)', color: '#f87171' },
-  { id: 'c-xai-db', fromNode: 'xai-tree', toNode: 'prisma-store', fallbackY1: 400, fallbackY2: 360, stream: 'stream-2', label: 'Chuỗi nhân quả ➔ AuditEvent Store bất biến', color: '#f87171' },
-  { id: 'c-cop-db', fromNode: 'rag-copilot', toNode: 'prisma-store', fallbackY1: 240, fallbackY2: 360, stream: 'stream-3', label: 'Tư vấn y khoa ➔ 16 Models Prisma Store', color: '#f87171' }
+  { id: 'c-re-sim', fromNode: 'risk-engine', toNode: 'scenario-simulator', fallbackY1: 80, fallbackY2: 120, stream: 'stream-1', label: 'Điểm tham chiếu ➔ Mô phỏng can thiệp What-If & Snapshot v1', color: '#f87171' },
+  { id: 'c-xai-db', fromNode: 'xai-tree', toNode: 'prisma-store', fallbackY1: 400, fallbackY2: 360, stream: 'stream-2', label: 'Chuỗi nguồn gốc ➔ Audit Store hộ gia đình', color: '#f87171' },
+  { id: 'c-cop-db', fromNode: 'rag-copilot', toNode: 'prisma-store', fallbackY1: 240, fallbackY2: 360, stream: 'stream-3', label: 'Tư vấn y khoa ➔ 31 Models SQLite Hộ Gia Đình', color: '#f87171' }
 ]
 
 export function SystemKnowledgeTree() {
@@ -363,7 +363,7 @@ export function SystemKnowledgeTree() {
     { id: 'all', label: 'Toàn Bộ Cây Tri Thức (5 Tầng · 14 Mắt Xích)', tag: 'Tất Cả 14 Luồng' },
     { id: 'stream-1', label: 'Luồng 1: Thị Giác AI ➔ Đo Đạc ➔ Đánh Giá Nguy Cơ ➔ Cải Tạo 3D', tag: 'Vision ➔ Risk' },
     { id: 'stream-2', label: 'Luồng 2: Khảo Sát Thích Ứng ➔ Hủy Phụ Thuộc ➔ WHO/CDC ➔ Audit Trail', tag: 'Survey ➔ Audit' },
-    { id: 'stream-3', label: 'Luồng 3: Trợ Lý Copilot ➔ Chỉ Mục Vector RAG ➔ Giải Trình XAI', tag: 'RAG ➔ XAI' }
+    { id: 'stream-3', label: 'Luồng 3: Trợ Lý Copilot ➔ Chỉ Mục Vector RAG ➔ Decision Provenance', tag: 'RAG ➔ Provenance' }
   ]
 
   // Render SVG Conduit Bridge between two columns

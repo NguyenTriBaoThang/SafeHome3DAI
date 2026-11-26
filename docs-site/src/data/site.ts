@@ -42,8 +42,8 @@ export const NAV_GROUPS: NavGroup[] = [
     title: 'TỔNG QUAN & BẢN ĐỒ',
     items: [
       { id: 'overview', label: 'Tổng quan (Overview)', path: '/', blurb: 'Tầm nhìn, thách thức té ngã người cao tuổi & hành trình 7 bước', badge: '7 Bước' },
-      { id: 'architecture', label: 'Kiến trúc (Architecture)', path: '/architecture', blurb: 'Cây tri thức kiến trúc, CSDL Prisma 16 bảng & luồng dữ liệu', badge: 'Cây Tri Thức' },
-      { id: 'tests', label: 'Kiểm thử & QA', path: '/tests', blurb: '109/109 ca kiểm thử Vitest thành công (20 test suites), 100% xanh lá', badge: '109 Tests' },
+      { id: 'architecture', label: 'Kiến trúc (Architecture)', path: '/architecture', blurb: 'Cây tri thức kiến trúc, CSDL Prisma 31 models & SQLite cô lập theo hộ', badge: '31 Models' },
+      { id: 'tests', label: 'Kiểm thử & QA', path: '/tests', blurb: '57 bộ Vitest (486 passed), 81 Python ML tests, 40Q RAG & Browser E2E', badge: '57 Suites' },
     ]
   },
   {
@@ -51,17 +51,17 @@ export const NAV_GROUPS: NavGroup[] = [
     title: 'PHÂN HỆ LÕI (CORE ENGINES)',
     items: [
       { id: 'survey', label: 'AI Guided Survey', path: '/survey', blurb: 'Khảo sát AI thích ứng, tỉa nhánh câu hỏi động & NLP tiếng Việt', badge: 'DAG & NLP' },
-      { id: 'vision', label: 'AI Vision & Items', path: '/vision', blurb: 'Thị giác đa tầng, Bounding Box HTML & thẩm định vật dụng CDC STEADI', badge: 'CDC STEADI' },
-      { id: 'digital-twin', label: '3D Digital Twin', path: '/digital-twin', blurb: 'Bản sao số 3D WebGL, Photorealistic Dollhouse & gom cụm <0.95m', badge: 'Dollhouse' },
-      { id: 'risk', label: 'Risk Engine (WHO/CDC)', path: '/risk', blurb: '8 quy tắc y khoa tất định, chấm điểm 0-100 & ưu tiên can thiệp', badge: '8 Rules' },
-      { id: 'xai', label: 'XAI & Copilot RAG', path: '/xai', blurb: 'Sơ đồ cây quyết định ReactFlow & trợ lý tra cứu y khoa 4 tab', badge: 'Cây Quyết Định' },
+      { id: 'vision', label: 'AI Vision & Camera', path: '/vision', blurb: 'Thị giác đa tầng, Live Camera capture, 18 lớp vật thể & HITL', badge: '18 Classes' },
+      { id: 'digital-twin', label: '3D Twin & Experience', path: '/digital-twin', blurb: 'Bản sao số 3D WebGL, Tour /experience, tách ánh sáng mô phỏng', badge: 'WebGL 3D' },
+      { id: 'risk', label: 'Risk Engine (WHO/CDC)', path: '/risk', blurb: '8 quy tắc RISK-001..008 (chờ duyệt lâm sàng) & Before/After Snapshots', badge: '8 Rules' },
+      { id: 'xai', label: 'Provenance & RAG', path: '/xai', blurb: 'Truy vết quyết định (Decision Provenance) & trợ lý RAG 4 tab', badge: 'Provenance' },
     ]
   },
   {
     id: 'integration',
     title: 'TÍCH HỢP & ĐẶC TẢ',
     items: [
-      { id: 'api', label: 'Đặc tả API (API Reference)', path: '/api', blurb: 'Tài liệu chi tiết 15+ endpoint RESTful của nền tảng', badge: '15+ APIs' },
+      { id: 'api', label: 'Đặc tả API (API Reference)', path: '/api', blurb: 'Tài liệu RESTful APIs (59 protected routes qua withAccount + Auth)', badge: '63 APIs' },
     ]
   }
 ]
@@ -69,10 +69,10 @@ export const NAV_GROUPS: NavGroup[] = [
 export const NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)
 
 export const SYSTEM_STATS = [
-  { label: 'Quy tắc nguy cơ y khoa', value: '8 Rules (WHO/CDC)' },
-  { label: 'Ca kiểm thử tự động', value: '109 / 109 Passed (100%)' },
-  { label: 'Bộ kiểm thử (Test Suites)', value: '20 Test Suites' },
-  { label: 'Phân hệ hành trình', value: '7 Bước khép kín' },
-  { label: 'Mô hình CSDL Prisma', value: '16 Bảng dữ liệu' },
-  { label: 'Độ trễ gom cụm 3D', value: '< 2ms (<0.95m radius)' },
+  { label: 'Quy tắc môi trường', value: 'RISK-001..008 (WHO/CDC)' },
+  { label: 'Vitest Automation', value: '57 Suites · 486 Passed (1 Skip)' },
+  { label: 'Python ML & Node Bridge', value: '81 Python OK · 14 Node PASS' },
+  { label: 'Giao diện & API', value: '17 Routes · 63 APIs (59 Guarded)' },
+  { label: 'Mô hình CSDL Prisma', value: '31 Models (SQLite Hộ Gia Đình)' },
+  { label: 'RAG Benchmark Offline', value: '40/40 PASS (PRELIMINARY)' },
 ]
