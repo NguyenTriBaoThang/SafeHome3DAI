@@ -2,7 +2,6 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addRoomToSurvey } from "@/lib/survey/surveyManager";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const AddRoomSchema = z.object({
   roomType: z.enum(["BEDROOM", "BATHROOM", "LIVING_ROOM", "KITCHEN"]),
@@ -38,7 +37,7 @@ async function POSTHandler(
   } catch (error: any) {
     console.error("Lỗi thêm phòng vào khảo sát:", error);
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Không thể thêm phòng", "SURVEYS_ROOMS_ERROR"),
+      { success: false, code: "SURVEYS_ROOMS_ERROR", error: "Không thể thêm phòng" },
       { status: 500 }
     );
   }

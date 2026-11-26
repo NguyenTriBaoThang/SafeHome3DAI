@@ -1,7 +1,6 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -73,7 +72,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy trạng thái quy trình:", error);
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Lỗi truy vấn cơ sở dữ liệu", "WORKFLOW_STATE_ERROR"),
+      { success: false, code: "WORKFLOW_STATE_ERROR", error: "Lỗi truy vấn cơ sở dữ liệu" },
       { status: 500 }
     );
   }

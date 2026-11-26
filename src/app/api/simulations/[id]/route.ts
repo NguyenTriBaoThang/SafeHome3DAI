@@ -1,4 +1,3 @@
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
@@ -62,7 +61,7 @@ async function DELETEHandler(
       );
     }
     return NextResponse.json(
-      { ...buildSafeErrorPayload(error, "Lỗi xóa phòng từ cơ sở dữ liệu", "SIMULATIONS_DELETE_ERROR"), persistenceStatus: "failed" },
+      { success: false, code: "SIMULATIONS_DELETE_ERROR", error: "Lỗi xóa phòng từ cơ sở dữ liệu", persistenceStatus: "failed" },
       { status: 503 }
     );
   }

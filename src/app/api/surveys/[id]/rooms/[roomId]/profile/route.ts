@@ -2,7 +2,6 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getRoomSurveyState } from "@/lib/survey/surveyManager";
 import { convertRoomProfileToSceneDraft } from "@/lib/survey/sceneDraftAdapter";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -29,7 +28,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy hồ sơ phòng:", error);
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Không thể lấy hồ sơ phòng", "SURVEYS_ROOMS_PROFILE_ERROR"),
+      { success: false, code: "SURVEYS_ROOMS_PROFILE_ERROR", error: "Không thể lấy hồ sơ phòng" },
       { status: 500 }
     );
   }

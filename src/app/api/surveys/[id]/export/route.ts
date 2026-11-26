@@ -6,7 +6,6 @@ import {
   DemoDataExportBlockedError,
 } from "@/lib/persistence/demoBoundary";
 import { recordAuditEventBestEffort } from "@/lib/persistence/reliablePersistence";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -46,7 +45,7 @@ async function GETHandler(
       );
     }
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Không thể xuất dữ liệu", "SURVEYS_EXPORT_ERROR"),
+      { success: false, code: "SURVEYS_EXPORT_ERROR", error: "Không thể xuất dữ liệu" },
       { status: error?.message?.includes("not found") ? 404 : 500 }
     );
   }

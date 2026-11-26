@@ -1,7 +1,6 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { getRoomSurveyState } from "@/lib/survey/surveyManager";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -18,7 +17,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy câu hỏi tiếp theo:", error);
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Lỗi tải câu hỏi tiếp theo", "SURVEYS_ROOMS_NEXTQUESTION_ERROR"),
+      { success: false, code: "SURVEYS_ROOMS_NEXTQUESTION_ERROR", error: "Lỗi tải câu hỏi tiếp theo" },
       { status: 500 }
     );
   }

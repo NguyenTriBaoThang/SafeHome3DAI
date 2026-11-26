@@ -2,7 +2,6 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { runRAGEvaluationSuite } from "@/lib/rag/evaluator";
 import { runA09BenchmarkSuite } from "@/lib/rag/benchmarkA09";
-import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(request: Request) {
   try {
@@ -16,7 +15,7 @@ async function GETHandler(request: Request) {
     return NextResponse.json(report);
   } catch (error: any) {
     return NextResponse.json(
-      buildSafeErrorPayload(error, "Lỗi thực thi kiểm thử đánh giá RAG", "RAG_EVAL_ERROR"),
+      { success: false, code: "RAG_EVAL_ERROR", error: "Lỗi thực thi kiểm thử đánh giá RAG" },
       { status: 500 }
     );
   }
