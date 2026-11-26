@@ -261,7 +261,7 @@ function SimulationRiskDashboard() {
               <button
                 key={r.id}
                 onClick={() => handleRoomSwitch(r.id)}
-                className={`min-h-11 sm:min-h-0 px-3 py-1.5 rounded-lg font-bold transition ${
+                className={`min-h-11 sm:min-h-[auto] px-3 py-1.5 rounded-lg font-bold transition ${
                   currentRoom.id === r.id
                     ? "bg-white text-slate-900 shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
@@ -274,7 +274,7 @@ function SimulationRiskDashboard() {
 
           <button
             onClick={() => handleReassess()}
-            className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-[auto] px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
             title="Đánh giá lại các quy tắc dựa trên dữ liệu mới nhất"
           >
             <RefreshCw className="h-3.5 w-3.5 text-slate-500" />
@@ -283,7 +283,7 @@ function SimulationRiskDashboard() {
 
           <button
             onClick={handleOpenComparison}
-            className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-[auto] px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >
             <GitCompare className="h-3.5 w-3.5" />
             <span>So sánh Trước / Sau</span>
@@ -291,7 +291,7 @@ function SimulationRiskDashboard() {
 
           <Link
             href="/risk-assessment/traceability"
-            className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-[auto] px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >
             <Compass className="h-3.5 w-3.5 text-teal-400" />
             <span>Bản đồ truy xuất nguồn gốc</span>
@@ -299,7 +299,7 @@ function SimulationRiskDashboard() {
 
           <button
             onClick={() => setReportModalOpen(true)}
-            className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-[auto] px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Xuất báo cáo</span>
@@ -482,7 +482,7 @@ function SimulationRiskDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setFilterSeverity(tab.id)}
-                className={`min-h-11 sm:min-h-0 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                className={`min-h-11 sm:min-h-[auto] px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                   filterSeverity === tab.id
                     ? "bg-slate-900 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -571,7 +571,7 @@ function SimulationRiskDashboard() {
                       {/* AI Explain Button */}
                       <button
                         onClick={() => handleExplainFinding(finding)}
-                        className="min-h-11 sm:min-h-0 px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 flex items-center gap-1 transition shadow-sm"
+                        className="min-h-11 sm:min-h-[auto] px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 flex items-center gap-1 transition shadow-sm"
                       >
                         <Sparkles className="h-3.5 w-3.5 text-purple-600" />
                         <span>Xem giải thích AI</span>
@@ -584,7 +584,7 @@ function SimulationRiskDashboard() {
                             fixObject(finding.targetObjectId!);
                             handleReassess();
                           }}
-                          className="min-h-11 sm:min-h-0 px-3 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 flex items-center gap-1 transition"
+                          className="min-h-11 sm:min-h-[auto] px-3 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 flex items-center gap-1 transition"
                           title="Áp dụng biện pháp khắc phục trên mô hình 3D"
                         >
                           <Wrench className="h-3.5 w-3.5 text-teal-600" />
@@ -747,7 +747,7 @@ function SimulationRiskDashboard() {
               </div>
               <button
                 onClick={() => setSelectedFindingForAi(null)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -858,7 +858,7 @@ function SimulationRiskDashboard() {
               </div>
               <button
                 onClick={() => setComparisonModalOpen(false)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -965,7 +965,7 @@ function SimulationRiskDashboard() {
             <div className="flex justify-end">
               <button
                 onClick={() => setComparisonModalOpen(false)}
-                className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
+                className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
               >
                 Đóng đối chiếu
               </button>
@@ -996,7 +996,7 @@ function SimulationRiskDashboard() {
               </div>
               <button
                 onClick={() => setReportModalOpen(false)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1068,7 +1068,7 @@ function SimulationRiskDashboard() {
                     downloadAnchor.click();
                     downloadAnchor.remove();
                   }}
-                  className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
+                  className="min-h-11 sm:min-h-[auto] px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Tải tệp JSON</span>
@@ -1076,7 +1076,7 @@ function SimulationRiskDashboard() {
 
                 <button
                   onClick={() => window.print()}
-                  className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition flex items-center gap-1.5"
+                  className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition flex items-center gap-1.5"
                 >
                   <Printer className="h-3.5 w-3.5" />
                   <span>In báo cáo</span>

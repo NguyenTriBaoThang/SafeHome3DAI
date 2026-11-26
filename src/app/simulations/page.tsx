@@ -223,7 +223,7 @@ export default function SimulationsArchivePage() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/workflow"
-            className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+            className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
           >
             <Compass className="h-4 w-4 text-teal-600" />
             <span>Chạy 7 Bước Mới</span>
@@ -231,7 +231,7 @@ export default function SimulationsArchivePage() {
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition active:scale-95"
+            className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Tạo Phòng 3D Mới</span>
@@ -281,11 +281,11 @@ export default function SimulationsArchivePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo tên phòng, dự án..."
-            className="min-h-11 sm:min-h-0 w-full pl-9 pr-3.5 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"
+            className="min-h-11 sm:min-h-[auto] w-full pl-9 pr-3.5 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 [&>*]:shrink-0">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
             Loại phòng:
           </span>
@@ -299,7 +299,7 @@ export default function SimulationsArchivePage() {
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}
-              className={`min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-3 py-1 rounded-xl text-xs font-semibold transition ${
+              className={`min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] px-3 py-1 rounded-xl text-xs font-semibold transition ${
                 filterType === tab.id
                   ? "bg-teal-600 text-white shadow-xs font-bold"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -325,7 +325,7 @@ export default function SimulationsArchivePage() {
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-teal-600 text-white font-bold text-xs"
+            className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl bg-teal-600 text-white font-bold text-xs"
           >
             + Tạo phòng mới ngay
           </button>
@@ -372,7 +372,7 @@ export default function SimulationsArchivePage() {
                           onClick={(e) => handleDelete(room.id, e)}
                           aria-label="Xóa phòng này"
                           title="Xóa phòng này"
-                          className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                          className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -455,7 +455,7 @@ export default function SimulationsArchivePage() {
                       e.stopPropagation();
                       void handleOpenIn3D(room.id, "/reports");
                     }}
-                    className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-[11px] flex items-center gap-1"
+                    className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-[11px] flex items-center gap-1"
                     aria-label="Xem báo cáo an toàn"
                     title="Xem báo cáo an toàn"
                   >
@@ -480,7 +480,7 @@ export default function SimulationsArchivePage() {
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -491,7 +491,7 @@ export default function SimulationsArchivePage() {
               <button
                 type="button"
                 onClick={() => setCreationMode("AI_SCAN")}
-                className={`min-h-11 sm:min-h-0 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                className={`min-h-11 sm:min-h-[auto] py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   creationMode === "AI_SCAN"
                     ? "bg-white text-teal-700 shadow-sm"
                     : "text-slate-600 hover:text-slate-900"
@@ -503,7 +503,7 @@ export default function SimulationsArchivePage() {
               <button
                 type="button"
                 onClick={() => setCreationMode("PRESET_TEMPLATE")}
-                className={`min-h-11 sm:min-h-0 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                className={`min-h-11 sm:min-h-[auto] py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   creationMode === "PRESET_TEMPLATE"
                     ? "bg-white text-teal-700 shadow-sm"
                     : "text-slate-600 hover:text-slate-900"
@@ -525,7 +525,7 @@ export default function SimulationsArchivePage() {
                     value={newRoomName}
                     onChange={(e) => setNewRoomName(e.target.value)}
                     placeholder="Ví dụ: Phòng khách Bác Nam (Căn hộ 502)"
-                    className="min-h-11 sm:min-h-0 w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="min-h-11 sm:min-h-[auto] w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   />
                 </div>
 
@@ -573,7 +573,7 @@ export default function SimulationsArchivePage() {
                           e.stopPropagation();
                           fileInputRef.current?.click();
                         }}
-                        className="min-h-11 sm:min-h-0 mt-1 px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold text-[11px] shadow-sm hover:bg-teal-700 transition flex items-center gap-1"
+                        className="min-h-11 sm:min-h-[auto] mt-1 px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold text-[11px] shadow-sm hover:bg-teal-700 transition flex items-center gap-1"
                       >
                         <Upload className="h-3 w-3" />
                         <span>Chọn ảnh từ máy</span>
@@ -591,7 +591,7 @@ export default function SimulationsArchivePage() {
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg bg-white/95 text-slate-800 text-[11px] font-bold shadow hover:bg-white transition flex items-center gap-1"
+                            className="min-h-11 sm:min-h-[auto] px-2.5 py-1 rounded-lg bg-white/95 text-slate-800 text-[11px] font-bold shadow hover:bg-white transition flex items-center gap-1"
                           >
                             <Camera className="h-3 w-3" />
                             <span>Đổi ảnh khác</span>
@@ -602,7 +602,7 @@ export default function SimulationsArchivePage() {
                               setUploadedPhotoUrl(null);
                               setUploadedPhotoFile(null);
                             }}
-                            className="min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg bg-rose-600/90 text-white text-[11px] font-bold shadow hover:bg-rose-600 transition flex items-center gap-1"
+                            className="min-h-11 sm:min-h-[auto] px-2.5 py-1 rounded-lg bg-rose-600/90 text-white text-[11px] font-bold shadow hover:bg-rose-600 transition flex items-center gap-1"
                           >
                             <X className="h-3 w-3" />
                             <span>Gỡ bỏ</span>
@@ -632,7 +632,7 @@ export default function SimulationsArchivePage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50"
+                    className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50"
                   >
                     Hủy
                   </button>
@@ -646,7 +646,7 @@ export default function SimulationsArchivePage() {
                       setShowCreateModal(false);
                       setShowScannerWizard(true);
                     }}
-                    className="min-h-11 sm:min-h-0 px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition active:scale-95"
+                    className="min-h-11 sm:min-h-[auto] px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition active:scale-95"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>
@@ -666,7 +666,7 @@ export default function SimulationsArchivePage() {
                     value={newRoomName}
                     onChange={(e) => setNewRoomName(e.target.value)}
                     placeholder="Ví dụ: Phòng ngủ mẫu (Thử nghiệm)"
-                    className="min-h-11 sm:min-h-0 w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="min-h-11 sm:min-h-[auto] w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   />
                 </div>
 
@@ -677,7 +677,7 @@ export default function SimulationsArchivePage() {
                   <select
                     value={newRoomType}
                     onChange={(e) => setNewRoomType(e.target.value as any)}
-                    className="min-h-11 sm:min-h-0 w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="min-h-11 sm:min-h-[auto] w-full px-3 py-2 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   >
                     <option value="BEDROOM">
                       Ví dụ mẫu 1: Phòng ngủ tiêu chuẩn (Có sẵn giường, tab đầu giường, thảm lót)
@@ -707,7 +707,7 @@ export default function SimulationsArchivePage() {
                       step="0.1"
                       value={newLength}
                       onChange={(e) => setNewLength(parseFloat(e.target.value) || 5)}
-                      className="min-h-11 sm:min-h-0 w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
+                      className="min-h-11 sm:min-h-[auto] w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
                     />
                   </div>
                   <div>
@@ -717,7 +717,7 @@ export default function SimulationsArchivePage() {
                       step="0.1"
                       value={newWidth}
                       onChange={(e) => setNewWidth(parseFloat(e.target.value) || 4)}
-                      className="min-h-11 sm:min-h-0 w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
+                      className="min-h-11 sm:min-h-[auto] w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
                     />
                   </div>
                   <div>
@@ -727,7 +727,7 @@ export default function SimulationsArchivePage() {
                       step="0.1"
                       value={newHeight}
                       onChange={(e) => setNewHeight(parseFloat(e.target.value) || 2.8)}
-                      className="min-h-11 sm:min-h-0 w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
+                      className="min-h-11 sm:min-h-[auto] w-full px-3 py-1.5 rounded-xl border border-slate-200 font-bold"
                     />
                   </div>
                 </div>
@@ -736,14 +736,14 @@ export default function SimulationsArchivePage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50"
+                    className="min-h-11 sm:min-h-[auto] px-4 py-2 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50"
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="min-h-11 sm:min-h-0 px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-md shadow-teal-600/20"
+                    className="min-h-11 sm:min-h-[auto] px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-md shadow-teal-600/20"
                   >
                     {isSubmitting ? "Đang tạo..." : "Khởi tạo phòng mẫu 3D"}
                   </button>
@@ -760,7 +760,7 @@ export default function SimulationsArchivePage() {
           <div className="max-w-5xl w-full relative my-auto">
             <button
               onClick={() => setShowScannerWizard(false)}
-              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+              className="min-h-11 min-w-11 sm:min-h-[auto] sm:min-w-[auto] absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
             >
               <X className="h-5 w-5" />
             </button>
