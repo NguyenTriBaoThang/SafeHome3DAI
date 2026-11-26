@@ -601,7 +601,7 @@ export const RoomCanvas: React.FC = () => {
   return (
     <div
       ref={canvasContainerRef}
-      className="relative w-full h-full min-h-[500px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none flex flex-col md:flex-row"
+      className="relative w-full h-full min-h-[340px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 rounded-2xl overflow-hidden shadow-inner select-none flex flex-col md:flex-row"
     >
       <input
         ref={compareFileInputRef}
@@ -1139,108 +1139,13 @@ export const RoomCanvas: React.FC = () => {
         })()}
         </Canvas>
         )}
-
-        {/* --- WHEELCHAIR MINI D-PAD & WASD HINT (WHEN WHEELCHAIR ACTIVE) --- */}
-        {showWheelchair && cameraPreset !== "WALKTHROUGH" && (
-          <div className="absolute bottom-16 left-3 z-20 flex items-end gap-2 pointer-events-auto">
-            <div className="grid grid-cols-3 gap-1 p-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 shadow-xl">
-              <div />
-              <button
-                onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
-                onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
-                onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
-                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-                title="Tiến (W / ↑)"
-                aria-label="Xe lăn: Tiến"
-              >
-                ▲
-              </button>
-              <div />
-              <button
-                onPointerDown={() => { wheelchairPadRef.current.left = true; }}
-                onPointerUp={() => { wheelchairPadRef.current.left = false; }}
-                onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
-                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-                title="Trái (A / ←)"
-                aria-label="Xe lăn: Trái"
-              >
-                ◀
-              </button>
-              <div className="w-11 h-11 rounded-lg bg-emerald-950/80 text-emerald-300 text-xs flex items-center justify-center">
-                ♿
-              </div>
-              <button
-                onPointerDown={() => { wheelchairPadRef.current.right = true; }}
-                onPointerUp={() => { wheelchairPadRef.current.right = false; }}
-                onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
-                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-                title="Phải (D / →)"
-                aria-label="Xe lăn: Phải"
-              >
-                ▶
-              </button>
-              <div />
-              <button
-                onPointerDown={() => { wheelchairPadRef.current.back = true; }}
-                onPointerUp={() => { wheelchairPadRef.current.back = false; }}
-                onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
-                className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center"
-                title="Lùi (S / ↓)"
-                aria-label="Xe lăn: Lùi"
-              >
-                ▼
-              </button>
-              <div />
-            </div>
-            <div className="hidden sm:block px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10.5px] text-slate-200 shadow-lg">
-              <div className="font-bold text-emerald-300">Lái xe lăn kiểm định Ø1.5m</div>
-              <div className="text-slate-400">Phím <kbd className="px-1 bg-slate-800 rounded text-white">WASD</kbd> / Mũi tên • <kbd className="px-1 bg-slate-800 rounded text-white">Shift</kbd> nhanh</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Provenance labels (B08): room model, dimensions, simulated 3D lighting vs actual physical lux */}
-      <div className="absolute bottom-14 right-3 z-20 pointer-events-none flex flex-col items-end gap-1 max-w-[92%] sm:max-w-md">
-        <div
-          data-testid="room-model-label"
-          className={`rounded-lg px-2 py-1 text-xs font-semibold border ${
-            isApproximateRoomModel(room) ? "bg-amber-950/85 text-amber-200 border-amber-700/70" : "bg-emerald-950/85 text-emerald-200 border-emerald-700/70"
-          }`}
-        >
-          {roomModelLabel(room)} ·{" "}
-          <span data-testid="room-dimensions-badge">
-            {dimensionsDisplay.text} ({dimensionsDisplay.sourceLabelVi})
-          </span>
-        </div>
-        <div
-          data-testid="b08-lighting-provenance"
-          className="rounded-lg px-2.5 py-1 text-[11px] font-medium border bg-slate-950/85 text-slate-200 border-slate-700/80 flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 shadow"
-        >
-          <span data-testid="simulated-lighting-badge" className="text-sky-200">
-            3D: {simulatedLightCfg.labelVi} ({sceneLightingIntensitySimulated.toFixed(2)}×)
-          </span>
-          <span className="text-slate-600" aria-hidden="true">|</span>
-          <span
-            data-testid="actual-lux-badge"
-            className={
-              illuminanceDisplay.badgeTone === "measured"
-                ? "text-emerald-300 font-semibold"
-                : illuminanceDisplay.badgeTone === "estimated"
-                ? "text-amber-200"
-                : "text-slate-300"
-            }
-          >
-            {illuminanceDisplay.statusLabelVi}
-          </span>
-        </div>
       </div>
 
       {/* --- TOP FLOATING TOOLBAR: CAMERA, LIGHTING & QUALITY PRESETS --- */}
       <div className="absolute top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
         {/* Lighting & LOD Selector (Top-Left) */}
-        <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0">
-          <span className="text-xs text-slate-300 font-medium px-1.5 hidden md:flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg shrink-0 max-w-full">
+          <span className="text-xs text-slate-300 font-medium px-1.5 hidden xl:flex items-center gap-1 whitespace-nowrap shrink-0">
             <Sun className="h-3.5 w-3.5 text-amber-400" />
             <span>Ánh sáng 3D:</span>
           </span>
@@ -1248,7 +1153,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "MORNING"}
             onClick={() => setLightingPreset("MORNING")}
-            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "MORNING"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1261,7 +1166,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "AFTERNOON"}
             onClick={() => setLightingPreset("AFTERNOON")}
-            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "AFTERNOON"
                 ? "bg-sky-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1274,33 +1179,33 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "NIGHT"}
             onClick={() => setLightingPreset("NIGHT")}
-            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "NIGHT"
                 ? "bg-indigo-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Ánh sáng 3D ban đêm mô phỏng (chỉ hiển thị render, không phải lux đo thật)"
           >
-            <Moon className="h-3 w-3" />
+            <Moon className="h-3 w-3 shrink-0" />
             <span>Ban đêm</span>
           </button>
           <button
             type="button"
             aria-pressed={lightingPreset === "STUDIO"}
             onClick={() => setLightingPreset("STUDIO")}
-            className={`min-h-[44px] sm:min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "STUDIO"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Ánh sáng 3D studio mô phỏng (không thay đổi lux đo thật)"
           >
-            <Sparkles className="h-3 w-3" />
+            <Sparkles className="h-3 w-3 shrink-0" />
             <span>Studio</span>
           </button>
 
-          <span className="text-slate-600 px-0.5 hidden sm:inline" aria-hidden="true">|</span>
-          <div className="flex items-center gap-0.5" role="group" aria-label="Chất lượng đồ họa 3D (LOD)">
+          <span className="text-slate-600 px-0.5 hidden sm:inline shrink-0" aria-hidden="true">|</span>
+          <div className="flex items-center gap-0.5 shrink-0" role="group" aria-label="Chất lượng đồ họa 3D (LOD)">
             {(["LOW", "MEDIUM", "HIGH"] as QualityPreset[]).map((preset) => (
               <button
                 key={preset}
@@ -1308,7 +1213,7 @@ export const RoomCanvas: React.FC = () => {
                 aria-pressed={qualityPreset === preset}
                 onClick={() => setQualityPreset(preset)}
                 title={QUALITY_PRESET_CONFIG[preset].labelVi}
-                className={`min-h-[44px] sm:min-h-[34px] px-2 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`min-h-[36px] sm:min-h-[32px] px-2 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
                   qualityPreset === preset
                     ? "bg-emerald-600 text-white font-bold shadow-sm"
                     : "bg-slate-800/80 hover:bg-slate-700 text-slate-300"
@@ -1321,8 +1226,8 @@ export const RoomCanvas: React.FC = () => {
         </div>
 
         {/* Camera Views & Actions (Top-Right) */}
-        <div className="flex items-center gap-0.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg overflow-x-auto max-w-[calc(100%-180px)]">
-          <span className="text-xs text-slate-300 font-medium px-1.5 hidden md:flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/60 pointer-events-auto text-white shadow-lg max-w-full">
+          <span className="text-xs text-slate-300 font-medium px-1.5 hidden xl:flex items-center gap-1 whitespace-nowrap shrink-0">
             <Camera className="h-3.5 w-3.5 text-teal-400" />
             <span>Góc nhìn:</span>
           </span>
@@ -1331,7 +1236,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("ISOMETRIC");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "ISOMETRIC"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1345,7 +1250,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("INTERIOR");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "INTERIOR"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1359,7 +1264,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("TOP");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "TOP"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1373,14 +1278,14 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("WALKTHROUGH");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "WALKTHROUGH"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Đi vào phòng bằng phím WASD hoặc mũi tên"
           >
-            <Footprints className="h-3 w-3" />
+            <Footprints className="h-3 w-3 shrink-0" />
             <span className="hidden sm:inline">Walkthrough</span>
           </button>
           <button
@@ -1388,14 +1293,14 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("SAFETY");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "SAFETY"
                 ? "bg-rose-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Tập trung góc nhìn vào điểm nguy cơ cao nhất"
           >
-            <AlertTriangle className="h-3 w-3 text-rose-400" />
+            <AlertTriangle className="h-3 w-3 text-rose-400 shrink-0" />
             <span className="hidden sm:inline">Nguy cơ</span>
           </button>
           <button
@@ -1403,14 +1308,14 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("COMPARISON");
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "COMPARISON"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Xem góc nhìn phối cảnh Trước / Sau cải tạo"
           >
-            <Sliders className="h-3 w-3 text-sky-400" />
+            <Sliders className="h-3 w-3 text-sky-400 shrink-0" />
             <span className="hidden sm:inline">Trước/Sau</span>
           </button>
           <button
@@ -1418,7 +1323,7 @@ export const RoomCanvas: React.FC = () => {
               if (cameraPreset === "WALKTHROUGH") setCameraPreset("ISOMETRIC");
               setShowWheelchair((v) => !v);
             }}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               showWheelchair
                 ? "bg-emerald-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1432,131 +1337,237 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={showSourceCompare}
             onClick={() => setShowSourceCompare((v) => !v)}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
               showSourceCompare
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
             }`}
             title="Đối chiếu trực tiếp mô hình 3D với ảnh mẫu / ảnh gốc"
           >
-            <ImageIcon className="h-3 w-3" />
+            <ImageIcon className="h-3 w-3 shrink-0" />
             <span className="hidden sm:inline">Đối chiếu ảnh</span>
           </button>
           <button
             onClick={handleFitRoom}
-            className="px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1"
+            className="min-h-[32px] px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0"
             title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
           >
-            <Maximize2 className="h-3 w-3" />
+            <Maximize2 className="h-3 w-3 shrink-0" />
             <span>Fit</span>
           </button>
           <button
             onClick={handleScreenshot}
-            className="px-2 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
+            className="min-h-[32px] px-2.5 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm whitespace-nowrap shrink-0"
             title="Chụp ảnh khung nhìn 3D hiện tại (PNG)"
           >
-            <Camera className="h-3 w-3" />
+            <Camera className="h-3 w-3 shrink-0" />
             <span className="hidden sm:inline">Chụp</span>
           </button>
         </div>
       </div>
 
-      {/* --- BOTTOM FLOATING TOOLBAR: TOGGLES & LEGEND --- */}
-      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
-        <div className="flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700/60 pointer-events-auto shadow-lg text-xs text-white">
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showHazardOverlay}
-              onChange={() =>
-                useSimulationStore.getState().toggleHazardOverlay()
-              }
-              className="rounded text-rose-500 focus:ring-rose-400 h-3.5 w-3.5"
-            />
-            <span className="text-xs font-medium text-rose-300">
-              Cảnh báo nguy cơ
-            </span>
-          </label>
-
-          <span className="text-slate-600">|</span>
-
-          <label
-            className="flex items-center gap-1.5 cursor-pointer"
-            title="Gom cụm các cảnh báo nằm gần nhau (<0.95m) để chống đè lấn nhãn"
-          >
-            <input
-              type="checkbox"
-              checked={clusterMarkers}
-              onChange={(e) => setClusterMarkers(e.target.checked)}
-              className="rounded text-teal-500 focus:ring-teal-400 h-3.5 w-3.5"
-            />
-            <span className="text-xs font-medium text-teal-300">
-              Gom cụm chống đè
-            </span>
-          </label>
-
-          <span className="text-slate-600">|</span>
-
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showAllLabels}
-              onChange={(e) => setShowAllLabels(e.target.checked)}
-              className="rounded text-sky-500 focus:ring-sky-400 h-3.5 w-3.5"
-            />
-            <span className="text-xs font-medium text-slate-300">
-              Tên đồ vật
-            </span>
-          </label>
-
-          <span className="text-slate-600">|</span>
-
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showWalkingZones}
-              onChange={() =>
-                useSimulationStore.getState().toggleWalkingZones()
-              }
-              className="rounded text-emerald-500 focus:ring-emerald-400 h-3.5 w-3.5"
-            />
-            <span className="text-xs font-medium text-emerald-300">
-              Hành lang
-            </span>
-          </label>
-
-          {selectedObjectId && (
-            <>
-              <span className="text-slate-600">|</span>
-              <button
-                onClick={handleFocusSelected}
-                className="flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition"
-              >
-                <Focus className="h-3 w-3" />
-                <span>Focus vật thể</span>
-              </button>
-            </>
+      {/* --- BOTTOM FLOATING STACK: D-PAD + PROVENANCE (ROW 1) ABOVE TOGGLES & LEGEND (ROW 2) --- */}
+      <div className="absolute bottom-3 left-3 right-3 flex flex-col gap-2 pointer-events-none z-20">
+        {/* Row 1: Wheelchair D-pad & WASD hint (Left) + Provenance badges B08 (Right) */}
+        <div
+          className={`flex flex-wrap items-end justify-between gap-2 pointer-events-none ${
+            showSourceCompare ? "md:pl-[45%]" : ""
+          }`}
+        >
+          {showWheelchair && cameraPreset !== "WALKTHROUGH" ? (
+            <div className="flex items-end gap-2 pointer-events-auto">
+              <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-emerald-500/40 shadow-xl">
+                <div />
+                <button
+                  onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
+                  onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
+                  onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  title="Tiến (W / ↑)"
+                  aria-label="Xe lăn: Tiến"
+                >
+                  ▲
+                </button>
+                <div />
+                <button
+                  onPointerDown={() => { wheelchairPadRef.current.left = true; }}
+                  onPointerUp={() => { wheelchairPadRef.current.left = false; }}
+                  onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  title="Trái (A / ←)"
+                  aria-label="Xe lăn: Trái"
+                >
+                  ◀
+                </button>
+                <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-[11px] flex items-center justify-center">
+                  ♿
+                </div>
+                <button
+                  onPointerDown={() => { wheelchairPadRef.current.right = true; }}
+                  onPointerUp={() => { wheelchairPadRef.current.right = false; }}
+                  onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  title="Phải (D / →)"
+                  aria-label="Xe lăn: Phải"
+                >
+                  ▶
+                </button>
+                <div />
+                <button
+                  onPointerDown={() => { wheelchairPadRef.current.back = true; }}
+                  onPointerUp={() => { wheelchairPadRef.current.back = false; }}
+                  onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  title="Lùi (S / ↓)"
+                  aria-label="Xe lăn: Lùi"
+                >
+                  ▼
+                </button>
+                <div />
+              </div>
+              <div className="hidden lg:block px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10.5px] text-slate-200 shadow-lg">
+                <div className="font-bold text-emerald-300">Lái xe lăn kiểm định Ø1.5m</div>
+                <div className="text-slate-400">Phím <kbd className="px-1 bg-slate-800 rounded text-white">WASD</kbd> / Mũi tên • <kbd className="px-1 bg-slate-800 rounded text-white">Shift</kbd> nhanh</div>
+              </div>
+            </div>
+          ) : (
+            <div />
           )}
+
+          {/* Provenance labels (B08): room model, dimensions, simulated 3D lighting vs actual physical lux */}
+          <div className="flex flex-col items-end gap-1 ml-auto max-w-full sm:max-w-md pointer-events-none">
+            <div
+              data-testid="room-model-label"
+              className={`rounded-lg px-2 py-0.5 text-[11px] font-semibold border ${
+                isApproximateRoomModel(room) ? "bg-amber-950/85 text-amber-200 border-amber-700/70" : "bg-emerald-950/85 text-emerald-200 border-emerald-700/70"
+              }`}
+            >
+              {roomModelLabel(room)} ·{" "}
+              <span data-testid="room-dimensions-badge">
+                {dimensionsDisplay.text} ({dimensionsDisplay.sourceLabelVi})
+              </span>
+            </div>
+            <div
+              data-testid="b08-lighting-provenance"
+              className="rounded-lg px-2 py-0.5 text-[11px] font-medium border bg-slate-950/85 text-slate-200 border-slate-700/80 flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 shadow"
+            >
+              <span data-testid="simulated-lighting-badge" className="text-sky-200">
+                3D: {simulatedLightCfg.labelVi} ({sceneLightingIntensitySimulated.toFixed(2)}×)
+              </span>
+              <span className="text-slate-600" aria-hidden="true">|</span>
+              <span
+                data-testid="actual-lux-badge"
+                className={
+                  illuminanceDisplay.badgeTone === "measured"
+                    ? "text-emerald-300 font-semibold"
+                    : illuminanceDisplay.badgeTone === "estimated"
+                    ? "text-amber-200"
+                    : "text-slate-300"
+                }
+              >
+                {illuminanceDisplay.statusLabelVi}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Legend */}
-        <div className="bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto text-xs text-slate-300 flex items-center gap-3 hidden sm:flex shadow-lg">
-          <span className="flex items-center gap-1">
-            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-600 text-xs font-black text-white">
-              H
+        {/* Row 2: Toggles & Legend */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto shadow-lg text-xs text-white max-w-full">
+            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+              <input
+                type="checkbox"
+                checked={showHazardOverlay}
+                onChange={() =>
+                  useSimulationStore.getState().toggleHazardOverlay()
+                }
+                className="rounded text-rose-500 focus:ring-rose-400 h-3.5 w-3.5"
+              />
+              <span className="text-xs font-medium text-rose-300">
+                Cảnh báo nguy cơ
+              </span>
+            </label>
+
+            <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
+
+            <label
+              className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+              title="Gom cụm các cảnh báo nằm gần nhau (<0.95m) để chống đè lấn nhãn"
+            >
+              <input
+                type="checkbox"
+                checked={clusterMarkers}
+                onChange={(e) => setClusterMarkers(e.target.checked)}
+                className="rounded text-teal-500 focus:ring-teal-400 h-3.5 w-3.5"
+              />
+              <span className="text-xs font-medium text-teal-300">
+                Gom cụm chống đè
+              </span>
+            </label>
+
+            <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
+
+            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+              <input
+                type="checkbox"
+                checked={showAllLabels}
+                onChange={(e) => setShowAllLabels(e.target.checked)}
+                className="rounded text-sky-500 focus:ring-sky-400 h-3.5 w-3.5"
+              />
+              <span className="text-xs font-medium text-slate-300">
+                Tên đồ vật
+              </span>
+            </label>
+
+            <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
+
+            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+              <input
+                type="checkbox"
+                checked={showWalkingZones}
+                onChange={() =>
+                  useSimulationStore.getState().toggleWalkingZones()
+                }
+                className="rounded text-emerald-500 focus:ring-emerald-400 h-3.5 w-3.5"
+              />
+              <span className="text-xs font-medium text-emerald-300">
+                Hành lang
+              </span>
+            </label>
+
+            {selectedObjectId && (
+              <>
+                <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
+                <button
+                  onClick={handleFocusSelected}
+                  className="flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition whitespace-nowrap shrink-0"
+                >
+                  <Focus className="h-3 w-3" />
+                  <span>Focus vật thể</span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Legend */}
+          <div className="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto text-[11px] text-slate-300 hidden sm:flex items-center gap-2.5 shadow-lg whitespace-nowrap shrink-0">
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-600 text-[10px] font-black text-white">
+                H
+              </span>
+              <span className="font-semibold text-rose-400">Nguy cơ cao</span>
             </span>
-            <span className="font-semibold text-rose-400">Nguy cơ cao</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-xs font-black text-white">
-              H
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-[10px] font-black text-white">
+                H
+              </span>
+              <span>Cần lưu ý</span>
             </span>
-            <span>Cần lưu ý</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span>Lối đi an toàn</span>
-          </span>
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span>Lối đi an toàn</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -183,103 +183,122 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Grid: Interactive 3D Preview + Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: 3D Simulation Quick View */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Box className="h-5 w-5 text-teal-600" />
-              <div>
-                <h3 className="text-sm font-bold text-slate-800">
-                  Mô phỏng 3D Digital Twin trực quan
-                </h3>
-                <p className="text-[11px] text-slate-400">
-                  Tương tác xoay, zoom, nhấp chọn đồ vật và xem vị trí nguy cơ trực tiếp trong không gian
-                </p>
-              </div>
+      {/* Main Full-Width 3D Digital Twin Section */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Box className="h-5 w-5 text-teal-600 shrink-0" />
+            <div>
+              <h3 className="text-base font-bold text-slate-800">
+                Mô phỏng 3D Digital Twin trực quan
+              </h3>
+              <p className="text-xs text-slate-500">
+                Tương tác xoay, zoom, nhấp chọn đồ vật và xem vị trí nguy cơ trực tiếp trong không gian
+              </p>
             </div>
-
-            <Link
-              href="/digital-twin"
-              className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1"
-            >
-              <span>Mở rộng</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
           </div>
 
-          <div className="h-[380px] rounded-2xl overflow-hidden border border-slate-100">
-            <RoomViewer />
-          </div>
-        </div>
-
-        {/* Right Col: Charts & Category Distribution */}
-        <div className="space-y-6">
-          {/* Donut Chart: Hazard by Category */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Phân loại nguy cơ hiện tại
-            </h3>
-            {categoryData.length > 0 ? (
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={4}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="py-8 text-center text-xs text-slate-400">
-                Không có nguy cơ nào trong phòng hiện tại.
+          <div className="flex flex-wrap items-center gap-2">
+            {rooms.length > 1 && (
+              <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                {rooms.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => switchRoom(r.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap max-w-[200px] truncate ${
+                      r.id === currentRoomId
+                        ? "bg-white text-teal-700 shadow-xs font-semibold"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title={r.name}
+                  >
+                    {r.name.split("(")[0].trim()}
+                  </button>
+                ))}
               </div>
             )}
 
-            <div className="space-y-1.5 pt-2 border-t border-slate-100 text-[11px]">
-              {categoryData.map((cat, i) => (
-                <div key={i} className="flex items-center justify-between text-slate-600">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span>{cat.name}</span>
-                  </div>
-                  <span className="font-bold text-slate-800">{cat.value} điểm</span>
-                </div>
-              ))}
-            </div>
+            <Link
+              href="/digital-twin"
+              className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-xs font-bold text-teal-700 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+            >
+              <span>Mở trang 3D đầy đủ</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
+        </div>
 
-          {/* Bar Chart: Hazards by Room */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Mật độ nguy cơ theo phòng
-            </h3>
-            <div className="h-[140px]">
+        <div className="h-[460px] sm:h-[520px] xl:h-[590px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-950">
+          <RoomViewer />
+        </div>
+      </div>
+
+      {/* Charts & Category Distribution Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Donut Chart: Hazard by Category */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            Phân loại nguy cơ hiện tại
+          </h3>
+          {categoryData.length > 0 ? (
+            <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={roomHazardsData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="room" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={52}
+                    outerRadius={80}
+                    paddingAngle={4}
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
                   <Tooltip />
-                  <Bar dataKey="hazards" fill="#0d9488" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
             </div>
+          ) : (
+            <div className="py-12 text-center text-xs text-slate-400">
+              Không có nguy cơ nào trong phòng hiện tại.
+            </div>
+          )}
+
+          <div className="space-y-1.5 pt-2 border-t border-slate-100 text-[11px]">
+            {categoryData.map((cat, i) => (
+              <div key={i} className="flex items-center justify-between text-slate-600">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <span>{cat.name}</span>
+                </div>
+                <span className="font-bold text-slate-800">{cat.value} điểm</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bar Chart: Hazards by Room */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            Mật độ nguy cơ theo phòng
+          </h3>
+          <div className="h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={roomHazardsData} margin={{ top: 10, right: 12, left: -20, bottom: 8 }}>
+                <XAxis dataKey="room" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="hazards" fill="#0d9488" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

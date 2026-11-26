@@ -138,7 +138,7 @@ export const AppSidebar: React.FC = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold transition-all group",
+                    "flex items-center justify-between px-3 py-1.5 rounded-xl text-sm font-semibold transition-all group",
                     isActive
                       ? "bg-teal-50 text-teal-800 font-bold border border-teal-200/80 shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
@@ -214,30 +214,30 @@ export const AppSidebar: React.FC = () => {
         </div>
 
         {/* Resident Persona Widget */}
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50/70 to-white p-3 shadow-xs">
-          <div className="flex items-center gap-2 mb-1.5">
-            <div className="h-6 w-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-700">
+        <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50/70 to-white p-2.5 shadow-xs">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-6 w-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 shrink-0">
               <UserCheck className="h-3.5 w-3.5" />
             </div>
             <div>
-              <div className="text-sm font-bold text-slate-800">
+              <div className="text-xs font-bold text-slate-800">
                 Gia đình của bạn
               </div>
-              <div className="text-xs text-slate-500">Hồ sơ khảo sát riêng</div>
+              <div className="text-[11px] text-slate-500">Hồ sơ khảo sát riêng</div>
             </div>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed bg-white/80 p-2 rounded-lg border border-slate-100">
+          <p className="text-[11px] text-slate-600 leading-snug bg-white/80 p-1.5 rounded-lg border border-slate-100">
             Thông tin người được khảo sát cần do gia đình cung cấp và xác nhận trong phần khảo sát tại nhà.
           </p>
         </div>
       </div>
 
       {/* Educational & Medical Safety Disclaimer */}
-      <div className="p-3 border-t border-slate-100">
-        <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80">
+      <div className="p-2.5 border-t border-slate-100">
+        <div className="rounded-xl bg-slate-50 p-2 border border-slate-200/80">
           <div className="flex items-start gap-1.5">
             <Info className="h-3.5 w-3.5 text-teal-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-500 leading-normal">
+            <p className="text-[11px] text-slate-500 leading-snug">
               <strong>Tuyên bố y tế:</strong> Hệ thống phục vụ mục đích giáo dục
               và hoạch định cải tạo không gian sống an toàn, không thay thế cho
               chẩn đoán y khoa.
