@@ -556,7 +556,7 @@ export default function AiVisionStudioPage() {
           <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 text-xs font-bold">
             <button
               onClick={() => handleSelectRoom("room-bedroom-01", "BEDROOM")}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`min-h-11 sm:min-h-0 px-3 py-1.5 rounded-lg transition ${
                 activeRoomType === "BEDROOM"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -566,7 +566,7 @@ export default function AiVisionStudioPage() {
             </button>
             <button
               onClick={() => handleSelectRoom("room-bathroom-01", "BATHROOM")}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`min-h-11 sm:min-h-0 px-3 py-1.5 rounded-lg transition ${
                 activeRoomType === "BATHROOM"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -579,7 +579,7 @@ export default function AiVisionStudioPage() {
           <button
             onClick={() => handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType, selectedImage.base64, selectedImage.caption)}
             disabled={isAnalyzing}
-            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >
             <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${isAnalyzing ? "animate-spin" : ""}`} />
             <span>Phân tích lại</span>
@@ -587,7 +587,7 @@ export default function AiVisionStudioPage() {
 
           <Link
             href="/risk-assessment"
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-0 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
           >
             <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
             <span>Bảng Đánh Giá Nguy Cơ</span>
@@ -618,7 +618,7 @@ export default function AiVisionStudioPage() {
               <select
                 value={selectedViewpoint}
                 onChange={(e) => setSelectedViewpoint(e.target.value as ViewpointType)}
-                className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 outline-none focus:border-teal-500"
+                className="min-h-11 sm:min-h-0 w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 outline-none focus:border-teal-500"
               >
                 <option value="ENTRANCE">Toàn cảnh từ cửa ra vào</option>
                 <option value="OPPOSITE_CORNER">Góc đối diện phòng</option>
@@ -663,7 +663,7 @@ export default function AiVisionStudioPage() {
               <button
                 onClick={handleStartCamera}
                 disabled={!imageConsent}
-                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed"
+                className="min-h-11 sm:min-h-0 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed"
               >
                 <Camera className="h-3.5 w-3.5 text-indigo-600" />
                 <span>Mở Camera</span>
@@ -712,7 +712,7 @@ export default function AiVisionStudioPage() {
                           {img.isCustom && (
                             <button
                               onClick={(e) => handleDeleteImage(img.id, e)}
-                              className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-rose-600 transition rounded"
+                              className="min-h-11 sm:min-h-0 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-rose-600 transition rounded"
                               title="Xóa ảnh này"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -756,7 +756,7 @@ export default function AiVisionStudioPage() {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setShowBoxes(!showBoxes)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+                  className={`min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
                     showBoxes
                       ? "bg-teal-50 border-teal-200 text-teal-800"
                       : "bg-slate-50 border-slate-200 text-slate-500"
@@ -767,7 +767,7 @@ export default function AiVisionStudioPage() {
                 </button>
                 <button
                   onClick={() => setShowLabels(!showLabels)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+                  className={`min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
                     showLabels
                       ? "bg-teal-50 border-teal-200 text-teal-800"
                       : "bg-slate-50 border-slate-200 text-slate-500"
@@ -778,21 +778,24 @@ export default function AiVisionStudioPage() {
                 </button>
                 <button
                   onClick={() => setZoomLevel((z) => Math.min(2.0, z + 0.25))}
-                  className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  aria-label="Phóng to"
                   title="Phóng to"
                 >
                   <ZoomIn className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setZoomLevel((z) => Math.max(0.75, z - 0.25))}
-                  className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  aria-label="Thu nhỏ"
                   title="Thu nhỏ"
                 >
                   <ZoomOut className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setZoomLevel(1)}
-                  className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  aria-label="Khôi phục góc nhìn"
                   title="Khôi phục góc nhìn"
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -811,7 +814,7 @@ export default function AiVisionStudioPage() {
                   type="button"
                   onClick={() => handleRunAnalysis(selectedImage.id, activeRoomId, activeRoomType, selectedImage.base64, selectedImage.caption)}
                   disabled={isAnalyzing}
-                  className="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shrink-0 transition"
+                  className="min-h-11 sm:min-h-0 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shrink-0 transition"
                 >
                   Thử lại
                 </button>
@@ -1019,21 +1022,21 @@ export default function AiVisionStudioPage() {
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           onClick={() => handleConfirmDetection(sel.id)}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition"
+                          className="min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition"
                         >
                           <Check className="h-3 w-3" />
                           <span>Đúng</span>
                         </button>
                         <button
                           onClick={() => handleOpenEditLabel(sel)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 flex items-center gap-1 transition"
+                          className="min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 flex items-center gap-1 transition"
                         >
                           <Edit3 className="h-3 w-3" />
                           <span>Sửa nhãn</span>
                         </button>
                         <button
                           onClick={() => handleRejectDetection(sel.id)}
-                          className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1 transition"
+                          className="min-h-11 sm:min-h-0 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1 transition"
                         >
                           <X className="h-3 w-3" />
                           <span>Sai</span>
@@ -1056,7 +1059,7 @@ export default function AiVisionStudioPage() {
             <div className="flex items-center bg-slate-100 rounded-xl p-1 text-[11px] font-bold">
               <button
                 onClick={() => setActiveTab("OBJECTS")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                className={`min-h-11 sm:min-h-0 flex-1 py-1.5 rounded-lg text-center transition ${
                   activeTab === "OBJECTS" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                 }`}
               >
@@ -1064,7 +1067,7 @@ export default function AiVisionStudioPage() {
               </button>
               <button
                 onClick={() => setActiveTab("CONCERNS")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                className={`min-h-11 sm:min-h-0 flex-1 py-1.5 rounded-lg text-center transition ${
                   activeTab === "CONCERNS" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                 }`}
               >
@@ -1072,7 +1075,7 @@ export default function AiVisionStudioPage() {
               </button>
               <button
                 onClick={() => setActiveTab("CLARIFY")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                className={`min-h-11 sm:min-h-0 flex-1 py-1.5 rounded-lg text-center transition ${
                   activeTab === "CLARIFY" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                 }`}
               >
@@ -1080,7 +1083,7 @@ export default function AiVisionStudioPage() {
               </button>
               <button
                 onClick={() => setActiveTab("RISK")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition ${
+                className={`min-h-11 sm:min-h-0 flex-1 py-1.5 rounded-lg text-center transition ${
                   activeTab === "RISK" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                 }`}
               >
@@ -1178,7 +1181,8 @@ export default function AiVisionStudioPage() {
                                   e.stopPropagation();
                                   handleConfirmDetection(det.id);
                                 }}
-                                className="p-1 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                aria-label="Xác nhận đúng"
                                 title="Xác nhận đúng"
                               >
                                 <Check className="h-3 w-3" />
@@ -1189,7 +1193,8 @@ export default function AiVisionStudioPage() {
                                 e.stopPropagation();
                                 handleOpenEditLabel(det);
                               }}
-                              className="p-1 rounded bg-blue-100 text-blue-800 hover:bg-blue-200"
+                              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded bg-blue-100 text-blue-800 hover:bg-blue-200"
+                              aria-label="Sửa nhãn"
                               title="Sửa nhãn"
                             >
                               <Edit3 className="h-3 w-3" />
@@ -1200,7 +1205,8 @@ export default function AiVisionStudioPage() {
                                   e.stopPropagation();
                                   handleRejectDetection(det.id);
                                 }}
-                                className="p-1 rounded bg-rose-100 text-rose-800 hover:bg-rose-200"
+                                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded bg-rose-100 text-rose-800 hover:bg-rose-200"
+                                aria-label="Từ chối"
                                 title="Từ chối"
                               >
                                 <X className="h-3 w-3" />
@@ -1328,7 +1334,7 @@ export default function AiVisionStudioPage() {
                                   data-answer-value={opt.value}
                                   aria-pressed={isSelected}
                                   onClick={() => handleAnswerClarification(q.id, opt.value)}
-                                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border flex items-center justify-between ${
+                                  className={`min-h-11 sm:min-h-0 w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border flex items-center justify-between ${
                                     isSelected
                                       ? "bg-teal-600 text-white border-teal-600 font-bold"
                                       : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
@@ -1346,7 +1352,7 @@ export default function AiVisionStudioPage() {
 
                     <button
                       onClick={handleSyncAndReassess}
-                      className="w-full mt-2 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                      className="min-h-11 sm:min-h-0 w-full mt-2 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       <span>Cập nhật &amp; Đánh giá Nguy cơ</span>
@@ -1409,7 +1415,7 @@ export default function AiVisionStudioPage() {
 
                     <button
                       onClick={handleOpenCopilotForRisk}
-                      className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5"
+                      className="min-h-11 sm:min-h-0 w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5"
                     >
                       <Bot className="h-3.5 w-3.5" />
                       <span>Giải thích bằng SafeHome Copilot</span>
@@ -1422,7 +1428,7 @@ export default function AiVisionStudioPage() {
                     </p>
                     <button
                       onClick={handleSyncAndReassess}
-                      className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition"
+                      className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition"
                     >
                       Đồng bộ &amp; Đánh giá ngay
                     </button>
@@ -1445,7 +1451,7 @@ export default function AiVisionStudioPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleBuild3DFromImage}
-            className="px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 transition flex items-center gap-1.5 shadow-xs"
+            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 transition flex items-center gap-1.5 shadow-xs"
             title="Dựng phòng số hóa 3D từ các vật thể nhận diện trong ảnh này"
           >
             <Layers className="h-3.5 w-3.5 text-indigo-600" />
@@ -1454,7 +1460,7 @@ export default function AiVisionStudioPage() {
 
           <button
             onClick={handleSyncAndReassess}
-            className="px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold border border-teal-200 transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold border border-teal-200 transition flex items-center gap-1.5"
           >
             <RefreshCw className="h-3.5 w-3.5 text-teal-600" />
             <span>Đồng bộ Khảo sát AI</span>
@@ -1462,7 +1468,7 @@ export default function AiVisionStudioPage() {
 
           <Link
             href="/risk-assessment"
-            className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center gap-1.5"
+            className="min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center gap-1.5"
           >
             <span>Mở Bảng Đánh Giá Nguy Cơ</span>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -1494,7 +1500,7 @@ export default function AiVisionStudioPage() {
               </h3>
               <button
                 onClick={() => setEditModalDetection(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg text-slate-400 hover:text-slate-700"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1506,7 +1512,7 @@ export default function AiVisionStudioPage() {
                 <select
                   value={newCategorySelect}
                   onChange={(e) => setNewCategorySelect(e.target.value as DetectionCategory)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none font-medium"
+                  className="min-h-11 sm:min-h-0 w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none font-medium"
                 >
                   {Object.entries(CATEGORY_TAXONOMY).map(([key, meta]) => (
                     <option key={key} value={key}>
@@ -1523,7 +1529,7 @@ export default function AiVisionStudioPage() {
                   aria-label="Tên hiển thị tùy chỉnh"
                   value={newLabelInput}
                   onChange={(e) => setNewLabelInput(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none font-medium"
+                  className="min-h-11 sm:min-h-0 w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none font-medium"
                   placeholder="Ví dụ: Thảm len phòng ngủ"
                 />
               </div>
@@ -1536,13 +1542,13 @@ export default function AiVisionStudioPage() {
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 onClick={() => setEditModalDetection(null)}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs"
+                className="min-h-11 sm:min-h-0 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveEditLabel}
-                className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition"
+                className="min-h-11 sm:min-h-0 px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition"
               >
                 Lưu sửa đổi
               </button>
@@ -1573,7 +1579,7 @@ export default function AiVisionStudioPage() {
               </div>
               <button
                 onClick={() => setCopilotModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg text-slate-400 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1616,7 +1622,7 @@ export default function AiVisionStudioPage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setCopilotModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+                className="min-h-11 sm:min-h-0 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
               >
                 Đóng
               </button>

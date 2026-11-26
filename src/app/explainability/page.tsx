@@ -328,13 +328,13 @@ export default function ExplainabilityPage() {
             onClick={() =>
               setTraceSourceMode((m) => (m === "ROOM" ? "EMPIRICAL_RUG" : "ROOM"))
             }
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700"
+            className="min-h-11 sm:min-h-0 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700"
           >
             {traceSourceMode === "ROOM" ? "Xem mẫu thảm rời" : "Quay lại phòng hiện tại"}
           </button>
           <button
             onClick={handleExportTrace}
-            className="px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-xs font-bold text-teal-800"
+            className="min-h-11 sm:min-h-0 px-3 py-1.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-xs font-bold text-teal-800"
           >
             Xuất Trace JSON
           </button>
@@ -419,7 +419,7 @@ export default function ExplainabilityPage() {
                 {selectedNodeData.hotspotHref && (
                   <a
                     href={selectedNodeData.hotspotHref}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-[11px] hover:bg-teal-700 transition"
+                    className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-[11px] hover:bg-teal-700 transition"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     <span>Mở điểm nóng 3D ({selectedNodeData.objectId})</span>
@@ -480,7 +480,7 @@ export default function ExplainabilityPage() {
                       setSelectedRuleId(rule.id);
                       setSelectedStepIndex(0);
                     }}
-                    className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                    className={`min-h-11 sm:min-h-0 p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
                       selectedRuleId === rule.id
                         ? "bg-slate-900 text-white border-slate-900 shadow-md"
                         : isDetected
