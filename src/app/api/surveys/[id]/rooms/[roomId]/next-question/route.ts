@@ -17,7 +17,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy câu hỏi tiếp theo:", error);
     return NextResponse.json(
-      { error: "Lỗi tải câu hỏi tiếp theo", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_NEXTQUESTION_ERROR", error: "Lỗi tải câu hỏi tiếp theo" },
       { status: 500 }
     );
   }

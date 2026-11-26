@@ -1,3 +1,4 @@
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import {
@@ -13,7 +14,7 @@ async function GETHandler(_request: Request) {
     return NextResponse.json({ success: true, consent: status });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || "Không tải được trạng thái đồng ý." },
+      buildSafeErrorPayload(error, "Không tải được trạng thái đồng ý.", "AUTH_CONSENT_ERROR"),
       { status: 503 }
     );
   }
@@ -45,7 +46,7 @@ async function POSTHandler(request: Request) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, persistenceStatus: "failed", error: error?.message || "Không lưu được đồng ý." },
+      { ...buildSafeErrorPayload(error, "Không lưu được đồng ý.", "AUTH_CONSENT_ERROR"), persistenceStatus: "failed" },
       { status: 503 }
     );
   }

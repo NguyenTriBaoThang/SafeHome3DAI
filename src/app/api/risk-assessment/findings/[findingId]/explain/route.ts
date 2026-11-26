@@ -2,6 +2,7 @@ import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { explainHazardFinding } from "@/lib/risk/explanationEngine";
 import { RiskFinding } from "@/lib/risk/types";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(
   req: NextRequest,
@@ -23,7 +24,7 @@ async function POSTHandler(
     return NextResponse.json({ success: true, data: explanation });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "RISKASSESSMENT_FINDINGS_EXPLAIN_ERROR"),
       { status: 500 }
     );
   }

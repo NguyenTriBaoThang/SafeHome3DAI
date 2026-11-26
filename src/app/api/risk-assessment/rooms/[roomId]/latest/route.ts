@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { getLatestAssessmentForRoom } from "@/lib/risk/assessmentManager";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   req: NextRequest,
@@ -21,7 +22,7 @@ async function GETHandler(
     return NextResponse.json({ success: true, data: snapshot });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "RISKASSESSMENT_ROOMS_LATEST_ERROR"),
       { status: 500 }
     );
   }

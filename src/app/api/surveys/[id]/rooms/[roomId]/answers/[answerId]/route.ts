@@ -51,7 +51,7 @@ async function PATCHHandler(
   } catch (error: any) {
     console.error("Lỗi cập nhật câu trả lời:", error);
     return NextResponse.json(
-      { error: "Không thể cập nhật câu trả lời", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_ANSWERS_ERROR", error: "Không thể cập nhật câu trả lời" },
       { status: 500 }
     );
   }

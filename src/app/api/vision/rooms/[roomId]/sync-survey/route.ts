@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { syncConfirmedVisionFactsToSurvey } from "@/lib/vision/surveySyncAdapter";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(
   req: NextRequest,
@@ -13,7 +14,7 @@ async function POSTHandler(
     return NextResponse.json(result);
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_ROOMS_SYNCSURVEY_ERROR"),
       { status: 500 }
     );
   }

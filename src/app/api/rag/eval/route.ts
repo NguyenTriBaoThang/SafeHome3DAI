@@ -15,7 +15,7 @@ async function GETHandler(request: Request) {
     return NextResponse.json(report);
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Lỗi thực thi kiểm thử đánh giá RAG", details: error.message },
+      { success: false, code: "RAG_EVAL_ERROR", error: "Lỗi thực thi kiểm thử đánh giá RAG" },
       { status: 500 }
     );
   }

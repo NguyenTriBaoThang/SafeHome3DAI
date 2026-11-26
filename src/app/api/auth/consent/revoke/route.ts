@@ -1,3 +1,4 @@
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { revokeConsent } from "@/lib/privacy/consentService";
@@ -37,7 +38,7 @@ async function POSTHandler(request: Request) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, persistenceStatus: "failed", error: error?.message || "Không thể thu hồi đồng ý." },
+      { ...buildSafeErrorPayload(error, "Không thể thu hồi đồng ý.", "AUTH_CONSENT_ERROR"), persistenceStatus: "failed" },
       { status: 503 }
     );
   }

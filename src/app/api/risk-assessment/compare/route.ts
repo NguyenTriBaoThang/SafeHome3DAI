@@ -6,6 +6,7 @@ import {
   compareSnapshots,
 } from "@/lib/risk/assessmentManager";
 import { AssessmentSnapshot } from "@/lib/risk/types";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(req: NextRequest) {
   try {
@@ -37,7 +38,7 @@ async function POSTHandler(req: NextRequest) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "RISKASSESSMENT_COMPARE_ERROR"),
       { status: 500 }
     );
   }

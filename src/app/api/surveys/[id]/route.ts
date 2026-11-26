@@ -35,7 +35,7 @@ async function GETHandler(
       return NextResponse.json({ success: false, code: error.code, error: error.message }, { status: 403 });
     }
     return NextResponse.json(
-      { error: "Lỗi hệ thống khi tải khảo sát", details: error.message },
+      { success: false, code: "SURVEYS_ERROR", error: "Lỗi hệ thống khi tải khảo sát" },
       { status: 500 }
     );
   }
@@ -80,7 +80,7 @@ async function DELETEHandler(
       return NextResponse.json({ success: false, code: error.code, error: error.message }, { status: 403 });
     }
     return NextResponse.json(
-      { error: "Không thể xóa khảo sát", details: error.message },
+      { success: false, code: "SURVEYS_ERROR", error: "Không thể xóa khảo sát" },
       { status: 500 }
     );
   }

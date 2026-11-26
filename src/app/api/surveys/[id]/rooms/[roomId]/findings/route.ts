@@ -17,7 +17,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy danh sách nguy cơ khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể lấy danh sách nguy cơ", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_FINDINGS_ERROR", error: "Không thể lấy danh sách nguy cơ" },
       { status: 500 }
     );
   }

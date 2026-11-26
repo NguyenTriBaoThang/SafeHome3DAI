@@ -72,7 +72,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy trạng thái quy trình:", error);
     return NextResponse.json(
-      { error: "Lỗi truy vấn cơ sở dữ liệu", details: error.message },
+      { success: false, code: "WORKFLOW_STATE_ERROR", error: "Lỗi truy vấn cơ sở dữ liệu" },
       { status: 500 }
     );
   }

@@ -37,7 +37,7 @@ async function POSTHandler(
   } catch (error: any) {
     console.error("Lỗi thêm phòng vào khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể thêm phòng", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_ERROR", error: "Không thể thêm phòng" },
       { status: 500 }
     );
   }

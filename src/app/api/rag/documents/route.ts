@@ -107,7 +107,7 @@ async function POSTHandler(request: Request) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Lỗi nạp tài liệu", details: error.message },
+      { success: false, code: "RAG_DOCUMENTS_ERROR", error: "Lỗi nạp tài liệu" },
       { status: 400 }
     );
   }

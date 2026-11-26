@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { saveClarificationAnswer } from "@/lib/vision/clarificationEngine";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(
   req: NextRequest,
@@ -23,7 +24,7 @@ async function POSTHandler(
     return NextResponse.json(result, { status: result.success ? 200 : 400 });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_CLARIFICATIONS_ANSWER_ERROR"),
       { status: 500 }
     );
   }

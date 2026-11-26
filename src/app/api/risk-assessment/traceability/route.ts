@@ -8,6 +8,7 @@ import {
   createLooseRugEmpiricalTrace,
   DECISION_TRACE_VERSION,
 } from "@/lib/risk/decisionTrace";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 const TraceabilityRequestSchema = z.object({
   roomInput: z.record(z.string(), z.any()),
@@ -39,7 +40,7 @@ async function GETHandler(req: NextRequest) {
     );
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message || "Lỗi truy xuất decision trace" },
+      buildSafeErrorPayload(error, "Lỗi truy xuất decision trace", "RISKASSESSMENT_TRACEABILITY_ERROR"),
       { status: 500 }
     );
   }
@@ -117,7 +118,7 @@ async function POSTHandler(req: NextRequest) {
     return NextResponse.json(payload);
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message || "Lỗi xử lý decision traceability" },
+      buildSafeErrorPayload(error, "Lỗi xử lý decision traceability", "RISKASSESSMENT_TRACEABILITY_ERROR"),
       { status: 500 }
     );
   }

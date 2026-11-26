@@ -16,7 +16,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy trạng thái phòng khảo sát:", error);
     return NextResponse.json(
-      { error: "Không tìm thấy phòng khảo sát", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_ERROR", error: "Không tìm thấy phòng khảo sát" },
       { status: 404 }
     );
   }

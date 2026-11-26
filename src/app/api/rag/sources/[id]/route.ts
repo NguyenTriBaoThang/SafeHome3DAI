@@ -6,6 +6,7 @@ import {
   rejectDocument,
   removeDocument,
 } from "@/lib/rag/documentRegistry";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   request: Request,
@@ -22,7 +23,7 @@ async function GETHandler(
     }
     return NextResponse.json(source);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_SOURCES_ERROR"), { status: 500 });
   }
 }
 
@@ -57,7 +58,7 @@ async function PATCHHandler(
 
     return NextResponse.json({ error: "Hành động không hợp lệ" }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_SOURCES_ERROR"), { status: 400 });
   }
 }
 

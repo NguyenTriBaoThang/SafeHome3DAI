@@ -45,7 +45,7 @@ async function GETHandler(
       );
     }
     return NextResponse.json(
-      { error: "Không thể xuất dữ liệu", details: error.message },
+      { success: false, code: "SURVEYS_EXPORT_ERROR", error: "Không thể xuất dữ liệu" },
       { status: error?.message?.includes("not found") ? 404 : 500 }
     );
   }

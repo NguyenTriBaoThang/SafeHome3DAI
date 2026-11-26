@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextResponse } from "next/server";
 import { retrieveEvidenceChunks } from "@/lib/rag/retrieval";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(request: Request) {
   try {
@@ -23,7 +24,7 @@ async function POSTHandler(request: Request) {
       chunks,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(buildSafeErrorPayload(error, "Lỗi hệ thống", "RAG_SEARCH_ERROR"), { status: 500 });
   }
 }
 

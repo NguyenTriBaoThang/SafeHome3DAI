@@ -28,7 +28,7 @@ async function GETHandler(
   } catch (error: any) {
     console.error("Lỗi lấy hồ sơ phòng:", error);
     return NextResponse.json(
-      { error: "Không thể lấy hồ sơ phòng", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_PROFILE_ERROR", error: "Không thể lấy hồ sơ phòng" },
       { status: 500 }
     );
   }

@@ -61,7 +61,7 @@ async function DELETEHandler(
       );
     }
     return NextResponse.json(
-      { success: false, persistenceStatus: "failed", error: "Lỗi xóa phòng từ cơ sở dữ liệu", details: error?.message },
+      { success: false, code: "SIMULATIONS_DELETE_ERROR", error: "Lỗi xóa phòng từ cơ sở dữ liệu", persistenceStatus: "failed" },
       { status: 503 }
     );
   }

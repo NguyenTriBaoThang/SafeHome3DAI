@@ -4,6 +4,7 @@ import { prisma } from "@/lib/database/prisma";
 import { DetectionCategory } from "@/lib/vision/types";
 import { CATEGORY_TAXONOMY } from "@/lib/vision/taxonomy";
 import { normalizeBoundingBox } from "@/lib/vision/providers/normalization";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function POSTHandler(
   req: NextRequest,
@@ -63,7 +64,7 @@ async function POSTHandler(
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_ANALYSES_DETECTIONS_ERROR"),
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { runAndPersistAssessment, getLatestAssessmentForRoom } from "@/lib/risk/assessmentManager";
@@ -68,9 +69,8 @@ async function POSTHandler(req: NextRequest) {
     }
     return NextResponse.json(
       {
-        success: false,
+        ...buildSafeErrorPayload(error, "Lỗi khi thẩm định nguy cơ môi trường", "RISK_EVALUATE_ERROR"),
         persistenceStatus: "failed",
-        error: error.message || "Lỗi khi thẩm định nguy cơ môi trường",
       },
       { status: 400 }
     );

@@ -56,7 +56,7 @@ async function POSTHandler(
   } catch (error: any) {
     console.error("Lỗi lưu câu trả lời khảo sát:", error);
     return NextResponse.json(
-      { error: "Không thể lưu câu trả lời", details: error.message },
+      { success: false, code: "SURVEYS_ROOMS_ANSWERS_ERROR", error: "Không thể lưu câu trả lời" },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   req: NextRequest,
@@ -29,7 +30,7 @@ async function GETHandler(
     return NextResponse.json({ success: true, data: mapped });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_ROOMS_CLARIFICATIONS_ERROR"),
       { status: 500 }
     );
   }
