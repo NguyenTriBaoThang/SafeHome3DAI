@@ -1,6 +1,7 @@
 import { withAccount } from "@/lib/auth/withAccount";
 import { NextRequest, NextResponse } from "next/server";
 import { createSceneDraftFromVision } from "@/lib/vision/sceneDraftAdapter";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function GETHandler(
   req: NextRequest,
@@ -13,7 +14,7 @@ async function GETHandler(
     return NextResponse.json({ success: true, data: draft });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_ROOMS_SCENEDRAFT_ERROR"),
       { status: 500 }
     );
   }

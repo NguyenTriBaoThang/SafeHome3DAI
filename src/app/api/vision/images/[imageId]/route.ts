@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { deleteImageFile } from "@/lib/vision/imageStorage";
 import { deleteVisionImage } from "@/lib/vision/deleteVisionImage";
+import { buildSafeErrorPayload } from "@/lib/security/resilience";
 
 async function DELETEHandler(
   req: NextRequest,
@@ -16,7 +17,7 @@ async function DELETEHandler(
     return NextResponse.json({ success: !!data, data }, { status: data ? 200 : 404 });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      buildSafeErrorPayload(error, "Lỗi hệ thống", "VISION_IMAGES_ERROR"),
       { status: 500 }
     );
   }
