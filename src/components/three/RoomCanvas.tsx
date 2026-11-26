@@ -625,7 +625,7 @@ export const RoomCanvas: React.FC = () => {
               <button
                 type="button"
                 onClick={() => compareFileInputRef.current?.click()}
-                className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-semibold flex items-center gap-1 transition"
+                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-semibold flex items-center gap-1 transition"
                 title="Chọn ảnh khác từ máy để đối chiếu"
               >
                 <Upload className="h-3 w-3 text-teal-400" />
@@ -635,7 +635,7 @@ export const RoomCanvas: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setManualCompareImage(null)}
-                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-semibold transition"
+                  className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-semibold transition"
                 >
                   Ảnh gốc
                 </button>
@@ -643,7 +643,7 @@ export const RoomCanvas: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowSourceCompare(false)}
-                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
                 aria-label="Đóng đối chiếu ảnh"
               >
                 <X className="h-3.5 w-3.5" />
@@ -669,7 +669,7 @@ export const RoomCanvas: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => compareFileInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition"
+                  className="min-h-11 sm:min-h-0 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   <span>Chọn ảnh từ máy</span>
@@ -678,7 +678,7 @@ export const RoomCanvas: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setManualCompareImage(referenceSample)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-semibold transition"
+                    className="min-h-11 sm:min-h-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-semibold transition"
                   >
                     Xem ảnh mẫu tham chiếu
                   </button>
@@ -1021,7 +1021,7 @@ export const RoomCanvas: React.FC = () => {
                     e.stopPropagation();
                     setExpandedClusterId(isExpanded ? null : cluster.id);
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold shadow-xl transition-all hover:scale-105 active:scale-95 border-2 border-white ${
+                  className={`min-h-11 sm:min-h-0 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold shadow-xl transition-all hover:scale-105 active:scale-95 border-2 border-white ${
                     isHigh
                       ? "bg-rose-600 hover:bg-rose-700 ring-2 ring-rose-500/40"
                       : "bg-amber-600 hover:bg-amber-700 ring-2 ring-amber-500/40"
@@ -1067,7 +1067,7 @@ export const RoomCanvas: React.FC = () => {
                           focusOnLocation(item.object.position);
                           setExpandedClusterId(null);
                         }}
-                        className="w-full text-left p-1.5 rounded-lg hover:bg-slate-800 transition flex items-start gap-2 group"
+                        className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 w-full text-left p-1.5 rounded-lg hover:bg-slate-800 transition flex items-start gap-2 group"
                       >
                         <span
                           className={`mt-0.5 px-1.5 py-0.2 rounded text-[10px] font-black text-white shrink-0 ${
@@ -1153,7 +1153,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "MORNING"}
             onClick={() => setLightingPreset("MORNING")}
-            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "MORNING"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1166,7 +1166,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "AFTERNOON"}
             onClick={() => setLightingPreset("AFTERNOON")}
-            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "AFTERNOON"
                 ? "bg-sky-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1179,7 +1179,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "NIGHT"}
             onClick={() => setLightingPreset("NIGHT")}
-            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "NIGHT"
                 ? "bg-indigo-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1193,7 +1193,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={lightingPreset === "STUDIO"}
             onClick={() => setLightingPreset("STUDIO")}
-            className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               lightingPreset === "STUDIO"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1213,7 +1213,7 @@ export const RoomCanvas: React.FC = () => {
                 aria-pressed={qualityPreset === preset}
                 onClick={() => setQualityPreset(preset)}
                 title={QUALITY_PRESET_CONFIG[preset].labelVi}
-                className={`min-h-[36px] sm:min-h-[32px] px-2 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
+                className={`min-h-[44px] min-w-11 sm:min-h-[32px] sm:min-w-0 px-2 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
                   qualityPreset === preset
                     ? "bg-emerald-600 text-white font-bold shadow-sm"
                     : "bg-slate-800/80 hover:bg-slate-700 text-slate-300"
@@ -1236,7 +1236,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("ISOMETRIC");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "ISOMETRIC"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1250,7 +1250,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("INTERIOR");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "INTERIOR"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1264,7 +1264,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("TOP");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap shrink-0 ${
               cameraPreset === "TOP"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1278,7 +1278,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("WALKTHROUGH");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "WALKTHROUGH"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1293,7 +1293,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("SAFETY");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "SAFETY"
                 ? "bg-rose-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1308,7 +1308,7 @@ export const RoomCanvas: React.FC = () => {
               focusOnLocation(null);
               setCameraPreset("COMPARISON");
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               cameraPreset === "COMPARISON"
                 ? "bg-teal-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1323,7 +1323,7 @@ export const RoomCanvas: React.FC = () => {
               if (cameraPreset === "WALKTHROUGH") setCameraPreset("ISOMETRIC");
               setShowWheelchair((v) => !v);
             }}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               showWheelchair
                 ? "bg-emerald-600 text-white font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1337,7 +1337,7 @@ export const RoomCanvas: React.FC = () => {
             type="button"
             aria-pressed={showSourceCompare}
             onClick={() => setShowSourceCompare((v) => !v)}
-            className={`min-h-[32px] px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0 ${
               showSourceCompare
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-800/80 hover:bg-slate-700 text-slate-200"
@@ -1349,7 +1349,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={handleFitRoom}
-            className="min-h-[32px] px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0"
+            className="min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
             title="Tự động căn chỉnh toàn bộ phòng vào vừa khung nhìn"
           >
             <Maximize2 className="h-3 w-3 shrink-0" />
@@ -1357,7 +1357,7 @@ export const RoomCanvas: React.FC = () => {
           </button>
           <button
             onClick={handleScreenshot}
-            className="min-h-[32px] px-2.5 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm whitespace-nowrap shrink-0"
+            className="min-h-11 min-w-11 sm:min-h-[32px] sm:min-w-0 px-2.5 py-1 rounded-lg bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm whitespace-nowrap shrink-0"
             title="Chụp ảnh khung nhìn 3D hiện tại (PNG)"
           >
             <Camera className="h-3 w-3 shrink-0" />
@@ -1382,7 +1382,7 @@ export const RoomCanvas: React.FC = () => {
                   onPointerDown={() => { wheelchairPadRef.current.fwd = true; }}
                   onPointerUp={() => { wheelchairPadRef.current.fwd = false; }}
                   onPointerLeave={() => { wheelchairPadRef.current.fwd = false; }}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
                   title="Tiến (W / ↑)"
                   aria-label="Xe lăn: Tiến"
                 >
@@ -1393,20 +1393,20 @@ export const RoomCanvas: React.FC = () => {
                   onPointerDown={() => { wheelchairPadRef.current.left = true; }}
                   onPointerUp={() => { wheelchairPadRef.current.left = false; }}
                   onPointerLeave={() => { wheelchairPadRef.current.left = false; }}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
                   title="Trái (A / ←)"
                   aria-label="Xe lăn: Trái"
                 >
                   ◀
                 </button>
-                <div className="w-8 h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-[11px] flex items-center justify-center">
+                <div className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg bg-emerald-950/80 text-emerald-300 text-[11px] flex items-center justify-center">
                   ♿
                 </div>
                 <button
                   onPointerDown={() => { wheelchairPadRef.current.right = true; }}
                   onPointerUp={() => { wheelchairPadRef.current.right = false; }}
                   onPointerLeave={() => { wheelchairPadRef.current.right = false; }}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
                   title="Phải (D / →)"
                   aria-label="Xe lăn: Phải"
                 >
@@ -1417,7 +1417,7 @@ export const RoomCanvas: React.FC = () => {
                   onPointerDown={() => { wheelchairPadRef.current.back = true; }}
                   onPointerUp={() => { wheelchairPadRef.current.back = false; }}
                   onPointerLeave={() => { wheelchairPadRef.current.back = false; }}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
+                  className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 active:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center"
                   title="Lùi (S / ↓)"
                   aria-label="Xe lăn: Lùi"
                 >
@@ -1474,7 +1474,7 @@ export const RoomCanvas: React.FC = () => {
         {/* Row 2: Toggles & Legend */}
         <div className="flex flex-wrap items-center justify-between gap-2 pointer-events-none">
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 pointer-events-auto shadow-lg text-xs text-white max-w-full">
-            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+            <label className="min-h-11 sm:min-h-0 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
               <input
                 type="checkbox"
                 checked={showHazardOverlay}
@@ -1491,7 +1491,7 @@ export const RoomCanvas: React.FC = () => {
             <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
 
             <label
-              className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+              className="min-h-11 sm:min-h-0 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
               title="Gom cụm các cảnh báo nằm gần nhau (<0.95m) để chống đè lấn nhãn"
             >
               <input
@@ -1507,7 +1507,7 @@ export const RoomCanvas: React.FC = () => {
 
             <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
 
-            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+            <label className="min-h-11 sm:min-h-0 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
               <input
                 type="checkbox"
                 checked={showAllLabels}
@@ -1521,7 +1521,7 @@ export const RoomCanvas: React.FC = () => {
 
             <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
 
-            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
+            <label className="min-h-11 sm:min-h-0 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0">
               <input
                 type="checkbox"
                 checked={showWalkingZones}
@@ -1540,7 +1540,7 @@ export const RoomCanvas: React.FC = () => {
                 <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
                 <button
                   onClick={handleFocusSelected}
-                  className="flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition whitespace-nowrap shrink-0"
+                  className="min-h-11 sm:min-h-0 flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition whitespace-nowrap shrink-0"
                 >
                   <Focus className="h-3 w-3" />
                   <span>Focus vật thể</span>

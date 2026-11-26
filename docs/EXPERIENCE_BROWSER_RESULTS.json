@@ -1,15 +1,15 @@
 {
-  "runAt": "2026-11-20T17:50:21.123Z",
-  "browser": "157.0.4341.60",
+  "runAt": "2026-11-26T01:00:18.759Z",
+  "browser": "159.0.8154.6",
   "base": "http://localhost:3210",
   "results": [
     {
       "name": "Desktop house loads and renders actual WebGL pixels",
       "status": "PASS",
       "detail": {
-        "distinctSampledColors": 163,
+        "distinctSampledColors": 160,
         "viewport": "1440x960",
-        "browser": "157.0.4341.60"
+        "browser": "159.0.8154.6"
       }
     },
     {

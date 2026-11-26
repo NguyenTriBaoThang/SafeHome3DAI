@@ -69,3 +69,5 @@ ehthumbs.db
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+.playwright-mcp/

@@ -129,3 +129,8 @@ textarea:focus-visible,
   border: 1px solid rgba(51, 65, 85, 0.8);
 }
 
+
+/* B10: nút điều khiển React Flow đủ 44px trên mobile */
+@media (max-width: 639px) {
+  .react-flow__controls .react-flow__controls-button { width: 44px; height: 44px; }
+}
